@@ -1,0 +1,103 @@
+{
+  "name": "ngrx-json-api",
+  "version": "0.0.1-alpha.1",
+  "description": "A JSON API client for ngrx",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abdulhaq-e/ngrx-json-api.git"
+  },
+  "scripts": {
+    "clean_test": "rm -rf ./tmp",
+    "doit": "tsc -p spec",
+    "build_test": "npm run clean_test && tsc -p ./spec",
+    "build_test:watch": "npm run clean_test && tsc -p ./spec -w",
+    "build_dist": "rm -rf dist && tsc && npm run copy_package",
+    "copy_package": "cp package.json dist/package.json",
+    "lint:lib": "tslint lib/**.ts",
+    "lint:spec": "tslint spec/**.ts",
+    "test": "npm run build_test && karma",
+    "test:watch": "npm run build_test:watch && karma:watch",
+    "karma": "karma start",
+    "karma:watch": "karma start --no-single-run"
+  },
+  "authors": [
+    "Abdulhaq Emhemmed"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+
+    "@ngrx/core": "^1.0.1",
+    "@ngrx/effects": "^1.0.1",
+    "@ngrx/store": "^2.0.1",
+
+    "rxjs": "^5.0.0-beta.6",
+    "lodash": "^4.1.13",
+
+    "@angular/common": "^2.0.0-rc.4",
+    "@angular/core": "^2.0.0-rc.4",
+    "@angular/compiler": "^2.0.0-rc.4",
+    "@angular/platform-browser": "^2.0.0-rc.4"
+  },
+  "devDependencies": {
+    "@types/core-js": "^0.9.28",
+    "@types/deep-freeze": "^0.0.28",
+    "@types/hammerjs": "^2.0.28",
+    "@types/jasmine": "^2.2.29",
+    "@types/lodash": "^0.0.27",
+    "@types/node": "^4.0.29",
+    "@types/protractor": "^1.5.16",
+    "@types/selenium-webdriver": "^2.44.26",
+    "@types/source-map": "^0.1.26",
+    "@types/uglify-js": "^2.0.27",
+    "@types/webpack": "^1.12.29",
+
+    "@angular/common": "^2.0.0-rc.4",
+    "@angular/compiler": "^2.0.0-rc.4",
+    "@angular/core": "^2.0.0-rc.4",
+    "@angular/http": "^2.0.0-rc.4",
+    "@angular/platform-browser": "^2.0.0-rc.4",
+    "@angular/platform-browser-dynamic": "^2.0.0-rc.4",
+
+    "@ngrx/core": "^1.0.0",
+    "@ngrx/effects": "^1.0.1",
+    "@ngrx/store": "^2.0.1",
+    "ngrx-store-localstorage": "^0.1.2",
+    "ngrx-store-logger": "^0.1.7",
+
+    "deep-freeze": "^0.0.1",
+
+    "rxjs": "5.0.0-beta.6",
+    "zone.js": "^0.6.8",
+
+    "core-js": "^2.2.2",
+    "esdoc": "^0.4.7",
+
+    "jasmine-core": "^2.4.1",
+
+    "karma": "^1.1.1",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-mocha-reporter": "^2.0.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "goldhand/karma-webpack",
+
+    "rimraf": "^2.5.1",
+
+    "tslint": "^3.6.0",
+    "typescript": "^2.0.0-beta",
+    "ts-helpers": "1.1.1",
+
+    "conventional-changelog-cli": "^1.1.1",
+    "npm-run-all": "^1.7.0",
+    "reflect-metadata": "^0.1.3",
+
+    "istanbul-instrumenter-loader": "^0.2.0",
+    "awesome-typescript-loader": "^2.1.0",
+    "source-map-loader": "^0.1.5",
+    "json-loader": "^0.5.4",
+
+    "webpack": "^2.1.0-beta.18"
+  }
+}

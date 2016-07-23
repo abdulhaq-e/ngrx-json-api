@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "declaration": true,
+    "strictNullChecks": false,
+    "baseUrl": "./src",
+    "types": [
+      "core-js",
+      "deep-freeze",
+      "jasmine",
+      "lodash",
+      "node",
+      "source-map",
+      "uglify-js",
+      "webpack"
+    ]
+  },
+  "compileOnSave": false,
+  "atom": {
+      "rewriteTsconfig": false
+  },
+  "filesGlob": [
+    "lib/**/*.ts",
+    "spec/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
