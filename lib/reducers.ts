@@ -8,12 +8,6 @@ import { JsonApiQuery,
 } from './interfaces';
 import { getResourcePath, updateOrInsertResource } from './utils';
 
-
-export interface JsonApiPayload {
-  data: {[key: string]: any};
-  options?: JsonApiQuery;
-}
-
 export const updateJsonApiStoreReducer = (state: JsonApiStore,
     payload: JsonApiDocument): JsonApiStore => {
 

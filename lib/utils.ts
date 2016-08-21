@@ -1,5 +1,7 @@
 import _ = require('lodash');
 
+import { Actions } from '@ngrx/effects';
+
 import { JsonApiResource,
     JsonApiStore,
     JsonApiResourceDefinition,
@@ -76,3 +78,7 @@ export const updateOrInsertResource = (state: Array<JsonApiResource>,
     return updateResource(state, resource, foundResource);
 
 };
+
+export function toPayload(action): any {
+  return action.payload;
+}

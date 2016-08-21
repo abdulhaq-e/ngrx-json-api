@@ -37,6 +37,7 @@ export class JsonApi {
     @Inject(RESOURCES_DEFINTION) private definition
   ) {
   }
+
   one(resourceType: string, id: string) {
     this.builderStack.push({
       path: this.resourcePathFor(resourceType, id)

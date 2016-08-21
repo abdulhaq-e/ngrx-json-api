@@ -1,8 +1,8 @@
 import {
-    addProviders,
     async,
     inject,
     fakeAsync,
+    TestBed
 } from '@angular/core/testing';
 
 let deepFreeze = require('deep-freeze');
@@ -141,8 +141,13 @@ describe('Json Api Reducer', () => {
     deepFreeze(state);
 
     beforeEach(() => {
-        addProviders([JsonApiActions])
+      TestBed.configureTestingModule({
+        providers: [
+            JsonApiActions
+        ]
+      });
     });
+
     beforeEach(inject([JsonApiActions], (api) => {
         actions = api;
     }));

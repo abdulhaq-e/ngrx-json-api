@@ -1,7 +1,8 @@
-import { addProviders,
+import {
   async,
   inject,
   fakeAsync,
+  TestBed
 } from '@angular/core/testing';
 
 import { JsonApiActions } from '../lib/actions';
@@ -11,7 +12,11 @@ describe('Json Api Actions', () => {
   let actions;
 
   beforeEach(() => {
-    addProviders([JsonApiActions]);
+    TestBed.configureTestingModule({
+        providers: [
+          JsonApiActions
+        ]
+      });
   });
 
   beforeEach(inject([JsonApiActions], (api) => {

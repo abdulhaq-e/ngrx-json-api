@@ -39,3 +39,8 @@ export interface JsonApiDocument {
   data: any;
   included: any;
 }
+
+export interface JsonApiPayload {
+  data: {[key: string]: any};
+  options?: JsonApiQuery;
+}
