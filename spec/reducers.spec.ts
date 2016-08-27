@@ -114,51 +114,39 @@ describe('JsonApi Reducers', () => {
     describe('Json Api Reducer', () => {
         let actions;
 
-        beforeEach(() => {
-            TestBed.configureTestingModule({
-                providers: [
-                    JsonApiActions
-                ]
-            });
-        });
-
-        beforeEach(inject([JsonApiActions], (api) => {
-            actions = api;
-        }));
-        //
         it('should change isCreating status according to CREATE actions', () => {
-            let newState = StoreReducer(state, actions.apiCreateInit('x'));
+            let newState = StoreReducer(state, JsonApiActions.apiCreateInit('x'));
             expect(newState.isCreating).toBe(true);
-            let newnewState = StoreReducer(newState, actions.apiCreateSuccess('x'));
+            let newnewState = StoreReducer(newState, JsonApiActions.apiCreateSuccess('x'));
             expect(newnewState.isCreating).toBe(false);
-            let newnewnewState = StoreReducer(newState, actions.apiCreateFail('x'));
+            let newnewnewState = StoreReducer(newState, JsonApiActions.apiCreateFail('x'));
             expect(newnewnewState.isCreating).toBe(false);
         });
 
         it('should change isReading status according to READ actions', () => {
-            let newState = StoreReducer(state, actions.apiReadInit('x'));
+            let newState = StoreReducer(state, JsonApiActions.apiReadInit('x'));
             expect(newState.isReading).toBe(true);
-            let newnewState = StoreReducer(newState, actions.apiReadSuccess('x'));
+            let newnewState = StoreReducer(newState, JsonApiActions.apiReadSuccess('x'));
             expect(newnewState.isReading).toBe(false);
-            let newnewnewState = StoreReducer(newState, actions.apiReadFail('x'));
+            let newnewnewState = StoreReducer(newState, JsonApiActions.apiReadFail('x'));
             expect(newnewnewState.isReading).toBe(false);
         });
 
         it('should change isUpdating status when UPDATE actions', () => {
-            let newState = StoreReducer(state, actions.apiUpdateInit('x'));
+            let newState = StoreReducer(state, JsonApiActions.apiUpdateInit('x'));
             expect(newState.isUpdating).toBe(true);
-            let newnewState = StoreReducer(newState, actions.apiUpdateSuccess('x'));
+            let newnewState = StoreReducer(newState, JsonApiActions.apiUpdateSuccess('x'));
             expect(newnewState.isUpdating).toBe(false);
-            let newnewnewState = StoreReducer(newState, actions.apiUpdateFail('x'));
+            let newnewnewState = StoreReducer(newState, JsonApiActions.apiUpdateFail('x'));
             expect(newnewnewState.isUpdating).toBe(false);
         });
 
         it('should change isDeleting status DELETE actions', () => {
-            let newState = StoreReducer(state, actions.apiDeleteInit('x'));
+            let newState = StoreReducer(state, JsonApiActions.apiDeleteInit('x'));
             expect(newState.isDeleting).toBe(true);
-            let newnewState = StoreReducer(newState, actions.apiDeleteSuccess('x'));
+            let newnewState = StoreReducer(newState, JsonApiActions.apiDeleteSuccess('x'));
             expect(newnewState.isDeleting).toBe(false);
-            let newnewnewState = StoreReducer(newState, actions.apiDeleteFail('x'));
+            let newnewnewState = StoreReducer(newState, JsonApiActions.apiDeleteFail('x'));
             expect(newnewnewState.isDeleting).toBe(false);
         });
 
@@ -233,7 +221,7 @@ describe('JsonApi Reducers', () => {
                     ]
                 }
             };
-            let newState = StoreReducer(state, actions.apiCreateSuccess(payload));
+            let newState = StoreReducer(state, JsonApiActions.apiCreateSuccess(payload));
             expect(newState).toEqual(expectedState);
         });
     });

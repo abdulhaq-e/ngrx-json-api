@@ -11,19 +11,6 @@ describe('Json Api Actions', () => {
 
   let actions;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [
-          JsonApiActions
-        ]
-      });
-  });
-
-  beforeEach(inject([JsonApiActions], (api) => {
-    actions = api;
-  }));
-
-
   it('should have a create init action', () => {
     expect(JsonApiActions.API_CREATE_INIT).toBeDefined();
     expect(JsonApiActions.API_CREATE_INIT).toBe('API_CREATE_INIT');
@@ -85,63 +72,63 @@ describe('Json Api Actions', () => {
   });
 
   it('should create a create init action using apiCreateInit', () => {
-    expect(actions.apiCreateInit('test')).toEqual({
+    expect(JsonApiActions.apiCreateInit('test')).toEqual({
       type: JsonApiActions.API_CREATE_INIT,
       payload: 'test'
     });
   });
 
   it('should create a create sueccess action using apiCreateSuccess', () => {
-    expect(actions.apiCreateSuccess('test')).toEqual({
+    expect(JsonApiActions.apiCreateSuccess('test')).toEqual({
       type: JsonApiActions.API_CREATE_SUCCESS,
       payload: 'test'
     });
   });
 
   it('should create a create fail action using apiCreateFail', () => {
-    expect(actions.apiCreateFail('test')).toEqual({
+    expect(JsonApiActions.apiCreateFail('test')).toEqual({
       type: JsonApiActions.API_CREATE_FAIL,
       payload: 'test'
     });
   });
 
   it('should create a read init action using apiReadInit', () => {
-    expect(actions.apiReadInit('test')).toEqual({
+    expect(JsonApiActions.apiReadInit('test')).toEqual({
       type: JsonApiActions.API_READ_INIT,
       payload: 'test'
     });
   });
 
   it('should create a read success action using apiReadSuccess', () => {
-    expect(actions.apiReadSuccess('test')).toEqual({
+    expect(JsonApiActions.apiReadSuccess('test')).toEqual({
       type: JsonApiActions.API_READ_SUCCESS,
       payload: 'test'
     });
   });
 
   it('should create a read fail action using apiReadFail', () => {
-    expect(actions.apiReadFail('test')).toEqual({
+    expect(JsonApiActions.apiReadFail('test')).toEqual({
       type: JsonApiActions.API_READ_FAIL,
       payload: 'test'
     });
   });
 
   it('should create an update init action using apiUpdateInit', () => {
-    expect(actions.apiUpdateInit('test')).toEqual({
+    expect(JsonApiActions.apiUpdateInit('test')).toEqual({
       type: JsonApiActions.API_UPDATE_INIT,
       payload: 'test'
     });
   });
 
   it('should create an update success action using apiUpdateSuccess', () => {
-    expect(actions.apiUpdateSuccess('test')).toEqual({
+    expect(JsonApiActions.apiUpdateSuccess('test')).toEqual({
       type: JsonApiActions.API_UPDATE_SUCCESS,
       payload: 'test'
     });
   });
 
   it('should create an update fail action using apiUpdateFail', () => {
-    expect(actions.apiUpdateFail('test')).toEqual({
+    expect(JsonApiActions.apiUpdateFail('test')).toEqual({
       type: JsonApiActions.API_UPDATE_FAIL,
       payload: 'test'
     });
@@ -149,21 +136,21 @@ describe('Json Api Actions', () => {
   });
 
   it('should create a delete init action using apiDeleteInit', () => {
-    expect(actions.apiDeleteInit('test')).toEqual({
+    expect(JsonApiActions.apiDeleteInit('test')).toEqual({
       type: JsonApiActions.API_DELETE_INIT,
       payload: 'test'
     });
   });
 
   it('should create a delete success action using apiDeleteSuccess', () => {
-    expect(actions.apiDeleteSuccess('test')).toEqual({
+    expect(JsonApiActions.apiDeleteSuccess('test')).toEqual({
       type: JsonApiActions.API_DELETE_SUCCESS,
       payload: 'test'
     });
   });
 
   it('should create an delete fail action using apiDeleteFail', () => {
-    expect(actions.apiDeleteFail('test')).toEqual({
+    expect(JsonApiActions.apiDeleteFail('test')).toEqual({
       type: JsonApiActions.API_DELETE_FAIL,
       payload: 'test'
     });
