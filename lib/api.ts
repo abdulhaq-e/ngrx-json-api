@@ -13,9 +13,12 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
-import { API_URL, RESOURCES_DEFINTION } from './ng2';
+import { API_URL, RESOURCES_DEFINITIONS } from './ng2';
 
-import { Query } from './interfaces';
+import {
+  Query,
+  ResourceDefinition
+  } from './interfaces';
 
 
 export interface Options {
@@ -30,36 +33,36 @@ export class JsonApi {
     'Content-Type': 'application/vnd.api+json',
     'Accept': 'application/vnd.api+json'
   });
-  public builderStack = [];
   public models: { [key: string]: any };
+  public urlBuilder = [];
 
   constructor(
     private http: Http,
     @Inject(API_URL) private apiUrl,
-    @Inject(RESOURCES_DEFINTION) private definition
+    @Inject(RESOURCES_DEFINITIONS) private definitions
   ) {
   }
 
   one(type: string, id: string) {
-    this.builderStack.push({
+    this.urlBuilder.push({
       path: this.resourcePathFor(type, id)
     });
     return this;
   }
 
   all(type: string) {
-    this.builderStack.push({
+    this.urlBuilder.push({
       path: this.collectionPathFor(type)
     });
     return this;
   }
 
-  resetBuilder() {
-    this.builderStack = [];
+  resetUrlBuilder() {
+    this.urlBuilder = [];
   }
 
   buildPath() {
-    return _.map(this.builderStack, 'path').join('/');
+    return _.map(this.urlBuilder, 'path').join('/');
   }
 
   buildUrl() {
@@ -78,29 +81,24 @@ export class JsonApi {
       search: requestParams
     };
 
-    this.resetBuilder();
+    this.resetUrlBuilder();
 
     return this.request(requestOptionsArgs);
   }
 
   post(payload) {
-    let lastRequest = _.chain(this.builderStack).last();
-    // console.log(lastRequest);
-
     let requestOptionsArgs = {
       method: RequestMethod.Post,
       url: this.urlFor(),
-      // model: lastRequest.get('model').value(),
       body: JSON.stringify(payload)
     };
 
-    this.resetBuilder();
+    this.resetUrlBuilder();
 
     return this.request(requestOptionsArgs);
   }
 
   patch(payload) {
-    let lastRequest = _.chain(this.builderStack).last();
 
     let requestOptionsArgs = {
       method: RequestMethod.Patch,
@@ -108,20 +106,19 @@ export class JsonApi {
       body: JSON.stringify(payload)
     };
 
-    this.resetBuilder();
+    this.resetUrlBuilder();
 
     return this.request(requestOptionsArgs);
   }
 
   destroy() {
-    let lastRequest = _.chain(this.builderStack).last();
 
     let requestOptions = {
       method: RequestMethod.Delete,
       url: this.urlFor()
     };
 
-    this.resetBuilder();
+    this.resetUrlBuilder();
 
     return this.request(requestOptions);
   }
@@ -160,9 +157,9 @@ export class JsonApi {
     return this.one(options.type, options.id).destroy();
   }
 
-  collectionPathFor(resourceType: string) {
-    let collectionPath = _.find(this.definition,
-      {type: resourceType}).collectionPath;
+  collectionPathFor(type: string) {
+    let collectionPath: ResourceDefinition = _.find(this.definitions,
+      {type: type}).collectionPath;
     return `${collectionPath}`;
   }
 

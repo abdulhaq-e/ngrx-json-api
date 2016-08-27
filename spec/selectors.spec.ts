@@ -25,23 +25,22 @@ import _ = require('lodash');
 
 import {
     find,
+    findRelated,
     _findAll,
     _findOne,
-    findRelated,
     _getHasOneRelation,
     _getHasManyRelation,
     _getResourcesDefinitions,
     _getResourceDefinition,
-    _getResourcePath,
     _getRelationDefinition,
     _getRelatedResources
 } from '../lib/selectors';
 
-import { initialiseJsonApiStore } from '../lib/utils';
+import { initialiseStore } from '../lib/utils';
 
-import { updateJsonApiStoreReducer } from '../lib/reducers';
+import { updateStoreReducer } from '../lib/reducers';
 
-fdescribe('Json Api Selectors', () => {
+describe('Json Api Selectors', () => {
 
     let payload = {
         data: [
@@ -102,7 +101,6 @@ fdescribe('Json Api Selectors', () => {
 
     let resourcesDefinitions = [
         {
-            path: 'article',
             type: 'Article',
             collectionPath: 'articles',
             attributes: ['title', 'subtitle'],
@@ -112,7 +110,6 @@ fdescribe('Json Api Selectors', () => {
             }
         },
         {
-            path: 'person',
             type: 'Person',
             collectionPath: 'people',
             attributes: ['name'],
@@ -127,8 +124,8 @@ fdescribe('Json Api Selectors', () => {
         },
     ];
 
-    let rawStore = initialiseJsonApiStore(resourcesDefinitions);
-    let store = updateJsonApiStoreReducer(rawStore, payload);
+    let rawStore = initialiseStore(resourcesDefinitions);
+    let store = updateStoreReducer(rawStore, payload);
     let obs = Observable.of(store)
 
     describe('getResourcesDefinitions', () => {
@@ -149,20 +146,8 @@ fdescribe('Json Api Selectors', () => {
                 .let(_getResourceDefinition('Person'))
                 .subscribe(d => {
                     expect(d).toEqual(resourcesDefinitions[1]);
-                    expect(d.path).toEqual('person');
                     expect(d.collectionPath).toEqual('people');
                     expect(d.type).toEqual('Person');
-                });
-            tick();
-        }));
-    });
-
-    describe('getResourcePath', () => {
-        it('should get a resource path given its type', fakeAsync(() => {
-            let sub = obs
-                .let(_getResourcePath('Person'))
-                .subscribe(d => {
-                    expect(d).toEqual('person');
                 });
             tick();
         }));

@@ -2,30 +2,25 @@ import _ = require('lodash');
 
 import { Actions } from '@ngrx/effects';
 
-import { Resource,
+import {
+    Resource,
     Store,
     ResourceDefinition,
     Document,
     RelationDefinition
 } from './interfaces';
 
-export const initialiseJsonApiStore = (
+export const initialiseStore = (
     resourcesDefinition: Array<ResourceDefinition>): Store => {
-    let data = _.reduce(resourcesDefinition,
-        (result, definition) => {
-            result[definition.path] = {
-                data: []
-            }
-            return result;
-        }, {});
-    return {
+
+    return ({
         isCreating: false,
         isReading: false,
         isUpdating: false,
         isDeleting: false,
         resourcesDefinitions: resourcesDefinition,
-        data: data
-    }
+        data: []
+    })
 };
 
 export const transformResource = (resource: Resource): Resource => {
@@ -87,5 +82,5 @@ export const updateOrInsertResource = (state: Array<Resource>,
 };
 
 export function toPayload(action): any {
-  return action.payload;
+    return action.payload;
 }

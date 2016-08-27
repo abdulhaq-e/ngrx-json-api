@@ -5,20 +5,11 @@ export interface RelationDefinition {
 
 export interface ResourceDefinition {
   type: string;
-  path: string;
   collectionPath: string;
   attributes: Array<string>;
   relationships: { [key: string]: RelationDefinition };
 };
 
-export interface Store {
-  data: {[key: string]: any};
-  resourcesDefinitions: Array<ResourceDefinition>;
-  isCreating: boolean;
-  isReading: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
-}
 
 export interface Query {
   type: string;
@@ -44,4 +35,13 @@ export interface Document {
 export interface Payload {
   data: {[key: string]: any};
   options?: Query;
+}
+
+export interface Store {
+  data: Array<Resource>;
+  resourcesDefinitions: Array<ResourceDefinition>;
+  isCreating: boolean;
+  isReading: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
 }

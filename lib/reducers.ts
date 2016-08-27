@@ -1,14 +1,16 @@
 import { Action, ActionReducer } from '@ngrx/store';
 
 import { JsonApiActions } from './actions';
-import { Query,
+import {
+  Query,
   Document,
   Resource,
   Store
 } from './interfaces';
-import { getResourcePath, updateOrInsertResource } from './utils';
+import {
+  updateOrInsertResource } from './utils';
 
-export const updateJsonApiStoreReducer = (state: Store,
+export const updateStoreReducer = (state: Store,
     payload: Document): Store => {
 
     let data = <Array<Resource> | Resource>_.get(payload, 'data');
@@ -28,13 +30,13 @@ export const updateJsonApiStoreReducer = (state: Store,
     return <Store>_.reduce(
         data, (result: Store,
           resource: Resource) => {
-            let resourcePath: string = getResourcePath(
-              result.resourcesDefinitions, resource.type);
+            // let resourcePath: string = getResourcePath(
+            //   result.resourcesDefinitions, resource.type);
             // Extremely ugly, needs refactoring!
             let newPartialState = { data: {} };
-            newPartialState.data[resourcePath] = { data: {} } ;
-            newPartialState.data[resourcePath].data = updateOrInsertResource(
-              result.data[resourcePath].data, resource);
+            // newPartialState.data[resourcePath] = { data: {} } ;
+            newPartialState.data = updateOrInsertResource(
+              result.data, resource);
               // result.data[resourcePath].data = updateOrInsertResource(
                 // result.data[resourcePath].data, resource);
             return <Store>_.merge({}, result, newPartialState);
@@ -42,7 +44,7 @@ export const updateJsonApiStoreReducer = (state: Store,
 };
 
 
-export const JsonApiReducer: ActionReducer<any> =
+export const StoreReducer: ActionReducer<any> =
   (state: Store, action: Action) => {
     let newState;
 
@@ -62,7 +64,7 @@ export const JsonApiReducer: ActionReducer<any> =
       case JsonApiActions.API_CREATE_SUCCESS:
         newState = Object.assign({},
           state,
-          updateJsonApiStoreReducer(state, action.payload.data),
+          updateStoreReducer(state, action.payload.data),
           { 'isCreating': false }
         );
         return newState;
@@ -70,7 +72,7 @@ export const JsonApiReducer: ActionReducer<any> =
       case JsonApiActions.API_READ_SUCCESS:
         newState = Object.assign({},
           state,
-          updateJsonApiStoreReducer(state, action.payload.data),
+          updateStoreReducer(state, action.payload.data),
           { 'isReading': false }
         );
         return newState;
@@ -79,7 +81,7 @@ export const JsonApiReducer: ActionReducer<any> =
         newState = Object.assign(
           {},
           state,
-          updateJsonApiStoreReducer(state, action.payload.data),
+          updateStoreReducer(state, action.payload.data),
           { 'isUpdating': false }
         );
         return newState;

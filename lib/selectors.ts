@@ -11,17 +11,6 @@ import {
     Store,
 } from './interfaces';
 
-// import { getResourcePath, getRelationshipDefinition } from './utils';
-
-// export const getEntity = (entityType: string, id: string) => {
-//   return (state$: Observable<any>) => {
-//     console.log(state$.entitiesDefinition);
-//     let entityPath = getEntityPath(state$.select('entitiesDefinition'), entityType);
-//     return state$.select(s => s.data[entityPath].data)
-//     .map(d => _.find(d, {'id': id}));
-//   };
-// }
-
 export const _getResourcesDefinitions = () => {
     return (state$: Observable<Store>) => {
         return state$.select(s => s.resourcesDefinitions);
@@ -34,13 +23,6 @@ export const _getResourceDefinition = (type: string) => {
         return state$.let(_getResourcesDefinitions())
             .map(definitions => <ResourceDefinition>_.find(
                 definitions, { type: type }));
-    };
-};
-
-export const _getResourcePath = (type: string) => {
-    return (state$: Observable<any>) => {
-        return state$.let(_getResourceDefinition(type))
-            .map(definition => definition.path);
     };
 };
 
@@ -60,18 +42,16 @@ export const _getRelationDefinition = (type: string, relation: string) => {
 
 export const find = (query: Query) => {
     if (typeof query.id === 'undefined') {
-        return this.findAll({ type: query.type });
+        return this._findAll({ type: query.type });
     }
-    return this.findOne({ type: query.type, id: query.id });
+    return this._findOne({ type: query.type, id: query.id });
 };
 
 export const _findAll = (query: Query) => {
     return (state$: Observable<any>) => {
-        return state$.let(_getResourcePath(query.type))
-            .mergeMap(
-            resourcePath => state$.select(s => s.data)
-                .map(d => d[resourcePath].data)
-            );
+        return state$.select(s => s.data)
+            .map(data => data.filter(
+              d => d.type === query.type));
     };
 };
 

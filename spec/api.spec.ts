@@ -18,14 +18,13 @@ import {
 import { Observable } from 'rxjs/Observable';
 
 import { JsonApi } from '../lib/api';
-import { API_URL, RESOURCES_DEFINTION } from '../lib/ng2';
+import { API_URL, RESOURCES_DEFINITIONS } from '../lib/ng2';
 import { ResourceDefinition } from '../lib/interfaces';
 
 describe('ngrx json api', () => {
     let jsonapi;
-    let resourcesDefinition: Array<ResourceDefinition> = [
+    let resourcesDefinitions: Array<ResourceDefinition> = [
         {
-            path: 'post',
             type: 'Post',
             collectionPath: 'posts',
             attributes: ['title', 'subtitle'],
@@ -35,7 +34,6 @@ describe('ngrx json api', () => {
             }
         },
         {
-            path: 'person',
             type: 'Person',
             collectionPath: 'people',
             attributes: ['name'],
@@ -59,7 +57,7 @@ describe('ngrx json api', () => {
                     provide: API_URL, useValue: 'myapi.com'
                 },
                 {
-                    provide: RESOURCES_DEFINTION, useValue: resourcesDefinition
+                    provide: RESOURCES_DEFINITIONS, useValue: resourcesDefinitions
                 }
             ]
         });
@@ -75,29 +73,29 @@ describe('ngrx json api', () => {
 
     it('should build url for a single item using one', () => {
         let oneItem = jsonapi.one('Post', '10');
-        expect(oneItem.builderStack[0].path).toEqual('posts/10');
-        expect(oneItem.builderStack[0].path).not.toEqual('post/10');
+        expect(oneItem.urlBuilder[0].path).toEqual('posts/10');
+        expect(oneItem.urlBuilder[0].path).not.toEqual('post/10');
     });
 
     it('should build url for a all item using all', () => {
         let oneItem = jsonapi.all('Post');
         // console.log(oneItem);
-        expect(oneItem.builderStack[0].path).toEqual('posts');
-        expect(oneItem.builderStack[0].path).not.toEqual('post');
+        expect(oneItem.urlBuilder[0].path).toEqual('posts');
+        expect(oneItem.urlBuilder[0].path).not.toEqual('post');
     });
 
     it('should reset the builder stack', () => {
-        jsonapi.builderStack = ['whatever'];
-        expect(jsonapi.builderStack).not.toEqual([]);
-        jsonapi.resetBuilder();
-        expect(jsonapi.builderStack).toEqual([]);
+        jsonapi.urlBuilder = ['whatever'];
+        expect(jsonapi.urlBuilder).not.toEqual([]);
+        jsonapi.resetUrlBuilder();
+        expect(jsonapi.urlBuilder).toEqual([]);
     });
 
     it('should build the path using buildPath', () => {
         jsonapi.one('Post', '1');
         expect(jsonapi.buildPath()).toBe('posts/1');
-        jsonapi.resetBuilder();
-        expect(jsonapi.builderStack).toEqual([]);
+        jsonapi.resetUrlBuilder();
+        expect(jsonapi.urlBuilder).toEqual([]);
         jsonapi.all('Post');
         expect(jsonapi.buildPath()).toBe('posts');
     });
@@ -105,8 +103,8 @@ describe('ngrx json api', () => {
     it('should build the url using buildUrl', () => {
         jsonapi.one('Post', '1');
         expect(jsonapi.buildUrl()).toBe('myapi.com/posts/1');
-        jsonapi.resetBuilder();
-        expect(jsonapi.builderStack).toEqual([]);
+        jsonapi.resetUrlBuilder();
+        expect(jsonapi.urlBuilder).toEqual([]);
         jsonapi.all('Post');
         expect(jsonapi.buildUrl()).toBe('myapi.com/posts');
     });
@@ -212,7 +210,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(0);
             });
             jsonapi.find({
-                resourceType: 'Post',
+                type: 'Post',
                 id: 1
             });
             tick();
@@ -226,7 +224,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(0);
             });
             jsonapi.find({
-                resourceType: 'Post'
+                type: 'Post'
             });
             tick();
         })));
@@ -239,7 +237,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(0);
             });
             jsonapi.findAll({
-                resourceType: 'Post'
+                type: 'Post'
             });
             tick();
         })));
@@ -276,7 +274,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(3);
             });
             jsonapi.delete({
-                resourceType: 'Post',
+                type: 'Post',
                 id: '1'
             });
             tick();

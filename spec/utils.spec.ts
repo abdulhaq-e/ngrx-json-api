@@ -9,7 +9,7 @@ import {
 let deepFreeze = require('deep-freeze');
 
 import {
-    initialiseJsonApiStore,
+    initialiseStore,
     insertResource,
     transformResource,
     updateOrInsertResource,
@@ -19,11 +19,10 @@ import {
 
 import { Resource, ResourceDefinition, Store } from '../lib/interfaces';
 
-describe('initialiseJsonApiStore', () => {
+describe('initialiseStore', () => {
 
     let resourcesDefinition: Array<ResourceDefinition> = [
         {
-            path: 'article',
             type: 'Article',
             collectionPath: 'articles',
             attributes: ['title', 'subtitle'],
@@ -33,7 +32,6 @@ describe('initialiseJsonApiStore', () => {
             }
         },
         {
-            path: 'person',
             type: 'Person',
             collectionPath: 'people',
             attributes: ['name'],
@@ -42,21 +40,14 @@ describe('initialiseJsonApiStore', () => {
     ];
 
     it('should init the store given resourcesDefinition', () => {
-        let store = initialiseJsonApiStore(resourcesDefinition);
+        let store = initialiseStore(resourcesDefinition);
         let expectedStore = {
             isCreating: false,
             isReading: false,
             isUpdating: false,
             isDeleting: false,
-            resourcesDefinition: resourcesDefinition,
-            data: {
-                article: {
-                    data: []
-                },
-                person: {
-                    data: []
-                }
-            }
+            resourcesDefinitions: resourcesDefinition,
+            data: []
         };
         expect(store).toEqual(expectedStore);
     });
