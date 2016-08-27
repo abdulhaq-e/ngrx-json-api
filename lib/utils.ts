@@ -2,27 +2,15 @@ import _ = require('lodash');
 
 import { Actions } from '@ngrx/effects';
 
-import { JsonApiResource,
-    JsonApiStore,
-    JsonApiResourceDefinition,
-    JsonApiDocument} from './interfaces';
-
-export const getResourcePath = (
-    resourcesDefinition: Array<JsonApiResourceDefinition>,
-    resourceType: string): string => {
-    let definition: JsonApiResourceDefinition = <JsonApiResourceDefinition>_.find(
-        resourcesDefinition, { type: resourceType });
-
-    if (typeof definition === 'undefined') {
-        throw new Error('Definition not found');
-    }
-    else {
-        return definition.path;
-    }
-};
+import { Resource,
+    Store,
+    ResourceDefinition,
+    Document,
+    RelationDefinition
+} from './interfaces';
 
 export const initialiseJsonApiStore = (
-    resourcesDefinition: Array<JsonApiResourceDefinition>): JsonApiStore => {
+    resourcesDefinition: Array<ResourceDefinition>): Store => {
     let data = _.reduce(resourcesDefinition,
         (result, definition) => {
             result[definition.path] = {
@@ -35,28 +23,47 @@ export const initialiseJsonApiStore = (
         isReading: false,
         isUpdating: false,
         isDeleting: false,
-        resourcesDefinition: resourcesDefinition,
+        resourcesDefinitions: resourcesDefinition,
         data: data
     }
 };
 
+export const transformResource = (resource: Resource): Resource => {
+    let newResource: Resource = {
+        id: resource.id,
+        type: resource.type
+    };
+    if (typeof resource.attributes !== 'undefined') {
+        _.forEach(resource.attributes, (value, key) => {
+            newResource[key] = value;
+        });
+    }
+    if (typeof resource.relationships !== 'undefined') {
+        _.forEach(resource.attributes, (value, key) => {
+            newResource[key] = value;
+        });
+    }
 
-export const updateResourceObject = (original: JsonApiResource,
-    source: JsonApiResource): JsonApiResource => {
+    return newResource;
+}
+
+
+export const updateResourceObject = (original: Resource,
+    source: Resource): Resource => {
 
     return _.merge({}, original, source);
 
 };
 
-export const insertResource = (state: Array<JsonApiResource>,
-    resource: JsonApiResource): Array<JsonApiResource> => {
+export const insertResource = (state: Array<Resource>,
+    resource: Resource): Array<Resource> => {
 
     return [...state, resource];
 
 };
 
-export const updateResource = (state: Array<JsonApiResource>, resource: JsonApiResource,
-    foundResource: JsonApiResource): Array<JsonApiResource> => {
+export const updateResource = (state: Array<Resource>, resource: Resource,
+    foundResource: Resource): Array<Resource> => {
 
     return [..._.filter(state, (r) => !(r.type === resource.type && r.id === resource.id)),
         updateResourceObject(foundResource, resource)
@@ -64,10 +71,10 @@ export const updateResource = (state: Array<JsonApiResource>, resource: JsonApiR
 
 };
 
-export const updateOrInsertResource = (state: Array<JsonApiResource>,
-    resource: JsonApiResource): Array<JsonApiResource> => {
+export const updateOrInsertResource = (state: Array<Resource>,
+    resource: Resource): Array<Resource> => {
 
-    // Check if the entity alread exists in the state
+    // Check if the resource already exists in the state
     let foundResource = _.find(state, { type: resource.type, id: resource.id });
 
     // If it is not there, we simply add it to the state

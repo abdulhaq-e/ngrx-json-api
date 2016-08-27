@@ -9,53 +9,19 @@ import {
 let deepFreeze = require('deep-freeze');
 
 import {
-    getResourcePath,
     initialiseJsonApiStore,
     insertResource,
+    transformResource,
     updateOrInsertResource,
     updateResourceObject,
     updateResource,
 } from '../lib/utils';
 
-import { JsonApiResource, JsonApiResourceDefinition, JsonApiStore } from '../lib/interfaces';
-
-describe('getResourcePath', () => {
-
-    let resourcesDefinition: Array<JsonApiResourceDefinition> = [
-        {
-            path: 'article',
-            type: 'Article',
-            collectionPath: 'articles',
-            attributes: ['title', 'subtitle'],
-            relationships: {
-                'author': { 'type': 'People', 'relationType': 'hasOne' },
-                'tags': { 'type': 'Tag', 'relationType': 'hasMany' }
-            }
-        },
-        {
-            path: 'person',
-            type: 'Person',
-            collectionPath: 'people',
-            attributes: ['name'],
-            relationships: {}
-        }
-    ];
-
-    it('should get the path given resourcesDefinition', () => {
-        expect(getResourcePath(resourcesDefinition, 'Article')).toBe('article');
-    });
-
-    it('should throw an error if the definition is not found', () => {
-        expect(() => getResourcePath(resourcesDefinition, 'Spam')).toThrow();
-        expect(() => getResourcePath(resourcesDefinition, 'Spam')).toThrowError(
-            'Definition not found');
-    });
-
-});
+import { Resource, ResourceDefinition, Store } from '../lib/interfaces';
 
 describe('initialiseJsonApiStore', () => {
 
-    let resourcesDefinition: Array<JsonApiResourceDefinition> = [
+    let resourcesDefinition: Array<ResourceDefinition> = [
         {
             path: 'article',
             type: 'Article',
@@ -99,7 +65,7 @@ describe('initialiseJsonApiStore', () => {
 
 describe('insert resource', () => {
 
-    let state: Array<JsonApiResource> = [
+    let state: Array<Resource> = [
         {
             type: 'Article',
             id: '1',
@@ -112,11 +78,11 @@ describe('insert resource', () => {
     deepFreeze(state);
 
     it(`should insert a resource`, () => {
-        let newResource: JsonApiResource = {
+        let newResource: Resource = {
             type: 'Article',
             id: '3'
         };
-        let expectedState: Array<JsonApiResource> = [
+        let expectedState: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',
@@ -133,11 +99,11 @@ describe('insert resource', () => {
     });
 
     it(`should insert a resource regardless if it's repeated or not`, () => {
-        let newResource: JsonApiResource = {
+        let newResource: Resource = {
             type: 'Article',
             id: '1'
         };
-        let expectedState: Array<JsonApiResource> = [
+        let expectedState: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',
@@ -154,18 +120,51 @@ describe('insert resource', () => {
     });
 });
 
+describe('transformResource', () => {
+
+    it('should transform a basic resource with no attributes and no relations', () => {
+        let resource = {
+            id: '1',
+            type: 'Article'
+        };
+        let expected = {
+            id: '1',
+            type: 'Article'
+        };
+        expect(transformResource(resource)).toEqual(expected);
+    });
+
+    it('should transform a resource with attributes', () => {
+        let resource = {
+            id: '1',
+            type: 'Article',
+            attributes: {
+                title: 'Hello World!'
+            }
+        };
+        let expected = {
+            id: '1',
+            type: 'Article',
+            title: 'Hello World!'
+        };
+        // console.log(transformResource(resource));
+        expect(transformResource(resource)).toEqual(expected);
+    });
+
+});
+
 describe('updateResourceObject', () => {
 
     it('should update attributes', () => {
 
-        let original: JsonApiResource = {
+        let original: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
                 'title': 'JSON API paints my bikeshed!',
             }
         };
-        let source: JsonApiResource = {
+        let source: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
@@ -181,7 +180,7 @@ describe('updateResourceObject', () => {
 
     it('should leave un-updated attributes', () => {
 
-        let original: JsonApiResource = {
+        let original: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
@@ -189,7 +188,7 @@ describe('updateResourceObject', () => {
                 body: 'Testing JSON API'
             }
         };
-        let source: JsonApiResource = {
+        let source: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
@@ -206,7 +205,7 @@ describe('updateResourceObject', () => {
 
 describe('updateResource', () => {
 
-    let state: Array<JsonApiResource> = [
+    let state: Array<Resource> = [
         {
             type: 'Article',
             id: '1',
@@ -227,14 +226,14 @@ describe('updateResource', () => {
 
     it('should update the resource given a foundResource', () => {
 
-        let foundResource: JsonApiResource = {
+        let foundResource: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
                 'title': 'JSON API paints my bikeshed!',
             }
         };
-        let resource: JsonApiResource = {
+        let resource: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
@@ -254,7 +253,7 @@ describe('updateOrInsertResource', () => {
 
 
     it(`should insert a resource if it was not found`, () => {
-        let state: Array<JsonApiResource> = [
+        let state: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',
@@ -266,12 +265,12 @@ describe('updateOrInsertResource', () => {
 
         deepFreeze(state);
 
-        let newResource: JsonApiResource = {
+        let newResource: Resource = {
             type: 'Article',
             id: '3'
         };
 
-        let expectedState: Array<JsonApiResource> = [
+        let expectedState: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',
@@ -288,7 +287,7 @@ describe('updateOrInsertResource', () => {
     });
 
     it('should update a resource if found', () => {
-        let state: Array<JsonApiResource> = [
+        let state: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',
@@ -305,7 +304,7 @@ describe('updateOrInsertResource', () => {
 
         deepFreeze(state);
 
-        let newResource: JsonApiResource = {
+        let newResource: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
@@ -313,7 +312,7 @@ describe('updateOrInsertResource', () => {
             }
         };
 
-        let expectedState: Array<JsonApiResource> = [
+        let expectedState: Array<Resource> = [
             {
                 type: 'Article',
                 id: '1',

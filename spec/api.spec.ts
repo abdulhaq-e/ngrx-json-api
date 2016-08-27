@@ -19,11 +19,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { JsonApi } from '../lib/api';
 import { API_URL, RESOURCES_DEFINTION } from '../lib/ng2';
-import { JsonApiResourceDefinition } from '../lib/interfaces';
+import { ResourceDefinition } from '../lib/interfaces';
 
 describe('ngrx json api', () => {
     let jsonapi;
-    let resourcesDefinition: Array<JsonApiResourceDefinition> = [
+    let resourcesDefinition: Array<ResourceDefinition> = [
         {
             path: 'post',
             type: 'Post',

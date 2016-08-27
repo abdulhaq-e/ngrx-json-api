@@ -11,9 +11,11 @@ import {
   URLSearchParams
 } from '@angular/http';
 
+import { Observable } from 'rxjs/Observable';
+
 import { API_URL, RESOURCES_DEFINTION } from './ng2';
 
-import { JsonApiQuery } from './interfaces';
+import { Query } from './interfaces';
 
 
 export interface Options {
@@ -38,16 +40,16 @@ export class JsonApi {
   ) {
   }
 
-  one(resourceType: string, id: string) {
+  one(type: string, id: string) {
     this.builderStack.push({
-      path: this.resourcePathFor(resourceType, id)
+      path: this.resourcePathFor(type, id)
     });
     return this;
   }
 
-  all(resourceType: string) {
+  all(type: string) {
     this.builderStack.push({
-      path: this.collectionPathFor(resourceType)
+      path: this.collectionPathFor(type)
     });
     return this;
   }
@@ -135,15 +137,15 @@ export class JsonApi {
     return this.http.request(request).map(res => res.json());
   }
 
-  find(options: JsonApiQuery) {
+  find(options: Query) {
     if (typeof options.id === 'undefined') {
       return this.findAll(options);
     }
-    return this.one(options.resourceType, options.id).get(options.params);
+    return this.one(options.type, options.id).get(options.params);
   }
 
-  findAll(options: JsonApiQuery) {
-    return this.all(options.resourceType).get(options.params);
+  findAll(options: Query) {
+    return this.all(options.type).get(options.params);
   }
 
   create(resourceType, payload) {
@@ -154,8 +156,8 @@ export class JsonApi {
     return this.one(resourceType, payload.id).patch(payload);
   }
 
-  delete(options: JsonApiQuery) {
-    return this.one(options.resourceType, options.id).destroy();
+  delete(options: Query) {
+    return this.one(options.type, options.id).destroy();
   }
 
   collectionPathFor(resourceType: string) {

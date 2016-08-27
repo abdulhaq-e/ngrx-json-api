@@ -1,17 +1,17 @@
 import { Action, ActionReducer } from '@ngrx/store';
 
 import { JsonApiActions } from './actions';
-import { JsonApiQuery,
-  JsonApiDocument,
-  JsonApiResource,
-  JsonApiStore
+import { Query,
+  Document,
+  Resource,
+  Store
 } from './interfaces';
 import { getResourcePath, updateOrInsertResource } from './utils';
 
-export const updateJsonApiStoreReducer = (state: JsonApiStore,
-    payload: JsonApiDocument): JsonApiStore => {
+export const updateJsonApiStoreReducer = (state: Store,
+    payload: Document): Store => {
 
-    let data = <Array<JsonApiResource> | JsonApiResource>_.get(payload, 'data');
+    let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
     if (_.isUndefined(data)) {
         return state;
@@ -19,17 +19,17 @@ export const updateJsonApiStoreReducer = (state: JsonApiStore,
 
     data = _.isArray(data) ? data : [data]
 
-    let included = <Array<JsonApiResource>>_.get(payload, 'included');
+    let included = <Array<Resource>>_.get(payload, 'included');
 
     if (!_.isUndefined(included)) {
         data = [...data, ...included];
     }
 
-    return <JsonApiStore>_.reduce(
-        data, (result: JsonApiStore,
-          resource: JsonApiResource) => {
+    return <Store>_.reduce(
+        data, (result: Store,
+          resource: Resource) => {
             let resourcePath: string = getResourcePath(
-              result.resourcesDefinition, resource.type);
+              result.resourcesDefinitions, resource.type);
             // Extremely ugly, needs refactoring!
             let newPartialState = { data: {} };
             newPartialState.data[resourcePath] = { data: {} } ;
@@ -37,13 +37,13 @@ export const updateJsonApiStoreReducer = (state: JsonApiStore,
               result.data[resourcePath].data, resource);
               // result.data[resourcePath].data = updateOrInsertResource(
                 // result.data[resourcePath].data, resource);
-            return <JsonApiStore>_.merge({}, result, newPartialState);
+            return <Store>_.merge({}, result, newPartialState);
         }, state);
 };
 
 
 export const JsonApiReducer: ActionReducer<any> =
-  (state: JsonApiStore, action: Action) => {
+  (state: Store, action: Action) => {
     let newState;
 
     switch (action.type) {

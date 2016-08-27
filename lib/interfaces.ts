@@ -1,46 +1,47 @@
-export interface JsonApiResourceDefinition {
+export interface RelationDefinition {
+  type: string;
+  relationType: string;
+}
+
+export interface ResourceDefinition {
   type: string;
   path: string;
   collectionPath: string;
   attributes: Array<string>;
-  relationships: { [key: string]: { type: string, relationType: string } };
+  relationships: { [key: string]: RelationDefinition };
 };
 
-// export type JsonApiResourcesDefinition = Array<JsonApiResourceDefinition>;
-
-
-export interface JsonApiStore {
+export interface Store {
   data: {[key: string]: any};
-  resourcesDefinition: Array<JsonApiResourceDefinition>;
+  resourcesDefinitions: Array<ResourceDefinition>;
   isCreating: boolean;
   isReading: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
-  // getResourcePath(resourceType: string): string;
 }
 
-export interface JsonApiQuery {
-  resourceType: string;
+export interface Query {
+  type: string;
   id?: string;
   params?: string;
 }
 
-export interface JsonApiResourceIdentifier {
+export interface ResourceIdentifier {
   type: string;
   id: string;
 }
 
-export interface JsonApiResource extends JsonApiResourceIdentifier {
+export interface Resource extends ResourceIdentifier {
   attributes?: {[key: string]: any};
   relationships? : {[key: string]: any};
 }
 
-export interface JsonApiDocument {
-  data: any;
-  included: any;
+export interface Document {
+  data?: any;
+  included?: any;
 }
 
-export interface JsonApiPayload {
+export interface Payload {
   data: {[key: string]: any};
-  options?: JsonApiQuery;
+  options?: Query;
 }
