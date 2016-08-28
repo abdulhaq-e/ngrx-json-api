@@ -13,8 +13,7 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
-import { API_URL, RESOURCES_DEFINITIONS } from './ng2';
-
+import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
   Query,
   ResourceDefinition
@@ -38,8 +37,8 @@ export class JsonApi {
 
   constructor(
     private http: Http,
-    @Inject(API_URL) private apiUrl,
-    @Inject(RESOURCES_DEFINITIONS) private definitions
+    private apiUrl: string,
+    private definitions: Array<ResourceDefinition>
   ) {
   }
 

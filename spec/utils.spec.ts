@@ -17,7 +17,7 @@ import {
     updateResource,
 } from '../lib/utils';
 
-import { Resource, ResourceDefinition, Store } from '../lib/interfaces';
+import { Resource, ResourceDefinition, NgrxJsonApiStore } from '../lib/interfaces';
 
 describe('initialiseStore', () => {
 

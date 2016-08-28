@@ -18,7 +18,11 @@ import {
 import { Observable } from 'rxjs/Observable';
 
 import { JsonApi } from '../lib/api';
-import { API_URL, RESOURCES_DEFINITIONS } from '../lib/ng2';
+import {
+  API_URL,
+  RESOURCES_DEFINITIONS,
+  _apiFactory
+  } from '../lib/module';
 import { ResourceDefinition } from '../lib/interfaces';
 
 describe('ngrx json api', () => {
@@ -46,7 +50,11 @@ describe('ngrx json api', () => {
             providers: [
                 BaseRequestOptions,
                 MockBackend,
-                JsonApi,
+                {
+                    provide: JsonApi,
+                    useFactory: _apiFactory,
+                    deps: [Http, API_URL, RESOURCES_DEFINITIONS]
+                },
                 {
                     provide: Http, useFactory: (backend: ConnectionBackend,
                         defaultOptions: BaseRequestOptions) => {

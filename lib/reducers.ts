@@ -5,13 +5,13 @@ import {
   Query,
   Document,
   Resource,
-  Store
+  NgrxJsonApiStore
 } from './interfaces';
 import {
   updateOrInsertResource } from './utils';
 
-export const updateStoreReducer = (state: Store,
-    payload: Document): Store => {
+export const updateStoreReducer = (state: NgrxJsonApiStore,
+    payload: Document): NgrxJsonApiStore => {
 
     let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
@@ -27,8 +27,8 @@ export const updateStoreReducer = (state: Store,
         data = [...data, ...included];
     }
 
-    return <Store>_.reduce(
-        data, (result: Store,
+    return <NgrxJsonApiStore>_.reduce(
+        data, (result: NgrxJsonApiStore,
           resource: Resource) => {
             // let resourcePath: string = getResourcePath(
             //   result.resourcesDefinitions, resource.type);
@@ -39,13 +39,13 @@ export const updateStoreReducer = (state: Store,
               result.data, resource);
               // result.data[resourcePath].data = updateOrInsertResource(
                 // result.data[resourcePath].data, resource);
-            return <Store>_.merge({}, result, newPartialState);
+            return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
         }, state);
 };
 
 
 export const StoreReducer: ActionReducer<any> =
-  (state: Store, action: Action) => {
+  (state: NgrxJsonApiStore, action: Action) => {
     let newState;
 
     switch (action.type) {

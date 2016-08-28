@@ -37,7 +37,7 @@ export interface Payload {
   options?: Query;
 }
 
-export interface Store {
+export interface NgrxJsonApiStore {
   data: Array<Resource>;
   resourcesDefinitions: Array<ResourceDefinition>;
   isCreating: boolean;

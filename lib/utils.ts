@@ -4,14 +4,14 @@ import { Actions } from '@ngrx/effects';
 
 import {
     Resource,
-    Store,
+    NgrxJsonApiStore,
     ResourceDefinition,
     Document,
     RelationDefinition
 } from './interfaces';
 
 export const initialiseStore = (
-    resourcesDefinition: Array<ResourceDefinition>): Store => {
+    resourcesDefinition: Array<ResourceDefinition>): NgrxJsonApiStore => {
 
     return ({
         isCreating: false,

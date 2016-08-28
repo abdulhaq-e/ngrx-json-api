@@ -8,18 +8,18 @@ import {
     ResourceIdentifier,
     Resource,
     Query,
-    Store,
+    NgrxJsonApiStore,
 } from './interfaces';
 
 export const _getResourcesDefinitions = () => {
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.select(s => s.resourcesDefinitions);
     };
 };
 
 export const _getResourceDefinition = (type: string) => {
 
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_getResourcesDefinitions())
             .map(definitions => <ResourceDefinition>_.find(
                 definitions, { type: type }));
@@ -28,7 +28,7 @@ export const _getResourceDefinition = (type: string) => {
 
 export const _getRelationDefinition = (type: string, relation: string) => {
 
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_getResourceDefinition(type))
             .map(definition => {
                 let relationship = definition.relationships[relation];
@@ -64,14 +64,14 @@ export const _findOne = (query: Query) => {
 };
 
 export const _getHasOneRelation = (resourceIdentifier: ResourceIdentifier) => {
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_findOne(resourceIdentifier));
     };
 };
 
 export const _getHasManyRelation = (
     resourceIdentifiers: Array<ResourceIdentifier>) => {
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_findAll({ type: resourceIdentifiers[0].type }))
             .map(resources => resources.filter(
                 resource => _.includes(resourceIdentifiers
@@ -81,7 +81,7 @@ export const _getHasManyRelation = (
 
 export const _getRelatedResources = (resourceIdentifier: ResourceIdentifier,
     relation: string) => {
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_getRelationDefinition(resourceIdentifier.type, relation))
             .mergeMap(relationDefinition => state$
                 .let(_findOne({
@@ -104,7 +104,7 @@ export const _getRelatedResources = (resourceIdentifier: ResourceIdentifier,
 
 export const findRelated = (resourceIdentifier: ResourceIdentifier,
     relation: string) => {
-    return (state$: Observable<Store>) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(_getRelatedResources(resourceIdentifier, relation))
     };
 };

@@ -12,7 +12,7 @@ import _ = require('lodash');
 import { StoreReducer, updateStoreReducer } from '../lib/reducers';
 import { JsonApiActions } from '../lib/actions';
 import { initialiseStore } from '../lib/utils';
-import { Store } from '../lib/interfaces';
+import { NgrxJsonApiStore } from '../lib/interfaces';
 
 describe('JsonApi Reducers', () => {
     let resourcesDefinition = [
@@ -39,7 +39,7 @@ describe('JsonApi Reducers', () => {
 
     describe('updateJsonApiStoreReducer', () => {
         it('should update the store given a JsonApiDocument', () => {
-            let expectedState: Store = initialiseStore(resourcesDefinition);
+            let expectedState: NgrxJsonApiStore = initialiseStore(resourcesDefinition);
 
             expectedState.data.push(
                 {
@@ -152,7 +152,7 @@ describe('JsonApi Reducers', () => {
 
         it('should update store data upson successfull CREATE/UPDATE/READ', () => {
 
-            let expectedState: Store = initialiseStore(resourcesDefinition);
+            let expectedState: NgrxJsonApiStore = initialiseStore(resourcesDefinition);
 
             expectedState.data.push(
                 {
