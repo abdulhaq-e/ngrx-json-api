@@ -7,8 +7,8 @@ import {
   Resource,
   NgrxJsonApiStore
 } from './interfaces';
-import {
-  updateOrInsertResource } from './utils';
+
+import { updateOrInsertResource } from './utils';
 
 export const updateStoreReducer = (state: NgrxJsonApiStore,
     payload: Document): NgrxJsonApiStore => {
