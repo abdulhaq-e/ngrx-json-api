@@ -1,6 +1,8 @@
-import { Response } from '@angular/http';
+import { Response, ResponseOptions } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/throw';
 
 import { JsonApi } from './api';
 
@@ -27,21 +29,22 @@ export class JsonApiMock {
   find(options) {
     if (options.id === '1') {
       return Observable.of(new Response(
-        { body: '{"1": 1}' }
+        new ResponseOptions({ body: '{"1": 1}', status: 200})
       ));
     } else if (options.id === '2') {
       return Observable.throw(new Response(
-        { status: 404 }
+        new ResponseOptions({ status: 404 })
       ));
     }
   }
 
   delete(ok: boolean) {
       if (ok) {
-        return Observable.of(new Response({}));
+        return Observable.of(new Response(
+          new ResponseOptions({})));
       } else if (!ok) {
         return Observable.throw(new Response(
-          { status: 404 }
+          new ResponseOptions({ status: 404 })
         ));
       }
     }

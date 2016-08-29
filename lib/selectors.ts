@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import _ = require('lodash');
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/let';
+import '@ngrx/core/add/operator/select';
+
 
 import { compose } from '@ngrx/core/compose';
 
@@ -130,7 +133,7 @@ export class NgrxJsonApiSelectors {
             } else {
                 let slicedRelations: Array<string> = relations.slice(1);
                 return _.reduce(slicedRelations, (acc, value) => {
-                    return acc.mergeMap(resource => {
+                    return acc.mergeMap((resource: Resource) => {
                         return state$.let(
                             this._getRelatedResources(
                                 { type: resource.type, id: resource.id }, value)

@@ -3,6 +3,7 @@
     "target": "ES5",
     "module": "commonjs",
     "sourceMap": true,
+    "outDir": "dist",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "removeComments": false,
@@ -25,9 +26,8 @@
   "atom": {
       "rewriteTsconfig": false
   },
-  "filesGlob": [
-    "lib/**/*.ts",
-    "spec/**/*.ts"
+  "files": [
+    "lib/index.ts"
   ],
   "exclude": [
     "node_modules"

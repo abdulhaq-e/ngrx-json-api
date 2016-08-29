@@ -1,6 +1,6 @@
 {
   "name": "ngrx-json-api",
-  "version": "0.0.1-alpha.1",
+  "version": "0.1.0",
   "description": "A JSON API client for ngrx",
   "main": "index.js",
   "repository": {
@@ -8,18 +8,15 @@
     "url": "https://github.com/abdulhaq-e/ngrx-json-api.git"
   },
   "scripts": {
-    "clean_test": "rm -rf ./tmp",
-    "doit": "tsc -p spec",
-    "build_test": "npm run clean_test && tsc -p ./spec",
-    "build_test:watch": "npm run clean_test && tsc -p ./spec -w",
-    "build_dist": "rm -rf dist && tsc && npm run copy_package",
+    "build": "rm -rf dist && tsc && npm run copy_package",
     "copy_package": "cp package.json dist/package.json",
+    "karma": "karma start",
+    "karma:watch": "karma start --no-single-run",
+    "lint": "npm run lint:lib && npm run lint:spec",
     "lint:lib": "tslint lib/**.ts",
     "lint:spec": "tslint spec/**.ts",
-    "test": "npm run build_test && karma",
-    "test:watch": "npm run build_test:watch && karma:watch",
-    "karma": "karma start",
-    "karma:watch": "karma start --no-single-run"
+    "test": "npm run karma",
+    "test:watch": "npm run karma:watch"
   },
   "authors": [
     "Abdulhaq Emhemmed"

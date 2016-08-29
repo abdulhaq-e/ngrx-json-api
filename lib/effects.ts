@@ -3,6 +3,10 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Effect, Actions } from '@ngrx/effects';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/mapTo';
 
 import { JsonApiActions } from './actions';
 import { JsonApi } from './api';
@@ -22,9 +26,9 @@ export class JsonApiEffects implements OnDestroy {
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
       return this.jsonApi.create(payload.options.type, payload.data)
-        .mapTo(this.jsonApiActions.apiCreateSuccess(payload))
+        .mapTo(JsonApiActions.apiCreateSuccess(payload))
         .catch(() => Observable.of(
-          this.jsonApiActions.apiCreateFail(payload)
+          JsonApiActions.apiCreateFail(payload)
         ))
     });
 
@@ -33,9 +37,9 @@ export class JsonApiEffects implements OnDestroy {
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
       return this.jsonApi.update(payload.options.type, payload.data)
-        .mapTo(this.jsonApiActions.apiUpdateSuccess(payload))
+        .mapTo(JsonApiActions.apiUpdateSuccess(payload))
         .catch(() => Observable.of(
-          this.jsonApiActions.apiUpdateFail(payload)
+          JsonApiActions.apiUpdateFail(payload)
         ));
     });
 
@@ -45,9 +49,9 @@ export class JsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.find(payload.options)
         .map(res => ({ data: res.json(), options: payload.options }))
-        .map(data => this.jsonApiActions.apiReadSuccess(data))
+        .map(data => JsonApiActions.apiReadSuccess(data))
         .catch(() => Observable.of(
-          this.jsonApiActions.apiReadFail(payload)
+          JsonApiActions.apiReadFail(payload)
         ));
     });
 
@@ -56,9 +60,9 @@ export class JsonApiEffects implements OnDestroy {
       .map<Payload>(toPayload)
       .mergeMap((payload: Payload) => {
         return this.jsonApi.delete(payload.options)
-          .mapTo(this.jsonApiActions.apiDeleteSuccess(payload))
+          .mapTo(JsonApiActions.apiDeleteSuccess(payload))
           .catch(() => Observable.of(
-            this.jsonApiActions.apiDeleteFail(payload)
+            JsonApiActions.apiDeleteFail(payload)
           ));
       });
 

@@ -12,6 +12,8 @@ import {
 } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+
 
 import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
@@ -157,7 +159,7 @@ export class JsonApi {
   }
 
   collectionPathFor(type: string) {
-    let collectionPath: ResourceDefinition = _.find(this.definitions,
+    let collectionPath: string = _.find(this.definitions,
       {type: type}).collectionPath;
     return `${collectionPath}`;
   }

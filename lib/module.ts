@@ -69,7 +69,7 @@ export class NgrxJsonApiModule {
         storeLocation: string): ModuleWithProviders {
         return {
             ngModule: NgrxJsonApiModule,
-            providers: configure(apiUrl, resourcesDefinitions)
+            providers: configure(apiUrl, resourcesDefinitions, storeLocation)
         };
     }
 };
