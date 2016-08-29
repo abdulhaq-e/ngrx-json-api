@@ -87,6 +87,11 @@ describe('Json Api Selectors', () => {
                 attributes: {
                     "name": "Usain Bolt"
                 },
+                relationships: {
+                    'blog': {
+                        data: { type: 'Blog', id: '1' }
+                    }
+                }
             },
             {
                 type: "Person",
@@ -108,6 +113,13 @@ describe('Json Api Selectors', () => {
                 attributes: {
                     "text": "No comment"
                 }
+            },
+            {
+                type: "Blog",
+                id: "1",
+                attributes: {
+                    name: "Random Blog!"
+                }
             }
         ]
     };
@@ -119,22 +131,29 @@ describe('Json Api Selectors', () => {
             attributes: ['title', 'subtitle'],
             relationships: {
                 'author': { 'type': 'Person', 'relationType': 'hasOne' },
-                'comments': { 'type': 'Comment', 'relationType': 'hasMany' }
+                'comments': { 'type': 'Comment', 'relationType': 'hasMany' },
             }
         },
         {
-            type: 'Person',
-            collectionPath: 'people',
-            attributes: ['name'],
-            relationships: {}
+          type: 'Person',
+          collectionPath: 'people',
+          attributes: ['name'],
+          relationships: {
+            'blog': { 'type': 'Blog', 'relationType': 'hasOne' }
+          }
         },
         {
-            path: 'comment',
             type: 'Comment',
             collectionPath: 'comments',
             attributes: ['text'],
             relationships: {}
         },
+        {
+            type: 'Blog',
+            collectionPath: 'blogs',
+            attributes: ['name'],
+            relationships: {}
+        }
     ];
 
     let rawStore = initialiseStore(resourcesDefinitions);
@@ -147,7 +166,7 @@ describe('Json Api Selectors', () => {
                 .let(selectors._getResourcesDefinitions())
                 .subscribe(d => {
                     expect(d).toEqual(resourcesDefinitions);
-                    expect(d.length).toEqual(3);
+                    expect(d.length).toEqual(4);
                 });
             tick();
         }));
@@ -334,6 +353,18 @@ describe('Json Api Selectors', () => {
             expect(res.length).toBe(1);
             expect(res[0].id).toEqual('1');
             expect(res[0].attributes.text).toEqual('Uncommented');
+        }));
+
+        it('should handle deep relations', fakeAsync(() => {
+            let res;
+            let sub = obs
+                .let(selectors._findRelated(
+                    { type: 'Article', id: '1' }, 'author.blog'))
+                .subscribe(d => res = d);
+            tick();
+            expect(res.type).toEqual('Blog');
+            expect(res.id).toEqual('1');
+            expect(res.attributes.name).toEqual('Random Blog!');
         }));
     });
 

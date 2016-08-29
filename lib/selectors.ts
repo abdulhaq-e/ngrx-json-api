@@ -34,24 +34,23 @@ export class NgrxJsonApiSelectors {
     };
 
     private _getResourceDefinition(type: string) {
-
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.let(this._getResourcesDefinitions())
-                .map(definitions => <ResourceDefinition>_.find(
-                    definitions, { type: type }));
+                .map(definitions => {
+                  return <ResourceDefinition>definitions.find(d => d.type === type);
+                });
         };
     };
 
     private _getRelationDefinition(type: string, relation: string) {
-
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.let(this._getResourceDefinition(type))
                 .map(definition => {
                     let relationship = definition.relationships[relation];
-                    return {
+                    return ({
                         type: relationship.type,
                         relationType: relationship.relationType
-                    };
+                    });
                 });
         };
     };
@@ -98,13 +97,14 @@ export class NgrxJsonApiSelectors {
     private _getRelatedResources(resourceIdentifier: ResourceIdentifier,
         relation: string) {
         return (state$: Observable<NgrxJsonApiStore>) => {
+
             return state$.let(this._getRelationDefinition(resourceIdentifier.type, relation))
                 .mergeMap(relationDefinition => state$
                     .let(this._findOne({
                         type: resourceIdentifier.type,
                         id: resourceIdentifier.id
                     }))
-                    .mergeMap(foundResource => {
+                    .mergeMap((foundResource: Resource) => {
                         if (relationDefinition.relationType === 'hasOne') {
                             return state$.let(this._getHasOneRelation(
                                 foundResource.relationships[relation].data
@@ -120,9 +120,25 @@ export class NgrxJsonApiSelectors {
 
     private _findRelated(resourceIdentifier: ResourceIdentifier,
         relation: string) {
+        let relations: Array<string> = relation.split('.');
         return (state$: Observable<NgrxJsonApiStore>) => {
-            return state$.let(this._getRelatedResources(resourceIdentifier, relation))
-        };
+            let obs = state$.let(
+                this._getRelatedResources(resourceIdentifier, relations[0])
+            );
+            if (relations.length === 1) {
+                return obs
+            } else {
+                let slicedRelations: Array<string> = relations.slice(1);
+                return _.reduce(slicedRelations, (acc, value) => {
+                    return acc.mergeMap(resource => {
+                        return state$.let(
+                            this._getRelatedResources(
+                                { type: resource.type, id: resource.id }, value)
+                        );
+                    })
+                }, obs)
+            }
+        }
     };
 
     public find(query: Query) {
