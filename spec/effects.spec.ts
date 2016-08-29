@@ -10,10 +10,10 @@
 //   MockStateUpdates
 // } from '@ngrx/effects/testing';
 //
-// import { JsonApiEffects } from '../lib/effects';
-// import { JsonApiActions } from '../lib/actions';
+// import { JsonApiEffects } from '../src/effects';
+// import { JsonApiActions } from '../src/actions';
 //
-// import { MOCK_JSON_API_PROVIDERS } from '../lib/testing';
+// import { MOCK_JSON_API_PROVIDERS } from '../src/testing';
 //
 // describe('Json Api Effects', () => {
 //   let effects: JsonApiEffects;

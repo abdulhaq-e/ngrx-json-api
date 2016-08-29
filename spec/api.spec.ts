@@ -17,13 +17,13 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
-import { JsonApi } from '../lib/api';
+import { JsonApi } from '../src/api';
 import {
   API_URL,
   RESOURCES_DEFINITIONS,
   _apiFactory
-  } from '../lib/module';
-import { ResourceDefinition } from '../lib/interfaces';
+  } from '../src/module';
+import { ResourceDefinition } from '../src/interfaces';
 
 describe('ngrx json api', () => {
     let jsonapi;

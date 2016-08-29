@@ -5,7 +5,7 @@
 //   tick
 // } from '@angular/core/testing';
 //
-// import { JsonApiStore } from '../lib/store';
+// import { JsonApiStore } from '../src/store';
 //
 // let resourcesDefinition = [
 //   {

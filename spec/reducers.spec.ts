@@ -9,10 +9,10 @@ let deepFreeze = require('deep-freeze');
 
 import _ = require('lodash');
 
-import { StoreReducer, updateStoreReducer } from '../lib/reducers';
-import { JsonApiActions } from '../lib/actions';
-import { initialiseStore } from '../lib/utils';
-import { NgrxJsonApiStore } from '../lib/interfaces';
+import { StoreReducer, updateStoreReducer } from '../src/reducers';
+import { JsonApiActions } from '../src/actions';
+import { initialiseStore } from '../src/utils';
+import { NgrxJsonApiStore } from '../src/interfaces';
 
 describe('JsonApi Reducers', () => {
     let resourcesDefinition = [

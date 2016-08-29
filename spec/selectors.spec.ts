@@ -25,12 +25,12 @@ import _ = require('lodash');
 
 import {
     NgrxJsonApiSelectors,
-} from '../lib/selectors';
-import { NGRX_JSON_API_STORE_LOCATION, _selectorsFactory } from '../lib/module';
+} from '../src/selectors';
+import { NGRX_JSON_API_STORE_LOCATION, _selectorsFactory } from '../src/module';
 
-import { initialiseStore } from '../lib/utils';
+import { initialiseStore } from '../src/utils';
 
-import { updateStoreReducer } from '../lib/reducers';
+import { updateStoreReducer } from '../src/reducers';
 
 describe('Json Api Selectors', () => {
     let selectors;

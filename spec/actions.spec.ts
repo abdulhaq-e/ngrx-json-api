@@ -5,7 +5,7 @@ import {
   TestBed
 } from '@angular/core/testing';
 
-import { JsonApiActions } from '../lib/actions';
+import { JsonApiActions } from '../src/actions';
 
 describe('Json Api Actions', () => {
 
