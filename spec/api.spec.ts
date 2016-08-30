@@ -19,10 +19,10 @@ import { Observable } from 'rxjs/Observable';
 
 import { JsonApi } from '../src/api';
 import {
-  API_URL,
-  RESOURCES_DEFINITIONS,
-  _apiFactory
-  } from '../src/module';
+    API_URL,
+    RESOURCES_DEFINITIONS,
+    _apiFactory
+} from '../src/module';
 import { ResourceDefinition } from '../src/interfaces';
 
 describe('ngrx json api', () => {
@@ -80,13 +80,13 @@ describe('ngrx json api', () => {
     });
 
     it('should build url for a single item using one', () => {
-        let oneItem = jsonapi.one('Post', '10');
+        let oneItem = jsonapi.one({ type: 'Post', id: '10' });
         expect(oneItem.urlBuilder[0].path).toEqual('posts/10');
         expect(oneItem.urlBuilder[0].path).not.toEqual('post/10');
     });
 
     it('should build url for a all item using all', () => {
-        let oneItem = jsonapi.all('Post');
+        let oneItem = jsonapi.all({ type: 'Post' });
         // console.log(oneItem);
         expect(oneItem.urlBuilder[0].path).toEqual('posts');
         expect(oneItem.urlBuilder[0].path).not.toEqual('post');
@@ -100,20 +100,20 @@ describe('ngrx json api', () => {
     });
 
     it('should build the path using buildPath', () => {
-        jsonapi.one('Post', '1');
+        jsonapi.one({ type: 'Post', id: '1' });
         expect(jsonapi.buildPath()).toBe('posts/1');
         jsonapi.resetUrlBuilder();
         expect(jsonapi.urlBuilder).toEqual([]);
-        jsonapi.all('Post');
+        jsonapi.all({ type: 'Post' });
         expect(jsonapi.buildPath()).toBe('posts');
     });
 
     it('should build the url using buildUrl', () => {
-        jsonapi.one('Post', '1');
+        jsonapi.one({ type: 'Post', id: '1' });
         expect(jsonapi.buildUrl()).toBe('myapi.com/posts/1');
         jsonapi.resetUrlBuilder();
         expect(jsonapi.urlBuilder).toEqual([]);
-        jsonapi.all('Post');
+        jsonapi.all({ type: 'Post' });
         expect(jsonapi.buildUrl()).toBe('myapi.com/posts');
     });
 
@@ -123,7 +123,7 @@ describe('ngrx json api', () => {
                 expect(c.request.url).toBe('myapi.com/posts/1');
                 expect(c.request.method).toBe(0);
             });
-            jsonapi.one('Post', '1').get();
+            jsonapi.one({ type: 'Post', id: '1' }).get();
             tick();
         })));
 
@@ -133,7 +133,7 @@ describe('ngrx json api', () => {
                 expect(c.request.url).toBe('myapi.com/posts');
                 expect(c.request.method).toBe(0);
             });
-            jsonapi.all('Post').get();
+            jsonapi.all({ type: 'Post' }).get();
             tick();
         })));
 
@@ -145,7 +145,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(1);
                 expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
             });
-            jsonapi.one('Post', '1').post({ title: 'Hello World!' });
+            jsonapi.one({ type: 'Post', id: '1' }).post({ title: 'Hello World!' });
             tick();
         })));
 
@@ -157,7 +157,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(1);
                 expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
             });
-            jsonapi.all('Post').post({ title: 'Hello World!' });
+            jsonapi.all({ type: 'Post' }).post({ title: 'Hello World!' });
             tick();
         })));
 
@@ -170,9 +170,9 @@ describe('ngrx json api', () => {
                 expect(c.request.headers.get('Content-Type')).toBe('application/vnd.api+json');
                 expect(c.request.headers.get('Accept')).toBe('application/vnd.api+json');
             });
-            jsonapi.all('Post').post({ title: 'Hello World!' });
+            jsonapi.all({ type: 'Post' }).post({ title: 'Hello World!' });
             tick();
-            jsonapi.one('Post', '10').post({ title: 'Hello World!' });
+            jsonapi.one({ type: 'Post', id: '10' }).post({ title: 'Hello World!' });
             tick();
         })));
 
@@ -184,7 +184,7 @@ describe('ngrx json api', () => {
                 expect(c.request.method).toBe(6);
                 expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
             });
-            jsonapi.all('Post').patch({ title: 'Hello World!' });
+            jsonapi.all({ type: 'Post' }).patch({ title: 'Hello World!' });
             tick();
         })));
 
@@ -195,7 +195,7 @@ describe('ngrx json api', () => {
                 expect(c.request.url).toBe('myapi.com/posts/1');
                 expect(c.request.method).toBe(3);
             });
-            jsonapi.one('Post', '1').destroy();
+            jsonapi.one({ type: 'Post', id: '1' }).destroy();
             tick();
         })));
 
@@ -256,9 +256,10 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts');
                 expect(c.request.method).toBe(1);
-                expect(c.request._body).toBe(JSON.stringify({ title: 'Hello' }));
+                expect(c.request._body).toBe(JSON.stringify(
+                    { title: 'Hello', type: 'Post' }));
             });
-            jsonapi.create('Post', { title: 'Hello' });
+            jsonapi.create({ title: 'Hello', type: 'Post' });
             tick();
         })));
 
@@ -268,9 +269,10 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts/1');
                 expect(c.request.method).toBe(6);
-                expect(c.request._body).toBe(JSON.stringify({ title: 'Hello', id: '1' }));
+                expect(c.request._body).toBe(JSON.stringify(
+                    { title: 'Hello', id: '1', type: 'Post' }));
             });
-            jsonapi.update('Post', { title: 'Hello', id: '1' });
+            jsonapi.update({ title: 'Hello', id: '1', type: 'Post' });
             tick();
         })));
 
@@ -288,4 +290,19 @@ describe('ngrx json api', () => {
             tick();
         })));
 
+    it('should perform a get request with query params',
+        fakeAsync(inject([MockBackend], (mockBackend) => {
+            mockBackend.connections.subscribe(c => {
+                expect(c.request.url).toBe(
+                    `myapi.com/posts?include=author,author.blog&filter%5Bid%5D=1&filter%5Bautho%5D=2`
+                );
+                expect(c.request.method).toBe(0);
+            });
+            jsonapi.all({ type: 'Post' }).get({
+                include: ['author', 'author.blog'],
+                filtering: [{ type: 'id', value: '1' },
+                    { type: 'autho', value: '2' }],
+            });
+            tick();
+        })));
 });

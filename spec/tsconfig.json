@@ -23,7 +23,7 @@
     },
     "compileOnSave": false,
     "filesGlob": [
-        "lib/**/*.ts",
+        "src/**/*.ts",
         "spec/**/*.ts"
     ],
     "exclude": [

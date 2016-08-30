@@ -3,12 +3,12 @@ import _ = require('lodash');
 import { Injectable, Inject } from '@angular/core';
 
 import {
-  Headers,
-  Http,
-  Request,
-  RequestOptions,
-  RequestMethod,
-  URLSearchParams
+    Headers,
+    Http,
+    Request,
+    RequestOptions,
+    RequestMethod,
+    URLSearchParams
 } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
@@ -17,185 +17,182 @@ import 'rxjs/add/operator/map';
 
 import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
-  Query,
-  ResourceDefinition
-  } from './interfaces';
-
-
-export interface Options {
-  model?: string;
-  id?: string;
-}
+    Query,
+    ResourceDefinition
+} from './interfaces';
 
 @Injectable()
 export class JsonApi {
 
-  public headers: Headers = new Headers({
-    'Content-Type': 'application/vnd.api+json',
-    'Accept': 'application/vnd.api+json'
-  });
-  public models: { [key: string]: any };
-  public urlBuilder = [];
-
-  constructor(
-    private http: Http,
-    private apiUrl: string,
-    private definitions: Array<ResourceDefinition>
-  ) {
-  }
-
-  one(type: string, id: string) {
-    this.urlBuilder.push({
-      path: this.resourcePathFor(type, id)
+    public headers: Headers = new Headers({
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'application/vnd.api+json'
     });
-    return this;
-  }
+    public models: { [key: string]: any };
+    public urlBuilder = [];
 
-  all(type: string) {
-    this.urlBuilder.push({
-      path: this.collectionPathFor(type)
-    });
-    return this;
-  }
-
-  resetUrlBuilder() {
-    this.urlBuilder = [];
-  }
-
-  buildPath() {
-    return _.map(this.urlBuilder, 'path').join('/');
-  }
-
-  buildUrl() {
-    return `${this.apiUrl}/${this.buildPath()}`;
-  }
-
-  get(params = {}) {
-
-    let requestParams = new URLSearchParams();
-
-    // TODO: implement param conversion.
-
-    let requestOptionsArgs = {
-      method: RequestMethod.Get,
-      url: this.urlFor(),
-      search: requestParams
-    };
-
-    this.resetUrlBuilder();
-
-    return this.request(requestOptionsArgs);
-  }
-
-  post(payload) {
-    let requestOptionsArgs = {
-      method: RequestMethod.Post,
-      url: this.urlFor(),
-      body: JSON.stringify(payload)
-    };
-
-    this.resetUrlBuilder();
-
-    return this.request(requestOptionsArgs);
-  }
-
-  patch(payload) {
-
-    let requestOptionsArgs = {
-      method: RequestMethod.Patch,
-      url: this.urlFor(),
-      body: JSON.stringify(payload)
-    };
-
-    this.resetUrlBuilder();
-
-    return this.request(requestOptionsArgs);
-  }
-
-  destroy() {
-
-    let requestOptions = {
-      method: RequestMethod.Delete,
-      url: this.urlFor()
-    };
-
-    this.resetUrlBuilder();
-
-    return this.request(requestOptions);
-  }
-
-  request(requestOptionsArgs) {
-
-    let requestOptions = new RequestOptions(requestOptionsArgs);
-
-    let request = new Request(requestOptions.merge({
-      headers: this.headers
-    }));
-
-    return this.http.request(request).map(res => res.json());
-  }
-
-  find(options: Query) {
-    if (typeof options.id === 'undefined') {
-      return this.findAll(options);
+    constructor(
+        private http: Http,
+        private apiUrl: string,
+        private definitions: Array<ResourceDefinition>
+    ) {
     }
-    return this.one(options.type, options.id).get(options.params);
-  }
 
-  findAll(options: Query) {
-    return this.all(options.type).get(options.params);
-  }
-
-  create(resourceType, payload) {
-    return this.all(resourceType).post(payload);
-  }
-
-  update(resourceType, payload) {
-    return this.one(resourceType, payload.id).patch(payload);
-  }
-
-  delete(options: Query) {
-    return this.one(options.type, options.id).destroy();
-  }
-
-  collectionPathFor(type: string) {
-    let collectionPath: string = _.find(this.definitions,
-      {type: type}).collectionPath;
-    return `${collectionPath}`;
-  }
-
-  resourcePathFor(resourceType: string, id: string) {
-    let collectionPath = this.collectionPathFor(resourceType);
-    return `${collectionPath}/${encodeURIComponent(id)}`;
-  }
-
-  collectionUrlFor(resourceType: string) {
-    let collectionPath = this.collectionPathFor(resourceType);
-    return `${this.apiUrl}/${collectionPath}`;
-  }
-
-  resourceUrlFor(resourceType: string, id) {
-    let resourcePath = this.resourcePathFor(resourceType, id);
-    return `${this.apiUrl}/${resourcePath}`;
-  }
-
-  urlFor(options: Options = {}) {
-    if (!_.isUndefined(options.model) && !_.isUndefined(options.id)) {
-      return this.resourceUrlFor(options.model, options.id);
-    } else if (!_.isUndefined(options.model)) {
-      return this.collectionUrlFor(options.model);
-    } else {
-      return this.buildUrl();
+    public create(payload) {
+        return this.all({ type: payload.type }).post(payload);
     }
-  }
 
-  pathFor(options: Options = {}) {
-    if (!_.isUndefined(options.model) && !_.isUndefined(options.id)) {
-      return this.resourcePathFor(options.model, options.id);
-    } else if (!_.isUndefined(options.model)) {
-      return this.collectionPathFor(options.model);
-    } else {
-      return this.buildPath();
+    public delete(query: Query) {
+        return this.one(query).destroy();
     }
-  }
+
+    public find(query: Query) {
+        if (typeof query.id === 'undefined') {
+            return this.findAll(query);
+        }
+        return this.one(query).get(query.params);
+    }
+
+    public update(payload) {
+        return this.one({ type: payload.type, id: payload.id }).patch(payload);
+    }
+
+    private all(query: Query) {
+        this.urlBuilder.push({
+            path: this.collectionPathFor(query.type)
+        });
+        return this;
+    }
+
+    private buildPath() {
+        return _.map(this.urlBuilder, 'path').join('/');
+    }
+
+    private buildUrl() {
+        return `${this.apiUrl}/${this.buildPath()}`;
+    }
+
+    private collectionPathFor(type: string) {
+        let collectionPath: string = _.find(this.definitions,
+            { type: type }).collectionPath;
+        return `${collectionPath}`;
+    }
+
+    private collectionUrlFor(type: string) {
+        let collectionPath = this.collectionPathFor(type);
+        return `${this.apiUrl}/${collectionPath}`;
+    }
+
+    private destroy() {
+
+        let requestOptions = {
+            method: RequestMethod.Delete,
+            url: this.buildUrl()
+        };
+
+        this.resetUrlBuilder();
+
+        return this.request(requestOptions);
+    }
+
+    private findAll(query: Query) {
+        return this.all(query).get(query.params);
+    }
+
+    private get(params = {}) {
+
+        let requestParams = new URLSearchParams();
+
+        if (!_.isEmpty(params)) {
+            if (_.hasIn(params, 'include')) {
+                requestParams.append('include', params.include.join(','));
+            }
+
+            // TODO: refactor, extremely ugly!
+
+            // let filters = [params.filtering[0].value];
+            //
+            // params.filtering.slice(1).forEach(f => {
+            //   filters.push('[' + f.type + ']' + '=' + f.value)
+            // })
+            // requestParams.append(
+            //   'filter' + '[' + params.filtering[0].type + ']', filters.join(','));
+
+            // the code below doesn't satisfy JSON API recommendation:
+            if (_.hasIn(params, 'filtering')) {
+                params.filtering.forEach(f => {
+                    requestParams.append('filter' + '[' + f.type + ']', f.value);
+                });
+            }
+        }
+
+        // TODO: implement param conversion.
+
+        let requestOptionsArgs = {
+            method: RequestMethod.Get,
+            url: this.buildUrl(),
+            search: requestParams
+        };
+
+        this.resetUrlBuilder();
+
+        return this.request(requestOptionsArgs);
+    }
+
+    private one(query: Query) {
+        this.urlBuilder.push({
+            path: this.resourcePathFor(query.type, query.id)
+        });
+        return this;
+    }
+
+    private patch(payload) {
+
+        let requestOptionsArgs = {
+            method: RequestMethod.Patch,
+            url: this.buildUrl(),
+            body: JSON.stringify(payload)
+        };
+
+        this.resetUrlBuilder();
+
+        return this.request(requestOptionsArgs);
+    }
+
+    private post(payload) {
+        let requestOptionsArgs = {
+            method: RequestMethod.Post,
+            url: this.buildUrl(),
+            body: JSON.stringify(payload)
+        };
+
+        this.resetUrlBuilder();
+
+        return this.request(requestOptionsArgs);
+    }
+
+    private resetUrlBuilder() {
+        this.urlBuilder = [];
+    }
+
+    private resourcePathFor(type: string, id: string) {
+        let collectionPath = this.collectionPathFor(type);
+        return `${collectionPath}/${encodeURIComponent(id)}`;
+    }
+
+    private resourceUrlFor(type: string, id) {
+        let resourcePath = this.resourcePathFor(type, id);
+        return `${this.apiUrl}/${resourcePath}`;
+    }
+
+    private request(requestOptionsArgs) {
+
+        let requestOptions = new RequestOptions(requestOptionsArgs);
+
+        let request = new Request(requestOptions.merge({
+            headers: this.headers
+        }));
+
+        return this.http.request(request).map(res => res.json());
+    }
 }
