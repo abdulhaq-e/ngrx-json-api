@@ -1,34 +1,37 @@
 {
-  "compilerOptions": {
-    "target": "ES5",
-    "module": "commonjs",
-    "sourceMap": true,
-    "outDir": "dist",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "removeComments": false,
-    "moduleResolution": "node",
-    "declaration": true,
-    "strictNullChecks": false,
-    "baseUrl": "./src",
-    "types": [
-      "deep-freeze",
-      "jasmine",
-      "lodash",
-      "node",
-      "source-map",
-      "uglify-js",
-      "webpack"
+    "compilerOptions": {
+        "target": "ES5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "outDir": "dist",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "moduleResolution": "node",
+        "declaration": true,
+        "strictNullChecks": false,
+        "baseUrl": "./src",
+        "types": [
+            "deep-freeze",
+            "jasmine",
+            "lodash",
+            "node",
+            "source-map",
+            "uglify-js",
+            "webpack"
+        ],
+        "lib": [
+            "dom", "es6"
+        ]
+    },
+    "compileOnSave": false,
+    "atom": {
+        "rewriteTsconfig": false
+    },
+    "files": [
+        "src/index.ts"
+    ],
+    "exclude": [
+        "node_modules"
     ]
-  },
-  "compileOnSave": false,
-  "atom": {
-      "rewriteTsconfig": false
-  },
-  "files": [
-    "src/index.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
 }

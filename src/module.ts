@@ -6,11 +6,11 @@ import {
 
 import { EffectsModule } from '@ngrx/effects';
 
-import { JsonApi } from '../src/api';
-import { JsonApiEffects } from '../src/effects';
-import { JsonApiActions } from '../src/actions';
-import { NgrxJsonApiSelectors } from '../src/selectors';
-import { ResourceDefinition } from '../src/interfaces';
+import { JsonApi } from './api';
+import { JsonApiEffects } from './effects';
+import { JsonApiActions } from './actions';
+import { NgrxJsonApiSelectors } from './selectors';
+import { ResourceDefinition } from './interfaces';
 
 export const API_URL = new OpaqueToken('API_URL');
 
