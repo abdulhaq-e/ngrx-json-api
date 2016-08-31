@@ -1,14 +1,14 @@
 import { ModuleWithProviders, NgModule, OpaqueToken } from '@angular/core';
 
 import {
-    Http
+    Http, HttpModule
 } from '@angular/http';
 
 import { EffectsModule } from '@ngrx/effects';
 
 import { JsonApi } from './api';
 import { JsonApiEffects } from './effects';
-import { JsonApiActions } from './actions';
+import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
 import { ResourceDefinition } from './interfaces';
 
@@ -60,7 +60,8 @@ export const configure = (
 
 @NgModule({
     imports: [
-        EffectsModule.run(JsonApiEffects)
+      HttpModule,
+      EffectsModule.run(JsonApiEffects)
     ]
 })
 export class NgrxJsonApiModule {
