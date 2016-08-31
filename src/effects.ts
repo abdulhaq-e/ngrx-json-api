@@ -17,7 +17,6 @@ import { toPayload } from './utils';
 export class JsonApiEffects implements OnDestroy {
   constructor(
     private actions$: Actions,
-    private jsonApiActions: JsonApiActions,
     private jsonApi: JsonApi
   ) { }
 
@@ -25,7 +24,7 @@ export class JsonApiEffects implements OnDestroy {
     .ofType(JsonApiActions.API_CREATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.create(payload.options.type, payload.data)
+      return this.jsonApi.create({type: payload.data})
         .mapTo(JsonApiActions.apiCreateSuccess(payload))
         .catch(() => Observable.of(
           JsonApiActions.apiCreateFail(payload)
@@ -36,7 +35,7 @@ export class JsonApiEffects implements OnDestroy {
     .ofType(JsonApiActions.API_UPDATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.update(payload.options.type, payload.data)
+      return this.jsonApi.update(payload.data)
         .mapTo(JsonApiActions.apiUpdateSuccess(payload))
         .catch(() => Observable.of(
           JsonApiActions.apiUpdateFail(payload)
@@ -47,8 +46,8 @@ export class JsonApiEffects implements OnDestroy {
     .ofType(JsonApiActions.API_READ_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.find(payload.options)
-        .map(res => ({ data: res.json(), options: payload.options }))
+      return this.jsonApi.find(payload.query)
+        .map(res => ({ data: res.json() }))
         .map(data => JsonApiActions.apiReadSuccess(data))
         .catch(() => Observable.of(
           JsonApiActions.apiReadFail(payload)
@@ -59,7 +58,7 @@ export class JsonApiEffects implements OnDestroy {
       .ofType(JsonApiActions.API_DELETE_INIT)
       .map<Payload>(toPayload)
       .mergeMap((payload: Payload) => {
-        return this.jsonApi.delete(payload.options)
+        return this.jsonApi.delete(payload.query)
           .mapTo(JsonApiActions.apiDeleteSuccess(payload))
           .catch(() => Observable.of(
             JsonApiActions.apiDeleteFail(payload)

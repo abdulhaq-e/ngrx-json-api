@@ -20,6 +20,8 @@ export class JsonApiActions {
   static API_DELETE_SUCCESS = 'API_DELETE_SUCCESS';
   static API_DELETE_FAIL = 'API_DELETE_FAIL';
 
+  static DELETE_FROM_STATE = 'DELETE_FROM_STATE';
+
   static apiCreateInit(payload: any): Action {
     return {
       type: JsonApiActions.API_CREATE_INIT,
@@ -102,6 +104,13 @@ export class JsonApiActions {
       type: JsonApiActions.API_DELETE_FAIL,
       payload: payload
     };
+  }
+
+  static deleteFromState(payload: any) {
+    return {
+      type: JsonApiActions.DELETE_FROM_STATE,
+      payload: payload
+    }
   }
 
 }

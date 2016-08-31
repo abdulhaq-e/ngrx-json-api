@@ -1,4 +1,5 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/let';
@@ -28,11 +29,11 @@ import {
 } from '../src/selectors';
 import { NGRX_JSON_API_STORE_LOCATION, _selectorsFactory } from '../src/module';
 
-import { initialiseStore } from '../src/utils';
+import { initNgrxStore, updateStoreResources } from '../src/utils';
 
-import { updateStoreReducer } from '../src/reducers';
+import { resourcesDefinitions, selectorsPayload } from './test_utils';
 
-describe('Json Api Selectors', () => {
+describe('NgrxJsonApiSelectors', () => {
     let selectors;
 
     beforeEach(() => {
@@ -54,110 +55,10 @@ describe('Json Api Selectors', () => {
     beforeEach(inject([NgrxJsonApiSelectors], (s) => {
         selectors = s;
     }));
-
-    let payload = {
-        data: [
-            {
-                type: "Article",
-                id: "1",
-                attributes: {
-                    "title": "JSON API paints my bikeshed!"
-                },
-                relationships: {
-                    'author': {
-                        data: { type: 'Person', id: "1" }
-                    },
-                    'comments': {
-                        data: [
-                            { type: 'Comment', id: '1' },
-                        ]
-                    }
-                }
-            },
-            {
-                type: "Article",
-                id: "2",
-                attributes: {
-                    "title": "Untitled"
-                },
-            },
-            {
-                type: "Person",
-                id: "1",
-                attributes: {
-                    "name": "Usain Bolt"
-                },
-                relationships: {
-                    'blog': {
-                        data: { type: 'Blog', id: '1' }
-                    }
-                }
-            },
-            {
-                type: "Person",
-                id: "2",
-                attributes: {
-                    "name": "Michael Phelps"
-                },
-            },
-            {
-                type: "Comment",
-                id: "1",
-                attributes: {
-                    "text": "Uncommented"
-                }
-            },
-            {
-                type: "Comment",
-                id: "2",
-                attributes: {
-                    "text": "No comment"
-                }
-            },
-            {
-                type: "Blog",
-                id: "1",
-                attributes: {
-                    name: "Random Blog!"
-                }
-            }
-        ]
-    };
-
-    let resourcesDefinitions = [
-        {
-            type: 'Article',
-            collectionPath: 'articles',
-            attributes: ['title', 'subtitle'],
-            relationships: {
-                'author': { 'type': 'Person', 'relationType': 'hasOne' },
-                'comments': { 'type': 'Comment', 'relationType': 'hasMany' },
-            }
-        },
-        {
-          type: 'Person',
-          collectionPath: 'people',
-          attributes: ['name'],
-          relationships: {
-            'blog': { 'type': 'Blog', 'relationType': 'hasOne' }
-          }
-        },
-        {
-            type: 'Comment',
-            collectionPath: 'comments',
-            attributes: ['text'],
-            relationships: {}
-        },
-        {
-            type: 'Blog',
-            collectionPath: 'blogs',
-            attributes: ['name'],
-            relationships: {}
-        }
-    ];
-
-    let rawStore = initialiseStore(resourcesDefinitions);
-    let store = updateStoreReducer(rawStore, payload);
+    let rawStore = initNgrxStore(resourcesDefinitions);
+    let store = Object.assign({}, rawStore, {
+      data: updateStoreResources(rawStore.data, selectorsPayload)
+    });
     let obs = Observable.of(store)
 
     describe('_getResourcesDefinitions', () => {

@@ -2,111 +2,88 @@ import { Action, ActionReducer } from '@ngrx/store';
 
 import { JsonApiActions } from './actions';
 import {
-  Query,
-  Document,
-  Resource,
-  NgrxJsonApiStore
+    Query,
+    Document,
+    Resource,
+    NgrxJsonApiStore
 } from './interfaces';
 
-import { updateOrInsertResource } from './utils';
+import {
+    updateOrInsertResource,
+    deleteFromState,
+    updateStoreResources
+} from './utils';
 
-export const updateStoreReducer = (state: NgrxJsonApiStore,
-    payload: Document): NgrxJsonApiStore => {
+export const NgrxStoreReducer: ActionReducer<any> =
+    (state: NgrxJsonApiStore, action: Action) => {
+        let newState;
 
-    let data = <Array<Resource> | Resource>_.get(payload, 'data');
+        switch (action.type) {
+            case JsonApiActions.API_CREATE_INIT:
+                return Object.assign({}, state, { 'isCreating': true });
 
-    if (_.isUndefined(data)) {
-        return state;
-    }
+            case JsonApiActions.API_READ_INIT:
+                return Object.assign({}, state, { 'isReading': true });
 
-    data = _.isArray(data) ? data : [data]
+            case JsonApiActions.API_UPDATE_INIT:
+                return Object.assign({}, state, { 'isUpdating': true });
 
-    let included = <Array<Resource>>_.get(payload, 'included');
+            case JsonApiActions.API_DELETE_INIT:
+            case JsonApiActions.DELETE_FROM_STATE:
+                return Object.assign({}, state, { 'isDeleting': true });
 
-    if (!_.isUndefined(included)) {
-        data = [...data, ...included];
-    }
+            case JsonApiActions.API_CREATE_SUCCESS:
+                newState = Object.assign({},
+                    state, {
+                        data: updateStoreResources(state.data, action.payload.data),
+                    },
+                    { 'isCreating': false }
+                );
+                return newState;
 
-    return <NgrxJsonApiStore>_.reduce(
-        data, (result: NgrxJsonApiStore,
-          resource: Resource) => {
-            // let resourcePath: string = getResourcePath(
-            //   result.resourcesDefinitions, resource.type);
-            // Extremely ugly, needs refactoring!
-            let newPartialState = { data: {} };
-            // newPartialState.data[resourcePath] = { data: {} } ;
-            newPartialState.data = updateOrInsertResource(
-              result.data, resource);
-              // result.data[resourcePath].data = updateOrInsertResource(
-                // result.data[resourcePath].data, resource);
-            return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
-        }, state);
-};
+            case JsonApiActions.API_READ_SUCCESS:
+                newState = Object.assign({},
+                    state, {
+                        data: updateStoreResources(state.data, action.payload.data),
+                    },
+                    { 'isReading': false }
+                );
+                return newState;
 
+            case JsonApiActions.API_UPDATE_SUCCESS:
+                newState = Object.assign(
+                    {},
+                    state, {
+                        data: updateStoreResources(state.data, action.payload.data),
+                    },
+                    { 'isUpdating': false }
+                );
+                return newState;
 
-export const StoreReducer: ActionReducer<any> =
-  (state: NgrxJsonApiStore, action: Action) => {
-    let newState;
+            case JsonApiActions.API_DELETE_SUCCESS:
+            case JsonApiActions.DELETE_FROM_STATE:
+                newState = Object.assign({}, state,
+                    { data: deleteFromState(state.data, action.payload.query) },
+                    { 'isDeleting': false });
+                return newState;
 
-    switch (action.type) {
-      case JsonApiActions.API_CREATE_INIT:
-        return Object.assign({}, state, { 'isCreating': true });
+            case JsonApiActions.API_CREATE_FAIL:
+                newState = Object.assign({}, state, { 'isCreating': false });
+                return newState;
 
-      case JsonApiActions.API_READ_INIT:
-        return Object.assign({}, state, { 'isReading': true });
+            case JsonApiActions.API_READ_FAIL:
+                newState = Object.assign({}, state, { 'isReading': false });
+                return newState;
 
-      case JsonApiActions.API_UPDATE_INIT:
-        return Object.assign({}, state, { 'isUpdating': true });
+            case JsonApiActions.API_UPDATE_FAIL:
+                newState = Object.assign({}, state, { 'isUpdating': false });
+                return newState;
 
-      case JsonApiActions.API_DELETE_INIT:
-        return Object.assign({}, state, { 'isDeleting': true });
+            case JsonApiActions.API_DELETE_FAIL:
+                newState = Object.assign({}, state, { 'isDeleting': false });
+                return newState;
 
-      case JsonApiActions.API_CREATE_SUCCESS:
-        newState = Object.assign({},
-          state,
-          updateStoreReducer(state, action.payload.data),
-          { 'isCreating': false }
-        );
-        return newState;
-
-      case JsonApiActions.API_READ_SUCCESS:
-        newState = Object.assign({},
-          state,
-          updateStoreReducer(state, action.payload.data),
-          { 'isReading': false }
-        );
-        return newState;
-
-      case JsonApiActions.API_UPDATE_SUCCESS:
-        newState = Object.assign(
-          {},
-          state,
-          updateStoreReducer(state, action.payload.data),
-          { 'isUpdating': false }
-        );
-        return newState;
-
-      case JsonApiActions.API_DELETE_SUCCESS:
-        newState = Object.assign({}, state, { 'isDeleting': false });
-        return newState;
-
-      case JsonApiActions.API_CREATE_FAIL:
-        newState = Object.assign({}, state, { 'isCreating': false });
-        return newState;
-
-      case JsonApiActions.API_READ_FAIL:
-        newState = Object.assign({}, state, { 'isReading': false });
-        return newState;
-
-      case JsonApiActions.API_UPDATE_FAIL:
-        newState = Object.assign({}, state, { 'isUpdating': false });
-        return newState;
-
-      case JsonApiActions.API_DELETE_FAIL:
-        newState = Object.assign({}, state, { 'isDeleting': false });
-        return newState;
-
-      default:
-        return state;
-    }
-  };
+            default:
+                return state;
+        }
+    };

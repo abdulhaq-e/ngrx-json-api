@@ -7,10 +7,11 @@ import {
     NgrxJsonApiStore,
     ResourceDefinition,
     Document,
-    RelationDefinition
+    RelationDefinition,
+    Query
 } from './interfaces';
 
-export const initialiseStore = (
+export const initNgrxStore = (
     resourcesDefinition: Array<ResourceDefinition>): NgrxJsonApiStore => {
 
     return ({
@@ -23,25 +24,24 @@ export const initialiseStore = (
     })
 };
 
-export const transformResource = (resource: Resource): Resource => {
-    let newResource: Resource = {
-        id: resource.id,
-        type: resource.type
-    };
-    if (typeof resource.attributes !== 'undefined') {
-        _.forEach(resource.attributes, (value, key) => {
-            newResource[key] = value;
-        });
-    }
-    if (typeof resource.relationships !== 'undefined') {
-        _.forEach(resource.attributes, (value, key) => {
-            newResource[key] = value;
-        });
-    }
-
-    return newResource;
-}
-
+// export const transformResource = (resource: Resource): Resource => {
+//     let newResource: Resource = {
+//         id: resource.id,
+//         type: resource.type
+//     };
+//     if (typeof resource.attributes !== 'undefined') {
+//         _.forEach(resource.attributes, (value, key) => {
+//             newResource[key] = value;
+//         });
+//     }
+//     if (typeof resource.relationships !== 'undefined') {
+//         _.forEach(resource.attributes, (value, key) => {
+//             newResource[key] = value;
+//         });
+//     }
+//
+//     return newResource;
+// }
 
 export const updateResourceObject = (original: Resource,
     source: Resource): Resource => {
@@ -79,6 +79,48 @@ export const updateOrInsertResource = (state: Array<Resource>,
 
     return updateResource(state, resource, foundResource);
 
+};
+
+export const updateStoreResources = (state: Array<Resource>,
+    payload: Document): Array<Resource> => {
+
+    let data = <Array<Resource> | Resource>_.get(payload, 'data');
+
+    if (_.isUndefined(data)) {
+        return state;
+    }
+
+    data = _.isArray(data) ? data : [data]
+
+    let included = <Array<Resource>>_.get(payload, 'included');
+
+    if (!_.isUndefined(included)) {
+        data = [...data, ...included];
+    }
+
+    return <Array<Resource>>_.reduce(
+        data, (result: Array<Resource>,
+            resource: Resource) => {
+            // let resourcePath: string = getResourcePath(
+            //   result.resourcesDefinitions, resource.type);
+            // Extremely ugly, needs refactoring!
+            // let newPartialState = { data: {} };
+            // newPartialState.data[resourcePath] = { data: {} } ;
+            // newPartialState.data = updateOrInsertResource(
+            // result.data, resource);
+            return updateOrInsertResource(result, resource)
+            // result.data[resourcePath].data = updateOrInsertResource(
+            // result.data[resourcePath].data, resource);
+            // return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
+        }, state);
+};
+
+export const deleteFromState = (state: Array<Resource>, query: Query) => {
+    if (typeof query.id === 'undefined') {
+        return state.filter(r => (r.type != query.type));
+    } else {
+        return state.filter(r => (r.type != query.type || r.id != query.id));
+    }
 };
 
 export function toPayload(action): any {

@@ -18,6 +18,7 @@ import 'rxjs/add/operator/map';
 import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
     Query,
+    QueryParams,
     ResourceDefinition
 } from './interfaces';
 
@@ -99,7 +100,7 @@ export class JsonApi {
         return this.all(query).get(query.params);
     }
 
-    private get(params = {}) {
+    private get(params: QueryParams = {}) {
 
         let requestParams = new URLSearchParams();
 

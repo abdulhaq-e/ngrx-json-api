@@ -9,50 +9,37 @@ import {
 let deepFreeze = require('deep-freeze');
 
 import {
-    initialiseStore,
+    deleteFromState,
+    initNgrxStore,
     insertResource,
-    transformResource,
+    // transformResource,
     updateOrInsertResource,
     updateResourceObject,
     updateResource,
+    updateStoreResources
 } from '../src/utils';
 
 import { Resource, ResourceDefinition, NgrxJsonApiStore } from '../src/interfaces';
 
+import {
+    resourcesDefinitions, documentPayload
+} from './test_utils';
+
 describe('initialiseStore', () => {
 
-    let resourcesDefinition: Array<ResourceDefinition> = [
-        {
-            type: 'Article',
-            collectionPath: 'articles',
-            attributes: ['title', 'subtitle'],
-            relationships: {
-                'author': { 'type': 'People', 'relationType': 'hasOne' },
-                'tags': { 'type': 'Tag', 'relationType': 'hasMany' }
-            }
-        },
-        {
-            type: 'Person',
-            collectionPath: 'people',
-            attributes: ['name'],
-            relationships: {}
-        }
-    ];
-
     it('should init the store given resourcesDefinition', () => {
-        let store = initialiseStore(resourcesDefinition);
+        let store = initNgrxStore(resourcesDefinitions);
         let expectedStore = {
             isCreating: false,
             isReading: false,
             isUpdating: false,
             isDeleting: false,
-            resourcesDefinitions: resourcesDefinition,
+            resourcesDefinitions: resourcesDefinitions,
             data: []
         };
         expect(store).toEqual(expectedStore);
     });
 });
-
 
 describe('insert resource', () => {
 
@@ -65,7 +52,6 @@ describe('insert resource', () => {
             }
         },
     ];
-
     deepFreeze(state);
 
     it(`should insert a resource`, () => {
@@ -73,19 +59,7 @@ describe('insert resource', () => {
             type: 'Article',
             id: '3'
         };
-        let expectedState: Array<Resource> = [
-            {
-                type: 'Article',
-                id: '1',
-                attributes: {
-                    'title': 'JSON API paints my bikeshed!'
-                }
-            },
-            {
-                type: 'Article',
-                id: '3'
-            }
-        ];
+        let expectedState: Array<Resource> = [...state, newResource];
         expect(insertResource(state, newResource)).toEqual(expectedState);
     });
 
@@ -94,55 +68,43 @@ describe('insert resource', () => {
             type: 'Article',
             id: '1'
         };
-        let expectedState: Array<Resource> = [
-            {
-                type: 'Article',
-                id: '1',
-                attributes: {
-                    'title': 'JSON API paints my bikeshed!'
-                }
-            },
-            {
-                type: 'Article',
-                id: '1'
-            }
-        ];
+        let expectedState: Array<Resource> = [...state, newResource];
         expect(insertResource(state, newResource)).toEqual(expectedState);
     });
 });
 
-describe('transformResource', () => {
-
-    it('should transform a basic resource with no attributes and no relations', () => {
-        let resource = {
-            id: '1',
-            type: 'Article'
-        };
-        let expected = {
-            id: '1',
-            type: 'Article'
-        };
-        expect(transformResource(resource)).toEqual(expected);
-    });
-
-    it('should transform a resource with attributes', () => {
-        let resource = {
-            id: '1',
-            type: 'Article',
-            attributes: {
-                title: 'Hello World!'
-            }
-        };
-        let expected = {
-            id: '1',
-            type: 'Article',
-            title: 'Hello World!'
-        };
-        // console.log(transformResource(resource));
-        expect(transformResource(resource)).toEqual(expected);
-    });
-
-});
+// describe('transformResource', () => {
+//
+//     it('should transform a basic resource with no attributes and no relations', () => {
+//         let resource = {
+//             id: '1',
+//             type: 'Article'
+//         };
+//         let expected = {
+//             id: '1',
+//             type: 'Article'
+//         };
+//         expect(transformResource(resource)).toEqual(expected);
+//     });
+//
+//     it('should transform a resource with attributes', () => {
+//         let resource = {
+//             id: '1',
+//             type: 'Article',
+//             attributes: {
+//                 title: 'Hello World!'
+//             }
+//         };
+//         let expected = {
+//             id: '1',
+//             type: 'Article',
+//             title: 'Hello World!'
+//         };
+//         // console.log(transformResource(resource));
+//         expect(transformResource(resource)).toEqual(expected);
+//     });
+//
+// });
 
 describe('updateResourceObject', () => {
 
@@ -152,14 +114,15 @@ describe('updateResourceObject', () => {
             type: 'Article',
             id: '1',
             attributes: {
-                'title': 'JSON API paints my bikeshed!',
+                body: 'Testing JSON API',
+                title: 'JSON API paints my bikeshed!',
             }
         };
         let source: Resource = {
             type: 'Article',
             id: '1',
             attributes: {
-                'title': 'Untitled'
+                title: 'Untitled'
             }
         };
         deepFreeze(original);
@@ -167,28 +130,6 @@ describe('updateResourceObject', () => {
 
         expect(updateResourceObject(original, source).attributes.title)
             .toEqual('Untitled');
-    });
-
-    it('should leave un-updated attributes', () => {
-
-        let original: Resource = {
-            type: 'Article',
-            id: '1',
-            attributes: {
-                title: 'JSON API paints my bikeshed!',
-                body: 'Testing JSON API'
-            }
-        };
-        let source: Resource = {
-            type: 'Article',
-            id: '1',
-            attributes: {
-                'title': 'Untitled'
-            }
-        };
-        deepFreeze(original);
-        deepFreeze(source)
-
         expect(updateResourceObject(original, source).attributes.body)
             .toEqual('Testing JSON API');
     });
@@ -261,19 +202,7 @@ describe('updateOrInsertResource', () => {
             id: '3'
         };
 
-        let expectedState: Array<Resource> = [
-            {
-                type: 'Article',
-                id: '1',
-                attributes: {
-                    'title': 'JSON API paints my bikeshed!'
-                }
-            },
-            {
-                type: 'Article',
-                id: '3'
-            }
-        ];
+        let expectedState: Array<Resource> = [...state, newResource];
         expect(updateOrInsertResource(state, newResource)).toEqual(expectedState);
     });
 
@@ -326,70 +255,63 @@ describe('updateOrInsertResource', () => {
     })
 });
 
-//   it('should handle included entities', () => {
-//     state = _.assign(state, {
-//       'data': _.assign(state.data, {
-//         'article': {
-//           'data': [
-//             {
-//               'type': 'Article',
-//               'id': '1',
-//               'attributes': {
-//                 'title': 'JSON API paints my bikeshed!'
-//               }
-//             },
-//             {
-//               'type': 'Article',
-//               'id': '2',
-//               'attributes': {
-//                 'title': 'Untitled'
-//               }
-//             }]
-//         },
-//         'comment': {
-//           'data': [
-//             {
-//               'type': 'Comment',
-//               'id': '1',
-//               'attributes': {
-//                 'text': 'Uncommented'
-//               }
-//             },
-//             {
-//               'type': 'Comment',
-//               'id': '2',
-//               'attributes': {
-//                 'text': 'No comment'
-//               }
-//             }
-//           ]
-//         }
-//       })
-//     });
-//     // console.log(state);
-//     deepFreeze(state);
-//     let entities = {
-//       'data': [],
-//       'included': [
-//         {
-//           'type': 'Person',
-//           'id': '1',
-//           'attributes': {
-//             'name': 'Euler'
-//           }
-//         },
-//         {
-//           'type': 'Person',
-//           'id': '2',
-//           'attributes': {
-//             'name': 'Lagrange'
-//           }
-//         }
-//       ]
-//     };
-//     let newState = updateOrCreateReducer(state, entities);
-//     // console.log(newState);
-//     expect(newState.data.person.data[0].attributes.name).toEqual('Euler');
-//     expect(newState.data.person.data[1].attributes.name).toEqual('Lagrange');
-//   });
-// });
+describe('updateStoreResources', () => {
+    it('should update the store resources given a JsonApiDocument', () => {
+        let expectedState = [];
+        expectedState.push(
+            {
+                type: 'Article',
+                id: '1',
+                attributes: {
+                    'title': 'JSON API paints my bikeshed!'
+                }
+            },
+            {
+                type: 'Article',
+                id: '2',
+                attributes: {
+                    'title': 'Untitled'
+                }
+            },
+            {
+                type: 'Person',
+                id: '1',
+                attributes: {
+                    'name': 'Person 1'
+                }
+            },
+            {
+                type: 'Person',
+                id: '2',
+                attributes: {
+                    'name': 'Person 2'
+                }
+            });
+
+        let rawStore = initNgrxStore(resourcesDefinitions);
+        let newState = updateStoreResources(rawStore.data, documentPayload);
+        expect(newState).toEqual(expectedState);
+    });
+});
+
+describe('deleteFromState', () => {
+
+    it('should delete a single resource given a type and id', () => {
+        let rawStore = initNgrxStore(resourcesDefinitions);
+        let state = updateStoreResources(rawStore.data, documentPayload);
+        let expectedState = state.slice(1);
+        // expectedState.reverse();
+        expect(deleteFromState(state, { type: 'Article', id: '1' }))
+            .toEqual(expectedState);
+    });
+
+    it('should delete all resources given a type only', () => {
+        let rawStore = initNgrxStore(resourcesDefinitions);
+        let state = updateStoreResources(rawStore.data, documentPayload);
+        let expectedState = state.slice(2);
+        // expectedState.reverse();
+        expect(deleteFromState(state, { type: 'Article' }))
+            .toEqual(expectedState);
+    });
+
+});

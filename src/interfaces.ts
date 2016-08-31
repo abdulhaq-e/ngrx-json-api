@@ -10,11 +10,15 @@ export interface ResourceDefinition {
   relationships: { [key: string]: RelationDefinition };
 };
 
+export interface QueryParams {
+  filtering?: Array<{type: string, value: string}>
+  include?: Array<string>
+}
 
 export interface Query {
   type: string;
   id?: string;
-  params?: string;
+  params?: QueryParams;
 }
 
 export interface ResourceIdentifier {
@@ -34,7 +38,7 @@ export interface Document {
 
 export interface Payload {
   data: {[key: string]: any};
-  options?: Query;
+  query?: Query;
 }
 
 export interface NgrxJsonApiStore {
