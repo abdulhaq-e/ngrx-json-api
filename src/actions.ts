@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Action } from '@ngrx/store';
 
-export class JsonApiActions {
+export class NgrxJsonApiActions {
 
   static API_CREATE_INIT = 'API_CREATE_INIT';
   static API_CREATE_SUCCESS = 'API_CREATE_SUCCESS';
@@ -24,91 +24,91 @@ export class JsonApiActions {
 
   static apiCreateInit(payload: any): Action {
     return {
-      type: JsonApiActions.API_CREATE_INIT,
+      type: NgrxJsonApiActions.API_CREATE_INIT,
       payload: payload
     };
   }
 
   static apiCreateSuccess(payload: any) {
     return {
-      type: JsonApiActions.API_CREATE_SUCCESS,
+      type: NgrxJsonApiActions.API_CREATE_SUCCESS,
       payload: payload
     };
   }
 
   static apiCreateFail(payload: any) {
     return {
-      type: JsonApiActions.API_CREATE_FAIL,
+      type: NgrxJsonApiActions.API_CREATE_FAIL,
       payload: payload
     };
   }
 
   static apiReadInit(payload: any): Action {
     return {
-      type: JsonApiActions.API_READ_INIT,
+      type: NgrxJsonApiActions.API_READ_INIT,
       payload: payload
     };
   }
 
   static apiReadSuccess(payload: any) {
     return {
-      type: JsonApiActions.API_READ_SUCCESS,
+      type: NgrxJsonApiActions.API_READ_SUCCESS,
       payload: payload
     };
   }
 
   static apiReadFail(payload: any) {
     return {
-      type: JsonApiActions.API_READ_FAIL,
+      type: NgrxJsonApiActions.API_READ_FAIL,
       payload: payload
     };
   }
 
   static apiUpdateInit(payload: any): Action {
     return {
-      type: JsonApiActions.API_UPDATE_INIT,
+      type: NgrxJsonApiActions.API_UPDATE_INIT,
       payload: payload
     };
   }
 
   static apiUpdateSuccess(payload: any) {
     return {
-      type: JsonApiActions.API_UPDATE_SUCCESS,
+      type: NgrxJsonApiActions.API_UPDATE_SUCCESS,
       payload: payload
     };
   }
 
   static apiUpdateFail(payload: any) {
     return {
-      type: JsonApiActions.API_UPDATE_FAIL,
+      type: NgrxJsonApiActions.API_UPDATE_FAIL,
       payload: payload
     };
   }
 
   static apiDeleteInit(payload: any): Action {
     return {
-      type: JsonApiActions.API_DELETE_INIT,
+      type: NgrxJsonApiActions.API_DELETE_INIT,
       payload: payload
     };
   }
 
   static apiDeleteSuccess(payload: any) {
     return {
-      type: JsonApiActions.API_DELETE_SUCCESS,
+      type: NgrxJsonApiActions.API_DELETE_SUCCESS,
       payload: payload
     };
   }
 
   static apiDeleteFail(payload: any) {
     return {
-      type: JsonApiActions.API_DELETE_FAIL,
+      type: NgrxJsonApiActions.API_DELETE_FAIL,
       payload: payload
     };
   }
 
   static deleteFromState(payload: any) {
     return {
-      type: JsonApiActions.DELETE_FROM_STATE,
+      type: NgrxJsonApiActions.DELETE_FROM_STATE,
       payload: payload
     }
   }

@@ -10,7 +10,7 @@ let deepFreeze = require('deep-freeze');
 import _ = require('lodash');
 
 import { NgrxStoreReducer } from '../src/reducers';
-import { JsonApiActions } from '../src/actions';
+import { NgrxJsonApiActions } from '../src/actions';
 import { initNgrxStore } from '../src/utils';
 import { NgrxJsonApiStore } from '../src/interfaces';
 
@@ -22,41 +22,41 @@ describe('NgrxJsonApiReducer', () => {
 
     deepFreeze(state);
     it('should change isCreating status according to CREATE actions', () => {
-        let newState = NgrxStoreReducer(state, JsonApiActions.apiCreateInit('x'));
+        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiCreateInit('x'));
         expect(newState.isCreating).toBe(true);
-        let newnewState = NgrxStoreReducer(newState, JsonApiActions.apiCreateSuccess('x'));
+        let newnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiCreateSuccess('x'));
         expect(newnewState.isCreating).toBe(false);
-        let newnewnewState = NgrxStoreReducer(newState, JsonApiActions.apiCreateFail('x'));
+        let newnewnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiCreateFail('x'));
         expect(newnewnewState.isCreating).toBe(false);
     });
 
     it('should change isReading status according to READ actions', () => {
-        let newState = NgrxStoreReducer(state, JsonApiActions.apiReadInit('x'));
+        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiReadInit('x'));
         expect(newState.isReading).toBe(true);
-        let newnewState = NgrxStoreReducer(newState, JsonApiActions.apiReadSuccess('x'));
+        let newnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiReadSuccess('x'));
         expect(newnewState.isReading).toBe(false);
-        let newnewnewState = NgrxStoreReducer(newState, JsonApiActions.apiReadFail('x'));
+        let newnewnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiReadFail('x'));
         expect(newnewnewState.isReading).toBe(false);
     });
 
     it('should change isUpdating status when UPDATE actions', () => {
-        let newState = NgrxStoreReducer(state, JsonApiActions.apiUpdateInit('x'));
+        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiUpdateInit('x'));
         expect(newState.isUpdating).toBe(true);
-        let newnewState = NgrxStoreReducer(newState, JsonApiActions.apiUpdateSuccess('x'));
+        let newnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiUpdateSuccess('x'));
         expect(newnewState.isUpdating).toBe(false);
-        let newnewnewState = NgrxStoreReducer(newState, JsonApiActions.apiUpdateFail('x'));
+        let newnewnewState = NgrxStoreReducer(newState, NgrxJsonApiActions.apiUpdateFail('x'));
         expect(newnewnewState.isUpdating).toBe(false);
     });
 
     it('should change isDeleting status DELETE actions', () => {
-        let newState = NgrxStoreReducer(state, JsonApiActions.apiDeleteInit(
+        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiDeleteInit(
           {query: {type: 'Article'}}));
         expect(newState.isDeleting).toBe(true);
         let newnewState = NgrxStoreReducer(newState,
-          JsonApiActions.apiDeleteSuccess({query: {type: 'Article'}}));
+          NgrxJsonApiActions.apiDeleteSuccess({query: {type: 'Article'}}));
         expect(newnewState.isDeleting).toBe(false);
         let newnewnewState = NgrxStoreReducer(newState,
-          JsonApiActions.apiDeleteFail({query: {type: 'Article'}}));
+          NgrxJsonApiActions.apiDeleteFail({query: {type: 'Article'}}));
         expect(newnewnewState.isDeleting).toBe(false);
     });
 
@@ -131,7 +131,7 @@ describe('NgrxJsonApiReducer', () => {
                 ]
             }
         };
-        let newState = NgrxStoreReducer(state, JsonApiActions.apiCreateSuccess(payload));
+        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiCreateSuccess(payload));
         expect(newState).toEqual(expectedState);
     });
 });
