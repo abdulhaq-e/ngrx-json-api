@@ -1,6 +1,6 @@
 {
   "name": "ngrx-json-api",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A JSON API client for ngrx",
   "main": "index.js",
   "repository": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc && npm run copy_package",
-    "copy_package": "cp package.json dist/package.json",
+    "copy_package": "cp package.json dist/package.json && cp README.md dist/README.md",
     "karma": "karma start",
     "karma:watch": "karma start --no-single-run",
     "lint": "npm run lint:lib && npm run lint:spec",
