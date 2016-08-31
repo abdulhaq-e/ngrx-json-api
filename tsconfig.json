@@ -12,7 +12,6 @@
     "strictNullChecks": false,
     "baseUrl": "./src",
     "types": [
-      "core-js",
       "deep-freeze",
       "jasmine",
       "lodash",
