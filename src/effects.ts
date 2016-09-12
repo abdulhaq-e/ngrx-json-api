@@ -20,7 +20,7 @@ export class JsonApiEffects implements OnDestroy {
     private jsonApi: JsonApi
   ) { }
 
-  @Effect() createEntity$ = this.actions$
+  @Effect() createResource$ = this.actions$
     .ofType(NgrxJsonApiActions.API_CREATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
@@ -31,7 +31,7 @@ export class JsonApiEffects implements OnDestroy {
         ))
     });
 
-  @Effect() updateEntity$ = this.actions$
+  @Effect() updateResource$ = this.actions$
     .ofType(NgrxJsonApiActions.API_UPDATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
@@ -42,7 +42,7 @@ export class JsonApiEffects implements OnDestroy {
         ));
     });
 
-  @Effect() readEntity$ = this.actions$
+  @Effect() readResource$ = this.actions$
     .ofType(NgrxJsonApiActions.API_READ_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
@@ -54,7 +54,7 @@ export class JsonApiEffects implements OnDestroy {
         ));
     });
 
-    @Effect() deleteEntity$ = this.actions$
+    @Effect() deleteResource$ = this.actions$
       .ofType(NgrxJsonApiActions.API_DELETE_INIT)
       .map<Payload>(toPayload)
       .mergeMap((payload: Payload) => {
