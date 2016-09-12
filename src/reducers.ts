@@ -29,7 +29,6 @@ export const NgrxStoreReducer: ActionReducer<any> =
                 return Object.assign({}, state, { 'isUpdating': true });
 
             case NgrxJsonApiActions.API_DELETE_INIT:
-            case NgrxJsonApiActions.DELETE_FROM_STATE:
                 return Object.assign({}, state, { 'isDeleting': true });
 
             case NgrxJsonApiActions.API_CREATE_SUCCESS:

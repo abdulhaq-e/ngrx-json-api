@@ -58,6 +58,9 @@ describe('NgrxJsonApiReducer', () => {
         let newnewnewState = NgrxStoreReducer(newState,
           NgrxJsonApiActions.apiDeleteFail({query: {type: 'Article'}}));
         expect(newnewnewState.isDeleting).toBe(false);
+        let newestState = NgrxStoreReducer(newState,
+          NgrxJsonApiActions.deleteFromState({query: {type: 'Article'}}));
+        expect(newestState.isDeleting).toBe(false);
     });
 
     it('should update store data upson successfull CREATE/UPDATE/READ', () => {
