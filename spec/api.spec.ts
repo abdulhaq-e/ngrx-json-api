@@ -17,7 +17,7 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
-import { JsonApi } from '../src/api';
+import { NgrxJsonApi } from '../src/api';
 import {
     API_URL,
     RESOURCES_DEFINITIONS,
@@ -51,7 +51,7 @@ describe('ngrx json api', () => {
                 BaseRequestOptions,
                 MockBackend,
                 {
-                    provide: JsonApi,
+                    provide: NgrxJsonApi,
                     useFactory: _apiFactory,
                     deps: [Http, API_URL, RESOURCES_DEFINITIONS]
                 },
@@ -71,7 +71,7 @@ describe('ngrx json api', () => {
         });
     });
 
-    beforeEach(inject([JsonApi], (api) => {
+    beforeEach(inject([NgrxJsonApi], (api) => {
         jsonapi = api;
     }));
 

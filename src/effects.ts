@@ -9,7 +9,7 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/mapTo';
 
 import { NgrxJsonApiActions } from './actions';
-import { JsonApi } from './api';
+import { NgrxJsonApi } from './api';
 import { Payload } from './interfaces';
 import { toPayload } from './utils';
 
@@ -17,7 +17,7 @@ import { toPayload } from './utils';
 export class JsonApiEffects implements OnDestroy {
   constructor(
     private actions$: Actions,
-    private jsonApi: JsonApi
+    private jsonApi: NgrxJsonApi
   ) { }
 
   @Effect() createResource$ = this.actions$

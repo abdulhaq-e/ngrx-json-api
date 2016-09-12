@@ -24,7 +24,7 @@ import {
 } from './interfaces';
 
 @Injectable()
-export class JsonApi {
+export class NgrxJsonApi {
 
     public headers: Headers = new Headers({
         'Content-Type': 'application/vnd.api+json',

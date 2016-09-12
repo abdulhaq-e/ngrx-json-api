@@ -6,7 +6,7 @@ import {
 
 import { EffectsModule } from '@ngrx/effects';
 
-import { JsonApi } from './api';
+import { NgrxJsonApi } from './api';
 import { JsonApiEffects } from './effects';
 import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
@@ -23,7 +23,7 @@ export const _apiFactory = (
     http: Http,
     apiUrl: string,
     resourcesDefinitions: Array<ResourceDefinition>) => {
-    return new JsonApi(http, apiUrl, resourcesDefinitions);
+    return new NgrxJsonApi(http, apiUrl, resourcesDefinitions);
 };
 
 export const _selectorsFactory = (storeLocation: string) => {
@@ -36,7 +36,7 @@ export const configure = (
     storeLocation: string): Array<any> => {
     return [
         {
-            provide: JsonApi,
+            provide: NgrxJsonApi,
             useFactory: _apiFactory,
             deps: [Http, API_URL, RESOURCES_DEFINITIONS]
         },

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
-import { JsonApi } from './api';
+import { NgrxJsonApi } from './api';
 
 
 export class JsonApiMock {
@@ -52,5 +52,5 @@ export class JsonApiMock {
 
 export const MOCK_JSON_API_PROVIDERS = [
   { provide: JsonApiMock, useClass: JsonApiMock },
-  { provide: JsonApi, useExisting: JsonApiMock }
+  { provide: NgrxJsonApi, useExisting: JsonApiMock }
 ];
