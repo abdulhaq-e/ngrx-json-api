@@ -7,6 +7,7 @@ import {
     Http,
     Request,
     RequestOptions,
+    Response,
     RequestMethod,
     URLSearchParams
 } from '@angular/http';
@@ -194,6 +195,6 @@ export class JsonApi {
             headers: this.headers
         }));
 
-        return this.http.request(request).map(res => res.json());
+        return this.http.request(request);
     }
 }
