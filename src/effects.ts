@@ -14,7 +14,7 @@ import { Payload } from './interfaces';
 import { toPayload } from './utils';
 
 @Injectable()
-export class JsonApiEffects implements OnDestroy {
+export class NgrxJsonApiEffects implements OnDestroy {
   constructor(
     private actions$: Actions,
     private jsonApi: NgrxJsonApi
