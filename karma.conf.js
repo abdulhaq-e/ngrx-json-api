@@ -9,7 +9,7 @@ module.exports = function(karma) {
         frameworks: ['jasmine'],
 
         files: [{
-                pattern: 'tests.js',
+                pattern: 'tests.bundle.ts',
                 watched: false
             }
             // "./spec/**.js"
@@ -18,7 +18,8 @@ module.exports = function(karma) {
         exclude: [],
 
         preprocessors: {
-            'tests.js': ['coverage', 'webpack', 'sourcemap']
+          'tests.bundle.ts': ['coverage', 'webpack', 'sourcemap']
+            // 'tests.js': ['coverage', 'webpack', 'sourcemap']
         },
 
         reporters: ['mocha', 'coverage'],

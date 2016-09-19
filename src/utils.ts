@@ -1,4 +1,14 @@
-import _ = require('lodash');
+// import * as _.filter from 'lodash/filter';
+// import * as _.includes from 'lodash/includes';
+// import * as _.reduce from 'lodash/reduce';
+// import * as _.get from 'lodash/get';
+// import * as _.merge from 'lodash/merge';
+// import * as _.isArray from 'lodash/isArray';
+// import * as _.isUndefined from 'lodash/_.isUndefined';
+// import * as _.find from 'lodash/find';
+
+import * as _ from 'lodash';
+
 
 import { Actions } from '@ngrx/effects';
 
@@ -30,12 +40,12 @@ export const initNgrxStore = (
 //         type: resource.type
 //     };
 //     if (typeof resource.attributes !== 'undefined') {
-//         _.forEach(resource.attributes, (value, key) => {
+//         _forEach(resource.attributes, (value, key) => {
 //             newResource[key] = value;
 //         });
 //     }
 //     if (typeof resource.relationships !== 'undefined') {
-//         _.forEach(resource.attributes, (value, key) => {
+//         _forEach(resource.attributes, (value, key) => {
 //             newResource[key] = value;
 //         });
 //     }

@@ -1,16 +1,19 @@
 {
     "compilerOptions": {
-        "target": "ES5",
-        "module": "commonjs",
+        "target": "es5",
+        "module": "es2015",
         "sourceMap": true,
-        "outDir": "dist",
+        "outDir": "./release",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "removeComments": false,
         "moduleResolution": "node",
+        "noEmitOnError": false,
         "declaration": true,
         "strictNullChecks": false,
-        "baseUrl": "./src",
+        "inlineSources": true,
+        "baseUrl": ".",
+        "skipLibCheck": true,
         "types": [
             "deep-freeze",
             "jasmine",
@@ -21,15 +24,18 @@
             "webpack"
         ],
         "lib": [
-            "dom", "es6"
-        ]
+            "dom", "es2015"
+        ],
+        "baseUrl": ".",
+        "stripInternal": true,
+        "rootDir": "."
     },
     "compileOnSave": false,
     "atom": {
         "rewriteTsconfig": false
     },
     "files": [
-        "src/index.ts"
+        "index.ts"
     ],
     "exclude": [
         "node_modules"

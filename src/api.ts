@@ -1,6 +1,9 @@
-import _ = require('lodash');
+// import * as _.map from 'lodash/map';
+// import * as _.find from 'lodash/find';
+// import * as _.isEmpty from 'lodash/isEmpty';
+// import * as _.hasIn from 'lodash/hasIn';
 
-import { Injectable, Inject } from '@angular/core';
+import * as _ from 'lodash';
 
 import {
     Headers,
@@ -23,7 +26,6 @@ import {
     ResourceDefinition
 } from './interfaces';
 
-@Injectable()
 export class NgrxJsonApi {
 
     public headers: Headers = new Headers({

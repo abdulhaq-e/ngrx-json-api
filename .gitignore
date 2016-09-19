@@ -53,3 +53,5 @@ __build__/**
 
 # Build Artifacts #
 release
+spec/ngc/ngfactory/
+spec/ngc/output/

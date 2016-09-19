@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+// import * as _.find from 'lodash/map';
+// import * as _.includes from 'lodash/includes';
+// import * as _.reduce from 'lodash/reduce';
+import * as _ from 'lodash';
 
-import _ = require('lodash');
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/let';
