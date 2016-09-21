@@ -10,7 +10,7 @@ import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
-import { ResourceDefinition } from './interfaces';
+import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
 export const API_URL = new OpaqueToken('API_URL');
 
@@ -65,9 +65,7 @@ export const configure = (
     ]
 })
 export class NgrxJsonApiModule {
-    static configure(apiUrl: string,
-        resourcesDefinitions: Array<ResourceDefinition>,
-        storeLocation: string): ModuleWithProviders {
+    static configure(config: NgrxJsonApiModuleConfig): ModuleWithProviders {
         return {
             ngModule: NgrxJsonApiModule,
             providers: configure(apiUrl, resourcesDefinitions, storeLocation)

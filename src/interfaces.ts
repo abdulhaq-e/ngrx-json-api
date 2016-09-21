@@ -49,3 +49,10 @@ export interface NgrxJsonApiStore {
   isUpdating: boolean;
   isDeleting: boolean;
 }
+
+export interface NgrxJsonApiModuleConfig {
+  apiUrl: string;
+  resourcesDefinitions: Array<ResourceDefinition>;
+  storeLocation: string;
+  transformResources?: boolean;
+}
