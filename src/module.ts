@@ -7,7 +7,7 @@ import {
 import { EffectsModule } from '@ngrx/effects';
 
 import { NgrxJsonApi } from './api';
-import { JsonApiEffects } from './effects';
+import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
 import { ResourceDefinition } from './interfaces';
@@ -19,14 +19,14 @@ export const RESOURCES_DEFINITIONS = new OpaqueToken('RESOURCES_DEFINTIONS');
 export const NGRX_JSON_API_STORE_LOCATION = new OpaqueToken(
     'NGRX_JSON_API_STORE_LOCATION')
 
-export const _apiFactory = (
+export const apiFactory = (
     http: Http,
     apiUrl: string,
     resourcesDefinitions: Array<ResourceDefinition>) => {
     return new NgrxJsonApi(http, apiUrl, resourcesDefinitions);
 };
 
-export const _selectorsFactory = (storeLocation: string) => {
+export const selectorsFactory = (storeLocation: string) => {
     return new NgrxJsonApiSelectors(storeLocation);
 }
 
@@ -37,12 +37,12 @@ export const configure = (
     return [
         {
             provide: NgrxJsonApi,
-            useFactory: _apiFactory,
+            useFactory: apiFactory,
             deps: [Http, API_URL, RESOURCES_DEFINITIONS]
         },
         {
             provide: NgrxJsonApiSelectors,
-            useFactory: _selectorsFactory,
+            useFactory: selectorsFactory,
             deps: [NGRX_JSON_API_STORE_LOCATION]
         },
         {
@@ -61,7 +61,7 @@ export const configure = (
 @NgModule({
     imports: [
       HttpModule,
-      EffectsModule.run(JsonApiEffects)
+      EffectsModule.run(NgrxJsonApiEffects)
     ]
 })
 export class NgrxJsonApiModule {

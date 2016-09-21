@@ -20,13 +20,13 @@ import {
     NgrxJsonApiStore,
 } from './interfaces';
 
-export const getResourcesDefinitions () => {
+export const getResourcesDefinitions = () => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.select(s => s.resourcesDefinitions);
     };
 };
 
-export const getResourceDefinition =(type: string) => {
+export const getResourceDefinition = (type: string) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(getResourcesDefinitions())
             .map(definitions => {

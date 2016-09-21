@@ -21,7 +21,7 @@ import { NgrxJsonApi } from '../src/api';
 import {
     API_URL,
     RESOURCES_DEFINITIONS,
-    _apiFactory
+    apiFactory
 } from '../src/module';
 import { ResourceDefinition } from '../src/interfaces';
 
@@ -52,7 +52,7 @@ describe('ngrx json api', () => {
                 MockBackend,
                 {
                     provide: NgrxJsonApi,
-                    useFactory: _apiFactory,
+                    useFactory: apiFactory,
                     deps: [Http, API_URL, RESOURCES_DEFINITIONS]
                 },
                 {

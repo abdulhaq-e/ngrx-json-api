@@ -38,7 +38,7 @@ import {
   NgrxJsonApiSelectors,
 } from '../src/selectors';
 
-import { NGRX_JSON_API_STORE_LOCATION, _selectorsFactory } from '../src/module';
+import { NGRX_JSON_API_STORE_LOCATION, selectorsFactory } from '../src/module';
 
 import { initNgrxStore, updateStoreResources } from '../src/utils';
 
@@ -272,7 +272,7 @@ describe('NgrxJsonApiSelectors', () => {
             providers: [
                 {
                     provide: NgrxJsonApiSelectors,
-                    useFactory: _selectorsFactory,
+                    useFactory: selectorsFactory,
                     deps: [NGRX_JSON_API_STORE_LOCATION]
                 },
                 {
