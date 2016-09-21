@@ -1,6 +1,6 @@
 {
   "name": "ngrx-json-api",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "A JSON API client for ngrx",
   "main": "index.js",
   "module": "./index.js",

@@ -30,10 +30,7 @@ export const selectorsFactory = (storeLocation: string) => {
     return new NgrxJsonApiSelectors(storeLocation);
 }
 
-export const configure = (
-    apiUrl: string,
-    resourcesDefinitions: Array<ResourceDefinition>,
-    storeLocation: string): Array<any> => {
+export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
     return [
         {
             provide: NgrxJsonApi,
@@ -46,13 +43,13 @@ export const configure = (
             deps: [NGRX_JSON_API_STORE_LOCATION]
         },
         {
-            provide: NGRX_JSON_API_STORE_LOCATION, useValue: storeLocation
+            provide: NGRX_JSON_API_STORE_LOCATION, useValue: config.storeLocation
         },
         {
-            provide: API_URL, useValue: apiUrl
+            provide: API_URL, useValue: config.apiUrl
         },
         {
-            provide: RESOURCES_DEFINITIONS, useValue: resourcesDefinitions
+            provide: RESOURCES_DEFINITIONS, useValue: config.resourcesDefinitions
         }
 
     ]
@@ -68,7 +65,7 @@ export class NgrxJsonApiModule {
     static configure(config: NgrxJsonApiModuleConfig): ModuleWithProviders {
         return {
             ngModule: NgrxJsonApiModule,
-            providers: configure(apiUrl, resourcesDefinitions, storeLocation)
+            providers: configure(config)
         };
     }
 };
