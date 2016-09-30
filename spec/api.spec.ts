@@ -31,17 +31,10 @@ describe('ngrx json api', () => {
         {
             type: 'Post',
             collectionPath: 'posts',
-            attributes: ['title', 'subtitle'],
-            relationships: {
-                'author': { 'type': 'People', 'relationType': 'hasOne' },
-                'tags': { 'type': 'Tag', 'relationType': 'hasMany' }
-            }
         },
         {
             type: 'Person',
             collectionPath: 'people',
-            attributes: ['name'],
-            relationships: {}
         }
     ];
 

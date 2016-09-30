@@ -21,7 +21,7 @@ import 'rxjs/add/operator/map';
 
 import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
-    Query,
+    ResourceQuery,
     QueryParams,
     ResourceDefinition
 } from './interfaces';
@@ -46,11 +46,11 @@ export class NgrxJsonApi {
         return this.all({ type: payload.type }).post(payload);
     }
 
-    public delete(query: Query) {
+    public delete(query: ResourceQuery) {
         return this.one(query).destroy();
     }
 
-    public find(query: Query) {
+    public find(query: ResourceQuery) {
         if (typeof query.id === 'undefined') {
             return this.findAll(query);
         }
@@ -61,7 +61,7 @@ export class NgrxJsonApi {
         return this.one({ type: payload.type, id: payload.id }).patch(payload);
     }
 
-    private all(query: Query) {
+    private all(query: ResourceQuery) {
         this.urlBuilder.push({
             path: this.collectionPathFor(query.type)
         });
@@ -99,7 +99,7 @@ export class NgrxJsonApi {
         return this.request(requestOptions);
     }
 
-    private findAll(query: Query) {
+    private findAll(query: ResourceQuery) {
         return this.all(query).get(query.params);
     }
 
@@ -143,7 +143,7 @@ export class NgrxJsonApi {
         return this.request(requestOptionsArgs);
     }
 
-    private one(query: Query) {
+    private one(query: ResourceQuery) {
         this.urlBuilder.push({
             path: this.resourcePathFor(query.type, query.id)
         });

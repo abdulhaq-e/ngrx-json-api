@@ -25,7 +25,7 @@
     "prebuild": "npm run test && npm run clean:pre",
     "postbuild": "npm run clean:post && npm run copy",
     "test:unit": "npm run karma",
-    "test:watch": "npm run karma:watch",
+    "test:unit:watch": "npm run karma:watch",
     "test": "npm run test:unit"
   },
   "authors": [

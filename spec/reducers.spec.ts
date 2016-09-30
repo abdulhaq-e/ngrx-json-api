@@ -9,18 +9,18 @@ let deepFreeze = require('deep-freeze');
 
 import _ = require('lodash');
 
-import { NgrxStoreReducer } from '../src/reducers';
+import { NgrxStoreReducer, initialState} from '../src/reducers';
 import { NgrxJsonApiActions } from '../src/actions';
-import { initNgrxStore } from '../src/utils';
 import { NgrxJsonApiStore } from '../src/interfaces';
 
 import { resourcesDefinitions } from './test_utils';
 
 describe('NgrxJsonApiReducer', () => {
 
-    let state = initNgrxStore(resourcesDefinitions);
+    let state = initialState;
 
     deepFreeze(state);
+
     it('should change isCreating status according to CREATE actions', () => {
         let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiCreateInit('x'));
         expect(newState.isCreating).toBe(true);
@@ -50,53 +50,55 @@ describe('NgrxJsonApiReducer', () => {
 
     it('should change isDeleting status DELETE actions', () => {
         let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiDeleteInit(
-          {query: {type: 'Article'}}));
+            { query: { type: 'Article' } }));
         expect(newState.isDeleting).toBe(true);
         let newnewState = NgrxStoreReducer(newState,
-          NgrxJsonApiActions.apiDeleteSuccess({query: {type: 'Article'}}));
+            NgrxJsonApiActions.apiDeleteSuccess({ query: { type: 'Article' } }));
         expect(newnewState.isDeleting).toBe(false);
         let newnewnewState = NgrxStoreReducer(newState,
-          NgrxJsonApiActions.apiDeleteFail({query: {type: 'Article'}}));
+            NgrxJsonApiActions.apiDeleteFail({ query: { type: 'Article' } }));
         expect(newnewnewState.isDeleting).toBe(false);
         let newestState = NgrxStoreReducer(newState,
-          NgrxJsonApiActions.deleteFromState({query: {type: 'Article'}}));
+            NgrxJsonApiActions.deleteFromState({ query: { type: 'Article' } }));
         expect(newestState.isDeleting).toBe(false);
     });
 
     it('should update store data upson successfull CREATE/UPDATE/READ', () => {
 
-        let expectedState: NgrxJsonApiStore = initNgrxStore(resourcesDefinitions);
+        let expectedState: NgrxJsonApiStore = initialState;
 
-        expectedState.data.push(
-            {
-                type: 'Article',
-                id: '1',
-                attributes: {
-                    'title': 'JSON API paints my bikeshed!'
-                }
-            },
-            {
-                type: 'Article',
-                id: '2',
-                attributes: {
-                    'title': 'Untitled'
-                }
-            });
-        expectedState.data.push(
-            {
-                type: 'Person',
-                id: '1',
-                attributes: {
-                    'name': 'Person 1'
-                }
-            },
-            {
-                type: 'Person',
-                id: '2',
-                attributes: {
-                    'name': 'Person 2'
-                }
-            });
+        expectedState = Object.assign({}, expectedState, {
+            data: [
+                ...expectedState.data,
+                {
+                    type: 'Article',
+                    id: '1',
+                    attributes: {
+                        'title': 'JSON API paints my bikeshed!'
+                    }
+                },
+                {
+                    type: 'Article',
+                    id: '2',
+                    attributes: {
+                        'title': 'Untitled'
+                    }
+                },
+                {
+                    type: 'Person',
+                    id: '1',
+                    attributes: {
+                        'name': 'Person 1'
+                    }
+                },
+                {
+                    type: 'Person',
+                    id: '2',
+                    attributes: {
+                        'name': 'Person 2'
+                    }
+                }]
+        });
 
         let payload = {
             data: {

@@ -16,125 +16,63 @@ import {
     ResourceDefinition,
     ResourceIdentifier,
     Resource,
-    Query,
+    ResourceQuery,
     NgrxJsonApiStore,
 } from './interfaces';
+import {
+    denormaliseResource,
+    getSingleResource,
+    getMultipleResources,
+    getSingleTypeResources,
+    filterResources
+} from './utils';
 
-export const getResourcesDefinitions = () => {
+export const getAll$ = () => {
+
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.select(s => s.resourcesDefinitions);
-    };
-};
-
-export const getResourceDefinition = (type: string) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getResourcesDefinitions())
-            .map(definitions => {
-              return <ResourceDefinition>definitions.find(d => d.type === type);
-            });
-    };
-};
-
-export const getRelationDefinition = (type: string, relation: string) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getResourceDefinition(type))
-            .map(definition => {
-                let relationship = definition.relationships[relation];
-                return ({
-                    type: relationship.type,
-                    relationType: relationship.relationType
-                });
-            });
-    };
-};
-
-export const getAll = (query: Query) => {
-    return (state$: Observable<any>) => {
-        return state$.select(s => s.data)
-            .map(data => data.filter(
-                d => d.type === query.type));
-    };
-};
-
-export const getOne = (query: Query) => {
-    return (state$: Observable<any>) => {
-        return state$.let(getAll({ type: query.type }))
-            .map((data: Array<any>) => _.find(data, { id: query.id }));
-        // data.filter(d => d.id === query.id)).map(a => a[0]);
-    };
-};
-
-export const get = (query: Query) => {
-    if (typeof query.id === 'undefined') {
-        return getAll({ type: query.type });
+        return state$
+            .select(s => s.data);
     }
-    return getOne({ type: query.type, id: query.id });
-};
+}
 
-
-export const getHasOneRelation = (resourceIdentifier: ResourceIdentifier) => {
+export const getOne$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getOne(resourceIdentifier));
-    };
-};
+        return state$.let(getAll$())
+            .map(resources => getSingleResource(query, resources))
+            .mergeMap(resource => state$.let(getAll$())
+                .map(resources => denormaliseResource(resource, resources))
+            );
 
-export const getHasManyRelation = (
-    resourceIdentifiers: Array<ResourceIdentifier>) => {
+    }
+}
+
+export const getSingleTypeResources$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAll({ type: resourceIdentifiers[0].type }))
-            .map(resources => resources.filter(
-                resource => _.includes(resourceIdentifiers
-                    .map(r => r.id), resource.id)))
-    };
-};
+        return state$.let(getAll$())
+            .map(resources => getSingleTypeResources(query, resources))
+            .mergeMap(singleTypeResources => state$.let(getAll$())
+                .map(resources => singleTypeResources.map(
+                    resource => denormaliseResource(resource, resources))
+                ));
+    }
+}
 
-export const getRelatedResources = (resourceIdentifier: ResourceIdentifier,
-    relation: string) => {
+export const get$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-
-        return state$.let(getRelationDefinition(resourceIdentifier.type, relation))
-            .mergeMap(relationDefinition => state$
-                .let(getOne({
-                    type: resourceIdentifier.type,
-                    id: resourceIdentifier.id
-                }))
-                .mergeMap((foundResource: Resource) => {
-                    if (relationDefinition.relationType === 'hasOne') {
-                        return state$.let(getHasOneRelation(
-                            foundResource.relationships[relation].data
-                        ));
-                    } else if (relationDefinition.relationType === 'hasMany') {
-                        return state$.let(getHasManyRelation(
-                            foundResource.relationships[relation].data
-                        ));
-                    }
-                }));
-    };
-};
-
-export const getRelated = (resourceIdentifier: ResourceIdentifier,
-    relation: string) => {
-    let relations: Array<string> = relation.split('.');
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        let obs = state$.let(
-            getRelatedResources(resourceIdentifier, relations[0])
-        );
-        if (relations.length === 1) {
-            return obs
+        if (!_.isUndefined(query.id) && !_.isUndefined(query.type)) {
+          // Only get a single resource given 'id' and 'type'
+            return state$.let(getOne$(query));
+        } else if (!_.isUndefined(query.type)) {
+          // Only get resources of a given 'type' then filter
+            return state$.let(getSingleTypeResources$(query))
+                .map(resources => filterResources(resources, query));
         } else {
-            let slicedRelations: Array<string> = relations.slice(1);
-            return _.reduce(slicedRelations, (acc, value) => {
-                return acc.mergeMap((resource: Resource) => {
-                    return state$.let(
-                        getRelatedResources(
-                            { type: resource.type, id: resource.id }, value)
-                    );
-                })
-            }, obs)
+          // Neither 'id' nor 'type' are given so get all resources and filter
+            return state$.let(getAll$())
+                .map(resources => filterResources(resources, query));
         }
-    }
+    };
 };
-
 
 export class NgrxJsonApiSelectors {
 
@@ -148,18 +86,9 @@ export class NgrxJsonApiSelectors {
         }
     }
 
-
-    public get(query: Query) {
+    public get$(query: ResourceQuery) {
         return compose(
-            get(query),
-            this.getNgrxJsonApiStore(this.storeLocation)
-        );
-    }
-
-    public getRelated(resourceIdentifier: ResourceIdentifier,
-        relation: string) {
-        return compose(
-            getRelated(resourceIdentifier, relation),
+            get$(query),
             this.getNgrxJsonApiStore(this.storeLocation)
         );
     }

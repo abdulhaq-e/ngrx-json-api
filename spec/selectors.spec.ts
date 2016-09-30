@@ -25,241 +25,96 @@ import _ = require('lodash');
 
 
 import {
-  getResourcesDefinitions,
-  getResourceDefinition,
-  getRelationDefinition,
-  getAll,
-  getOne,
-  get,
-  getHasOneRelation,
-  getHasManyRelation,
-  getRelatedResources,
-  getRelated
-  NgrxJsonApiSelectors,
+    // getRelationsDefinitions,
+    // getRelationDefinition,
+    get$,
+    getOne$,
+    getSingleTypeResources$,
+    // getHasManyRelation,
+    // getRelatedResources,
+    // getRelated,
+    NgrxJsonApiSelectors,
 } from '../src/selectors';
 
-import { NGRX_JSON_API_STORE_LOCATION, selectorsFactory } from '../src/module';
+import {
+    initialState
+} from '../src/reducers';
 
-import { initNgrxStore, updateStoreResources } from '../src/utils';
+import {
+    NGRX_JSON_API_STORE_LOCATION,
+    selectorsFactory
+} from '../src/module';
 
-import { resourcesDefinitions, selectorsPayload } from './test_utils';
+import { updateStoreResources } from '../src/utils';
+
+import { selectorsPayload } from './test_utils';
 
 describe('individual selectors', () => {
 
-  let rawStore = initNgrxStore(resourcesDefinitions);
-  let store = Object.assign({}, rawStore, {
-    data: updateStoreResources(rawStore.data, selectorsPayload)
-  });
-  let obs = Observable.of(store)
+    let store = Object.assign({}, initialState, {
+        data: updateStoreResources([], selectorsPayload)
+    });
+    let obs = Observable.of(store)
 
+    describe('getOne$', () => {
+        it('should get a single resource given a type and id', fakeAsync(() => {
+            let res;
+            let sub = obs.
+                let(getOne$({type: 'Article', id: '1'}))
+                .subscribe(d => res = d);
+            tick();
+            expect(res.title).toEqual('JSON API paints my bikeshed!');
+            expect(res.type).toEqual('Article');
+            expect(res.id).toEqual('1');
+        }));
+    });
 
-  describe('getResourcesDefinitions', () => {
-      it('should get all resources definitons', fakeAsync(() => {
-          let sub = obs
-              .let(getResourcesDefinitions())
-              .subscribe(d => {
-                  expect(d).toEqual(resourcesDefinitions);
-                  expect(d.length).toEqual(4);
-              });
-          tick();
-      }));
-  });
+    describe('getSingleTypeResources$', () => {
+        it('should get all denormalised resources of a given type', fakeAsync(() => {
+            let res;
+            let sub = obs.
+                let(getSingleTypeResources$({type: 'Article'}))
+                .subscribe(d => res = d);
+            tick();
+            expect(res[0]).toBeDefined();
+            expect(res[1]).toBeDefined();
+            expect(res[0].title).toEqual('JSON API paints my bikeshed!');
+            expect(res[0].author).toBeDefined();
+            expect(res[0].comments).toBeDefined();
+            expect(res[0].id).toEqual('1');
+            expect(res[1].title).toEqual('Untitled');
+            expect(res[1].author).toEqual(null);
+            expect(res[1].id).toEqual('2');
+            expect(res[2]).not.toBeDefined();
+        }));
+    });
 
-  describe('getResourceDefinition', () => {
-      it('should get a single resource definiton', fakeAsync(() => {
-          let sub = obs
-              .let(getResourceDefinition('Person'))
-              .subscribe(d => {
-                  expect(d).toEqual(resourcesDefinitions[1]);
-                  expect(d.collectionPath).toEqual('people');
-                  expect(d.type).toEqual('Person');
-              });
-          tick();
-      }));
-  });
+    describe('get$', () => {
 
-  describe('getRelationDefinition', () => {
-      it('should get a relation definition given a resource type and relation',
-          fakeAsync(() => {
-              let sub = obs
-                  .let(getRelationDefinition('Article', 'author'))
-                  .subscribe(d => {
-                      expect(d).toEqual({
-                          type: 'Person',
-                          relationType: 'hasOne'
-                      });
-                  });
-              tick();
-          }));
-  });
+        it('should use getOne$ given a type and id', fakeAsync(() => {
+            let res;
+            let sub = obs
+                .let(get$({ type: 'Article', id: '1' }))
+                .subscribe(d => res = d);
+            obs.let(getOne$({type: 'Article', id: '1'}))
+            .subscribe(r => expect(r).toEqual(res));
+            tick();
+        }));
 
-  describe('get', () => {
+        it('should use getSingleTypeResources$ given a type only', fakeAsync(() => {
+            let res;
+            let sub = obs
+                .let(get$({ type: 'Article'}))
+                .subscribe(d => res = d);
+            obs.let(getSingleTypeResources$({type: 'Article'}))
+            .subscribe(r => expect(r).toEqual(res));
+            tick();
+        }));
 
-      it('should get ALL resources given a type only', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(get({ type: 'Article' }))
-              .subscribe(d => res = d);
-          tick();
-          expect(res[0]).toBeDefined();
-          expect(res[1]).toBeDefined();
-          expect(res[0].attributes.title).toEqual('JSON API paints my bikeshed!');
-          expect(res[0].attributes.author).not.toBeDefined();
-          expect(res[0].id).toEqual('1');
-          expect(res[1].attributes.title).toEqual('Untitled');
-          expect(res[1].attributes.author).not.toBeDefined();
-          expect(res[1].id).toEqual('2');
-          expect(res[2]).not.toBeDefined();
-      }));
+        it('should filter resources (TODO)', () => {
 
-      it('should get a single resource given a type and id', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(get({ type: 'Article', id: '1' }))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.attributes.title).toEqual('JSON API paints my bikeshed!');
-          expect(res.attributes.author).not.toBeDefined();
-          expect(res.id).toEqual('1');
-      }));
-  });
-
-  describe('getAll and getOne', () => {
-
-      it('getAll should get ALL resources given a type', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getAll({ type: 'Article' }))
-              .subscribe(d => res = d);
-          tick();
-          expect(res[0]).toBeDefined();
-          expect(res[1]).toBeDefined();
-          expect(res[0].attributes.title).toEqual('JSON API paints my bikeshed!');
-          expect(res[0].attributes.author).not.toBeDefined();
-          expect(res[0].id).toEqual('1');
-          expect(res[1].attributes.title).toEqual('Untitled');
-          expect(res[1].attributes.author).not.toBeDefined();
-          expect(res[1].id).toEqual('2');
-          expect(res[2]).not.toBeDefined();
-      }));
-
-      it('getOne should get a single resource given a type and id', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getOne({ type: 'Article', id: '1' }))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.attributes.title).toEqual('JSON API paints my bikeshed!');
-          expect(res.attributes.author).not.toBeDefined();
-          expect(res.id).toEqual('1');
-      }));
-  });
-
-  describe('getHasOneRelation', () => {
-      it('should get a single resource given its identifier', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getHasOneRelation({ type: 'Article', id: '1' }))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.attributes.title).toEqual('JSON API paints my bikeshed!');
-          expect(res.attributes.author).not.toBeDefined();
-          expect(res.id).toEqual('1');
-      }));
-  });
-
-  describe('getHasManyRelation', () => {
-      it('should get multiple resources given their identifiers',
-          fakeAsync(() => {
-              let res;
-              let sub = obs
-                  .let(getHasManyRelation([
-                      { type: 'Comment', id: '1' },
-                      { type: 'Comment', id: '2' }
-                  ]))
-                  .subscribe(d => res = d);
-              tick();
-              expect(res).toBeDefined();
-              expect(res[0].id).toEqual('1');
-              expect(res[1].id).toEqual('2');
-              expect(res[0].attributes.text).toEqual('Uncommented');
-              expect(res[1].attributes.text).toEqual('No comment');
-          }));
-  });
-
-  describe('getRelatedResources', () => {
-      it('should handle hasOne relations', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getRelatedResources(
-                  { type: 'Article', id: '1' }, 'author'))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.attributes.name).toEqual('Usain Bolt');
-          expect(res.type).toEqual('Person');
-          expect(res.id).toEqual('1');
-
-      }));
-
-      it('should handle hasMany relations', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getRelatedResources(
-                  { type: 'Article', id: '1' }, 'comments'))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.length).toBe(1);
-          expect(res[0].id).toEqual('1');
-          expect(res[0].attributes.text).toEqual('Uncommented');
-      }));
-
-  });
-
-  describe('getRelated', () => {
-      it('should handle hasOne relations', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getRelated(
-                  { type: 'Article', id: '1' }, 'author'))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.attributes.name).toEqual('Usain Bolt');
-          expect(res.type).toEqual('Person');
-          expect(res.id).toEqual('1');
-
-      }));
-
-      it('should handle hasMany relations', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getRelated(
-                  { type: 'Article', id: '1' }, 'comments'))
-              .subscribe(d => res = d);
-          tick();
-          expect(res).toBeDefined();
-          expect(res.length).toBe(1);
-          expect(res[0].id).toEqual('1');
-          expect(res[0].attributes.text).toEqual('Uncommented');
-      }));
-
-      it('should handle deep relations', fakeAsync(() => {
-          let res;
-          let sub = obs
-              .let(getRelated(
-                  { type: 'Article', id: '1' }, 'author.blog'))
-              .subscribe(d => res = d);
-          tick();
-          expect(res.type).toEqual('Blog');
-          expect(res.id).toEqual('1');
-          expect(res.attributes.name).toEqual('Random Blog!');
-      }));
-  });
+        });
+    });
 
 });
 
@@ -278,7 +133,7 @@ describe('NgrxJsonApiSelectors', () => {
                 {
                     provide: NGRX_JSON_API_STORE_LOCATION,
                     useValue: 'api'
-                }
+                },
             ]
         })
     });
@@ -286,42 +141,11 @@ describe('NgrxJsonApiSelectors', () => {
     beforeEach(inject([NgrxJsonApiSelectors], (s) => {
         selectors = s;
     }));
-    let rawStore = initNgrxStore(resourcesDefinitions);
+    let rawStore = initialState;
     let store = Object.assign({}, rawStore, {
-      data: updateStoreResources(rawStore.data, selectorsPayload)
+        data: updateStoreResources(rawStore.data, selectorsPayload)
     });
     let obs = Observable.of(store)
-
-    describe('getRelated public', () => {
-        it('should handle hasOne relations', fakeAsync(() => {
-            let res;
-            let store2 = { api: store }
-            let sub = Observable.of(store2)
-                .let(selectors.getRelated(
-                    { type: 'Article', id: '1' }, 'author'))
-                .subscribe(d => res = d);
-            tick();
-            expect(res).toBeDefined();
-            expect(res.attributes.name).toEqual('Usain Bolt');
-            expect(res.type).toEqual('Person');
-            expect(res.id).toEqual('1');
-
-        }));
-
-        it('should handle hasMany relations', fakeAsync(() => {
-            let res;
-            let store2 = { api: store }
-            let sub = Observable.of(store2)
-                .let(selectors.getRelated(
-                    { type: 'Article', id: '1' }, 'comments'))
-                .subscribe(d => res = d);
-            tick();
-            expect(res).toBeDefined();
-            expect(res.length).toBe(1);
-            expect(res[0].id).toEqual('1');
-            expect(res[0].attributes.text).toEqual('Uncommented');
-        }));
-    });
 
     describe('get public', () => {
 
@@ -329,16 +153,16 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get({ type: 'Article' }))
+                .let(selectors.get$({ type: 'Article' }))
                 .subscribe(d => res = d);
             tick();
             expect(res[0]).toBeDefined();
             expect(res[1]).toBeDefined();
-            expect(res[0].attributes.title).toEqual('JSON API paints my bikeshed!');
-            expect(res[0].attributes.author).not.toBeDefined();
+            expect(res[0].title).toEqual('JSON API paints my bikeshed!');
+            expect(res[0].author).toBeDefined();
             expect(res[0].id).toEqual('1');
-            expect(res[1].attributes.title).toEqual('Untitled');
-            expect(res[1].attributes.author).not.toBeDefined();
+            expect(res[1].title).toEqual('Untitled');
+            expect(res[1].author).toBeDefined();
             expect(res[1].id).toEqual('2');
             expect(res[2]).not.toBeDefined();
         }));
@@ -347,12 +171,12 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get({ type: 'Article', id: '1' }))
+                .let(selectors.get$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res).toBeDefined();
-            expect(res.attributes.title).toEqual('JSON API paints my bikeshed!');
-            expect(res.attributes.author).not.toBeDefined();
+            expect(res.title).toEqual('JSON API paints my bikeshed!');
+            expect(res.author).toBeDefined();
             expect(res.id).toEqual('1');
         }));
     });

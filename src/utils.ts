@@ -1,12 +1,3 @@
-// import * as _.filter from 'lodash/filter';
-// import * as _.includes from 'lodash/includes';
-// import * as _.reduce from 'lodash/reduce';
-// import * as _.get from 'lodash/get';
-// import * as _.merge from 'lodash/merge';
-// import * as _.isArray from 'lodash/isArray';
-// import * as _.isUndefined from 'lodash/_.isUndefined';
-// import * as _.find from 'lodash/find';
-
 import * as _ from 'lodash';
 
 
@@ -15,43 +6,101 @@ import { Actions } from '@ngrx/effects';
 import {
     Resource,
     NgrxJsonApiStore,
+    ResourceIdentifier,
     ResourceDefinition,
     Document,
     RelationDefinition,
-    Query
+    ResourceQuery
 } from './interfaces';
 
-export const initNgrxStore = (
-    resourcesDefinition: Array<ResourceDefinition>): NgrxJsonApiStore => {
+export const denormaliseObject = (
+    resource: Resource, resources: Array<Resource>, bag: Array<Resource>) => {
+    // this function MUST MUTATE resource
 
-    return ({
-        isCreating: false,
-        isReading: false,
-        isUpdating: false,
-        isDeleting: false,
-        resourcesDefinitions: resourcesDefinition,
-        data: []
-    })
-};
+    let denormalised: any = resource;
 
-// export const transformResource = (resource: Resource): Resource => {
-//     let newResource: Resource = {
-//         id: resource.id,
-//         type: resource.type
-//     };
-//     if (typeof resource.attributes !== 'undefined') {
-//         _forEach(resource.attributes, (value, key) => {
-//             newResource[key] = value;
-//         });
-//     }
-//     if (typeof resource.relationships !== 'undefined') {
-//         _forEach(resource.attributes, (value, key) => {
-//             newResource[key] = value;
-//         });
-//     }
-//
-//     return newResource;
-// }
+    if (resource.hasOwnProperty('attributes')) {
+        Object.keys(resource.attributes)
+            .forEach(attribute => {
+                denormalised[attribute] = resource.attributes[attribute]
+            });
+    }
+
+    if (resource.hasOwnProperty('relationships')) {
+
+        Object.keys(resource.relationships)
+            .forEach(relation => {
+
+                let data = resource.relationships[relation].data;
+                let denormalisedRelation;
+
+                if (data === null || _.isEqual(data, [])) {
+
+                    denormalisedRelation = data;
+
+                } else if (_.isPlainObject(data)) {
+                    // hasOne relation
+                    let relatedResource = getSingleResource(data, resources);
+                    denormalisedRelation = denormaliseResource(
+                        relatedResource, resources, bag);
+                } else if (_.isArray(data)) {
+                    // hasMany relation
+                    let relatedResources = getMultipleResources(data, resources);
+                    denormalisedRelation = relatedResources.map(
+                        r => denormaliseResource(r, resources, bag));
+                }
+
+                denormalised = _.set(
+                    denormalised,
+                    relation,
+                    denormalisedRelation
+                );
+            });
+    }
+
+    delete denormalised.attributes;
+    delete denormalised.relationships;
+
+    return denormalised;
+}
+
+export const denormaliseResource = (
+    resource: Resource, resources: Array<Resource>, bag: Array<Resource> = []
+) => {
+
+    if (_.isUndefined(resource)) {
+        return undefined;
+    }
+
+    if (!_.find(bag, { type: resource.type, id: resource.id })) {
+        let obj = _.assign({}, resource);
+
+        bag = [obj, ...bag];
+        bag[0] = denormaliseObject(obj, resources, bag);
+        return bag[0];
+    } else {
+        return _.find(bag, { type: resource.type, id: resource.id });
+    }
+}
+
+export const getSingleResource = (
+    query: ResourceQuery,
+    resources: Array<Resource>): Resource => {
+    return _.find(resources, { type: query.type, id: query.id })
+}
+
+export const getMultipleResources = (
+    queries: Array<ResourceQuery>,
+    resources: Array<Resource>): Array<Resource> => {
+    return queries.map(query => getSingleResource(query, resources));
+}
+
+export const getSingleTypeResources = (
+    query: ResourceQuery,
+    resources: Array<Resource>): Array<Resource> => {
+    return resources.filter(resource => resource.type === query.type);
+}
+
 
 export const updateResourceObject = (original: Resource,
     source: Resource): Resource => {
@@ -125,7 +174,7 @@ export const updateStoreResources = (state: Array<Resource>,
         }, state);
 };
 
-export const deleteFromState = (state: Array<Resource>, query: Query) => {
+export const deleteFromState = (state: Array<Resource>, query: ResourceQuery) => {
     if (typeof query.id === 'undefined') {
         return state.filter(r => (r.type != query.type));
     } else {
@@ -135,4 +184,94 @@ export const deleteFromState = (state: Array<Resource>, query: Query) => {
 
 export function toPayload(action): any {
     return action.payload;
+}
+
+export const filterResources = (resources, query: ResourceQuery) => {
+    return resources.filter(resource => {
+        if (query.hasOwnProperty('params') && query.params.hasOwnProperty('filtering')) {
+            return query.params.filtering.every(element => {
+                let resolvedPath = element.hasOwnProperty('path') ? _.get(resource, element.path) : resource
+
+                if (_.isUndefined(resolvedPath) || _.isNull(resolvedPath)) {
+                    return false;
+                } else if (_.isArray(resolvedPath)) {
+                    let newQuery = {
+                        params: {
+                            filtering: [
+                                {
+                                    type: element.type,
+                                    field: element.field,
+                                    value: element.value
+                                }
+                            ]
+                        }
+                    };
+                    if (!_.isEmpty(filterResources(resolvedPath, newQuery))) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                let resourceField: any = _.get(resolvedPath, element.field);
+                element.type = element.hasOwnProperty('type') ? element.type : 'iexact';
+
+                switch (element.type) {
+                    case 'iexact':
+                        if (_.isString(element.value) && _.isString(resourceField)) {
+                            return element.value.toLowerCase() === resourceField.toLowerCase()
+                        } else {
+                            return element.value === resourceField;
+                        }
+
+                    case 'exact':
+                        return element.value === resourceField;
+
+                    case 'contains':
+                        return _.includes(resourceField, element.value);
+
+                    case 'icontains':
+                        return _.includes(resourceField.toLowerCase(),
+                            element.value.toLowerCase());
+
+                    case 'in':
+                        if (_.isArray(element.value)) {
+                            return _.includes(element.value, resourceField);
+                        } else {
+                            return _.includes([element.value], resourceField);
+                        }
+                    case 'gt':
+                        return element.value > resourceField;
+
+                    case 'gte':
+                        return element.value >= resourceField;
+
+                    case 'lt':
+                        return element.value < resourceField;
+
+                    case 'lte':
+                        return element.value <= resourceField;
+
+                    case 'startswith':
+                        return _.startsWith(resourceField, element.value);
+
+                    case 'istartswith':
+                        return _.startsWith(resourceField.toLowerCase(),
+                            element.value.toLowerCase())
+
+                    case 'endswith':
+                        return _.endsWith(resourceField, element.value);
+
+                    case 'iendswith':
+                        return _.endsWith(resourceField.toLowerCase(),
+                            element.value.toLowerCase());
+
+                    default:
+                        return true;
+                }
+            });
+        } else {
+            return true;
+        }
+    });
 }

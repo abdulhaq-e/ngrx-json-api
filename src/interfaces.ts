@@ -1,4 +1,5 @@
 export interface RelationDefinition {
+  relation: string;
   type: string;
   relationType: string;
 }
@@ -6,17 +7,20 @@ export interface RelationDefinition {
 export interface ResourceDefinition {
   type: string;
   collectionPath: string;
-  attributes: Array<string>;
-  relationships: { [key: string]: RelationDefinition };
 };
 
 export interface QueryParams {
-  filtering?: Array<{type: string, value: string}>
+  filtering?: Array<{
+    field: string,
+    value: any,
+    type?: string,
+    path?: string
+  }>
   include?: Array<string>
 }
 
-export interface Query {
-  type: string;
+export interface ResourceQuery {
+  type?: string;
   id?: string;
   params?: QueryParams;
 }
@@ -38,12 +42,11 @@ export interface Document {
 
 export interface Payload {
   data: {[key: string]: any};
-  query?: Query;
+  query?: ResourceQuery;
 }
 
 export interface NgrxJsonApiStore {
   data: Array<Resource>;
-  resourcesDefinitions: Array<ResourceDefinition>;
   isCreating: boolean;
   isReading: boolean;
   isUpdating: boolean;
@@ -54,5 +57,4 @@ export interface NgrxJsonApiModuleConfig {
   apiUrl: string;
   resourcesDefinitions: Array<ResourceDefinition>;
   storeLocation: string;
-  transformResources?: boolean;
 }

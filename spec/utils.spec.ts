@@ -10,7 +10,12 @@ let deepFreeze = require('deep-freeze');
 
 import {
     deleteFromState,
-    initNgrxStore,
+    denormaliseObject,
+    denormaliseResource,
+    filterResources,
+    getSingleResource,
+    getMultipleResources,
+    getSingleTypeResources,
     insertResource,
     // transformResource,
     updateOrInsertResource,
@@ -19,25 +24,231 @@ import {
     updateStoreResources
 } from '../src/utils';
 
+import {
+    initialState
+} from '../src/reducers';
+
 import { Resource, ResourceDefinition, NgrxJsonApiStore } from '../src/interfaces';
 
 import {
-    resourcesDefinitions, documentPayload
+    resourcesDefinitions, documentPayload, selectorsPayload
 } from './test_utils';
 
-describe('initialiseStore', () => {
+describe('selectors utils', () => {
+    let resources = [
+        {
+            type: 'Article',
+            id: '1',
+            attributes: {
+                'title': 'JSON API paints my bikeshed!'
+            },
+            relationships: {
+                author: {
+                    data: { type: 'Person', id: '3' }
+                },
+            }
+        },
+        {
+            type: 'Article',
+            id: '2',
+            attributes: {
+                'title': 'Untitled'
+            }
+        },
+        {
+            type: 'Person',
+            id: '1',
+            attributes: {
+                'name': 'Person 1'
+            },
+            relationships: {
+                blogs: {
+                    data: [
+                        { type: 'Blog', id: '1' },
+                        { type: 'Blog', id: '2' }
+                    ]
+                }
+            }
+        },
+        {
+            type: 'Person',
+            id: '2',
+            attributes: {
+                'name': 'Person 2'
+            }
+        },
+        {
+            type: 'Blog',
+            id: '1',
+            relationships: {
+                author: {
+                    data: { type: 'Person', id: '2' }
+                }
+            }
+        },
+        {
+            type: 'Blog',
+            id: '2',
+        },
+        {
+            type: 'Blog',
+            id: '3',
+            relationships: {
+                author: {
+                    data: { type: 'Person', id: '3' }
+                }
+            }
+        },
+        {
+            type: 'Person',
+            id: '3',
+            attributes: {
+                name: 'Person 3'
+            },
+            relationships: {
+                blogs: {
+                    data: [
+                        { type: 'Blog', id: '3' }
+                    ]
+                }
+            }
+        }
+    ];
+    describe('getSingleResource', () => {
+        it('should get a single resource given a ResourceQuery', () => {
+            expect(getSingleResource({ type: 'Person', id: '2' }, resources))
+                .toEqual({
+                    type: 'Person',
+                    id: '2',
+                    attributes: {
+                        'name': 'Person 2'
+                    }
+                });
+        });
 
-    it('should init the store given resourcesDefinition', () => {
-        let store = initNgrxStore(resourcesDefinitions);
-        let expectedStore = {
-            isCreating: false,
-            isReading: false,
-            isUpdating: false,
-            isDeleting: false,
-            resourcesDefinitions: resourcesDefinitions,
-            data: []
-        };
-        expect(store).toEqual(expectedStore);
+        it('should return undefined if the resource was not found', () => {
+            expect(getSingleResource({ type: 'Person', id: '10' }, resources))
+                .toBe(undefined);
+        });
+    });
+
+    describe('getMultipleResources', () => {
+        it('should get multiple resources given an array of ResourceQuery', () => {
+            expect(getMultipleResources([
+                { type: 'Person', id: '1' },
+                { type: 'Person', id: '2' }
+            ], resources))
+                .toEqual([
+                    {
+                        type: 'Person',
+                        id: '1',
+                        attributes: {
+                            'name': 'Person 1'
+                        },
+                        relationships: {
+                            blogs: {
+                                data: [
+                                    { type: 'Blog', id: '1' },
+                                    { type: 'Blog', id: '2' }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        type: 'Person',
+                        id: '2',
+                        attributes: {
+                            'name': 'Person 2'
+                        }
+                    }
+                ]);
+        });
+    });
+
+    describe('getSingleTypeResources', () => {
+        it('should get an array of resources of a given type', () => {
+            expect(getSingleTypeResources({ type: 'Blog' }, resources)).toEqual(
+                [{
+                    type: 'Blog',
+                    id: '1',
+                    relationships: {
+                        author: {
+                            data: { type: 'Person', id: '2' }
+                        }
+                    }
+                },
+                    {
+                        type: 'Blog',
+                        id: '2',
+                    },
+                    {
+                        type: 'Blog',
+                        id: '3',
+                        relationships: {
+                            author: {
+                                data: { type: 'Person', id: '3' }
+                            }
+                        }
+                    }]
+            );
+        });
+    });
+
+    describe('denormaliseResource and denormaliseObject', () => {
+        it('should denormalise a resource with no relatios', () => {
+            expect(denormaliseResource(resources[3], resources)).toEqual({
+                type: 'Person',
+                id: '2',
+                name: 'Person 2'
+            });
+            expect(denormaliseResource(resources[5], resources)).toEqual({
+                type: 'Blog',
+                id: '2',
+            });
+        });
+
+        it('should denormalise a resource with relations', () => {
+            expect(denormaliseResource(resources[4], resources)).toEqual({
+                type: 'Blog',
+                id: '1',
+                author: {
+                    type: 'Person',
+                    id: '2',
+                    name: 'Person 2'
+                }
+            });
+        });
+
+        it('should denormalise a resource with deep relations', () => {
+            expect(denormaliseResource(resources[2], resources)).toEqual({
+                type: 'Person',
+                id: '1',
+                name: 'Person 1',
+                blogs: [
+                    {
+                        type: 'Blog',
+                        id: '1',
+                        author: {
+                            type: 'Person',
+                            id: '2',
+                            name: 'Person 2'
+                        }
+                    },
+                    {
+                        type: 'Blog',
+                        id: '2'
+                    }
+                ]
+            });
+        });
+
+        it('should denormalise a resource with very deep relations (circular dependency)',
+            () => {
+                let denormalisedResource = denormaliseResource(resources[0], resources);
+                expect(denormalisedResource.author).toEqual(
+                    denormalisedResource.author.blogs[0].author);
+            });
+
     });
 });
 
@@ -72,39 +283,6 @@ describe('insert resource', () => {
         expect(insertResource(state, newResource)).toEqual(expectedState);
     });
 });
-
-// describe('transformResource', () => {
-//
-//     it('should transform a basic resource with no attributes and no relations', () => {
-//         let resource = {
-//             id: '1',
-//             type: 'Article'
-//         };
-//         let expected = {
-//             id: '1',
-//             type: 'Article'
-//         };
-//         expect(transformResource(resource)).toEqual(expected);
-//     });
-//
-//     it('should transform a resource with attributes', () => {
-//         let resource = {
-//             id: '1',
-//             type: 'Article',
-//             attributes: {
-//                 title: 'Hello World!'
-//             }
-//         };
-//         let expected = {
-//             id: '1',
-//             type: 'Article',
-//             title: 'Hello World!'
-//         };
-//         // console.log(transformResource(resource));
-//         expect(transformResource(resource)).toEqual(expected);
-//     });
-//
-// });
 
 describe('updateResourceObject', () => {
 
@@ -288,7 +466,7 @@ describe('updateStoreResources', () => {
                 }
             });
 
-        let rawStore = initNgrxStore(resourcesDefinitions);
+        let rawStore = initialState;
         let newState = updateStoreResources(rawStore.data, documentPayload);
         expect(newState).toEqual(expectedState);
     });
@@ -297,7 +475,7 @@ describe('updateStoreResources', () => {
 describe('deleteFromState', () => {
 
     it('should delete a single resource given a type and id', () => {
-        let rawStore = initNgrxStore(resourcesDefinitions);
+        let rawStore = initialState;
         let state = updateStoreResources(rawStore.data, documentPayload);
         let expectedState = state.slice(1);
         // expectedState.reverse();
@@ -306,12 +484,93 @@ describe('deleteFromState', () => {
     });
 
     it('should delete all resources given a type only', () => {
-        let rawStore = initNgrxStore(resourcesDefinitions);
+        let rawStore = initialState;
         let state = updateStoreResources(rawStore.data, documentPayload);
         let expectedState = state.slice(2);
         // expectedState.reverse();
         expect(deleteFromState(state, { type: 'Article' }))
             .toEqual(expectedState);
     });
+});
+
+describe('filterResources (TODO: test remaining types)', () => {
+
+    let resources = selectorsPayload.data.map(
+        r => denormaliseResource(r, selectorsPayload.data));
+
+    it('should filter resources using an iexact filter if no type is given', () => {
+        let query = {
+            params: {
+                filtering: [{ field: 'title', value: 'untitled' }]
+            }
+        }
+        let filtered = filterResources(resources, query);
+        expect(filtered.length).toBe(1);
+        expect(filtered[0].id).toBe('2');
+        expect(filtered[0].type).toBe('Article');
+    });
+
+    it('should filter resources using iexact filter', () => {
+        let query = {
+            params: {
+                filtering: [
+                    { field: 'title', value: 'untitled', type: 'iexact' }
+                ]
+            }
+        }
+        let filtered = filterResources(resources, query);
+        expect(filtered.length).toBe(1);
+        expect(filtered[0].id).toBe('2');
+        expect(filtered[0].type).toBe('Article');
+    });
+
+    it('should filter resources using in filter', () => {
+        let query = {
+            params: {
+                filtering: [
+                    {
+                      field: 'title',
+                      value: ['Untitled', 'JSON API paints my bikeshed!'],
+                      type: 'in'
+                    }
+                ]
+            }
+        }
+        let filtered = filterResources(resources, query);
+        expect(filtered.length).toBe(2);
+        expect(filtered[0].id).toBe('1');
+        expect(filtered[0].type).toBe('Article');
+        expect(filtered[1].id).toBe('2');
+    });
+
+    it('should filter related resources using iexact filter', () => {
+        let query = {
+            params: {
+                filtering: [
+                    { field: 'name', value: 'usain bolt', type: 'iexact', path: 'author' }
+                ]
+            }
+        }
+        let filtered = filterResources(resources, query);
+        expect(filtered.length).toBe(1);
+        expect(filtered[0].id).toBe('1');
+        expect(filtered[0].type).toBe('Article');
+    });
+
+    it('should filter hasMany related resources using iexact filter', () => {
+        let query = {
+            params: {
+                filtering: [
+                    { field: 'text', value: 'uncommented', type: 'iexact', path: 'comments' }
+                ]
+            }
+        }
+        let filtered = filterResources(resources, query);
+        expect(filtered.length).toBe(1);
+        expect(filtered[0].id).toBe('1');
+        expect(filtered[0].type).toBe('Article');
+    });
+
+
 
 });

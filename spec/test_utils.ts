@@ -6,31 +6,18 @@ export const resourcesDefinitions: Array<ResourceDefinition> = [
     {
         type: 'Article',
         collectionPath: 'articles',
-        attributes: ['title', 'subtitle'],
-        relationships: {
-            'author': { 'type': 'Person', 'relationType': 'hasOne' },
-            'comments': { 'type': 'Comment', 'relationType': 'hasMany' },
-        }
     },
     {
         type: 'Person',
         collectionPath: 'people',
-        attributes: ['name'],
-        relationships: {
-            'blog': { 'type': 'Blog', 'relationType': 'hasOne' }
-        }
     },
     {
         type: 'Comment',
         collectionPath: 'comments',
-        attributes: ['text'],
-        relationships: {}
     },
     {
         type: 'Blog',
         collectionPath: 'blogs',
-        attributes: ['name'],
-        relationships: {}
     }
 ];
 
@@ -78,10 +65,10 @@ export const selectorsPayload = {
                 "title": "JSON API paints my bikeshed!"
             },
             relationships: {
-                'author': {
-                    data: { type: 'Person', id: "1" }
+                author: {
+                    data: { type: 'Person', id: '1' }
                 },
-                'comments': {
+                comments: {
                     data: [
                         { type: 'Comment', id: '1' },
                     ]
@@ -94,6 +81,15 @@ export const selectorsPayload = {
             attributes: {
                 "title": "Untitled"
             },
+            relationships: {
+                author: {
+                    data: null
+                },
+                comments: {
+                    data: []
+                }
+            }
+
         },
         {
             type: "Person",

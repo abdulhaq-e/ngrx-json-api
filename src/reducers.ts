@@ -2,7 +2,7 @@ import { Action, ActionReducer } from '@ngrx/store';
 
 import { NgrxJsonApiActions } from './actions';
 import {
-    Query,
+    ResourceQuery,
     Document,
     Resource,
     NgrxJsonApiStore
@@ -14,8 +14,16 @@ import {
     updateStoreResources
 } from './utils';
 
+export const initialState = {
+    isCreating: false,
+    isReading: false,
+    isUpdating: false,
+    isDeleting: false,
+    data: []
+};
+
 export const NgrxStoreReducer: ActionReducer<any> =
-    (state: NgrxJsonApiStore, action: Action) => {
+    (state: NgrxJsonApiStore = initialState, action: Action) => {
         let newState;
 
         switch (action.type) {

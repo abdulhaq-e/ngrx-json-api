@@ -28,11 +28,15 @@
     "atom": {
         "rewriteTsconfig": false
     },
-    "files": [
-        "index.ts"
-    ],
     "exclude": [
-        "node_modules"
+      "node_modules"
+    ],
+    "filesGlob": [
+      "./spec/**/*.ts",
+      "./src/**/*.ts"
+    ],
+    "files": [
+        "./index.ts"
     ],
     "angularCompilerOptions": {
         "strictMetadataEmit": true

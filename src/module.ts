@@ -31,6 +31,7 @@ export const selectorsFactory = (storeLocation: string) => {
 }
 
 export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
+
     return [
         {
             provide: NgrxJsonApi,
@@ -57,8 +58,8 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
 
 @NgModule({
     imports: [
-      HttpModule,
-      EffectsModule.run(NgrxJsonApiEffects)
+        HttpModule,
+        EffectsModule.run(NgrxJsonApiEffects)
     ]
 })
 export class NgrxJsonApiModule {
