@@ -10,12 +10,7 @@ export interface ResourceDefinition {
 };
 
 export interface QueryParams {
-  filtering?: Array<{
-    field: string,
-    value: any,
-    type?: string,
-    path?: string
-  }>
+  filtering?: Array<{field: string, value: any, type?: string, path?: string}>
   include?: Array<string>
 }
 
@@ -41,12 +36,15 @@ export interface Document {
 }
 
 export interface Payload {
-  data: {[key: string]: any};
+  jsonApiData: {[key: string]: any};
   query?: ResourceQuery;
 }
 
+export type NgrxJsonApiStoreResources = {[id: string]: Resource};
+export type NgrxJsonApiStoreData = {[key: string]: NgrxJsonApiStoreResources};
+
 export interface NgrxJsonApiStore {
-  data: Array<Resource>;
+  data: NgrxJsonApiStoreData;
   isCreating: boolean;
   isReading: boolean;
   isUpdating: boolean;

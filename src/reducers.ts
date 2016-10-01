@@ -14,16 +14,16 @@ import {
     updateStoreResources
 } from './utils';
 
-export const initialState = {
+export const initialNgrxJsonApiState = {
     isCreating: false,
     isReading: false,
     isUpdating: false,
     isDeleting: false,
-    data: []
+    data: {}
 };
 
 export const NgrxStoreReducer: ActionReducer<any> =
-    (state: NgrxJsonApiStore = initialState, action: Action) => {
+    (state: NgrxJsonApiStore = initialNgrxJsonApiState, action: Action) => {
         let newState;
 
         switch (action.type) {
@@ -42,7 +42,8 @@ export const NgrxStoreReducer: ActionReducer<any> =
             case NgrxJsonApiActions.API_CREATE_SUCCESS:
                 newState = Object.assign({},
                     state, {
-                        data: updateStoreResources(state.data, action.payload.data),
+                        data: updateStoreResources(
+                          state.data, action.payload.jsonApiData),
                     },
                     { 'isCreating': false }
                 );
@@ -51,7 +52,8 @@ export const NgrxStoreReducer: ActionReducer<any> =
             case NgrxJsonApiActions.API_READ_SUCCESS:
                 newState = Object.assign({},
                     state, {
-                        data: updateStoreResources(state.data, action.payload.data),
+                        data: updateStoreResources(
+                          state.data, action.payload.jsonApiData),
                     },
                     { 'isReading': false }
                 );
@@ -61,7 +63,8 @@ export const NgrxStoreReducer: ActionReducer<any> =
                 newState = Object.assign(
                     {},
                     state, {
-                        data: updateStoreResources(state.data, action.payload.data),
+                        data: updateStoreResources(
+                          state.data, action.payload.jsonApiData),
                     },
                     { 'isUpdating': false }
                 );

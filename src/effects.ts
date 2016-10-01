@@ -24,7 +24,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActions.API_CREATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.create({type: payload.data})
+      return this.jsonApi.create({type: payload.jsonApiData})
         .mapTo(NgrxJsonApiActions.apiCreateSuccess(payload))
         .catch(() => Observable.of(
           NgrxJsonApiActions.apiCreateFail(payload)
@@ -35,7 +35,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActions.API_UPDATE_INIT)
     .map<Payload>(toPayload)
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.update(payload.data)
+      return this.jsonApi.update(payload.jsonApiData)
         .mapTo(NgrxJsonApiActions.apiUpdateSuccess(payload))
         .catch(() => Observable.of(
           NgrxJsonApiActions.apiUpdateFail(payload)

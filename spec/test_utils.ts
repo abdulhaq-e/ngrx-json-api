@@ -56,13 +56,13 @@ export const documentPayload = {
     ]
 };
 
-export const selectorsPayload = {
+export const testPayload = {
     data: [
         {
             type: "Article",
             id: "1",
             attributes: {
-                "title": "JSON API paints my bikeshed!"
+                "title": "Article 1"
             },
             relationships: {
                 author: {
@@ -79,7 +79,7 @@ export const selectorsPayload = {
             type: "Article",
             id: "2",
             attributes: {
-                "title": "Untitled"
+                "title": "Article 2"
             },
             relationships: {
                 author: {
@@ -89,17 +89,19 @@ export const selectorsPayload = {
                     data: []
                 }
             }
-
         },
         {
             type: "Person",
             id: "1",
             attributes: {
-                "name": "Usain Bolt"
+                "name": "Person 1"
             },
             relationships: {
-                'blog': {
-                    data: { type: 'Blog', id: '1' }
+                'blogs': {
+                    data: [
+                      { type: 'Blog', id: '1' },
+                      { type: 'Blog', id: '3' }
+                    ]
                 }
             }
         },
@@ -107,7 +109,7 @@ export const selectorsPayload = {
             type: "Person",
             id: "2",
             attributes: {
-                "name": "Michael Phelps"
+                "name": "Person 2"
             },
         },
         {
@@ -128,7 +130,25 @@ export const selectorsPayload = {
             type: "Blog",
             id: "1",
             attributes: {
-                name: "Random Blog!"
+                name: "Blog 1"
+            },
+            relationships: {
+              author: {
+                data: { type: 'Person', id: '2' }
+              }
+            }
+        },
+        {
+            type: 'Blog',
+            id: '2',
+        },
+        {
+            type: 'Blog',
+            id: '3',
+            relationships: {
+                author: {
+                    data: { type: 'Person', id: '1' }
+                }
             }
         }
     ]

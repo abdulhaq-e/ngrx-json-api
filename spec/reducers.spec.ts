@@ -9,15 +9,15 @@ let deepFreeze = require('deep-freeze');
 
 import _ = require('lodash');
 
-import { NgrxStoreReducer, initialState} from '../src/reducers';
+import { NgrxStoreReducer, initialNgrxJsonApiState} from '../src/reducers';
 import { NgrxJsonApiActions } from '../src/actions';
 import { NgrxJsonApiStore } from '../src/interfaces';
 
-import { resourcesDefinitions } from './test_utils';
+import { testPayload } from './test_utils';
 
 describe('NgrxJsonApiReducer', () => {
 
-    let state = initialState;
+    let state = initialNgrxJsonApiState;
 
     deepFreeze(state);
 
@@ -64,79 +64,11 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should update store data upson successfull CREATE/UPDATE/READ', () => {
-
-        let expectedState: NgrxJsonApiStore = initialState;
-
-        expectedState = Object.assign({}, expectedState, {
-            data: [
-                ...expectedState.data,
-                {
-                    type: 'Article',
-                    id: '1',
-                    attributes: {
-                        'title': 'JSON API paints my bikeshed!'
-                    }
-                },
-                {
-                    type: 'Article',
-                    id: '2',
-                    attributes: {
-                        'title': 'Untitled'
-                    }
-                },
-                {
-                    type: 'Person',
-                    id: '1',
-                    attributes: {
-                        'name': 'Person 1'
-                    }
-                },
-                {
-                    type: 'Person',
-                    id: '2',
-                    attributes: {
-                        'name': 'Person 2'
-                    }
-                }]
-        });
-
-        let payload = {
-            data: {
-                data: [
-                    {
-                        type: 'Article',
-                        id: '1',
-                        attributes: {
-                            'title': 'JSON API paints my bikeshed!'
-                        }
-                    },
-                    {
-                        type: 'Article',
-                        id: '2',
-                        attributes: {
-                            'title': 'Untitled'
-                        }
-                    }
-                ],
-                included: [
-                    {
-                        type: 'Person',
-                        id: '1',
-                        attributes: {
-                            'name': 'Person 1'
-                        }
-                    },
-                    {
-                        type: 'Person',
-                        id: '2',
-                        attributes: {
-                            'name': 'Person 2'
-                        }
-                    }
-                ]
-            }
-        };
-        let newState = NgrxStoreReducer(state, NgrxJsonApiActions.apiCreateSuccess(payload));
-        expect(newState).toEqual(expectedState);
+        let newState = NgrxStoreReducer(state,
+            NgrxJsonApiActions.apiCreateSuccess({ jsonApiData: testPayload }));
+        expect(newState.data['Article']).toBeDefined();
+        expect(newState.data['Blog']).toBeDefined();
+        expect(newState.data['Person']).toBeDefined();
+        expect(newState.data['Comment']).toBeDefined();
     });
 });

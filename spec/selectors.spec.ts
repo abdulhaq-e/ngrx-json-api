@@ -37,7 +37,7 @@ import {
 } from '../src/selectors';
 
 import {
-    initialState
+    initialNgrxJsonApiState
 } from '../src/reducers';
 
 import {
@@ -47,14 +47,14 @@ import {
 
 import { updateStoreResources } from '../src/utils';
 
-import { selectorsPayload } from './test_utils';
+import { testPayload } from './test_utils';
 
 describe('individual selectors', () => {
 
-    let store = Object.assign({}, initialState, {
-        data: updateStoreResources([], selectorsPayload)
+    let store = Object.assign({}, initialNgrxJsonApiState, {
+        data: updateStoreResources({}, testPayload)
     });
-    let obs = Observable.of(store)
+    let obs = Observable.of(store);
 
     describe('getOne$', () => {
         it('should get a single resource given a type and id', fakeAsync(() => {
@@ -63,7 +63,7 @@ describe('individual selectors', () => {
                 let(getOne$({type: 'Article', id: '1'}))
                 .subscribe(d => res = d);
             tick();
-            expect(res.title).toEqual('JSON API paints my bikeshed!');
+            expect(res.title).toEqual('Article 1');
             expect(res.type).toEqual('Article');
             expect(res.id).toEqual('1');
         }));
@@ -78,11 +78,11 @@ describe('individual selectors', () => {
             tick();
             expect(res[0]).toBeDefined();
             expect(res[1]).toBeDefined();
-            expect(res[0].title).toEqual('JSON API paints my bikeshed!');
+            expect(res[0].title).toEqual('Article 1');
             expect(res[0].author).toBeDefined();
             expect(res[0].comments).toBeDefined();
             expect(res[0].id).toEqual('1');
-            expect(res[1].title).toEqual('Untitled');
+            expect(res[1].title).toEqual('Article 2');
             expect(res[1].author).toEqual(null);
             expect(res[1].id).toEqual('2');
             expect(res[2]).not.toBeDefined();
@@ -141,9 +141,8 @@ describe('NgrxJsonApiSelectors', () => {
     beforeEach(inject([NgrxJsonApiSelectors], (s) => {
         selectors = s;
     }));
-    let rawStore = initialState;
-    let store = Object.assign({}, rawStore, {
-        data: updateStoreResources(rawStore.data, selectorsPayload)
+    let store = Object.assign({}, initialNgrxJsonApiState, {
+        data: updateStoreResources({}, testPayload)
     });
     let obs = Observable.of(store)
 
@@ -158,10 +157,10 @@ describe('NgrxJsonApiSelectors', () => {
             tick();
             expect(res[0]).toBeDefined();
             expect(res[1]).toBeDefined();
-            expect(res[0].title).toEqual('JSON API paints my bikeshed!');
+            expect(res[0].title).toEqual('Article 1');
             expect(res[0].author).toBeDefined();
             expect(res[0].id).toEqual('1');
-            expect(res[1].title).toEqual('Untitled');
+            expect(res[1].title).toEqual('Article 2');
             expect(res[1].author).toBeDefined();
             expect(res[1].id).toEqual('2');
             expect(res[2]).not.toBeDefined();
@@ -175,7 +174,7 @@ describe('NgrxJsonApiSelectors', () => {
                 .subscribe(d => res = d);
             tick();
             expect(res).toBeDefined();
-            expect(res.title).toEqual('JSON API paints my bikeshed!');
+            expect(res.title).toEqual('Article 1');
             expect(res.author).toBeDefined();
             expect(res.id).toEqual('1');
         }));

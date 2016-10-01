@@ -6,6 +6,8 @@ import { Actions } from '@ngrx/effects';
 import {
     Resource,
     NgrxJsonApiStore,
+    NgrxJsonApiStoreData,
+    NgrxJsonApiStoreResources,
     ResourceIdentifier,
     ResourceDefinition,
     Document,
@@ -14,7 +16,9 @@ import {
 } from './interfaces';
 
 export const denormaliseObject = (
-    resource: Resource, resources: Array<Resource>, bag: Array<Resource>) => {
+    resource: Resource,
+    resources: NgrxJsonApiStoreData,
+    bag: NgrxJsonApiStoreData): any => {
     // this function MUST MUTATE resource
 
     let denormalised: any = resource;
@@ -65,40 +69,44 @@ export const denormaliseObject = (
 }
 
 export const denormaliseResource = (
-    resource: Resource, resources: Array<Resource>, bag: Array<Resource> = []
-) => {
+    resource: Resource, resources: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData = {}
+): any => {
 
     if (_.isUndefined(resource)) {
         return undefined;
     }
 
-    if (!_.find(bag, { type: resource.type, id: resource.id })) {
-        let obj = _.assign({}, resource);
-
-        bag = [obj, ...bag];
-        bag[0] = denormaliseObject(obj, resources, bag);
-        return bag[0];
-    } else {
-        return _.find(bag, { type: resource.type, id: resource.id });
+    if (_.isUndefined(bag[resource.type])) {
+        bag[resource.type] = {};
     }
+
+    if (_.isUndefined(bag[resource.type][resource.id])) {
+
+        let obj = Object.assign({}, resource);
+
+        bag[resource.type][resource.id] = obj;
+        bag[resource.type][resource.id] = denormaliseObject(obj, resources, bag);
+    }
+
+    return bag[resource.type][resource.id];
 }
 
 export const getSingleResource = (
     query: ResourceQuery,
-    resources: Array<Resource>): Resource => {
-    return _.find(resources, { type: query.type, id: query.id })
+    resources: NgrxJsonApiStoreData): Resource => {
+    return resources[query.type][query.id];
 }
 
 export const getMultipleResources = (
     queries: Array<ResourceQuery>,
-    resources: Array<Resource>): Array<Resource> => {
+    resources: NgrxJsonApiStoreData): Array<Resource> => {
     return queries.map(query => getSingleResource(query, resources));
 }
 
 export const getSingleTypeResources = (
     query: ResourceQuery,
-    resources: Array<Resource>): Array<Resource> => {
-    return resources.filter(resource => resource.type === query.type);
+    resources: NgrxJsonApiStoreData): Array<Resource> => {
+    return <Array<Resource>>_.flatMap(resources[query.type]);
 }
 
 
@@ -109,39 +117,50 @@ export const updateResourceObject = (original: Resource,
 
 };
 
-export const insertResource = (state: Array<Resource>,
-    resource: Resource): Array<Resource> => {
-
-    return [...state, resource];
-
-};
-
-export const updateResource = (state: Array<Resource>, resource: Resource,
-    foundResource: Resource): Array<Resource> => {
-
-    return [..._.filter(state, (r) => !(r.type === resource.type && r.id === resource.id)),
-        updateResourceObject(foundResource, resource)
-    ];
+export const insertResource = (state: NgrxJsonApiStoreResources,
+    resource: Resource): NgrxJsonApiStoreResources => {
+    let newState = Object.assign({}, state);
+    newState[resource.id] = resource
+    return newState;
 
 };
 
-export const updateOrInsertResource = (state: Array<Resource>,
-    resource: Resource): Array<Resource> => {
+export const updateResource = (state: NgrxJsonApiStoreResources,
+    resource: Resource, foundResource: Resource): NgrxJsonApiStoreResources => {
 
-    // Check if the resource already exists in the state
-    let foundResource = _.find(state, { type: resource.type, id: resource.id });
+    let newState = Object.assign({}, state);
+    newState[resource.id] = updateResourceObject(foundResource, resource);
+    return newState;
+};
 
-    // If it is not there, we simply add it to the state
-    if (_.isUndefined(foundResource)) {
-        return insertResource(state, resource);
+export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
+    resource: Resource): NgrxJsonApiStoreData => {
+
+    let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+
+    if (_.isUndefined(state[resource.type])) {
+        // we must mutate the main state (ngrxjsonapistoredata)
+        newState[resource.type] = {};
+        newState[resource.type] = insertResource(newState[resource.type], resource);
+        return newState;
+
+    } else if (_.isUndefined(state[resource.type][resource.id])) {
+        newState[resource.type] = insertResource(
+            newState[resource.type],
+            resource);
+        return newState;
+    } else {
+        newState[resource.type] = updateResource(
+            newState[resource.type],
+            resource,
+            state[resource.type][resource.id]);
+        return newState;
     }
 
-    return updateResource(state, resource, foundResource);
-
 };
 
-export const updateStoreResources = (state: Array<Resource>,
-    payload: Document): Array<Resource> => {
+export const updateStoreResources = (state: NgrxJsonApiStoreData,
+    payload: Document): NgrxJsonApiStoreData => {
 
     let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
@@ -157,8 +176,8 @@ export const updateStoreResources = (state: Array<Resource>,
         data = [...data, ...included];
     }
 
-    return <Array<Resource>>_.reduce(
-        data, (result: Array<Resource>,
+    return <NgrxJsonApiStoreData>_.reduce(
+        data, (result: NgrxJsonApiStoreData,
             resource: Resource) => {
             // let resourcePath: string = getResourcePath(
             //   result.resourcesDefinitions, resource.type);
@@ -174,12 +193,14 @@ export const updateStoreResources = (state: Array<Resource>,
         }, state);
 };
 
-export const deleteFromState = (state: Array<Resource>, query: ResourceQuery) => {
+export const deleteFromState = (state: NgrxJsonApiStoreData, query: ResourceQuery) => {
+    let newState = Object.assign({}, state);
     if (typeof query.id === 'undefined') {
-        return state.filter(r => (r.type != query.type));
+        newState[query.type] = {};
     } else {
-        return state.filter(r => (r.type != query.type || r.id != query.id));
+        delete newState[query.type][query.id]
     }
+    return newState;
 };
 
 export function toPayload(action): any {
