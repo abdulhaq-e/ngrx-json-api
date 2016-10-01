@@ -1,6 +1,9 @@
 import { Action, ActionReducer } from '@ngrx/store';
 
-import { NgrxJsonApiActions } from './actions';
+import {
+  NgrxJsonApiActions,
+  NgrxJsonApiActionTypes
+} from './actions';
 import {
     ResourceQuery,
     Document,
@@ -27,19 +30,19 @@ export const NgrxStoreReducer: ActionReducer<any> =
         let newState;
 
         switch (action.type) {
-            case NgrxJsonApiActions.API_CREATE_INIT:
+            case NgrxJsonApiActionTypes.API_CREATE_INIT:
                 return Object.assign({}, state, { 'isCreating': true });
 
-            case NgrxJsonApiActions.API_READ_INIT:
+            case NgrxJsonApiActionTypes.API_READ_INIT:
                 return Object.assign({}, state, { 'isReading': true });
 
-            case NgrxJsonApiActions.API_UPDATE_INIT:
+            case NgrxJsonApiActionTypes.API_UPDATE_INIT:
                 return Object.assign({}, state, { 'isUpdating': true });
 
-            case NgrxJsonApiActions.API_DELETE_INIT:
+            case NgrxJsonApiActionTypes.API_DELETE_INIT:
                 return Object.assign({}, state, { 'isDeleting': true });
 
-            case NgrxJsonApiActions.API_CREATE_SUCCESS:
+            case NgrxJsonApiActionTypes.API_CREATE_SUCCESS:
                 newState = Object.assign({},
                     state, {
                         data: updateStoreResources(
@@ -49,7 +52,7 @@ export const NgrxStoreReducer: ActionReducer<any> =
                 );
                 return newState;
 
-            case NgrxJsonApiActions.API_READ_SUCCESS:
+            case NgrxJsonApiActionTypes.API_READ_SUCCESS:
                 newState = Object.assign({},
                     state, {
                         data: updateStoreResources(
@@ -59,7 +62,7 @@ export const NgrxStoreReducer: ActionReducer<any> =
                 );
                 return newState;
 
-            case NgrxJsonApiActions.API_UPDATE_SUCCESS:
+            case NgrxJsonApiActionTypes.API_UPDATE_SUCCESS:
                 newState = Object.assign(
                     {},
                     state, {
@@ -70,26 +73,26 @@ export const NgrxStoreReducer: ActionReducer<any> =
                 );
                 return newState;
 
-            case NgrxJsonApiActions.API_DELETE_SUCCESS:
-            case NgrxJsonApiActions.DELETE_FROM_STATE:
+            case NgrxJsonApiActionTypes.API_DELETE_SUCCESS:
+            case NgrxJsonApiActionTypes.DELETE_FROM_STATE:
                 newState = Object.assign({}, state,
                     { data: deleteFromState(state.data, action.payload.query) },
                     { 'isDeleting': false });
                 return newState;
 
-            case NgrxJsonApiActions.API_CREATE_FAIL:
+            case NgrxJsonApiActionTypes.API_CREATE_FAIL:
                 newState = Object.assign({}, state, { 'isCreating': false });
                 return newState;
 
-            case NgrxJsonApiActions.API_READ_FAIL:
+            case NgrxJsonApiActionTypes.API_READ_FAIL:
                 newState = Object.assign({}, state, { 'isReading': false });
                 return newState;
 
-            case NgrxJsonApiActions.API_UPDATE_FAIL:
+            case NgrxJsonApiActionTypes.API_UPDATE_FAIL:
                 newState = Object.assign({}, state, { 'isUpdating': false });
                 return newState;
 
-            case NgrxJsonApiActions.API_DELETE_FAIL:
+            case NgrxJsonApiActionTypes.API_DELETE_FAIL:
                 newState = Object.assign({}, state, { 'isDeleting': false });
                 return newState;
 

@@ -8,62 +8,71 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/mapTo';
 
-import { NgrxJsonApiActions } from './actions';
+import {
+    NgrxJsonApiActionTypes,
+    ApiCreateInitAction,
+    ApiCreateSuccessAction,
+    ApiCreateFailAction,
+    ApiUpdateInitAction,
+    ApiUpdateSuccessAction,
+    ApiUpdateFailAction,
+    ApiReadInitAction,
+    ApiReadSuccessAction,
+    ApiReadFailAction,
+    ApiDeleteInitAction,
+    ApiDeleteSuccessAction,
+    ApiDeleteFailAction,
+    DeleteFromStateAction
+} from './actions';
 import { NgrxJsonApi } from './api';
 import { Payload } from './interfaces';
 import { toPayload } from './utils';
 
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
-  constructor(
-    private actions$: Actions,
-    private jsonApi: NgrxJsonApi
-  ) { }
+    constructor(
+        private actions$: Actions,
+        private jsonApi: NgrxJsonApi
+    ) { }
 
-  @Effect() createResource$ = this.actions$
-    .ofType(NgrxJsonApiActions.API_CREATE_INIT)
-    .map<Payload>(toPayload)
-    .mergeMap((payload: Payload) => {
-      return this.jsonApi.create({type: payload.jsonApiData})
-        .mapTo(NgrxJsonApiActions.apiCreateSuccess(payload))
-        .catch(() => Observable.of(
-          NgrxJsonApiActions.apiCreateFail(payload)
-        ))
-    });
+    @Effect() createResource$ = this.actions$
+        .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
+        .map<Payload>(toPayload)
+        .mergeMap((payload: Payload) => {
+            return this.jsonApi.create({ type: payload.jsonApiData })
+                .mapTo(ApiCreateSuccessAction(payload))
+                .catch(() => Observable.of(
+                    new ApiCreateFailAction(payload)
+                ))
+        });
 
-  @Effect() updateResource$ = this.actions$
-    .ofType(NgrxJsonApiActions.API_UPDATE_INIT)
-    .map<Payload>(toPayload)
-    .mergeMap((payload: Payload) => {
-      return this.jsonApi.update(payload.jsonApiData)
-        .mapTo(NgrxJsonApiActions.apiUpdateSuccess(payload))
-        .catch(() => Observable.of(
-          NgrxJsonApiActions.apiUpdateFail(payload)
-        ));
-    });
+    @Effect() updateResource$ = this.actions$
+        .ofType(NgrxJsonApiActionTypes.API_UPDATE_INIT)
+        .map<Payload>(toPayload)
+        .mergeMap((payload: Payload) => {
+            return this.jsonApi.update(payload.jsonApiData)
+                .mapTo(new ApiUpdateSuccessAction(payload))
+                .catch(() => Observable.of(new ApiUpdateFailAction(payload)));
+        });
 
-  @Effect() readResource$ = this.actions$
-    .ofType(NgrxJsonApiActions.API_READ_INIT)
-    .map<Payload>(toPayload)
-    .mergeMap((payload: Payload) => {
-      return this.jsonApi.find(payload.query)
-        .map(res => ({ data: res.json() }))
-        .map(data => NgrxJsonApiActions.apiReadSuccess(data))
-        .catch(() => Observable.of(
-          NgrxJsonApiActions.apiReadFail(payload)
-        ));
-    });
+    @Effect() readResource$ = this.actions$
+        .ofType(NgrxJsonApiActionTypes.API_READ_INIT)
+        .map<Payload>(toPayload)
+        .mergeMap((payload: Payload) => {
+            return this.jsonApi.find(payload.query)
+                .map(res => ({ data: res.json() }))
+                .map(data => new ApiReadSuccessAction(data))
+                .catch(() => Observable.of(new ApiReadFailAction(payload)));
+        });
 
     @Effect() deleteResource$ = this.actions$
-      .ofType(NgrxJsonApiActions.API_DELETE_INIT)
-      .map<Payload>(toPayload)
-      .mergeMap((payload: Payload) => {
-        return this.jsonApi.delete(payload.query)
-          .mapTo(NgrxJsonApiActions.apiDeleteSuccess(payload))
-          .catch(() => Observable.of(
-            NgrxJsonApiActions.apiDeleteFail(payload)
-          ));
-      });
+        .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
+        .map<Payload>(toPayload)
+        .mergeMap((payload: Payload) => {
+            return this.jsonApi.delete(payload.query)
+                .mapTo(new ApiDeleteSuccessAction(payload))
+                .catch(() => Observable.of(new ApiDeleteFailAction(payload)));
+        });
 
     ngOnDestroy() {
 

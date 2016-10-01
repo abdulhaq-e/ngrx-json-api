@@ -20,7 +20,7 @@ import { Observable } from 'rxjs/Observable';
 import { NgrxJsonApi } from '../src/api';
 import {
     API_URL,
-    RESOURCES_DEFINITIONS,
+    RESOURCE_DEFINITIONS,
     apiFactory
 } from '../src/module';
 import { ResourceDefinition } from '../src/interfaces';
@@ -46,7 +46,7 @@ describe('ngrx json api', () => {
                 {
                     provide: NgrxJsonApi,
                     useFactory: apiFactory,
-                    deps: [Http, API_URL, RESOURCES_DEFINITIONS]
+                    deps: [Http, API_URL, RESOURCE_DEFINITIONS]
                 },
                 {
                     provide: Http, useFactory: (backend: ConnectionBackend,
@@ -58,7 +58,7 @@ describe('ngrx json api', () => {
                     provide: API_URL, useValue: 'myapi.com'
                 },
                 {
-                    provide: RESOURCES_DEFINITIONS, useValue: resourcesDefinitions
+                    provide: RESOURCE_DEFINITIONS, useValue: resourcesDefinitions
                 }
             ]
         });
