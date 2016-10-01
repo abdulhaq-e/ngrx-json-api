@@ -53,6 +53,6 @@ export interface NgrxJsonApiStore {
 
 export interface NgrxJsonApiModuleConfig {
   apiUrl: string;
-  resourcesDefinitions: Array<ResourceDefinition>;
+  resourceDefinitions: Array<ResourceDefinition>;
   storeLocation: string;
 }

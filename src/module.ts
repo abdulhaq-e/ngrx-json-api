@@ -14,7 +14,7 @@ import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
 export const API_URL = new OpaqueToken('API_URL');
 
-export const RESOURCES_DEFINITIONS = new OpaqueToken('RESOURCES_DEFINTIONS');
+export const RESOURCE_DEFINITIONS = new OpaqueToken('RESOURCE_DEFINTIONS');
 
 export const NGRX_JSON_API_STORE_LOCATION = new OpaqueToken(
     'NGRX_JSON_API_STORE_LOCATION')
@@ -22,8 +22,8 @@ export const NGRX_JSON_API_STORE_LOCATION = new OpaqueToken(
 export const apiFactory = (
     http: Http,
     apiUrl: string,
-    resourcesDefinitions: Array<ResourceDefinition>) => {
-    return new NgrxJsonApi(http, apiUrl, resourcesDefinitions);
+    resourceDefinitions: Array<ResourceDefinition>) => {
+    return new NgrxJsonApi(http, apiUrl, resourceDefinitions);
 };
 
 export const selectorsFactory = (storeLocation: string) => {
@@ -36,7 +36,7 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
         {
             provide: NgrxJsonApi,
             useFactory: apiFactory,
-            deps: [Http, API_URL, RESOURCES_DEFINITIONS]
+            deps: [Http, API_URL, RESOURCE_DEFINITIONS]
         },
         {
             provide: NgrxJsonApiSelectors,
@@ -50,9 +50,8 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
             provide: API_URL, useValue: config.apiUrl
         },
         {
-            provide: RESOURCES_DEFINITIONS, useValue: config.resourcesDefinitions
+            provide: RESOURCE_DEFINITIONS, useValue: config.resourceDefinitions
         }
-
     ]
 }
 
