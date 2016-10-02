@@ -1,176 +1,168 @@
-// import {
-//   addProviders,
-//   async,
-//   inject,
-//   fakeAsync,
-// } from '@angular/core/testing';
-//
-// import {
-//   MOCK_EFFECTS_PROVIDERS,
-//   MockStateUpdates
-// } from '@ngrx/effects/testing';
-//
-// import { JsonApiEffects } from '../src/effects';
-// import { JsonApiActions } from '../src/actions';
-//
-// import { MOCK_JSON_API_PROVIDERS } from '../src/testing';
-//
-// describe('Json Api Effects', () => {
-//   let effects: JsonApiEffects;
-//   let updates$: MockStateUpdates;
-//
-//   beforeEach(() => {
-//     addProviders([
-//       JsonApiActions,
-//       JsonApiEffects,
-//       MOCK_EFFECTS_PROVIDERS,
-//       MOCK_JSON_API_PROVIDERS
-//     ])
-//   });
-//
-//   beforeEach(inject([JsonApiEffects, MockStateUpdates], (jsonApiEffects, mockUpdates) => {
-//     effects = jsonApiEffects;
-//     updates$ = mockUpdates;
-//   }));
-//   let successPayload = {
-//     options: {
-//       entityType: 'Whatever',
-//       id: '1'
-//     },
-//     data: {
-//       type: 'SUCCESS'
-//     }
-//   };
-//   let failPayload = {
-//     options: {
-//       entityType: 'Whatever',
-//       id: '2'
-//     },
-//     data: {
-//       type: 'FAIL'
-//     }
-//   };
-//
-//
-//   it('should respond to successfull CREATE_INIT action', () => {
-//
-//     updates$.sendAction({
-//       type: JsonApiActions.API_CREATE_INIT,
-//       payload: successPayload
-//     });
-//
-//     // TODO: Test that the Observable has emitted some in the
-//     // first place!
-//
-//     effects.createEntity$.subscribe(action => {
-//       expect(action.type).toBe(JsonApiActions.API_CREATE_SUCCESS);
-//       expect(action.payload).toBe(successPayload);
-//     });
-//
-//   });
-//
-//   it('should respond to failed CREATE_INIT action', () => {
-//
-//     updates$.sendAction({
-//       type: JsonApiActions.API_CREATE_INIT,
-//       payload: failPayload
-//     });
-//
-//     effects.createEntity$.subscribe(action => {
-//       expect(action.type).toBe(JsonApiActions.API_CREATE_FAIL);
-//       expect(action.payload).toBe(failPayload);
-//     });
-//   });
-//
-//   it('should respond to successfull UPDATE_INIT action', () => {
-//
-//     updates$.sendAction({
-//       type: JsonApiActions.API_UPDATE_INIT,
-//       payload: successPayload
-//     });
-//
-//     effects.updateEntity$.subscribe(action => {
-//       expect(action.type).toBe(JsonApiActions.API_UPDATE_SUCCESS);
-//       expect(action.payload).toBe(successPayload);
-//     });
-//
-//   });
-//
-//   it('should respond to fail UPDATE_INIT action', () => {
-//
-//     updates$.sendAction({
-//       type: JsonApiActions.API_UPDATE_INIT,
-//       payload: failPayload
-//     });
-//
-//     effects.updateEntity$.subscribe(action => {
-//       expect(action.type).toBe(JsonApiActions.API_UPDATE_FAIL);
-//       expect(action.payload).toBe(failPayload);
-//     });
-//   });
-//
-//
-//   it('should respond to successfull READ_INIT action', () => {
-//     updates$.sendAction({
-//       type: JsonApiActions.API_READ_INIT,
-//       payload: successPayload
-//     });
-//
-//     effects.readEntity$.subscribe(action => {
-//       // console.log(action);
-//       expect(action.type).toBe(JsonApiActions.API_READ_SUCCESS);
-//       // expect(action.payload).toBe(successPayload);
-//     });
-//   });
-//
-//   it('should respond to fail READ_INIT action', () => {
-//     updates$.sendAction({
-//       type: JsonApiActions.API_READ_INIT,
-//       payload: failPayload
-//     });
-//
-//     effects.readEntity$.subscribe(action => {
-//       // console.log(action);
-//       expect(action.type).toBe(JsonApiActions.API_READ_FAIL);
-//       expect(action.payload).toBe(failPayload);
-//     });
-//   });
-//
-//   let payloadSuccess = {
-//     options: true,
-//     data: {}
-//   };
-//   let payloadFail = {
-//     options: false,
-//     data: {}
-//   };
-//
-//   it('should respond to successfull DELETE_INIT action', () => {
-//     updates$.sendAction({
-//       type: JsonApiActions.API_DELETE_INIT,
-//       payload: payloadSuccess
-//     });
-//
-//     effects.deleteEntity$.subscribe(action => {
-//       // console.log(action);
-//       expect(action.type).toBe(JsonApiActions.API_DELETE_SUCCESS);
-//       expect(action.payload).toBe(payloadSuccess);
-//     });
-//   });
-//
-//   it('should respond to fail DELETE_INIT action', () => {
-//     updates$.sendAction({
-//       type: JsonApiActions.API_DELETE_INIT,
-//       payload: payloadFail
-//     });
-//
-//     effects.deleteEntity$.subscribe(action => {
-//       // console.log(action);
-//       expect(action.type).toBe(JsonApiActions.API_DELETE_FAIL);
-//       expect(action.payload).toBe(payloadFail);
-//     });
-//
-//     expect(true).toEqual(true);
-//   });
-//
-// });
+import {
+    async,
+    inject,
+    fakeAsync,
+    tick,
+    TestBed
+} from '@angular/core/testing';
+
+import {
+    EffectsTestingModule,
+    EffectsRunner
+} from '@ngrx/effects/testing';
+
+import { NgrxJsonApiEffects } from '../src/effects';
+import {
+    ApiCreateInitAction,
+    ApiCreateSuccessAction,
+    ApiCreateFailAction,
+    ApiUpdateInitAction,
+    ApiUpdateSuccessAction,
+    ApiUpdateFailAction,
+    ApiReadInitAction,
+    ApiReadSuccessAction,
+    ApiReadFailAction,
+    ApiDeleteInitAction,
+    ApiDeleteSuccessAction,
+    ApiDeleteFailAction,
+    DeleteFromStateAction
+} from '../src/actions';
+
+import { MOCK_JSON_API_PROVIDERS } from '../src/testing';
+
+describe('NgrxJsonApiEffects', () => {
+    let runner: EffectsRunner;
+    let effects;
+
+    beforeEach(() => TestBed.configureTestingModule({
+        imports: [
+            EffectsTestingModule
+        ],
+        providers: [
+            ...MOCK_JSON_API_PROVIDERS,
+            NgrxJsonApiEffects
+        ]
+    }));
+
+    beforeEach(inject([EffectsRunner, NgrxJsonApiEffects],
+        (_runner, _effects) => {
+            runner = _runner;
+            effects = _effects;
+        }
+    ));
+
+    let successPayload = {
+        jsonApiData: {
+            data: {
+                type: 'SUCCESS'
+            }
+        }
+    };
+    let failPayload = {
+        jsonApiData: {
+            data: {
+                type: 'FAIL'
+            }
+        }
+    };
+    let successQuery = {
+        query: {
+            type: 'SUCCESS'
+        }
+    };
+    let failQuery = {
+        query: {
+            type: 'FAIL'
+        }
+    };
+
+
+    it('should respond to successfull CREATE_INIT action', () => {
+        runner.queue(new ApiCreateInitAction(successPayload));
+        let res;
+        effects.createResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiCreateSuccessAction(successPayload));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed CREATE_INIT action', () => {
+        let res;
+        runner.queue(new ApiCreateInitAction(failPayload));
+        effects.createResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiCreateFailAction(failPayload));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to successfull UPDATE_INIT action', () => {
+        let res;
+        runner.queue(new ApiUpdateInitAction(successPayload));
+        effects.updateResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiUpdateSuccessAction(successPayload));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed UPDATE_INIT action', () => {
+        let res;
+        runner.queue(new ApiUpdateInitAction(failPayload));
+        effects.updateResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiUpdateFailAction(failPayload));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to successfull READ_INIT action', () => {
+        let res;
+        runner.queue(new ApiReadInitAction(successQuery));
+        effects.readResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiReadSuccessAction(successPayload));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed READ_INIT action', () => {
+        let res;
+        runner.queue(new ApiReadInitAction(failQuery));
+        effects.readResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiReadFailAction(failQuery));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to successfull DELETE_INIT action', () => {
+        let res;
+        runner.queue(new ApiDeleteInitAction(successQuery));
+        effects.deleteResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiDeleteSuccessAction(successQuery));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed DELETE_INIT action', () => {
+        let res;
+        runner.queue(new ApiDeleteInitAction(failQuery));
+        effects.deleteResource$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new ApiDeleteFailAction(failQuery));
+        });
+        expect(res).toBeDefined();
+    });
+
+});

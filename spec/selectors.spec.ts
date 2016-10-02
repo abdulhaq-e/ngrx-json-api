@@ -29,6 +29,7 @@ import {
     // getRelationDefinition,
     get$,
     getOne$,
+    getAll$,
     getSingleTypeResources$,
     // getHasManyRelation,
     // getRelatedResources,

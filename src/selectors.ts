@@ -18,6 +18,8 @@ import {
     Resource,
     ResourceQuery,
     NgrxJsonApiStore,
+    NgrxJsonApiStoreData,
+    NgrxJsonApiStoreResources,
 } from './interfaces';
 import {
     denormaliseResource,

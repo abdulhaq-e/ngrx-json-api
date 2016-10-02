@@ -18,12 +18,11 @@ import {
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-
-import { API_URL, RESOURCES_DEFINITIONS } from './module';
 import {
     ResourceQuery,
     QueryParams,
-    ResourceDefinition
+    ResourceDefinition,
+    Document
 } from './interfaces';
 
 export class NgrxJsonApi {
@@ -42,8 +41,8 @@ export class NgrxJsonApi {
     ) {
     }
 
-    public create(payload) {
-        return this.all({ type: payload.type }).post(payload);
+    public create(payload: Document) {
+        return this.all({ type: payload.data.type }).post(payload);
     }
 
     public delete(query: ResourceQuery) {
@@ -57,8 +56,13 @@ export class NgrxJsonApi {
         return this.one(query).get(query.params);
     }
 
-    public update(payload) {
-        return this.one({ type: payload.type, id: payload.id }).patch(payload);
+    public update(payload: Document) {
+        return this.one(
+            {
+                type: payload.data.type,
+                id: payload.data.id
+            }
+        ).patch(payload);
     }
 
     private all(query: ResourceQuery) {
@@ -150,12 +154,12 @@ export class NgrxJsonApi {
         return this;
     }
 
-    private patch(payload) {
+    private patch(payload: Document) {
 
         let requestOptionsArgs = {
             method: RequestMethod.Patch,
             url: this.buildUrl(),
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ data: payload.data })
         };
 
         this.resetUrlBuilder();
@@ -163,11 +167,11 @@ export class NgrxJsonApi {
         return this.request(requestOptionsArgs);
     }
 
-    private post(payload) {
+    private post(payload: Document) {
         let requestOptionsArgs = {
             method: RequestMethod.Post,
             url: this.buildUrl(),
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ data: payload.data })
         };
 
         this.resetUrlBuilder();

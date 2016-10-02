@@ -133,12 +133,18 @@ describe('ngrx json api', () => {
     it('should perform a post request on a single resource',
         fakeAsync(inject([MockBackend], (mockBackend) => {
             mockBackend.connections.subscribe(c => {
-                // console.log(c.request);
+                console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts/1');
                 expect(c.request.method).toBe(1);
-                expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
+                expect(c.request._body).toBe(
+                    JSON.stringify({
+                        data: {
+                            title: 'Hello World!'
+                        }
+                    }));
             });
-            jsonapi.one({ type: 'Post', id: '1' }).post({ title: 'Hello World!' });
+            jsonapi.one({ type: 'Post', id: '1' })
+                .post({ data: { title: 'Hello World!' } });
             tick();
         })));
 
@@ -148,9 +154,17 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts');
                 expect(c.request.method).toBe(1);
-                expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
+                expect(c.request._body).toBe(JSON.stringify({
+                    data: {
+                        title: 'Hello World!'
+                    }
+                }));
             });
-            jsonapi.all({ type: 'Post' }).post({ title: 'Hello World!' });
+            jsonapi.all({ type: 'Post' }).post({
+                data: {
+                    title: 'Hello World!'
+                }
+            });
             tick();
         })));
 
@@ -175,9 +189,17 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts');
                 expect(c.request.method).toBe(6);
-                expect(c.request._body).toBe(JSON.stringify({ title: 'Hello World!' }));
+                expect(c.request._body).toBe(JSON.stringify({
+                    data: {
+                        title: 'Hello World!'
+                    }
+                }));
             });
-            jsonapi.all({ type: 'Post' }).patch({ title: 'Hello World!' });
+            jsonapi.all({ type: 'Post' }).patch({
+                data: {
+                    title: 'Hello World!'
+                }
+            });
             tick();
         })));
 
@@ -249,10 +271,15 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts');
                 expect(c.request.method).toBe(1);
-                expect(c.request._body).toBe(JSON.stringify(
-                    { title: 'Hello', type: 'Post' }));
+                expect(c.request._body).toBe(JSON.stringify({
+                    data: {
+                        title: 'Hello', type: 'Post'
+                    }
+                }));
             });
-            jsonapi.create({ title: 'Hello', type: 'Post' });
+            jsonapi.create({
+                data: { title: 'Hello', type: 'Post' }
+            });
             tick();
         })));
 
@@ -262,10 +289,15 @@ describe('ngrx json api', () => {
                 // console.log(c.request);
                 expect(c.request.url).toBe('myapi.com/posts/1');
                 expect(c.request.method).toBe(6);
-                expect(c.request._body).toBe(JSON.stringify(
-                    { title: 'Hello', id: '1', type: 'Post' }));
+                expect(c.request._body).toBe(JSON.stringify({
+                    data: { title: 'Hello', id: '1', type: 'Post' }
+                }));
             });
-            jsonapi.update({ title: 'Hello', id: '1', type: 'Post' });
+            jsonapi.update({
+                data: {
+                    title: 'Hello', id: '1', type: 'Post'
+                }
+            });
             tick();
         })));
 

@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { Effect, Actions } from '@ngrx/effects';
+import { Effect, Actions, toPayload } from '@ngrx/effects';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
@@ -26,7 +26,6 @@ import {
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { Payload } from './interfaces';
-import { toPayload } from './utils';
 
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
@@ -39,11 +38,11 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
-            return this.jsonApi.create({ type: payload.jsonApiData })
-                .mapTo(ApiCreateSuccessAction(payload))
+            return this.jsonApi.create(payload.jsonApiData)
+                .mapTo(new ApiCreateSuccessAction(payload))
                 .catch(() => Observable.of(
                     new ApiCreateFailAction(payload)
-                ))
+                ));
         });
 
     @Effect() updateResource$ = this.actions$
@@ -60,7 +59,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
             return this.jsonApi.find(payload.query)
-                .map(res => ({ data: res.json() }))
+                .map(res => ({ jsonApiData: res.json() }))
                 .map(data => new ApiReadSuccessAction(data))
                 .catch(() => Observable.of(new ApiReadFailAction(payload)));
         });

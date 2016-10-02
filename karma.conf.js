@@ -18,8 +18,8 @@ module.exports = function(karma) {
         exclude: [],
 
         preprocessors: {
-          'tests.bundle.ts': ['coverage', 'webpack', 'sourcemap']
-            // 'tests.js': ['coverage', 'webpack', 'sourcemap']
+            'tests.bundle.ts': ['coverage', 'webpack', 'sourcemap']
+                // 'tests.js': ['coverage', 'webpack', 'sourcemap']
         },
 
         reporters: ['mocha', 'coverage'],
@@ -48,25 +48,25 @@ module.exports = function(karma) {
         webpack: {
             devtool: 'inline-source-map',
             resolve: {
-                root: __dirname,
-                extensions: ['', '.ts', '.js']
+                modules: [path.resolve(__dirname, './'), 'node_modules'],
+                extensions: ['.ts', '.js']
             },
             module: {
-                loaders: [{
+                rules: [{
                     test: /\.ts?$/,
                     exclude: /(node_modules)/,
                     loader: 'awesome-typescript-loader',
                     query: {
-                    compilerOptions: {
-                      tsconfig: './tsconfig.json'
-                    }
-                },
+                        compilerOptions: {
+                            tsconfig: './tsconfig.json'
+                        }
+                    },
                 }, {
                     test: /\.json$/,
                     loader: 'json-loader',
-                }],
-                postLoaders: [{
+                }, {
                     test: /\.(js|ts)$/,
+                    enforce: 'post',
                     loader: 'istanbul-instrumenter-loader',
                     include: path.resolve(__dirname, 'lib'),
                     exclude: [

@@ -36,7 +36,7 @@ export interface Document {
 }
 
 export interface Payload {
-  jsonApiData?: {[key: string]: any};
+  jsonApiData?: Document;
   query?: ResourceQuery;
 }
 

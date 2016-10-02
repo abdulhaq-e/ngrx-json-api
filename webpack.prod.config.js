@@ -18,7 +18,7 @@ var config = {
         umdNamedDefine: true
     },
     module: {
-        loaders: [{
+        rules: [{
             test: /\.js$/,
             loader: 'babel',
             exclude: /(node_modules|bower_components)/
@@ -56,10 +56,10 @@ var config = {
     ],
 
     resolve: {
-        root: [path.resolve(__dirname, 'release'),
+        modules: [path.resolve(__dirname, 'release'),
             'node_modules'
         ],
-        extensions: ['', '.js']
+        extensions: ['.js']
     }
 };
 
