@@ -25,7 +25,7 @@ export const initialNgrxJsonApiState = {
     data: {}
 };
 
-export const NgrxStoreReducer: ActionReducer<any> =
+export const NgrxJsonApiStoreReducer: ActionReducer<any> =
     (state: NgrxJsonApiStore = initialNgrxJsonApiState, action: Action) => {
         let newState;
 

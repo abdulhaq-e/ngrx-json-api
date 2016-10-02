@@ -9,7 +9,7 @@
 1- Import what is is required, the ngModule and the reducer:
 
 ```typescript
-import { NgrxJsonApiModule, NgrxJsonApiStore } from 'ngrx-json-api'.
+import { NgrxJsonApiModule, NgrxJsonApiStoreReducer } from 'ngrx-json-api'.
 ```
 
 2- Create an array of resource definitions (see `src/interfaces.ts`):
@@ -35,10 +35,10 @@ let resourceDefinitions: Array<ResourceDefinition> = [
 ];
 ```
 
-3- Use `NgrxStoreReducer` as a reducer for the JSON API state.
+3- Use `NgrxJsonApiStoreReducer` as a reducer for the JSON API state.
 
 ```typescript
-StoreModule.provide({ counter: counterReducer, api: NgrxStoreReducer})
+StoreModule.provide({ counter: counterReducer, api: NgrxJsonApiStoreReducer})
 ```
 
 It's important to know where in the state lives `NgrxJsonApiStore` because it will be used in the next step (in the above example it's 'api')
