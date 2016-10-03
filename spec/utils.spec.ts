@@ -16,6 +16,8 @@ import {
     getSingleResource,
     getMultipleResources,
     getSingleTypeResources,
+    transformStoreData,
+    transformStoreResources,
     insertResource,
     updateOrInsertResource,
     updateResourceObject,
@@ -71,15 +73,35 @@ describe('selectors utils', () => {
     });
 
     describe('getSingleTypeResources', () => {
-        it('should get an array of resources of a given type', () => {
+        it('should get an NgrxJsonApiStoreResources given a type', () => {
             let obtainedResources = getSingleTypeResources(
                 { type: 'Blog' }, resources);
-            expect(obtainedResources[0].id).toEqual('1');
-            expect(obtainedResources[0].attributes.name).toEqual('Blog 1');
-            expect(obtainedResources[1].id).toEqual('2');
-            expect(obtainedResources[2].id).toEqual('3');
+            expect(obtainedResources['1'].id).toEqual('1');
+            expect(obtainedResources['1'].attributes.name).toEqual('Blog 1');
+            expect(obtainedResources['2'].id).toEqual('2');
+            expect(obtainedResources['3'].id).toEqual('3');
         });
     });
+
+    describe('transformStoreResources', () => {
+        it('should provide an array of all resources given a NgrxJsonApiStoreResources', () => {
+            let allResources = transformStoreResources(
+                getSingleTypeResources({ type: 'Article' }, resources));
+            expect(allResources.length).toEqual(2);
+            expect(allResources[0].type).toEqual("Article");
+            expect(allResources[0].id).toEqual("1");
+        });
+    });
+
+    describe('transformStoreData', () => {
+        it('should provide an array of all resources given a NgrxJsonApiStoreData', () => {
+            let allResources = transformStoreData(resources);
+            expect(allResources.length).toEqual(9);
+            expect(allResources[0].type).toEqual("Person");
+            expect(allResources[0].id).toEqual("1");
+        });
+    });
+
 
     describe('denormaliseResource and denormaliseObject', () => {
         it('should denormalise a resource with no relatios', () => {
@@ -292,6 +314,36 @@ describe('updateOrInsertResource', () => {
         expect(newState['Article']['2']).toBeDefined();
         expect(newState['Article']['1'].attributes.tag).toEqual('Whatever');
     })
+
+    it(`should insert related resources even if they were not included`, () => {
+        let state = {}
+        deepFreeze(state);
+
+        let newResource: Resource = {
+            type: 'Article',
+            id: '3',
+            relationships: {
+              author: {
+                data: { type: 'Person', id: '1' }
+              },
+              comments: {
+                data: [
+                  {type: 'Comment', id: '1'},
+                  {type: 'Comment', id: '2'}
+                ]
+              }
+            }
+        };
+        let newState = updateOrInsertResource(state, newResource);
+        expect(newState['Comment']['1']).toBeDefined();
+        expect(newState['Comment']['1'].id).toEqual('1');
+        expect(newState['Comment']['2']).toBeDefined();
+        expect(newState['Comment']['2'].id).toEqual('2');
+        expect(newState['Person']['1']).toBeDefined();
+        expect(newState['Person']['1'].id).toEqual('1');
+        expect(newState['Article']['3']).toBeDefined();
+    });
+
 });
 
 describe('updateStoreResources', () => {

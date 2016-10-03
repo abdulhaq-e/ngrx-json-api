@@ -26,33 +26,57 @@ import {
     getSingleResource,
     getMultipleResources,
     getSingleTypeResources,
+    transformStoreData,
+    transformStoreResources,
     filterResources
 } from './utils';
 
-export const getAll$ = () => {
-
+export const getAllRaw$ = () => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$
             .select(s => s.data);
     }
 }
 
-export const getOne$ = (query: ResourceQuery) => {
+export const getAll$ = () => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAll$())
+        return state$.let(getAllRaw$())
+            .map(resources => transformStoreData(resources))
+    }
+}
+
+export const getOneRaw$ = (query: ResourceQuery) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
+        return state$.let(getAllRaw$())
             .map(resources => getSingleResource(query, resources))
-            .mergeMap(resource => state$.let(getAll$())
+            .mergeMap(resource => state$.let(getAllRaw$())
                 .map(resources => denormaliseResource(resource, resources))
             );
 
     }
 }
 
+export const getOne$ = (query: ResourceQuery) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
+        return state$.let(getOneRaw$(query))
+            .mergeMap(resource => state$.let(getAllRaw$())
+                .map(resources => denormaliseResource(resource, resources))
+            );
+    }
+}
+
+export const getSingleTypeResourcesRaw$ = (query: ResourceQuery) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
+        return state$.let(getAllRaw$())
+            .map(resources => getSingleTypeResources(query, resources));
+    }
+}
+
 export const getSingleTypeResources$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAll$())
-            .map(resources => getSingleTypeResources(query, resources))
-            .mergeMap(singleTypeResources => state$.let(getAll$())
+        return state$.let(getSingleTypeResourcesRaw$(query))
+            .map(resources => transformStoreResources(resources))
+            .mergeMap(singleTypeResources => state$.let(getAllRaw$())
                 .map(resources => singleTypeResources.map(
                     resource => denormaliseResource(resource, resources))
                 ));
@@ -62,14 +86,14 @@ export const getSingleTypeResources$ = (query: ResourceQuery) => {
 export const get$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         if (!_.isUndefined(query.id) && !_.isUndefined(query.type)) {
-          // Only get a single resource given 'id' and 'type'
+            // Only get a single resource given 'id' and 'type'
             return state$.let(getOne$(query));
         } else if (!_.isUndefined(query.type)) {
-          // Only get resources of a given 'type' then filter
+            // Only get resources of a given 'type' then filter
             return state$.let(getSingleTypeResources$(query))
                 .map(resources => filterResources(resources, query));
         } else {
-          // Neither 'id' nor 'type' are given so get all resources and filter
+            // Neither 'id' nor 'type' are given so get all resources and filter
             return state$.let(getAll$())
                 .map(resources => filterResources(resources, query));
         }

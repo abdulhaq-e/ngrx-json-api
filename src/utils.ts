@@ -105,8 +105,25 @@ export const getMultipleResources = (
 
 export const getSingleTypeResources = (
     query: ResourceQuery,
+    resources: NgrxJsonApiStoreData): NgrxJsonApiStoreResources => {
+    return resources[query.type];
+}
+
+
+export const transformStoreResources = (
+    resources: NgrxJsonApiStoreResources): Array<Resource> => {
+
+    return <Array<Resource>>_.flatMap(resources);
+}
+
+export const transformStoreData = (
     resources: NgrxJsonApiStoreData): Array<Resource> => {
-    return <Array<Resource>>_.flatMap(resources[query.type]);
+
+    return Object.keys(resources).reduce((result, key) => {
+        return [...result, ...transformStoreResources(getSingleTypeResources(
+            { type: key }, resources))];
+    }, []);
+
 }
 
 
@@ -137,6 +154,24 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
     resource: Resource): NgrxJsonApiStoreData => {
 
     let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+
+    // handle relationships first.
+    if (resource.hasOwnProperty('relationships')) {
+        Object.keys(resource.relationships)
+            .forEach(relation => {
+                let data = resource.relationships[relation].data;
+                if (_.isPlainObject(data)) {
+                  // hasOne relation
+                  newState = updateOrInsertResource(state, data);
+                } else if (_.isArray(data)) {
+                    // hasMany relation
+                    newState = data.reduce<NgrxJsonApiStoreData>(
+                      (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
+                      return updateOrInsertResource(partialState, currentResource);
+                    }, newState);
+                }
+            });
+    }
 
     if (_.isUndefined(state[resource.type])) {
         // we must mutate the main state (ngrxjsonapistoredata)
@@ -315,11 +350,11 @@ export const filterResources = (resources, query: ResourceQuery) => {
 
 let typeCache: { [label: string]: boolean } = {};
 export function type<T>(label: T | ''): T {
-  if (typeCache[<string>label]) {
-    throw new Error(`Action type "${label}" is not unqiue"`);
-  }
+    if (typeCache[<string>label]) {
+        throw new Error(`Action type "${label}" is not unqiue"`);
+    }
 
-  typeCache[<string>label] = true;
+    typeCache[<string>label] = true;
 
-  return <T>label;
+    return <T>label;
 }
