@@ -94,6 +94,9 @@ export const denormaliseResource = (
 export const getSingleResource = (
     query: ResourceQuery,
     resources: NgrxJsonApiStoreData): Resource => {
+      if (_.isUndefined(resources[query.type])) {
+        return undefined;
+      }
     return resources[query.type][query.id];
 }
 
@@ -165,7 +168,7 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
                   newState = updateOrInsertResource(state, data);
                 } else if (_.isArray(data)) {
                     // hasMany relation
-                    newState = data.reduce<NgrxJsonApiStoreData>(
+                    newState = <NgrxJsonApiStoreData>data.reduce(
                       (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
                       return updateOrInsertResource(partialState, currentResource);
                     }, newState);

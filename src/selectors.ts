@@ -6,8 +6,11 @@ import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/let';
-import '@ngrx/core/add/operator/select';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
 
+import '@ngrx/core/add/operator/select';
 
 import { compose } from '@ngrx/core/compose';
 
@@ -113,10 +116,14 @@ export class NgrxJsonApiSelectors {
     }
 
     public get$(query: ResourceQuery) {
-        return compose(
-            get$(query),
-            this.getNgrxJsonApiStore(this.storeLocation)
-        );
+      return (state$: Observable<any>) => {
+        return state$.select(s => s[this.storeLocation])
+        .let(get$(query)).distinctUntilChanged();
+      }
+        // return compose(
+        //     get$(query),
+        //     this.getNgrxJsonApiStore(this.storeLocation)
+        // );
     }
 
 }

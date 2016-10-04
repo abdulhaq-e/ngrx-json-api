@@ -57,6 +57,12 @@ describe('selectors utils', () => {
             expect(getSingleResource({ type: 'Person', id: '10' }, resources))
                 .toBe(undefined);
         });
+
+        it('should return undefined if the resource type does not exist', () => {
+            expect(getSingleResource({ type: 'Tag'}, resources))
+                .toBe(undefined);
+        });
+
     });
 
     describe('getMultipleResources', () => {
@@ -182,7 +188,7 @@ describe('updateResourceObject', () => {
                 body: 'Testing JSON API',
                 title: 'JSON API paints my bikeshed!',
             },
-            relationshisp: {
+            relationships: {
                 author: {
                     data: { type: 'Person', id: '1' }
                 }
