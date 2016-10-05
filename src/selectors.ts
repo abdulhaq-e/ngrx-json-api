@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/let';
 import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
@@ -48,30 +49,10 @@ export const getAll$ = () => {
     }
 }
 
-export const getOneRaw$ = (query: ResourceQuery) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAllRaw$())
-            .map(resources => getSingleResource(query, resources))
-            .mergeMap(resource => state$.let(getAllRaw$())
-                .map(resources => denormaliseResource(resource, resources))
-            );
-
-    }
-}
-
-export const getOne$ = (query: ResourceQuery) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getOneRaw$(query))
-            .mergeMap(resource => state$.let(getAllRaw$())
-                .map(resources => denormaliseResource(resource, resources))
-            );
-    }
-}
-
 export const getSingleTypeResourcesRaw$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(getAllRaw$())
-            .map(resources => getSingleTypeResources(query, resources));
+            .map(resources => resources[query.type]);
     }
 }
 
@@ -79,12 +60,36 @@ export const getSingleTypeResources$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(getSingleTypeResourcesRaw$(query))
             .map(resources => transformStoreResources(resources))
-            .mergeMap(singleTypeResources => state$.let(getAllRaw$())
-                .map(resources => singleTypeResources.map(
-                    resource => denormaliseResource(resource, resources))
-                ));
+            .combineLatest(state$.let(getAllRaw$()),
+            (singleTypeResources, resources) => {
+                return singleTypeResources.map(resource => denormaliseResource(resource, resources));
+            });
     }
 }
+
+export const getOneRaw$ = (query: ResourceQuery) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
+        return state$.let(getSingleTypeResourcesRaw$(query))
+            .map(resources => resources[query.id]);
+        // .mergeMap(resource => state$.let(getAllRaw$())
+        //     .map(resources => denormaliseResource(resource, resources))
+        // );
+
+    }
+}
+
+export const getOne$ = (query: ResourceQuery) => {
+    return (state$: Observable<NgrxJsonApiStore>) => {
+        return state$.let(getOneRaw$(query))
+            .combineLatest(state$.let(getAllRaw$()),
+            (resource, resources) => {
+                return denormaliseResource(resource, resources);
+            });
+    }
+}
+
+
+
 
 export const get$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
@@ -116,10 +121,10 @@ export class NgrxJsonApiSelectors {
     }
 
     public get$(query: ResourceQuery) {
-      return (state$: Observable<any>) => {
-        return state$.select(s => s[this.storeLocation])
-        .let(get$(query)).distinctUntilChanged();
-      }
+        return (state$: Observable<any>) => {
+            return state$.select(s => s[this.storeLocation])
+                .let(get$(query)).distinctUntilChanged();
+        }
         // return compose(
         //     get$(query),
         //     this.getNgrxJsonApiStore(this.storeLocation)

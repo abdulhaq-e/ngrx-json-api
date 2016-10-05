@@ -29,8 +29,10 @@ import {
     // getRelationDefinition,
     get$,
     getOne$,
+    getOneRaw$,
     getAllRaw$,
     getSingleTypeResources$,
+    getSingleTypeResourcesRaw$,
     // getHasManyRelation,
     // getRelatedResources,
     // getRelated,
@@ -57,6 +59,20 @@ describe('individual selectors', () => {
     });
     let obs = Observable.of(store);
 
+    describe('getOneRaw$', () => {
+        it('should get a single resource given a type and id', fakeAsync(() => {
+            let res;
+            let sub = obs.
+                let(getOneRaw$({type: 'Article', id: '1'}))
+                .subscribe(d => res = d);
+            tick();
+            expect(res.title).not.toBeDefined();
+            expect(res.attributes.title).toEqual('Article 1');
+            expect(res.type).toEqual('Article');
+            expect(res.id).toEqual('1');
+        }));
+    });
+
     describe('getOne$', () => {
         it('should get a single resource given a type and id', fakeAsync(() => {
             let res;
@@ -67,6 +83,23 @@ describe('individual selectors', () => {
             expect(res.title).toEqual('Article 1');
             expect(res.type).toEqual('Article');
             expect(res.id).toEqual('1');
+        }));
+    });
+
+    describe('getSingleTypeResourcesRaw$', () => {
+        it('should get all denormalised resources of a given type', fakeAsync(() => {
+            let res;
+            let sub = obs.
+                let(getSingleTypeResourcesRaw$({type: 'Article'}))
+                .subscribe(d => res = d);
+            tick();
+            expect(res['1']).toBeDefined();
+            expect(res['2']).toBeDefined();
+            expect(res['1'].attributes.title).toEqual('Article 1');
+            expect(res['1'].id).toEqual('1');
+            expect(res['2'].attributes.title).toEqual('Article 2');
+            expect(res['2'].id).toEqual('2');
+            expect(res['3']).not.toBeDefined();
         }));
     });
 
