@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { Actions } from '@ngrx/effects';
 
 import {
+    FilteringParams,
     Resource,
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
@@ -94,9 +95,9 @@ export const denormaliseResource = (
 export const getSingleResource = (
     query: ResourceQuery,
     resources: NgrxJsonApiStoreData): Resource => {
-      if (_.isUndefined(resources[query.type])) {
+    if (_.isUndefined(resources[query.type])) {
         return undefined;
-      }
+    }
     return resources[query.type][query.id];
 }
 
@@ -164,14 +165,14 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
             .forEach(relation => {
                 let data = resource.relationships[relation].data;
                 if (_.isPlainObject(data)) {
-                  // hasOne relation
-                  newState = updateOrInsertResource(state, data);
+                    // hasOne relation
+                    newState = updateOrInsertResource(state, data);
                 } else if (_.isArray(data)) {
                     // hasMany relation
                     newState = <NgrxJsonApiStoreData>data.reduce(
-                      (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
-                      return updateOrInsertResource(partialState, currentResource);
-                    }, newState);
+                        (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
+                            return updateOrInsertResource(partialState, currentResource);
+                        }, newState);
                 }
             });
     }
@@ -360,4 +361,47 @@ export function type<T>(label: T | ''): T {
     typeCache[<string>label] = true;
 
     return <T>label;
+}
+
+export const generateIncludedQueryParam = (included: Array<string>): string => {
+    if (_.isEmpty(included)) {
+        return '';
+    }
+
+    return 'include=' + included.join();
+
+}
+
+export const generateFilteringParams = (filtering: Array<FilteringParams>): string => {
+
+    if (_.isEmpty(filtering)) {
+      return '';
+    }
+    let filteringParams = filtering.map(f => 'filter[' + f.api + ']=' + f.value);
+
+    return filteringParams.join('&');
+
+}
+
+export const generateQueryParams = (first: string, second: string) => {
+
+  let arrayOfParams: Array<string> = []
+
+  if (first !== '') {
+    arrayOfParams.push(first);
+  }
+
+  if (second !== '') {
+    arrayOfParams.push(second);
+  }
+
+  let queryParams = '?' + arrayOfParams.join('&');
+
+  // if both params are empty string, queryParams will end up to be '?',
+  // we don't want this to happen
+  if (queryParams !== '?') {
+    return queryParams;
+  }
+
+  return '';
 }

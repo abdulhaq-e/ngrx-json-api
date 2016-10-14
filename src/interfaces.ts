@@ -9,8 +9,16 @@ export interface ResourceDefinition {
   collectionPath: string;
 };
 
+export interface FilteringParams {
+  field?: string;
+  value?: any;
+  type?: string;
+  path?: string;
+  api?: string;
+}
+
 export interface QueryParams {
-  filtering?: Array<{field: string, value: any, type?: string, path?: string}>
+  filtering?: Array<FilteringParams>
   include?: Array<string>
 }
 

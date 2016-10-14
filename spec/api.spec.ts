@@ -130,6 +130,23 @@ describe('ngrx json api', () => {
             tick();
         })));
 
+    it('should perform a get request with queryParams',
+        fakeAsync(inject([MockBackend], (mockBackend) => {
+            mockBackend.connections.subscribe(c => {
+                expect(c.request.url).toBe(
+                    'myapi.com/posts?include=person,comments&filter[person__name]=smith&filter[person__age]=20');
+                expect(c.request.method).toBe(0);
+            });
+            jsonapi.all({ type: 'Post' }).get({
+                filtering: [
+                    { api: 'person__name', value: 'smith' },
+                    { api: 'person__age', value: 20 }
+                ],
+                include: ['person', 'comments']
+            });
+            tick();
+        })));
+
     it('should perform a post request on a single resource',
         fakeAsync(inject([MockBackend], (mockBackend) => {
             mockBackend.connections.subscribe(c => {
@@ -315,19 +332,4 @@ describe('ngrx json api', () => {
             tick();
         })));
 
-    it('should perform a get request with query params',
-        fakeAsync(inject([MockBackend], (mockBackend) => {
-            mockBackend.connections.subscribe(c => {
-                expect(c.request.url).toBe(
-                    `myapi.com/posts?include=author,author.blog&filter%5Bid%5D=1&filter%5Bautho%5D=2`
-                );
-                expect(c.request.method).toBe(0);
-            });
-            jsonapi.all({ type: 'Post' }).get({
-                include: ['author', 'author.blog'],
-                filtering: [{ type: 'id', value: '1' },
-                    { type: 'autho', value: '2' }],
-            });
-            tick();
-        })));
 });

@@ -25,6 +25,12 @@ import {
     Document
 } from './interfaces';
 
+import {
+    generateIncludedQueryParam,
+    generateFilteringParams,
+    generateQueryParams
+} from './utils';
+
 export class NgrxJsonApi {
 
     public headers: Headers = new Headers({
@@ -108,38 +114,24 @@ export class NgrxJsonApi {
     }
 
     private get(params: QueryParams = {}) {
-
-        let requestParams = new URLSearchParams();
+        let queryParams = '';
+        let includedParam: string = '';
+        let filteringParams: string = '';
 
         if (!_.isEmpty(params)) {
             if (_.hasIn(params, 'include')) {
-                requestParams.append('include', params.include.join(','));
+                includedParam = generateIncludedQueryParam(params.include);
             }
-
-            // TODO: refactor, extremely ugly!
-
-            // let filters = [params.filtering[0].value];
-            //
-            // params.filtering.slice(1).forEach(f => {
-            //   filters.push('[' + f.type + ']' + '=' + f.value)
-            // })
-            // requestParams.append(
-            //   'filter' + '[' + params.filtering[0].type + ']', filters.join(','));
-
-            // the code below doesn't satisfy JSON API recommendation:
             if (_.hasIn(params, 'filtering')) {
-                params.filtering.forEach(f => {
-                    requestParams.append('filter' + '[' + f.type + ']', f.value);
-                });
+                filteringParams = generateFilteringParams(params.filtering);
             }
         }
 
-        // TODO: implement param conversion.
+        queryParams = generateQueryParams(includedParam, filteringParams);
 
         let requestOptionsArgs = {
             method: RequestMethod.Get,
-            url: this.buildUrl(),
-            search: requestParams
+            url: this.buildUrl() + queryParams,
         };
 
         this.resetUrlBuilder();

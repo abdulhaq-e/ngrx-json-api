@@ -16,6 +16,9 @@ import {
     getSingleResource,
     getMultipleResources,
     getSingleTypeResources,
+    generateIncludedQueryParam,
+    generateFilteringParams,
+    generateQueryParams,
     transformStoreData,
     transformStoreResources,
     insertResource,
@@ -59,7 +62,7 @@ describe('selectors utils', () => {
         });
 
         it('should return undefined if the resource type does not exist', () => {
-            expect(getSingleResource({ type: 'Tag'}, resources))
+            expect(getSingleResource({ type: 'Tag' }, resources))
                 .toBe(undefined);
         });
 
@@ -329,15 +332,15 @@ describe('updateOrInsertResource', () => {
             type: 'Article',
             id: '3',
             relationships: {
-              author: {
-                data: { type: 'Person', id: '1' }
-              },
-              comments: {
-                data: [
-                  {type: 'Comment', id: '1'},
-                  {type: 'Comment', id: '2'}
-                ]
-              }
+                author: {
+                    data: { type: 'Person', id: '1' }
+                },
+                comments: {
+                    data: [
+                        { type: 'Comment', id: '1' },
+                        { type: 'Comment', id: '2' }
+                    ]
+                }
             }
         };
         let newState = updateOrInsertResource(state, newResource);
@@ -465,6 +468,55 @@ describe('filterResources (TODO: test remaining types)', () => {
         expect(filtered[0].type).toBe('Article');
     });
 
+});
 
+describe('generateIncludedQueryParam', () => {
+    it('should generate an included query param given an array of resources to be included', () => {
+        let params = generateIncludedQueryParam(['comments', 'comments.author'])
+
+        expect(params).toEqual('include=comments,comments.author')
+    })
+
+    it('should return an empty string if the array is empty', () => {
+        let params = generateIncludedQueryParam([])
+        expect(params).toEqual('')
+    })
 
 });
+
+describe('generateFilteringParams', () => {
+    it('should generate filter params given an array of filters', () => {
+
+        let params = generateFilteringParams([
+            {
+                api: 'person__name', value: 'Smith'
+            },
+            {
+                api: 'person__age', value: 20
+            }
+        ]);
+        expect(params).toEqual('filter[person__name]=Smith&filter[person__age]=20')
+    });
+
+    it('should return an empty string given an empty array of filters', () => {
+
+        let params = generateFilteringParams([]);
+
+        expect(params).toEqual('');
+    });
+});
+
+describe('generateQueryParams', () => {
+    it('should generate query params given included and filtering params', () => {
+
+        let params = generateQueryParams(
+            'filter[person__name]=Smith&filter[person__age]=20',
+            'include=comments,comments.author'
+        );
+
+        expect(params).toEqual(
+            ('?filter[person__name]=Smith&filter[person__age]=20' + '&' +
+                'include=comments,comments.author')
+        )
+    });
+})
