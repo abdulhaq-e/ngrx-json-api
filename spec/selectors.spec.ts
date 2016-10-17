@@ -74,7 +74,7 @@ describe('individual selectors', () => {
     });
 
     describe('getOne$', () => {
-        it('should get a single resource given a type and id', fakeAsync(() => {
+        it('should get a single denormalised resource given a type and id', fakeAsync(() => {
             let res;
             let sub = obs.
                 let(getOne$({type: 'Article', id: '1'}))
@@ -87,7 +87,7 @@ describe('individual selectors', () => {
     });
 
     describe('getSingleTypeResourcesRaw$', () => {
-        it('should get all denormalised resources of a given type', fakeAsync(() => {
+        it('should get all resources of a given type in raw form', fakeAsync(() => {
             let res;
             let sub = obs.
                 let(getSingleTypeResourcesRaw$({type: 'Article'}))
