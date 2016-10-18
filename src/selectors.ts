@@ -70,7 +70,12 @@ export const getSingleTypeResources$ = (query: ResourceQuery) => {
 export const getOneRaw$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(getSingleTypeResourcesRaw$(query))
-            .map(resources => resources[query.id]);
+            .map(resources => {
+                if (typeof resources === 'undefined') {
+                    return undefined;
+                }
+                return resources[query.id];
+            });
         // .mergeMap(resource => state$.let(getAllRaw$())
         //     .map(resources => denormaliseResource(resource, resources))
         // );

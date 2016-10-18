@@ -63,7 +63,7 @@ describe('individual selectors', () => {
         it('should get a single resource given a type and id', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getOneRaw$({type: 'Article', id: '1'}))
+                let(getOneRaw$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res.title).not.toBeDefined();
@@ -71,13 +71,22 @@ describe('individual selectors', () => {
             expect(res.type).toEqual('Article');
             expect(res.id).toEqual('1');
         }));
+
+        it('should return undefined if the type does not exist', fakeAsync(() => {
+            let res;
+            let sub = Observable.of(Object.assign({}, initialNgrxJsonApiState))
+                .let(getOneRaw$({ type: 'Article', id: '1' }))
+                .subscribe(d => res = d);
+            tick();
+            expect(res).not.toBeDefined();
+        }));
     });
 
     describe('getOne$', () => {
         it('should get a single denormalised resource given a type and id', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getOne$({type: 'Article', id: '1'}))
+                let(getOne$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res.title).toEqual('Article 1');
@@ -90,7 +99,7 @@ describe('individual selectors', () => {
         it('should get all resources of a given type in raw form', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getSingleTypeResourcesRaw$({type: 'Article'}))
+                let(getSingleTypeResourcesRaw$({ type: 'Article' }))
                 .subscribe(d => res = d);
             tick();
             expect(res['1']).toBeDefined();
@@ -107,7 +116,7 @@ describe('individual selectors', () => {
         it('should get all denormalised resources of a given type', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getSingleTypeResources$({type: 'Article'}))
+                let(getSingleTypeResources$({ type: 'Article' }))
                 .subscribe(d => res = d);
             tick();
             expect(res[0]).toBeDefined();
@@ -130,18 +139,18 @@ describe('individual selectors', () => {
             let sub = obs
                 .let(get$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
-            obs.let(getOne$({type: 'Article', id: '1'}))
-            .subscribe(r => expect(r).toEqual(res));
+            obs.let(getOne$({ type: 'Article', id: '1' }))
+                .subscribe(r => expect(r).toEqual(res));
             tick();
         }));
 
         it('should use getSingleTypeResources$ given a type only', fakeAsync(() => {
             let res;
             let sub = obs
-                .let(get$({ type: 'Article'}))
+                .let(get$({ type: 'Article' }))
                 .subscribe(d => res = d);
-            obs.let(getSingleTypeResources$({type: 'Article'}))
-            .subscribe(r => expect(r).toEqual(res));
+            obs.let(getSingleTypeResources$({ type: 'Article' }))
+                .subscribe(r => expect(r).toEqual(res));
             tick();
         }));
 
