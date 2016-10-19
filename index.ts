@@ -7,3 +7,4 @@ export * from './src/reducers';
 export * from './src/selectors';
 export * from './src/testing';
 export * from './src/utils';
+export * from './src/services';

@@ -4,12 +4,15 @@ import {
     Http, HttpModule
 } from '@angular/http';
 
+import { Store } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
+import { NgrxJsonApiService } from './services';
+
 import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
 export const API_URL = new OpaqueToken('API_URL');
@@ -27,7 +30,13 @@ export const apiFactory = (
 };
 
 export const selectorsFactory = (storeLocation: string) => {
-    return new NgrxJsonApiSelectors(storeLocation);
+    return new NgrxJsonApiSelectors<any>(storeLocation);
+}
+
+export const serviceFactory = (
+    store: Store<any>,
+    selectors: NgrxJsonApiSelectors<any>) => {
+    return new NgrxJsonApiService<any>(store, selectors);
 }
 
 export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
@@ -51,6 +60,11 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
         },
         {
             provide: RESOURCE_DEFINITIONS, useValue: config.resourceDefinitions
+        },
+        {
+            provide: NgrxJsonApiService,
+            useFactory: serviceFactory,
+            deps: [Store, NgrxJsonApiSelectors]
         }
     ]
 }

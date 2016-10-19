@@ -113,20 +113,20 @@ export const get$ = (query: ResourceQuery) => {
     };
 };
 
-export class NgrxJsonApiSelectors {
+export class NgrxJsonApiSelectors<T> {
 
     constructor(private storeLocation: string) {
         this.storeLocation = storeLocation;
     }
 
     private getNgrxJsonApiStore(storeLocation: string) {
-        return (state$: Observable<any>) => {
+        return (state$: Observable<T>) => {
             return state$.select(s => s[storeLocation]);
         }
     }
 
     public get$(query: ResourceQuery) {
-        return (state$: Observable<any>) => {
+        return (state$: Observable<T>) => {
             return state$.select(s => s[this.storeLocation])
                 .let(get$(query)).distinctUntilChanged();
         }
