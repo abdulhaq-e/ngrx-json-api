@@ -17,12 +17,16 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/throw';
+
 
 import {
+    Document,
+    Payload,
+    ResourceDefinition,
     ResourceQuery,
     QueryParams,
-    ResourceDefinition,
-    Document
+    QueryType,
 } from './interfaces';
 
 import {
@@ -37,8 +41,7 @@ export class NgrxJsonApi {
         'Content-Type': 'application/vnd.api+json',
         'Accept': 'application/vnd.api+json'
     });
-    public models: { [key: string]: any };
-    public urlBuilder = [];
+    public requestUrl: string;;
 
     constructor(
         private http: Http,
@@ -47,43 +50,17 @@ export class NgrxJsonApi {
     ) {
     }
 
-    public create(payload: Document) {
-        return this.all({ type: payload.data.type }).post(payload);
-    }
-
-    public delete(query: ResourceQuery) {
-        return this.one(query).destroy();
-    }
-
-    public find(query: ResourceQuery) {
-        if (typeof query.id === 'undefined') {
-            return this.findAll(query);
+    private urlBuilder(query: ResourceQuery) {
+        switch (query.queryType) {
+            case 'getOne':
+            case 'deleteOne':
+            case 'update':
+                return this.resourceUrlFor(query.type, query.id);
+            case 'getMany':
+            case 'create':
+                return this.collectionUrlFor(query.type);
         }
-        return this.one(query).get(query.params);
-    }
 
-    public update(payload: Document) {
-        return this.one(
-            {
-                type: payload.data.type,
-                id: payload.data.id
-            }
-        ).patch(payload);
-    }
-
-    private all(query: ResourceQuery) {
-        this.urlBuilder.push({
-            path: this.collectionPathFor(query.type)
-        });
-        return this;
-    }
-
-    private buildPath() {
-        return _.map(this.urlBuilder, 'path').join('/');
-    }
-
-    private buildUrl() {
-        return `${this.apiUrl}/${this.buildPath()}`;
     }
 
     private collectionPathFor(type: string) {
@@ -97,33 +74,33 @@ export class NgrxJsonApi {
         return `${this.apiUrl}/${collectionPath}`;
     }
 
-    private destroy() {
-
-        let requestOptions = {
-            method: RequestMethod.Delete,
-            url: this.buildUrl()
-        };
-
-        this.resetUrlBuilder();
-
-        return this.request(requestOptions);
+    private resourcePathFor(type: string, id: string) {
+        let collectionPath = this.collectionPathFor(type);
+        return `${collectionPath}/${encodeURIComponent(id)}`;
     }
 
-    private findAll(query: ResourceQuery) {
-        return this.all(query).get(query.params);
+    private resourceUrlFor(type: string, id: string) {
+        let resourcePath = this.resourcePathFor(type, id);
+        return `${this.apiUrl}/${resourcePath}`;
     }
 
-    private get(params: QueryParams = {}) {
+    public find(payload: Payload) {
+
+        let query = payload.query;
         let queryParams = '';
         let includedParam: string = '';
         let filteringParams: string = '';
 
-        if (!_.isEmpty(params)) {
-            if (_.hasIn(params, 'include')) {
-                includedParam = generateIncludedQueryParam(params.include);
+        if (typeof query === undefined) {
+            return Observable.throw('Query not found');
+        }
+
+        if (query.hasOwnProperty('params') && !_.isEmpty(query.params)) {
+            if (_.hasIn(query.params, 'include')) {
+                includedParam = generateIncludedQueryParam(query.params.include);
             }
-            if (_.hasIn(params, 'filtering')) {
-                filteringParams = generateFilteringParams(params.filtering);
+            if (_.hasIn(query.params, 'filtering')) {
+                filteringParams = generateFilteringParams(query.params.filtering);
             }
         }
 
@@ -131,59 +108,72 @@ export class NgrxJsonApi {
 
         let requestOptionsArgs = {
             method: RequestMethod.Get,
-            url: this.buildUrl() + queryParams,
+            url: this.urlBuilder(query) + queryParams,
         };
-
-        this.resetUrlBuilder();
 
         return this.request(requestOptionsArgs);
     }
 
-    private one(query: ResourceQuery) {
-        this.urlBuilder.push({
-            path: this.resourcePathFor(query.type, query.id)
-        });
-        return this;
-    }
+    public create(payload: Payload) {
 
-    private patch(payload: Document) {
+        let query = payload.query
+        let document = payload.jsonApiData;
 
-        let requestOptionsArgs = {
-            method: RequestMethod.Patch,
-            url: this.buildUrl(),
-            body: JSON.stringify({ data: payload.data })
-        };
+        if (typeof query === undefined) {
+            return Observable.throw('Query not found');
+        }
 
-        this.resetUrlBuilder();
+        if (typeof document === undefined) {
+            return Observable.throw('Query not found');
+        }
 
-        return this.request(requestOptionsArgs);
-    }
-
-    private post(payload: Document) {
         let requestOptionsArgs = {
             method: RequestMethod.Post,
-            url: this.buildUrl(),
-            body: JSON.stringify({ data: payload.data })
+            url: this.urlBuilder(query),
+            body: JSON.stringify({ data: document.data })
         };
-
-        this.resetUrlBuilder();
 
         return this.request(requestOptionsArgs);
     }
 
-    private resetUrlBuilder() {
-        this.urlBuilder = [];
+    public update(payload: Payload) {
+
+        let query = payload.query;
+        let document = payload.jsonApiData;
+
+        if (typeof query === undefined) {
+            return Observable.throw('Query not found');
+        }
+
+        if (typeof document === undefined) {
+            return Observable.throw('Query not found');
+        }
+        let requestOptionsArgs = {
+            method: RequestMethod.Patch,
+            url: this.urlBuilder(query),
+            body: JSON.stringify({ data: document.data })
+        };
+
+        return this.request(requestOptionsArgs);
     }
 
-    private resourcePathFor(type: string, id: string) {
-        let collectionPath = this.collectionPathFor(type);
-        return `${collectionPath}/${encodeURIComponent(id)}`;
+
+    public delete(payload: Payload) {
+
+        let query = payload.query;
+
+        if (typeof query === undefined) {
+            return Observable.throw('Query not found');
+        }
+
+        let requestOptions = {
+            method: RequestMethod.Delete,
+            url: this.urlBuilder(query)
+        };
+
+        return this.request(requestOptions);
     }
 
-    private resourceUrlFor(type: string, id) {
-        let resourcePath = this.resourcePathFor(type, id);
-        return `${this.apiUrl}/${resourcePath}`;
-    }
 
     private request(requestOptionsArgs) {
 

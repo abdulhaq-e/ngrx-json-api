@@ -56,6 +56,10 @@ describe('NgrxJsonApiEffects', () => {
             data: {
                 type: 'SUCCESS'
             }
+        },
+        query: {
+            queryType: 'create',
+            type: 'SUCCESS'
         }
     };
     let failPayload = {
@@ -63,6 +67,10 @@ describe('NgrxJsonApiEffects', () => {
             data: {
                 type: 'FAIL'
             }
+        },
+        query: {
+            queryType: 'create',
+            type: 'SUCCESS'
         }
     };
     let successQuery = {
@@ -127,7 +135,10 @@ describe('NgrxJsonApiEffects', () => {
         effects.readResource$.subscribe(result => {
             res = result;
             expect(result).toEqual(
-                new ApiReadSuccessAction(successPayload));
+                new ApiReadSuccessAction({
+                    jsonApiData: result.payload.jsonApiData,
+                    query: successQuery.query
+                }));
         });
         expect(res).toBeDefined();
     });

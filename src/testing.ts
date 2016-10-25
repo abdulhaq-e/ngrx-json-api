@@ -5,30 +5,30 @@ import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
 import { NgrxJsonApi } from './api';
-import { Document } from './interfaces';
+import { Payload } from './interfaces';
 
 
 export class JsonApiMock {
     constructor() { }
 
-    create(payload: Document) {
-        if (payload.data.type === 'SUCCESS') {
+    create(payload: Payload) {
+        if (payload.jsonApiData.data.type === 'SUCCESS') {
             return Observable.of('SUCCESS');
-        } else if (payload.data.type === 'FAIL') {
+        } else if (payload.jsonApiData.data.type === 'FAIL') {
             return Observable.throw('FAIL');
         }
     }
 
-    update(payload: Document) {
-        if (payload.data.type === 'SUCCESS') {
+    update(payload: Payload) {
+        if (payload.jsonApiData.data.type === 'SUCCESS') {
             return Observable.of('SUCCESS');
-        } else if (payload.data.type === 'FAIL') {
+        } else if (payload.jsonApiData.data.type === 'FAIL') {
             return Observable.throw('FAIL');
         }
     }
 
-    find(query) {
-        if (query.type === 'SUCCESS') {
+    find(payload: Payload) {
+        if (payload.query.type === 'SUCCESS') {
             let res = {
                 data: {
                     type: 'SUCCESS'
@@ -40,7 +40,7 @@ export class JsonApiMock {
                     status: 200
                 })
             ));
-        } else if (query.type === 'FAIL') {
+        } else if (payload.query.type === 'FAIL') {
             let res = {
                 data: {
                     type: 'FAIL'
@@ -52,11 +52,11 @@ export class JsonApiMock {
         }
     }
 
-    delete(query) {
-        if (query.type === 'SUCCESS') {
+    delete(payload: Payload) {
+        if (payload.query.type === 'SUCCESS') {
             return Observable.of(new Response(
                 new ResponseOptions({})));
-        } else if (query.type === 'FAIL') {
+        } else if (payload.query.type === 'FAIL') {
             return Observable.throw(new Response(
                 new ResponseOptions({ status: 404 })));
         }

@@ -6,7 +6,10 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/switchMapTo';
 import 'rxjs/add/operator/mapTo';
+
 
 import {
     NgrxJsonApiActionTypes,
@@ -38,7 +41,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
-            return this.jsonApi.create(payload.jsonApiData)
+            return this.jsonApi.create(payload)
                 .mapTo(new ApiCreateSuccessAction(payload))
                 .catch(() => Observable.of(
                     new ApiCreateFailAction(payload)
@@ -49,7 +52,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .ofType(NgrxJsonApiActionTypes.API_UPDATE_INIT)
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
-            return this.jsonApi.update(payload.jsonApiData)
+            return this.jsonApi.update(payload)
                 .mapTo(new ApiUpdateSuccessAction(payload))
                 .catch(() => Observable.of(new ApiUpdateFailAction(payload)));
         });
@@ -58,9 +61,12 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .ofType(NgrxJsonApiActionTypes.API_READ_INIT)
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
-            return this.jsonApi.find(payload.query)
-                .map(res => ({ jsonApiData: res.json() }))
-                .map(data => new ApiReadSuccessAction(data))
+            return this.jsonApi.find(payload)
+                .map(res => res.json())
+                .map(data => new ApiReadSuccessAction({
+                  jsonApiData: data,
+                  query: payload.query
+                }))
                 .catch(() => Observable.of(new ApiReadFailAction(payload)));
         });
 
@@ -68,7 +74,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
         .map<Payload>(toPayload)
         .mergeMap((payload: Payload) => {
-            return this.jsonApi.delete(payload.query)
+            return this.jsonApi.delete(payload)
                 .mapTo(new ApiDeleteSuccessAction(payload))
                 .catch(() => Observable.of(new ApiDeleteFailAction(payload)));
         });
