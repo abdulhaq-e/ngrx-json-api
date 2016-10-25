@@ -14,7 +14,8 @@ import {
 } from './actions';
 import {
   ResourceQuery,
-  Payload
+  Payload,
+  QueryType
 } from './interfaces';
 
 @Injectable()
@@ -24,24 +25,24 @@ export class NgrxJsonApiService<T> {
     private store: Store<T>,
     private selectors: NgrxJsonApiSelectors<T>) {}
 
-  public select$(query: ResourceQuery) {
-    return this.selectors.get$(query);
+  public select$(queryType: QueryType, query: ResourceQuery) {
+    return this.selectors.get$(queryType, query);
   }
 
   public create(payload: Payload) {
-    return this.store.dispatch(new ApiCreateInitAction(payload));
+    this.store.dispatch(new ApiCreateInitAction(payload));
   }
 
   public read(payload: Payload) {
-    return this.store.dispatch(new ApiReadInitAction(payload));
+    this.store.dispatch(new ApiReadInitAction(payload));
   }
 
   public update(payload: Payload) {
-    return this.store.dispatch(new ApiUpdateInitAction(payload));
+    this.store.dispatch(new ApiUpdateInitAction(payload));
   }
 
   public delete(payload: Payload) {
-    return this.store.dispatch(new ApiDeleteInitAction(payload));
+    this.store.dispatch(new ApiDeleteInitAction(payload));
   }
 
   public deleteFromState(payload: Payload) {

@@ -22,6 +22,8 @@ export interface QueryParams {
   include?: Array<string>
 }
 
+export type QueryType = 'getOne' | 'getMany' | 'getAll';
+
 export interface ResourceQuery {
   type?: string;
   id?: string;

@@ -80,6 +80,15 @@ describe('individual selectors', () => {
             tick();
             expect(res).not.toBeDefined();
         }));
+
+        it('should return undefined if the id is not given', fakeAsync(() => {
+            let res;
+            let sub = Observable.of(Object.assign({}, initialNgrxJsonApiState))
+                .let(getOneRaw$({ type: 'Article'}))
+                .subscribe(d => res = d);
+            tick();
+            expect(res).not.toBeDefined();
+        }));
     });
 
     describe('getOne$', () => {
@@ -110,6 +119,15 @@ describe('individual selectors', () => {
             expect(res['2'].id).toEqual('2');
             expect(res['3']).not.toBeDefined();
         }));
+
+        it('should return undefined if the resource type is not given', fakeAsync(() => {
+          let res;
+          let sub = obs.
+              let(getSingleTypeResourcesRaw$({}))
+              .subscribe(d => res = d);
+          tick();
+          expect(res).not.toBeDefined();
+        }));
     });
 
     describe('getSingleTypeResources$', () => {
@@ -137,7 +155,7 @@ describe('individual selectors', () => {
         it('should use getOne$ given a type and id', fakeAsync(() => {
             let res;
             let sub = obs
-                .let(get$({ type: 'Article', id: '1' }))
+                .let(get$('getOne', { type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             obs.let(getOne$({ type: 'Article', id: '1' }))
                 .subscribe(r => expect(r).toEqual(res));
@@ -147,7 +165,7 @@ describe('individual selectors', () => {
         it('should use getSingleTypeResources$ given a type only', fakeAsync(() => {
             let res;
             let sub = obs
-                .let(get$({ type: 'Article' }))
+                .let(get$('getMany', { type: 'Article' }))
                 .subscribe(d => res = d);
             obs.let(getSingleTypeResources$({ type: 'Article' }))
                 .subscribe(r => expect(r).toEqual(res));
@@ -195,7 +213,7 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get$({ type: 'Article' }))
+                .let(selectors.get$('getMany', { type: 'Article' }))
                 .subscribe(d => res = d);
             tick();
             expect(res[0]).toBeDefined();
@@ -213,7 +231,7 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get$({ type: 'Article', id: '1' }))
+                .let(selectors.get$('getOne', { type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res).toBeDefined();

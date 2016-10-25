@@ -24,6 +24,7 @@ import {
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
+    QueryType,
 } from './interfaces';
 import {
     denormaliseResource,
@@ -71,7 +72,7 @@ export const getOneRaw$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$.let(getSingleTypeResourcesRaw$(query))
             .map(resources => {
-                if (typeof resources === 'undefined') {
+                if (typeof resources === 'undefined' || !query.hasOwnProperty('id')) {
                     return undefined;
                 }
                 return resources[query.id];
@@ -93,24 +94,25 @@ export const getOne$ = (query: ResourceQuery) => {
     }
 }
 
-
-
-
-export const get$ = (query: ResourceQuery) => {
+export const get$ = (queryType: QueryType, query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        if (!_.isUndefined(query.id) && !_.isUndefined(query.type)) {
-            // Only get a single resource given 'id' and 'type'
-            return state$.let(getOne$(query));
-        } else if (!_.isUndefined(query.type)) {
-            // Only get resources of a given 'type' then filter
-            return state$.let(getSingleTypeResources$(query))
-                .map(resources => filterResources(resources, query));
-        } else {
-            // Neither 'id' nor 'type' are given so get all resources and filter
-            return state$.let(getAll$())
-                .map(resources => filterResources(resources, query));
+        let selected$;
+        switch (queryType) {
+            case 'getOne':
+                selected$ = state$.let(getOne$(query));
+                return selected$.distinctUntilChanged();
+            case 'getMany':
+                selected$ = state$.let(getSingleTypeResources$(query))
+                    .map(resources => filterResources(resources, query));
+                return selected$.distinctUntilChanged();
+            case 'getAll':
+                selected$ = state$.let(getAll$())
+                    .map(resources => filterResources(resources, query));
+                return selected$.distinctUntilChanged();
+            default:
+                return state$
         }
-    };
+    }
 };
 
 export class NgrxJsonApiSelectors<T> {
@@ -125,15 +127,11 @@ export class NgrxJsonApiSelectors<T> {
         }
     }
 
-    public get$(query: ResourceQuery) {
-        return (state$: Observable<T>) => {
-            return state$.select(s => s[this.storeLocation])
-                .let(get$(query)).distinctUntilChanged();
-        }
-        // return compose(
-        //     get$(query),
-        //     this.getNgrxJsonApiStore(this.storeLocation)
-        // );
+    public get$(queryType: QueryType, query: ResourceQuery) {
+        return compose(
+            get$(queryType, query),
+            this.getNgrxJsonApiStore(this.storeLocation)
+        );
     }
 
 }
