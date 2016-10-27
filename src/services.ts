@@ -25,8 +25,8 @@ export class NgrxJsonApiService<T> {
     private store: Store<T>,
     private selectors: NgrxJsonApiSelectors<T>) {}
 
-  public select$(queryType: QueryType, query: ResourceQuery) {
-    return this.selectors.get$(queryType, query);
+  public select$(query: ResourceQuery) {
+    return this.selectors.get$(query);
   }
 
   public create(payload: Payload) {
@@ -46,6 +46,6 @@ export class NgrxJsonApiService<T> {
   }
 
   public deleteFromState(payload: Payload) {
-    return this.store.dispatch(new DeleteFromStateAction(payload));
+    this.store.dispatch(new DeleteFromStateAction(payload));
   }
 }

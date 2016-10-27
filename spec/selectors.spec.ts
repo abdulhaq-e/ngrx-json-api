@@ -155,7 +155,11 @@ describe('individual selectors', () => {
         it('should use getOne$ given a type and id', fakeAsync(() => {
             let res;
             let sub = obs
-                .let(get$('getOne', { type: 'Article', id: '1' }))
+                .let(get$({
+                  type: 'Article',
+                  id: '1',
+                  queryType: 'getOne'
+                }))
                 .subscribe(d => res = d);
             obs.let(getOne$({ type: 'Article', id: '1' }))
                 .subscribe(r => expect(r).toEqual(res));
@@ -165,7 +169,10 @@ describe('individual selectors', () => {
         it('should use getSingleTypeResources$ given a type only', fakeAsync(() => {
             let res;
             let sub = obs
-                .let(get$('getMany', { type: 'Article' }))
+                .let(get$({
+                  type: 'Article',
+                  queryType: 'getMany'
+                }))
                 .subscribe(d => res = d);
             obs.let(getSingleTypeResources$({ type: 'Article' }))
                 .subscribe(r => expect(r).toEqual(res));
@@ -213,7 +220,10 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get$('getMany', { type: 'Article' }))
+                .let(selectors.get$({
+                  type: 'Article',
+                  queryType: 'getMany'
+                }))
                 .subscribe(d => res = d);
             tick();
             expect(res[0]).toBeDefined();
@@ -231,7 +241,11 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let store2 = { api: store }
             let sub = Observable.of(store2)
-                .let(selectors.get$('getOne', { type: 'Article', id: '1' }))
+                .let(selectors.get$({
+                  type: 'Article',
+                  id: '1',
+                  queryType: 'getOne'
+                }))
                 .subscribe(d => res = d);
             tick();
             expect(res).toBeDefined();

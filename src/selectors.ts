@@ -94,10 +94,10 @@ export const getOne$ = (query: ResourceQuery) => {
     }
 }
 
-export const get$ = (queryType: QueryType, query: ResourceQuery) => {
+export const get$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         let selected$;
-        switch (queryType) {
+        switch (query.queryType) {
             case 'getOne':
                 selected$ = state$.let(getOne$(query));
                 return selected$.distinctUntilChanged();
@@ -127,9 +127,9 @@ export class NgrxJsonApiSelectors<T> {
         }
     }
 
-    public get$(queryType: QueryType, query: ResourceQuery) {
+    public get$(query: ResourceQuery) {
         return compose(
-            get$(queryType, query),
+            get$(query),
             this.getNgrxJsonApiStore(this.storeLocation)
         );
     }
