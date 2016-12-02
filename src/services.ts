@@ -13,6 +13,7 @@ import {
   DeleteFromStateAction,
 } from './actions';
 import {
+  NgrxJsonApiStore,
   ResourceQuery,
   Payload,
   QueryType
