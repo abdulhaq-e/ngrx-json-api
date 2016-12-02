@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
+import { Action } from '@ngrx/store';
 import { Effect, Actions, toPayload } from '@ngrx/effects';
 
 import { Observable } from 'rxjs/Observable';
@@ -39,7 +40,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
     @Effect() createResource$ = this.actions$
         .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
-        .map<Payload>(toPayload)
+        .map<Action, Payload>(toPayload)
         .mergeMap((payload: Payload) => {
             return this.jsonApi.create(payload)
                 .mapTo(new ApiCreateSuccessAction(payload))
@@ -50,7 +51,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
     @Effect() updateResource$ = this.actions$
         .ofType(NgrxJsonApiActionTypes.API_UPDATE_INIT)
-        .map<Payload>(toPayload)
+        .map<Action, Payload>(toPayload)
         .mergeMap((payload: Payload) => {
             return this.jsonApi.update(payload)
                 .mapTo(new ApiUpdateSuccessAction(payload))
@@ -59,7 +60,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
     @Effect() readResource$ = this.actions$
         .ofType(NgrxJsonApiActionTypes.API_READ_INIT)
-        .map<Payload>(toPayload)
+        .map<Action, Payload>(toPayload)
         .mergeMap((payload: Payload) => {
             return this.jsonApi.find(payload)
                 .map(res => res.json())
@@ -72,7 +73,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
     @Effect() deleteResource$ = this.actions$
         .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
-        .map<Payload>(toPayload)
+        .map<Action, Payload>(toPayload)
         .mergeMap((payload: Payload) => {
             return this.jsonApi.delete(payload)
                 .mapTo(new ApiDeleteSuccessAction(payload))

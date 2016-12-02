@@ -45,7 +45,7 @@
   "devDependencies": {
     "@angular/common": "^2.3.0-rc.0",
     "@angular/compiler": "^2.3.0-rc.0",
-    "@angular/compiler-cli": "^0.6.0",
+    "@angular/compiler-cli": "^2.3.0-rc.0",
     "@angular/core": "^2.3.0-rc.0",
     "@angular/http": "^2.3.0-rc.0",
     "@angular/platform-browser": "^2.3.0-rc.0",
@@ -85,7 +85,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.8.0",
     "loader-utils": "^0.2.16",
-    "lodash": "^4.16.2",
+    "lodash": "^4.17.2",
     "lodash-webpack-plugin": "^0.10.0",
     "npm-run-all": "^3.1.0",
     "reflect-metadata": "^0.1.3",
