@@ -71,13 +71,85 @@ As can be seen, the config object passed to `configure` must have three properti
 - `resourceDefinitions` is an `Array` of resource definition as defined above:
 - `storeLocation` is the location of `NgrxJsonApiStore` in the main state. This is required for selectors to function properly.
 
-4- Import `NgrxJsonApiActions` inside the smart component and use on of its _static_ methods to emit an action.
+4- Import `NgrxJsonApiService` inside the component and use one of its methods to interact with this library.
 
-_TODO: provide examples_
+For example:
 
-5- Inject `NgrxJsonApiSelectors` into the smart component and use its methods to select parts of the state.
-
-_TODO: provide examples_
+```ts
+export class MyComponent {
+  constructor(private ngrxJsonApiService: NgrxJsonApiService<AppState>) {}
+  // to create a resource
+  this.ngrxJsonApiService.create({
+    jsonApiData: {
+      data: {
+        id: '1',
+        type: 'Person',
+        attributes: {
+          name: 'John Smith',
+          age: 50
+        }          
+      }
+    },
+    query: {
+      type: 'Person',
+      queryType: 'create'
+    }
+    });
+    // to read a resource from the api
+    this.ngrxJsonApiService.read({
+      query: {
+        type: 'Person',
+        id: '1',
+        queryType: 'getOne'
+      }
+    });
+    // if we wanted to read all resources of type Person
+    this.ngrxJsonApiService.read({
+      query: {
+        type: 'Person',
+        queryType: 'getMany'
+      }
+    });
+    // to delete a single resource
+    this.ngrxJsonApiService.delete({
+      query: {
+        type: 'Person',
+        id: '1',
+        queryType: 'deleteOne'
+      }
+    });
+    // similarly, to delete from the store (no request to api)
+    this.ngrxJsonApiService.deleteFromState({
+      query: {
+        type: 'Person',
+        id: '1',
+      }
+    });
+    // or all resources can be deleted
+    this.ngrxJsonApiService.deleteFromState({
+      query: {
+        type: 'Person',
+      }
+    });
+    // to update a single resource
+    this.ngrxJsonApiService.update({
+      jsonApiData: {
+        data: {
+          id: '1',
+          type: 'Person',
+          attributes: {
+            name: 'John Smith',
+            age: 50
+          }          
+        }
+      },
+      query: {
+        type: 'Person',
+        queryType: 'update'
+      }
+    });
+}
+```
 
 # THANKS :heart:
 
