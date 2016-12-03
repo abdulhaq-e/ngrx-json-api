@@ -151,6 +151,40 @@ export class MyComponent {
 }
 ```
 
+Now all we've done is interact with API using the instance of `NgrxJsonApiService` which will be responsible for updating the store after a response arrives. Using the same service we fetch data from the store to put in the view. This is done using selectors. Building on the above example and assuming the instance is called `ngrxJsonApiService`:
+
+```ts
+// to select a single resource:
+this.ngrxJsonApiService.select$({
+  query: {
+    queryType: 'getOne',
+    type: 'Person'
+    id: '1'
+  }
+});
+
+// to select all resources of type Person:
+this.ngrxJsonApiService.select$({
+  query: {
+    queryType: 'getMany',
+    type: 'Person'
+  }
+});
+
+// to select all resources:
+this.ngrxJsonApiService.select$({
+  query: {
+    queryType: 'getAll'
+  }
+});
+```
+
+Most of the time, when selecting all resources or resources of one type (`getMany`), filtering is used. Filtering is explained in the docs.
+
+### Documentation
+
+* [Filters](./docs/filters.md)
+
 # THANKS :heart:
 
 This library wouldn't exist without all the ngrx libraries along with the docs and tools provided with each. Thanks to Ngrx/[Store](https://github.com/ngrx/store),[Effects](https://github.com/ngrx/effects). Also, the basis of this library is [redux-json-api](https://github.com/dixieio/redux-json-api) and [devour](https://github.com/twg/devour) so a huge thanks to the developers of both these JSON API client libs.
