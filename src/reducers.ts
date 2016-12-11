@@ -1,20 +1,24 @@
 import { Action, ActionReducer } from '@ngrx/store';
 
 import {
-  NgrxJsonApiActions,
   NgrxJsonApiActionTypes
 } from './actions';
 import {
     ResourceQuery,
-    Document,
-    Resource,
+    ResourceState,
     NgrxJsonApiStore
 } from './interfaces';
 
 import {
-    updateOrInsertResource,
+    updateQueryParams,
+    updateQueryResults,
+    updateQueryErrors,
     deleteFromState,
-    updateStoreResources
+    updateStoreResources,
+    updateOrInsertResource,
+    updateResourceState,
+    rollbackStoreResources,
+    updateResourceErrors,
 } from './utils';
 
 export const initialNgrxJsonApiState = {
@@ -22,19 +26,31 @@ export const initialNgrxJsonApiState = {
     isReading: false,
     isUpdating: false,
     isDeleting: false,
-    data: {}
+    isCommitting : false,
+    data: {},
+    queries : {}
 };
 
 export const NgrxJsonApiStoreReducer: ActionReducer<any> =
     (state: NgrxJsonApiStore = initialNgrxJsonApiState, action: Action) => {
         let newState;
 
+        console.log("reduce", state, action);
+
         switch (action.type) {
             case NgrxJsonApiActionTypes.API_CREATE_INIT:
                 return Object.assign({}, state, { 'isCreating': true });
 
             case NgrxJsonApiActionTypes.API_READ_INIT:
-                return Object.assign({}, state, { 'isReading': true });
+                let newState = Object.assign({}, state, { 'isReading': true });
+
+                let query = action.payload.query as ResourceQuery;
+                if(query.queryId){
+                    newState = Object.assign({}, state, {
+                        queries: updateQueryParams( state.queries, query),
+                    });
+                }
+                return newState;
 
             case NgrxJsonApiActionTypes.API_UPDATE_INIT:
                 return Object.assign({}, state, { 'isUpdating': true });
@@ -57,6 +73,8 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                     state, {
                         data: updateStoreResources(
                           state.data, action.payload.jsonApiData),
+                        queries: updateQueryResults(
+                            state.queries, action.payload.query.queryId, action.payload.jsonApiData),
                     },
                     { 'isReading': false }
                 );
@@ -81,21 +99,77 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 return newState;
 
             case NgrxJsonApiActionTypes.API_CREATE_FAIL:
-                newState = Object.assign({}, state, { 'isCreating': false });
+                newState = Object.assign({}, state, {
+                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                  'isCreating': false }
+                );
                 return newState;
 
             case NgrxJsonApiActionTypes.API_READ_FAIL:
-                newState = Object.assign({}, state, { 'isReading': false });
+                newState = Object.assign({}, state, {
+                  queries: updateQueryErrors(state.queries, action.payload.query.queryId, action.payload.jsonApiData),
+                  'isReading': false
+                });
                 return newState;
 
             case NgrxJsonApiActionTypes.API_UPDATE_FAIL:
-                newState = Object.assign({}, state, { 'isUpdating': false });
+                newState = Object.assign({}, state, {
+                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                  'isUpdating': false }
+                );
                 return newState;
 
             case NgrxJsonApiActionTypes.API_DELETE_FAIL:
-                newState = Object.assign({}, state, { 'isDeleting': false });
+                newState = Object.assign({}, state, {
+                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                  'isDeleting': false }
+                );
                 return newState;
 
+            case NgrxJsonApiActionTypes.API_PATCH_STORE_RESOURCE:
+                newState = Object.assign({},
+                    state, {
+                        data: updateOrInsertResource(
+                            state.data, action.payload, false, false)
+                    }
+                );
+                return newState;
+            case NgrxJsonApiActionTypes.API_POST_STORE_RESOURCE:
+                newState = Object.assign({},
+                    state, {
+                        data: updateOrInsertResource(
+                            state.data, action.payload, false, true)
+                    }
+                );
+                return newState;
+            case NgrxJsonApiActionTypes.API_DELETE_STORE_RESOURCE:
+                newState = Object.assign({},
+                    state, {
+                        data: updateResourceState(
+                            state.data, action.payload, ResourceState.DELETED)
+                    }
+                );
+                return newState;
+            case NgrxJsonApiActionTypes.API_COMMIT_INIT:
+                newState = Object.assign({}, state, { 'isCommitting': true });
+                return newState;
+            case NgrxJsonApiActionTypes.API_COMMIT_SUCCESS:
+            case NgrxJsonApiActionTypes.API_COMMIT_FAIL:
+                // apply all the committed or failed changes
+                let actions = action.payload as Array<Action>;
+                newState = state;
+                for(let commitAction of actions){
+                 // newState = NgrxJsonApiStoreReducer(newState, commitAction);
+                }
+                newState = Object.assign({}, newState, {isCommitting: false});
+                return newState;
+            case NgrxJsonApiActionTypes.API_ROLLBACK:
+                newState = Object.assign({},
+                    state, {
+                        data: rollbackStoreResources(state.data)
+                    }
+                );
+                return newState;
             default:
                 return state;
         }

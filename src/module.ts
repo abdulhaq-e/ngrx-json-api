@@ -11,7 +11,7 @@ import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
-import { NgrxJsonApiService } from './services';
+import { NgrxJsonApiService, NgrxJsonApiServiceV2 } from './services';
 
 import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
@@ -39,6 +39,12 @@ export const serviceFactory = (
     return new NgrxJsonApiService<any>(store, selectors);
 }
 
+export const serviceFactoryV2 = (
+    store: Store<any>,
+    selectors: NgrxJsonApiSelectors<any>) => {
+    return new NgrxJsonApiServiceV2<any>(store, selectors);
+}
+
 export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
 
     return [
@@ -64,6 +70,11 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
         {
             provide: NgrxJsonApiService,
             useFactory: serviceFactory,
+            deps: [Store, NgrxJsonApiSelectors]
+        },
+        {
+            provide: NgrxJsonApiServiceV2,
+            useFactory: serviceFactoryV2,
             deps: [Store, NgrxJsonApiSelectors]
         }
     ]

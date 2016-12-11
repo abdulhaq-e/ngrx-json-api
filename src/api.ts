@@ -30,8 +30,10 @@ import {
 } from './interfaces';
 
 import {
-    generateIncludedQueryParam,
-    generateFilteringParams,
+    generateIncludedQueryParams,
+    generateFieldsQueryParams,
+    generateFilteringQueryParams,
+    generateSortingQueryParams,
     generateQueryParams
 } from './utils';
 
@@ -41,7 +43,7 @@ export class NgrxJsonApi {
         'Content-Type': 'application/vnd.api+json',
         'Accept': 'application/vnd.api+json'
     });
-    public requestUrl: string;;
+    public requestUrl: string;
 
     constructor(
         private http: Http,
@@ -90,6 +92,8 @@ export class NgrxJsonApi {
         let queryParams = '';
         let includedParam: string = '';
         let filteringParams: string = '';
+        let sortingParams: string = '';
+        let fieldsParams: string = '';
 
         if (typeof query === undefined) {
             return Observable.throw('Query not found');
@@ -97,14 +101,20 @@ export class NgrxJsonApi {
 
         if (query.hasOwnProperty('params') && !_.isEmpty(query.params)) {
             if (_.hasIn(query.params, 'include')) {
-                includedParam = generateIncludedQueryParam(query.params.include);
+                includedParam = generateIncludedQueryParams(query.params.include);
             }
             if (_.hasIn(query.params, 'filtering')) {
-                filteringParams = generateFilteringParams(query.params.filtering);
+                filteringParams = generateFilteringQueryParams(query.params.filtering);
+            }
+            if (_.hasIn(query.params, 'filtering')) {
+              sortingParams = generateSortingQueryParams(query.params.sorting);
+            }
+            if (_.hasIn(query.params, 'fields')) {
+              fieldsParams = generateFieldsQueryParams(query.params.fields);
             }
         }
 
-        queryParams = generateQueryParams(includedParam, filteringParams);
+        queryParams = generateQueryParams(includedParam, filteringParams, sortingParams, fieldsParams);
 
         let requestOptionsArgs = {
             method: RequestMethod.Get,

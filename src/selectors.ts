@@ -10,27 +10,23 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/filter';
 
 import '@ngrx/core/add/operator/select';
 
 import { compose } from '@ngrx/core/compose';
+import { Store } from '@ngrx/store';
 
 import {
-    RelationDefinition,
-    ResourceDefinition,
     ResourceIdentifier,
     Resource,
     ResourceQuery,
     NgrxJsonApiStore,
-    NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
     QueryType,
 } from './interfaces';
 import {
     denormaliseResource,
-    getSingleResource,
-    getMultipleResources,
-    getSingleTypeResources,
     transformStoreData,
     transformStoreResources,
     filterResources
@@ -75,7 +71,7 @@ export const getOneRaw$ = (query: ResourceQuery) => {
                 if (typeof resources === 'undefined' || !query.hasOwnProperty('id')) {
                     return undefined;
                 }
-                return resources[query.id];
+                return resources[query.id].resource;
             });
         // .mergeMap(resource => state$.let(getAllRaw$())
         //     .map(resources => denormaliseResource(resource, resources))
@@ -117,7 +113,7 @@ export const get$ = (queryType: QueryType, query: ResourceQuery) => {
 
 export class NgrxJsonApiSelectors<T> {
 
-    constructor(private storeLocation: string) {
+    constructor(public storeLocation: string) {
         this.storeLocation = storeLocation;
     }
 
@@ -132,6 +128,27 @@ export class NgrxJsonApiSelectors<T> {
             get$(queryType, query),
             this.getNgrxJsonApiStore(this.storeLocation)
         );
+    }
+
+    public getQuery$(store : Store<T>, queryId: string) {
+        let selection : Observable<NgrxJsonApiStore> = store.select(this.storeLocation);
+
+        return selection.filter(it => it.queries[queryId] != null && it.queries[queryId].resultIds != null)
+        .map(it => {
+            let resources : Array<Resource> = [];
+            let resourceIds : Array<ResourceIdentifier> = it.queries[queryId].resultIds;
+            for(let resourceId of resourceIds){
+                let storeResources : NgrxJsonApiStoreResources = it.data[resourceId.type];
+                let storeResource = storeResources ? storeResources[resourceId.id] : null;
+                if(storeResource){
+                    resources.push(storeResource.resource);
+                }else{
+                    throw new Error("unable to resolve resource: " + resourceId);
+                }
+            }
+            return resources;
+        });
+
     }
 
 }
