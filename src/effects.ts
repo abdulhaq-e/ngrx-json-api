@@ -30,7 +30,18 @@ import {
   ApiCommitFailAction,
 } from './actions';
 import { NgrxJsonApi } from './api';
-import {Payload, ResourceError, ResourceQuery, NgrxJsonApiStore, StoreResource, ResourceState } from './interfaces';
+import {Payload, ResourceError, ResourceQuery, NgrxJsonApiStore, StoreResource, ResourceState, ResourceIdentifier } from './interfaces';
+
+
+
+interface TopologySortContext {
+  pendingResources : Array<StoreResource>;
+  cursor : number;
+  sorted : Array<StoreResource>;
+  visited : Array<boolean>;
+  dependencies : { [id: string]: Array<StoreResource> };
+}
+
 
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
@@ -212,9 +223,82 @@ export class NgrxJsonApiEffects implements OnDestroy {
     }
   }
 
-  private sortPendingChanges(pending :  Array<StoreResource>) : Array<StoreResource> {
-    return pending; // TODO we need sorting? by change order?
+  private toKey(id : ResourceIdentifier){
+    return id.id + "@" + id.type;
   }
+
+  private sortPendingChanges(pendingResources :  Array<StoreResource>) : Array<StoreResource> {
+
+    // allocate dependency
+    let dependencies : any = {};
+    let pendingMap : any = {};
+    for(let pendingResource of pendingResources) {
+      let resource = pendingResource.resource;
+      dependencies[this.toKey(resource)] = [];
+      pendingMap[this.toKey(resource)] = pendingResource;
+    }
+
+    // extract dependencies
+    for(let pendingResource of pendingResources) {
+      let resource = pendingResource.resource;
+      let key = this.toKey(resource);
+      for(let relationshipName in resource.relationships){
+        let data = resource.relationships[relationshipName].data;
+        if (data) {
+          let dependencyIds : Array<ResourceIdentifier> = data instanceof Array ? data : [data];
+          for(let dependencyId of dependencyIds) {
+            let dependencyKey = this.toKey(dependencyId);
+            if (pendingMap[dependencyKey]) {
+              // we have a dependency between two unsaved objects
+              dependencies.push[key].push(pendingMap[dependencyKey]);
+            }
+          }
+        }
+      }
+    }
+
+    // order
+    let context = {
+      pendingResources : pendingResources,
+      cursor : pendingResources.length,
+      sorted : new Array(pendingResources.length),
+      dependencies : dependencies,
+      visited : []
+    }
+
+    let i = context.cursor;
+    while (i--) {
+      if (!context.visited[i]) {
+        this.visit(pendingResources[i], i, [], context)
+      }
+    }
+
+    return context.sorted;
+  }
+
+
+  private visit(pendingResource : StoreResource, i, predecessors, context : TopologySortContext) {
+    let key = this.toKey(pendingResource.resource);
+    if(predecessors.indexOf(key) >= 0) {
+      throw new Error('Cyclic dependency: '+ key + ' with ' + JSON.stringify(predecessors))
+    }
+
+    if (context.visited[i]) {
+      return;
+    }
+    context.visited[i] = true;
+
+    // outgoing edges
+    let outgoing : Array<StoreResource> = context.dependencies[key];
+
+    var preds = predecessors.concat(key)
+    for(let child of outgoing){
+      this.visit(child, context.pendingResources.indexOf(child), preds, context);
+    };
+
+    context.sorted[--context.cursor] = pendingResource;
+  }
+
 
   private getPendingChanges(state : NgrxJsonApiStore) : Array<StoreResource> {
     let pending : Array<StoreResource> = [];
@@ -237,3 +321,4 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 }
+

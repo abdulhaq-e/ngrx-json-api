@@ -160,7 +160,7 @@ export const insertStoreResource = (state: NgrxJsonApiStoreResources,
         newState[resource.id] = {
             resource : resource,
             originalResource : resource,
-            state : ResourceState.CREATED,
+            state : ResourceState.IN_SYNC,
             errors : [],
             loading : false
         };
