@@ -30,16 +30,16 @@ import {
   ApiCommitFailAction,
 } from './actions';
 import { NgrxJsonApi } from './api';
-import {Payload, ResourceError, ResourceQuery, NgrxJsonApiStore, StoreResource, ResourceState, ResourceIdentifier } from './interfaces';
+import {Payload, ResourceError, ResourceQuery, NgrxJsonApiStore, ResourceStore, ResourceState, ResourceIdentifier } from './interfaces';
 
 
 
 interface TopologySortContext {
-  pendingResources : Array<StoreResource>;
+  pendingResources : Array<ResourceStore>;
   cursor : number;
-  sorted : Array<StoreResource>;
+  sorted : Array<ResourceStore>;
   visited : Array<boolean>;
-  dependencies : { [id: string]: Array<StoreResource> };
+  dependencies : { [id: string]: Array<ResourceStore> };
 }
 
 
@@ -57,9 +57,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.create(payload)
         .mapTo(new ApiCreateSuccessAction(payload))
-        .catch(() => Observable.of(
-          new ApiCreateFailAction(payload)
-        ));
+        .catch(error => Observable.of(new ApiCreateFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() updateResource$ = this.actions$
@@ -68,7 +66,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.update(payload)
         .mapTo(new ApiUpdateSuccessAction(payload))
-        .catch(() => Observable.of(new ApiUpdateFailAction(payload)));
+        .catch(error => Observable.of(new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() readResource$ = this.actions$
@@ -81,7 +79,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
           jsonApiData: data,
           query: payload.query
         }))
-        .catch(() => Observable.of(new ApiReadFailAction(payload)));
+        .catch(error => Observable.of(new ApiReadFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() deleteResource$ = this.actions$
@@ -90,7 +88,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.delete(payload)
         .mapTo(new ApiDeleteSuccessAction(payload))
-        .catch(() => Observable.of(new ApiDeleteFailAction(payload)));
+        .catch(error => Observable.of(new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() commitResources$ = this.actions$
@@ -101,11 +99,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
       // TODO add support for bulk updates as well (jsonpatch, etc.)
       // to get atomicity for multiple updates
 
-      console.log("commit", store);
-
-      let pending : Array<StoreResource> = this.getPendingChanges(store);
-      console.log("pending", pending);
-
+      let pending : Array<ResourceStore> = this.getPendingChanges(store);
       if(pending.length > 0){
         pending = this.sortPendingChanges(pending);
 
@@ -176,20 +170,17 @@ export class NgrxJsonApiEffects implements OnDestroy {
           }
         }
 
-        return actions[0];
-
-        //return Observable.of(...actions).map(it => {console.log(it); return it;}).concatAll().toArray().map(actions => this.toCommitAction(actions));
+        return Observable.of(...actions).concatAll().toArray().map(actions => this.toCommitAction(actions));
       }else{
         return Observable.of(new ApiCommitSuccessAction([]));
       }
     });
 
   private toCommitAction(actions : Array<Action>){
-    console.log("actions done", actions);
     for(let action of actions){
       if(action.type == NgrxJsonApiActionTypes.API_CREATE_FAIL
-        || action.type == NgrxJsonApiActionTypes.API_CREATE_FAIL
-        || action.type == NgrxJsonApiActionTypes.API_CREATE_FAIL){
+        || action.type == NgrxJsonApiActionTypes.API_UPDATE_FAIL
+        || action.type == NgrxJsonApiActionTypes.API_DELETE_FAIL){
         return new ApiCommitFailAction(actions);
       }
     }
@@ -197,9 +188,13 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
   private toErrorPayload(query : ResourceQuery, response : Response) : Payload{
-    var document = response.json();
+
+    var contentType = response.headers.get("Content-Type");
+    var document = null;
+    if(contentType == 'application/vnd.api+json'){
+      document = response.json();
+    }
     if(document && document.errors && document.errors.length > 0){
-      // got json api errors
       return {
         query : query,
         jsonApiData : document
@@ -207,12 +202,13 @@ export class NgrxJsonApiEffects implements OnDestroy {
     }else{
       // transform http to json api error
       let errors : Array<ResourceError> = [];
-
       let error : ResourceError = {
         status : response.status.toString(),
         code : response.statusText
       };
+
       errors.push(error);
+      // got json api errors
 
       return {
         query : query,
@@ -227,7 +223,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return id.id + "@" + id.type;
   }
 
-  private sortPendingChanges(pendingResources :  Array<StoreResource>) : Array<StoreResource> {
+  private sortPendingChanges(pendingResources :  Array<ResourceStore>) : Array<ResourceStore> {
 
     // allocate dependency
     let dependencies : any = {};
@@ -277,7 +273,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 
-  private visit(pendingResource : StoreResource, i, predecessors, context : TopologySortContext) {
+  private visit(pendingResource : ResourceStore, i, predecessors, context : TopologySortContext) {
     let key = this.toKey(pendingResource.resource);
     if(predecessors.indexOf(key) >= 0) {
       throw new Error('Cyclic dependency: '+ key + ' with ' + JSON.stringify(predecessors))
@@ -289,7 +285,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     context.visited[i] = true;
 
     // outgoing edges
-    let outgoing : Array<StoreResource> = context.dependencies[key];
+    let outgoing : Array<ResourceStore> = context.dependencies[key];
 
     var preds = predecessors.concat(key)
     for(let child of outgoing){
@@ -300,12 +296,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 
-  private getPendingChanges(state : NgrxJsonApiStore) : Array<StoreResource> {
-    let pending : Array<StoreResource> = [];
+  private getPendingChanges(state : NgrxJsonApiStore) : Array<ResourceStore> {
+    let pending : Array<ResourceStore> = [];
     for(let type in state.data){
-      console.log(type);
       for(let id in state.data[type]){
-        console.log(id);
         let storeResource = state.data[type][id];
         if(storeResource.state != ResourceState.IN_SYNC){
            pending.push(storeResource);

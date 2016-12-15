@@ -42,14 +42,20 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 return Object.assign({}, state, { 'isCreating': true });
 
             case NgrxJsonApiActionTypes.API_READ_INIT:
-                let newState = Object.assign({}, state, { 'isReading': true });
-
+                newState = Object.assign({}, state, { 'isReading': true });
                 let query = action.payload.query as ResourceQuery;
                 if(query.queryId){
                     newState = Object.assign({}, state, {
                         queries: updateQueryParams( state.queries, query),
                     });
                 }
+                return newState;
+
+            case NgrxJsonApiActionTypes.REMOVE_QUERY:
+                let queryId = action.payload as string;
+                newState = Object.assign({}, state, {
+                    queries: this.removeQuery( state.queries, queryId),
+                });
                 return newState;
 
             case NgrxJsonApiActionTypes.API_UPDATE_INIT:
@@ -126,7 +132,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 );
                 return newState;
 
-            case NgrxJsonApiActionTypes.API_PATCH_STORE_RESOURCE:
+            case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE:
                 newState = Object.assign({},
                     state, {
                         data: updateOrInsertResource(
@@ -134,7 +140,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                     }
                 );
                 return newState;
-            case NgrxJsonApiActionTypes.API_POST_STORE_RESOURCE:
+            case NgrxJsonApiActionTypes.POST_STORE_RESOURCE:
                 newState = Object.assign({},
                     state, {
                         data: updateOrInsertResource(
@@ -142,7 +148,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                     }
                 );
                 return newState;
-            case NgrxJsonApiActionTypes.API_DELETE_STORE_RESOURCE:
+            case NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE:
                 newState = Object.assign({},
                     state, {
                         data: updateResourceState(
@@ -159,7 +165,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 let actions = action.payload as Array<Action>;
                 newState = state;
                 for(let commitAction of actions){
-                 // newState = NgrxJsonApiStoreReducer(newState, commitAction);
+                    newState = NgrxJsonApiStoreReducer(newState, commitAction);
                 }
                 newState = Object.assign({}, newState, {isCommitting: false});
                 return newState;

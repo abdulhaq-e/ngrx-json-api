@@ -8,12 +8,12 @@ import {
     SortingParam,
     Direction,
     Resource,
-    StoreResource,
+    ResourceStore,
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
     NgrxJsonApiStoreQueries,
-    NgrxJsonApiStoreQuery,
+    ResourceQueryStore,
     ResourceIdentifier,
     ResourceState,
     ResourceDefinition,
@@ -92,10 +92,10 @@ export const denormaliseResource = (
 
         let obj = Object.assign({}, resource);
 
-        var storeResource : StoreResource = {
+        var storeResource : ResourceStore = {
             errors : [],
             resource : obj,
-            originalResource : obj
+            persistedResource : obj
         };
 
         bag[resource.type][resource.id] = storeResource;
@@ -159,7 +159,7 @@ export const insertStoreResource = (state: NgrxJsonApiStoreResources,
     if(fromServer){
         newState[resource.id] = {
             resource : resource,
-            originalResource : resource,
+            persistedResource : resource,
             state : ResourceState.IN_SYNC,
             errors : [],
             loading : false
@@ -167,7 +167,7 @@ export const insertStoreResource = (state: NgrxJsonApiStoreResources,
     }else{
         newState[resource.id] = {
             resource : resource,
-            originalResource : null,
+            persistedResource : null,
             state : ResourceState.CREATED,
             errors : [],
             loading : false
@@ -182,7 +182,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     resource: Resource, fromServer : boolean): NgrxJsonApiStoreResources => {
 
     let foundResource = state[resource.id].resource;
-    let originalResource = state[resource.id].originalResource;
+    let persistedResource = state[resource.id].persistedResource;
 
     let newResource : Resource;
     let newResourceState : ResourceState;
@@ -190,27 +190,27 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
         // form server, override everything
         // TODO need to handle check and keep local updates?
         newResource= resource;
-        originalResource = resource;
+        persistedResource = resource;
         newResourceState = ResourceState.IN_SYNC;
     }else {
         let mergedResource = updateResourceObject(foundResource, resource);
-        if (_.isEqual(mergedResource, originalResource)) {
+        if (_.isEqual(mergedResource, persistedResource)) {
             // no changes anymore, do nothing
-            newResource = originalResource;
+            newResource = persistedResource;
             newResourceState = ResourceState.IN_SYNC;
         }
         else {
             // merge changes and mark as CREATED or UPDATED depending on whether
             // an original version is available
             newResource = mergedResource;
-            newResourceState = originalResource == null ? ResourceState.CREATED : ResourceState.UPDATED;
+            newResourceState = persistedResource == null ? ResourceState.CREATED : ResourceState.UPDATED;
         }
     }
 
     let newState = Object.assign({}, state);
     newState[resource.id] = {
         resource : newResource,
-        originalResource : originalResource,
+        persistedResource : persistedResource,
         state : newResourceState,
         errors : [],
         loading : false
@@ -242,10 +242,9 @@ export const updateResourceErrors = (state: NgrxJsonApiStoreData, query: Resourc
     // resource is not locally stored, no need to update(?)
     return state;
   }
-
   let newState: NgrxJsonApiStoreData = Object.assign({}, state);
   newState[query.type] = Object.assign({}, newState[query.type]);
-  let storeResource =  Object.assign({}, newState[query.type][query.id]);;
+  let storeResource =  Object.assign({}, newState[query.type][query.id]);
   storeResource.errors.length = 0;
   if(document.errors){
     storeResource.errors.push(...document.errors);
@@ -260,12 +259,12 @@ export const rollbackStoreResources = (state: NgrxJsonApiStoreData): NgrxJsonApi
     newState[type] = Object.assign({}, newState[type]);
     for(let id in newState[type]){
       let storeResource = newState[type][id];
-      if(storeResource.originalResource == null){
+      if(storeResource.persistedResource == null){
         delete newState[type][id];
       }else if(storeResource.state != ResourceState.IN_SYNC){
         newState[type][id] = Object.assign({}, newState[type][id], {
           state : ResourceState.IN_SYNC,
-          resource :  newState[type][id].originalResource
+          resource :  newState[type][id].persistedResource
         });
       }
     }
@@ -344,10 +343,10 @@ export const updateResourceState = (state: NgrxJsonApiStoreData,
 export const cloneQueryParams = (queryParams: QueryParams): QueryParams => {
     let newQueryParams : QueryParams = {};
     if(queryParams.include){
-      newQueryParams.include = queryParams.include.splice(0);
+        newQueryParams.include = queryParams.include.slice(0);
     }
     if(queryParams.fields){
-      newQueryParams.fields = queryParams.fields.splice(0);
+      newQueryParams.fields = queryParams.fields.slice(0);
     }
     if(queryParams.filtering){
       newQueryParams.filtering = queryParams.filtering.map(it => Object.assign({}, it));
@@ -372,13 +371,26 @@ export const cloneResourceQuery = (query: ResourceQuery): ResourceQuery => {
 export const updateQueryParams = (state: NgrxJsonApiStoreQueries,
     query: ResourceQuery): NgrxJsonApiStoreQueries => {
 
-    let storeQuery : NgrxJsonApiStoreQuery = state[query.queryId];
+    let storeQuery : ResourceQueryStore = state[query.queryId];
     let newQueryStore = Object.assign({}, storeQuery);
     newQueryStore.loading = true;
     newQueryStore.query = cloneResourceQuery(query);
+    if(_.isUndefined(newQueryStore.errors)){
+        newQueryStore.errors = [];
+    }
 
     let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
     newState[query.queryId] = newQueryStore;
+    return newState;
+}
+
+/**
+ * Removes the given query from the store.
+ */
+export const removeQuery = (state: NgrxJsonApiStoreQueries,
+    queryId: string): NgrxJsonApiStoreQueries => {
+    let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
+    delete newState[queryId];
     return newState;
 }
 
@@ -393,7 +405,7 @@ const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
 export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId : string,
     document: Document): NgrxJsonApiStoreQueries => {
 
-    let storeQuery : NgrxJsonApiStoreQuery = state[queryId];
+    let storeQuery : ResourceQueryStore = state[queryId];
     if(storeQuery){
         let data = _.isArray(document.data) ? document.data : [document.data];
         let newQueryStore = Object.assign({}, storeQuery, {

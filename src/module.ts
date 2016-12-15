@@ -9,9 +9,8 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
-import { NgrxJsonApiActions } from './actions';
 import { NgrxJsonApiSelectors } from './selectors';
-import { NgrxJsonApiService, NgrxJsonApiServiceV2 } from './services';
+import { NgrxJsonApiService, NgrxJsonApiServiceV2, SelectResourceStorePipe, SelectResourcePipe, GetResourcePipe } from './services';
 
 import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
@@ -41,8 +40,10 @@ export const serviceFactory = (
 
 export const serviceFactoryV2 = (
     store: Store<any>,
-    selectors: NgrxJsonApiSelectors<any>) => {
-    return new NgrxJsonApiServiceV2<any>(store, selectors);
+    selectors: NgrxJsonApiSelectors<any>,
+    apiUrl : string,
+    resourceDefinitions : Array<ResourceDefinition>) => {
+    return new NgrxJsonApiServiceV2(store, selectors, apiUrl, resourceDefinitions);
 }
 
 export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
@@ -75,12 +76,13 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
         {
             provide: NgrxJsonApiServiceV2,
             useFactory: serviceFactoryV2,
-            deps: [Store, NgrxJsonApiSelectors]
+            deps: [Store, NgrxJsonApiSelectors, API_URL, RESOURCE_DEFINITIONS]
         }
     ]
 }
 
 @NgModule({
+    declarations : [SelectResourceStorePipe, SelectResourcePipe, GetResourcePipe],
     imports: [
         HttpModule,
         EffectsModule.run(NgrxJsonApiEffects)

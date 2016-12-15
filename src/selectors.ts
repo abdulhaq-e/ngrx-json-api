@@ -21,6 +21,7 @@ import {
     ResourceIdentifier,
     Resource,
     ResourceQuery,
+    ResourceStore,
     NgrxJsonApiStore,
     NgrxJsonApiStoreResources,
     QueryType,
@@ -130,7 +131,7 @@ export class NgrxJsonApiSelectors<T> {
         );
     }
 
-    public getQuery$(store : Store<T>, queryId: string) {
+    public getResults$(store : Store<T>, queryId: string) {
         let selection : Observable<NgrxJsonApiStore> = store.select(this.storeLocation);
 
         return selection.filter(it => it.queries[queryId] != null && it.queries[queryId].resultIds != null)
@@ -148,7 +149,26 @@ export class NgrxJsonApiSelectors<T> {
             }
             return resources;
         });
+    }
 
+    public getResultIdentifiers$(store : Store<T>, queryId: string) : Observable<Array<ResourceIdentifier>> {
+        let selection : Observable<NgrxJsonApiStore> = store.select(this.storeLocation);
+
+        return selection.filter(it => it.queries[queryId] != null && it.queries[queryId].resultIds != null)
+			.map(it => it.queries[queryId].resultIds);
+    }
+
+    public getResourceStore$(store : Store<T>, identifier: ResourceIdentifier) : Observable<ResourceStore> {
+        let selection : Observable<NgrxJsonApiStore> = store.select(this.storeLocation);
+        return selection.map(it => it.data[identifier.type] != null && it.data[identifier.type][identifier.id] != null ? it.data[identifier.type][identifier.id] : null);
+    }
+
+    public getResource$(store : Store<T>, identifier: ResourceIdentifier) : Observable<Resource> {
+        return  this.getResourceStore$(store, identifier).map(it => it ? it.resource : null);
+    }
+
+    public getPersistedResource$(store : Store<T>, identifier: ResourceIdentifier) : Observable<Resource> {
+        return  this.getResourceStore$(store, identifier).map(it => it ? it.persistedResource : null);
     }
 
 }

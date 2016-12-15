@@ -66,9 +66,13 @@ export class NgrxJsonApi {
     }
 
     private collectionPathFor(type: string) {
-        let collectionPath: string = _.find(this.definitions,
-            { type: type }).collectionPath;
-        return `${collectionPath}`;
+        // assume that type == collectionPath if not configured otherwise
+        let definition = _.find(this.definitions,{ type: type })
+        if(definition){
+            return `${definition.collectionPath}`;
+        }else{
+            return type;
+        }
     }
 
     private collectionUrlFor(type: string) {

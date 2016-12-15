@@ -1,3 +1,4 @@
+import {Observable} from "rxjs";
 export interface RelationDefinition {
     relation: string;
     type: string;
@@ -88,7 +89,7 @@ export interface ResourceErrorSource{
 /**
  * Container to hold a Resource in the store with state information.
  */
-export interface StoreResource {
+export interface ResourceStore {
 
 	/**
 	 * State of the resource to track local changes not yet published to the json api endpoint.
@@ -103,7 +104,7 @@ export interface StoreResource {
 	/**
 	 * The original resource obtained from the server.
      */
-    originalResource : Resource;
+    persistedResource : Resource;
 
 	/**
 	 * True if any kind of operation is executed (post, patch, delete).
@@ -116,9 +117,14 @@ export interface StoreResource {
     errors : Array<ResourceError>
 }
 
+export interface ResourceRelationship{
+    data?: any;
+    links?: any;
+}
+
 export interface Resource extends ResourceIdentifier {
     attributes?: { [key: string]: any };
-    relationships?: { [key: string]: any };
+    relationships?: { [key: string]: ResourceRelationship };
     meta?: any;
     links?: any;
 }
@@ -136,7 +142,7 @@ export interface Payload {
     query: ResourceQuery;
 }
 
-export interface NgrxJsonApiStoreQuery{
+export interface ResourceQueryStore{
   query : ResourceQuery;
   loading : Boolean;
   resultIds : Array<ResourceIdentifier>
@@ -147,9 +153,9 @@ export interface NgrxJsonApiStoreQuery{
   errors : Array<ResourceError>
 }
 
-export type NgrxJsonApiStoreResources = { [id: string]: StoreResource };
+export type NgrxJsonApiStoreResources = { [id: string]: ResourceStore };
 export type NgrxJsonApiStoreData = { [key: string]: NgrxJsonApiStoreResources };
-export type NgrxJsonApiStoreQueries = { [key: string]: NgrxJsonApiStoreQuery };
+export type NgrxJsonApiStoreQueries = { [key: string]: ResourceQueryStore };
 
 export interface NgrxJsonApiStore {
     data: NgrxJsonApiStoreData;
