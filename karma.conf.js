@@ -21,7 +21,9 @@ module.exports = function(karma) {
             'tests.bundle.ts': ['coverage', 'webpack', 'sourcemap']
                 // 'tests.js': ['coverage', 'webpack', 'sourcemap']
         },
-
+        mime: {
+          'text/x-typescript': ['ts','tsx']
+        },
         reporters: ['mocha', 'coverage'],
 
         coverageReporter: {
