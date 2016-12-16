@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 
 import { Action } from '@ngrx/store';
 
-import { Payload, Resource, ResourceIdentifier } from './interfaces';
+import {
+  Payload,
+  Resource,
+  ResourceIdentifier
+} from './interfaces';
 import { type } from './utils';
 
 
@@ -30,6 +34,21 @@ export const NgrxJsonApiActionTypes = {
     DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE')
 }
 
+export class ApiCommitInitAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_INIT;
+    constructor(public payload : String) { }
+}
+
+export class ApiCommitSuccessAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_SUCCESS;
+    constructor(public payload : Array<Action>) {}
+}
+
+export class ApiCommitFailAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_FAIL;
+    constructor(public payload : Array<Action>) { }
+}
+
 export class ApiCreateInitAction implements Action {
     type = NgrxJsonApiActionTypes.API_CREATE_INIT;
     constructor(public payload: Payload) { }
@@ -42,36 +61,6 @@ export class ApiCreateSuccessAction implements Action {
 
 export class ApiCreateFailAction implements Action {
     type = NgrxJsonApiActionTypes.API_CREATE_FAIL;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiReadInitAction implements Action {
-    type = NgrxJsonApiActionTypes.API_READ_INIT;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiReadSuccessAction implements Action {
-    type = NgrxJsonApiActionTypes.API_READ_SUCCESS;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiReadFailAction implements Action {
-    type = NgrxJsonApiActionTypes.API_READ_FAIL;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiUpdateInitAction implements Action {
-    type = NgrxJsonApiActionTypes.API_UPDATE_INIT;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiUpdateSuccessAction implements Action {
-    type = NgrxJsonApiActionTypes.API_UPDATE_SUCCESS;
-    constructor(public payload: Payload) { }
-}
-
-export class ApiUpdateFailAction implements Action {
-    type = NgrxJsonApiActionTypes.API_UPDATE_FAIL;
     constructor(public payload: Payload) { }
 }
 
@@ -90,8 +79,38 @@ export class ApiDeleteFailAction implements Action {
     constructor(public payload: Payload) { }
 }
 
-export class DeleteFromStateAction implements Action {
-    type = NgrxJsonApiActionTypes.DELETE_FROM_STATE;
+export class ApiReadInitAction implements Action {
+    type = NgrxJsonApiActionTypes.API_READ_INIT;
+    constructor(public payload: Payload) { }
+}
+
+export class ApiReadSuccessAction implements Action {
+    type = NgrxJsonApiActionTypes.API_READ_SUCCESS;
+    constructor(public payload: Payload) { }
+}
+
+export class ApiReadFailAction implements Action {
+    type = NgrxJsonApiActionTypes.API_READ_FAIL;
+    constructor(public payload: Payload) { }
+}
+
+export class ApiRollbackAction implements Action {
+    type = NgrxJsonApiActionTypes.API_ROLLBACK;
+    constructor() { }
+}
+
+export class ApiUpdateInitAction implements Action {
+    type = NgrxJsonApiActionTypes.API_UPDATE_INIT;
+    constructor(public payload: Payload) { }
+}
+
+export class ApiUpdateSuccessAction implements Action {
+    type = NgrxJsonApiActionTypes.API_UPDATE_SUCCESS;
+    constructor(public payload: Payload) { }
+}
+
+export class ApiUpdateFailAction implements Action {
+    type = NgrxJsonApiActionTypes.API_UPDATE_FAIL;
     constructor(public payload: Payload) { }
 }
 
@@ -110,50 +129,29 @@ export class DeleteStoreResourceAction implements Action {
     constructor(public payload: ResourceIdentifier) { }
 }
 
-export class ApiCommitInitAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_INIT;
-    constructor(public payload : String) { }
-}
-
-export class ApiCommitSuccessAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_SUCCESS;
-    constructor(public payload : Array<Action>) {}
-}
-
-export class ApiCommitFailAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_FAIL;
-    constructor(public payload : Array<Action>) { }
-}
-
-export class ApiRollbackAction implements Action {
-    type = NgrxJsonApiActionTypes.API_ROLLBACK;
-    constructor() { }
-}
-
 export class RemoveQueryAction implements Action {
     type = NgrxJsonApiActionTypes.REMOVE_QUERY;
     constructor(public payload: string) { }
 }
 
-
 export type NgrxJsonApiActions
-    = ApiCreateInitAction
+    = ApiCommitInitAction
+    | ApiCommitSuccessAction
+    | ApiCommitFailAction
+    | ApiCreateInitAction
     | ApiCreateSuccessAction
     | ApiCreateFailAction
-    | ApiUpdateInitAction
-    | ApiUpdateSuccessAction
-    | ApiUpdateFailAction
-    | ApiReadInitAction
-    | ApiReadSuccessAction
-    | ApiReadFailAction
     | ApiDeleteInitAction
     | ApiDeleteSuccessAction
     | ApiDeleteFailAction
-    | DeleteFromStateAction
+    | ApiReadInitAction
+    | ApiReadSuccessAction
+    | ApiReadFailAction
+    | ApiRollbackAction
+    | ApiUpdateInitAction
+    | ApiUpdateSuccessAction
+    | ApiUpdateFailAction
     | PatchStoreResourceAction
     | DeleteStoreResourceAction
     | PostStoreResourceAction
-    | ApiCommitInitAction
-    | ApiCommitSuccessAction
-    | ApiCommitFailAction
-    | ApiRollbackAction
+    | RemoveQueryAction

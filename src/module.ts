@@ -10,7 +10,12 @@ import { EffectsModule } from '@ngrx/effects';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiSelectors } from './selectors';
-import { NgrxJsonApiService, NgrxJsonApiServiceV2, SelectResourceStorePipe, SelectResourcePipe, GetResourcePipe } from './services';
+import {
+  NgrxJsonApiService,
+  SelectResourceStorePipe,
+  SelectResourcePipe,
+  GetResourcePipe
+} from './services';
 
 import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
 
@@ -34,16 +39,10 @@ export const selectorsFactory = (storeLocation: string) => {
 
 export const serviceFactory = (
     store: Store<any>,
-    selectors: NgrxJsonApiSelectors<any>) => {
-    return new NgrxJsonApiService<any>(store, selectors);
-}
-
-export const serviceFactoryV2 = (
-    store: Store<any>,
     selectors: NgrxJsonApiSelectors<any>,
     apiUrl : string,
     resourceDefinitions : Array<ResourceDefinition>) => {
-    return new NgrxJsonApiServiceV2(store, selectors, apiUrl, resourceDefinitions);
+    return new NgrxJsonApiService(store, selectors, apiUrl, resourceDefinitions);
 }
 
 export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
@@ -71,11 +70,6 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
         {
             provide: NgrxJsonApiService,
             useFactory: serviceFactory,
-            deps: [Store, NgrxJsonApiSelectors]
-        },
-        {
-            provide: NgrxJsonApiServiceV2,
-            useFactory: serviceFactoryV2,
             deps: [Store, NgrxJsonApiSelectors, API_URL, RESOURCE_DEFINITIONS]
         }
     ]

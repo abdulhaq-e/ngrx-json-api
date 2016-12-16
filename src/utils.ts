@@ -465,10 +465,6 @@ export const deleteFromState = (state: NgrxJsonApiStoreData, query: ResourceQuer
     return newState;
 };
 
-export function toPayload(action): any {
-    return action.payload;
-}
-
 export const filterResources = (resources, query: ResourceQuery) => {
     return resources.filter(resource => {
         if (query.hasOwnProperty('params') && query.params.hasOwnProperty('filtering')) {

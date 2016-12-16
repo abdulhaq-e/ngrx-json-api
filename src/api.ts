@@ -1,8 +1,3 @@
-// import * as _.map from 'lodash/map';
-// import * as _.find from 'lodash/find';
-// import * as _.isEmpty from 'lodash/isEmpty';
-// import * as _.hasIn from 'lodash/hasIn';
-
 import * as _ from 'lodash';
 
 import {
@@ -19,7 +14,6 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/throw';
 
-
 import {
     Document,
     Payload,
@@ -28,7 +22,6 @@ import {
     QueryParams,
     QueryType,
 } from './interfaces';
-
 import {
     generateIncludedQueryParams,
     generateFieldsQueryParams,

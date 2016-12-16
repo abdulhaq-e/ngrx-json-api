@@ -1,78 +1,37 @@
 import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
-import {AnonymousSubscription} from 'rxjs/Subscription';
 
 import { Store } from '@ngrx/store';
 
 import { NgrxJsonApiSelectors } from './selectors';
 import {
+  ApiCommitInitAction,
   ApiCreateInitAction,
   ApiReadInitAction,
   ApiUpdateInitAction,
   ApiDeleteInitAction,
-  DeleteFromStateAction,
+  DeleteStoreResourceAction,
   PostStoreResourceAction,
   PatchStoreResourceAction,
-  DeleteStoreResourceAction,
-  ApiCommitInitAction,
   RemoveQueryAction,
 } from './actions';
 import {
   NgrxJsonApiStore,
-  ResourceQuery,
   Payload,
   QueryType,
-  NgrxJsonApiStore,
   Resource,
-  ResourceRelationship,
-  ResourceIdentifier,
-  ResourceStore,
   ResourceDefinition
+  ResourceIdentifier,
+  ResourceQuery,
+  ResourceQueryHandle,
+  ResourceRelationship,
+  ResourceStore,
 } from './interfaces';
 
-@Injectable()
-export class NgrxJsonApiService<T> {
-
-  constructor(
-    private store: Store<T>,
-    private selectors: NgrxJsonApiSelectors<T>) {}
-
-  public select$(query: ResourceQuery) {
-    return this.selectors.get$(query);
-  }
-
-  public create(payload: Payload) {
-    this.store.dispatch(new ApiCreateInitAction(payload));
-  }
-
-  public read(payload: Payload) {
-    this.store.dispatch(new ApiReadInitAction(payload));
-  }
-
-  public update(payload: Payload) {
-    this.store.dispatch(new ApiUpdateInitAction(payload));
-  }
-
-  public delete(payload: Payload) {
-    this.store.dispatch(new ApiDeleteInitAction(payload));
-  }
-
-  public deleteFromState(payload: Payload) {
-    this.store.dispatch(new DeleteFromStateAction(payload));
-  }
-}
-
-
-export interface ResourceQueryHandle<T> extends AnonymousSubscription {
-
-  results : Observable<T>;
-
-}
-
 
 @Injectable()
-export class NgrxJsonApiServiceV2 {
+export class NgrxJsonApiService {
 
   private test: boolean = true;
 
@@ -237,7 +196,7 @@ export class NgrxJsonApiServiceV2 {
 @Pipe({name: 'jaGetResource'})
 export class GetResourcePipe implements PipeTransform {
 
-  constructor(private service : NgrxJsonApiServiceV2){
+  constructor(private service : NgrxJsonApiService){
   }
 
   transform(id: ResourceIdentifier): Resource {
@@ -248,7 +207,7 @@ export class GetResourcePipe implements PipeTransform {
 @Pipe({name: 'jaSelectResource'})
 export class SelectResourcePipe implements PipeTransform {
 
-  constructor(private service : NgrxJsonApiServiceV2){
+  constructor(private service : NgrxJsonApiService){
   }
 
   transform(id: ResourceIdentifier): Observable<Resource> {
@@ -260,7 +219,7 @@ export class SelectResourcePipe implements PipeTransform {
 @Pipe({name: 'jaSelectResourceStore'})
 export class SelectResourceStorePipe implements PipeTransform {
 
-  constructor(private service : NgrxJsonApiServiceV2){
+  constructor(private service : NgrxJsonApiService){
   }
 
   transform(id: ResourceIdentifier): Observable<ResourceStore> {

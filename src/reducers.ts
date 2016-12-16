@@ -8,7 +8,6 @@ import {
     ResourceState,
     NgrxJsonApiStore
 } from './interfaces';
-
 import {
     updateQueryParams,
     updateQueryResults,
@@ -98,7 +97,6 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 return newState;
 
             case NgrxJsonApiActionTypes.API_DELETE_SUCCESS:
-            case NgrxJsonApiActionTypes.DELETE_FROM_STATE:
                 newState = Object.assign({}, state,
                     { data: deleteFromState(state.data, action.payload.query) },
                     { 'isDeleting': false });

@@ -17,22 +17,28 @@ import 'rxjs/add/operator/take';
 
 
 import {
-  NgrxJsonApiActionTypes,
-  ApiCreateSuccessAction,
-  ApiCreateFailAction,
-  ApiUpdateSuccessAction,
-  ApiUpdateFailAction,
-  ApiReadSuccessAction,
-  ApiReadFailAction,
-  ApiDeleteSuccessAction,
-  ApiDeleteFailAction,
-  ApiCommitSuccessAction,
   ApiCommitFailAction,
+  ApiCommitSuccessAction,
+  ApiCreateFailAction,
+  ApiCreateSuccessAction,
+  ApiDeleteFailAction,
+  ApiDeleteSuccessAction,
+  ApiReadFailAction,
+  ApiReadSuccessAction,
+  ApiUpdateFailAction,
+  ApiUpdateSuccessAction,
+  NgrxJsonApiActionTypes,
 } from './actions';
 import { NgrxJsonApi } from './api';
-import {Payload, ResourceError, ResourceQuery, NgrxJsonApiStore, ResourceStore, ResourceState, ResourceIdentifier } from './interfaces';
-
-
+import {
+  NgrxJsonApiStore,
+  Payload,
+  ResourceError,
+  ResourceIdentifier,
+  ResourceQuery,
+  ResourceState,
+  ResourceStore,
+} from './interfaces';
 
 interface TopologySortContext {
   pendingResources : Array<ResourceStore>;
@@ -41,7 +47,6 @@ interface TopologySortContext {
   visited : Array<boolean>;
   dependencies : { [id: string]: Array<ResourceStore> };
 }
-
 
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
@@ -315,4 +320,3 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 }
-
