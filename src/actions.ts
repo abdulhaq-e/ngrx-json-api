@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Action } from '@ngrx/store';
 
-import { Payload } from './interfaces';
+import { Payload, Resource, ResourceIdentifier } from './interfaces';
 import { type } from './utils';
 
 
@@ -19,7 +19,15 @@ export const NgrxJsonApiActionTypes = {
     API_DELETE_INIT: type('API_DELETE_INIT'),
     API_DELETE_SUCCESS: type('API_DELETE_SUCCESS'),
     API_DELETE_FAIL: type('API_DELETE_FAIL'),
-    DELETE_FROM_STATE: type('DELETE_FROM_STATE')
+    API_COMMIT_INIT: type('API_COMMIT_INIT'),
+    API_COMMIT_SUCCESS: type('API_COMMIT_SUCCESS'),
+    API_COMMIT_FAIL: type('API_COMMIT_FAIL'),
+    API_ROLLBACK: type('API_ROLLBACK'),
+    REMOVE_QUERY: type('REMOVE_QUERY'),
+    DELETE_FROM_STATE: type('DELETE_FROM_STATE'),
+    POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
+    PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
+    DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE')
 }
 
 export class ApiCreateInitAction implements Action {
@@ -87,6 +95,47 @@ export class DeleteFromStateAction implements Action {
     constructor(public payload: Payload) { }
 }
 
+export class PostStoreResourceAction implements Action {
+    type = NgrxJsonApiActionTypes.POST_STORE_RESOURCE;
+    constructor(public payload: Resource) { }
+}
+
+export class PatchStoreResourceAction implements Action {
+    type = NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE;
+    constructor(public payload: Resource) { }
+}
+
+export class DeleteStoreResourceAction implements Action {
+    type = NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE;
+    constructor(public payload: ResourceIdentifier) { }
+}
+
+export class ApiCommitInitAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_INIT;
+    constructor(public payload : String) { }
+}
+
+export class ApiCommitSuccessAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_SUCCESS;
+    constructor(public payload : Array<Action>) {}
+}
+
+export class ApiCommitFailAction implements Action {
+    type = NgrxJsonApiActionTypes.API_COMMIT_FAIL;
+    constructor(public payload : Array<Action>) { }
+}
+
+export class ApiRollbackAction implements Action {
+    type = NgrxJsonApiActionTypes.API_ROLLBACK;
+    constructor() { }
+}
+
+export class RemoveQueryAction implements Action {
+    type = NgrxJsonApiActionTypes.REMOVE_QUERY;
+    constructor(public payload: string) { }
+}
+
+
 export type NgrxJsonApiActions
     = ApiCreateInitAction
     | ApiCreateSuccessAction
@@ -101,3 +150,10 @@ export type NgrxJsonApiActions
     | ApiDeleteSuccessAction
     | ApiDeleteFailAction
     | DeleteFromStateAction
+    | PatchStoreResourceAction
+    | DeleteStoreResourceAction
+    | PostStoreResourceAction
+    | ApiCommitInitAction
+    | ApiCommitSuccessAction
+    | ApiCommitFailAction
+    | ApiRollbackAction
