@@ -56,6 +56,13 @@ export interface QueryParams {
     limit?: number
 }
 
+export type QueryType
+    = 'getOne'
+    | 'getMany'
+    | 'update'
+    | 'deleteOne'
+    | 'create'
+
 export interface RelationDefinition {
     relation: string;
     type: string;
@@ -165,11 +172,3 @@ export interface SortingParam {
     api: string;
     direction: Direction;
 }
-
-export type QueryType
-    = 'getOne'
-    | 'getMany'
-    | 'getAll'
-    | 'update'
-    | 'deleteOne'
-    | 'create'

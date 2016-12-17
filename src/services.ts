@@ -11,11 +11,11 @@ import {
   ApiReadInitAction,
   ApiUpdateInitAction,
   ApiDeleteInitAction,
-  AddQueryAction,
   DeleteStoreResourceAction,
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
+  QueryStoreInitAction,
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -89,7 +89,7 @@ export class NgrxJsonApiService {
       };
       this.store.dispatch(new ApiReadInitAction(payload));
     } else {
-      this.store.dispatch(new AddQueryAction(query));
+      this.store.dispatch(new QueryStoreInitAction(query));
     }
 
   }
