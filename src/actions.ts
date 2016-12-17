@@ -5,7 +5,8 @@ import { Action } from '@ngrx/store';
 import {
   Payload,
   Resource,
-  ResourceIdentifier
+  ResourceIdentifier,
+  ResourceQuery,
 } from './interfaces';
 import { type } from './utils';
 
@@ -27,11 +28,12 @@ export const NgrxJsonApiActionTypes = {
     API_COMMIT_SUCCESS: type('API_COMMIT_SUCCESS'),
     API_COMMIT_FAIL: type('API_COMMIT_FAIL'),
     API_ROLLBACK: type('API_ROLLBACK'),
-    REMOVE_QUERY: type('REMOVE_QUERY'),
-    DELETE_FROM_STATE: type('DELETE_FROM_STATE'),
-    POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
+    QUERY_STORE_INIT: type('QUERY_STORE_INIT'),
+    QUERY_STORE_SUCCESS: type('QUERY_STORE_SUCCESS'),
+    DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE'),
     PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
-    DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE')
+    POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
+    REMOVE_QUERY: type('REMOVE_QUERY'),
 }
 
 export class ApiCommitInitAction implements Action {
@@ -114,24 +116,34 @@ export class ApiUpdateFailAction implements Action {
     constructor(public payload: Payload) { }
 }
 
+export class DeleteStoreResourceAction implements Action {
+  type = NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE;
+  constructor(public payload: ResourceIdentifier) { }
+}
+
+export class PatchStoreResourceAction implements Action {
+  type = NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE;
+  constructor(public payload: Resource) { }
+}
+
 export class PostStoreResourceAction implements Action {
     type = NgrxJsonApiActionTypes.POST_STORE_RESOURCE;
     constructor(public payload: Resource) { }
 }
 
-export class PatchStoreResourceAction implements Action {
-    type = NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE;
-    constructor(public payload: Resource) { }
-}
-
-export class DeleteStoreResourceAction implements Action {
-    type = NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE;
-    constructor(public payload: ResourceIdentifier) { }
-}
-
 export class RemoveQueryAction implements Action {
     type = NgrxJsonApiActionTypes.REMOVE_QUERY;
     constructor(public payload: string) { }
+}
+
+export class QueryStoreInitAction implements Action {
+  type = NgrxJsonApiActionTypes.QUERY_STORE_INIT;
+  constructor(public payload: ResourceQuery) { }
+}
+
+export class QueryStoreSuccessAction implements Action {
+  type = NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS;
+  constructor(public payload: Payload) { }
 }
 
 export type NgrxJsonApiActions
@@ -151,7 +163,9 @@ export type NgrxJsonApiActions
     | ApiUpdateInitAction
     | ApiUpdateSuccessAction
     | ApiUpdateFailAction
-    | PatchStoreResourceAction
     | DeleteStoreResourceAction
+    | PatchStoreResourceAction
     | PostStoreResourceAction
     | RemoveQueryAction
+    | QueryStoreInitAction
+    | QueryStoreSuccessAction

@@ -30,6 +30,7 @@ import {
   NgrxJsonApiActionTypes,
 } from './actions';
 import { NgrxJsonApi } from './api';
+import { NgrxJsonApiSelectors } from './selectors';
 import {
   NgrxJsonApiStore,
   Payload,
@@ -54,6 +55,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     private actions$: Actions,
     private jsonApi: NgrxJsonApi,
     private store: Store<any>,
+    private selectors: NgrxJsonApiSelectors<any>,
   ) { }
 
   @Effect() createResource$ = this.actions$
@@ -85,6 +87,16 @@ export class NgrxJsonApiEffects implements OnDestroy {
           query: payload.query
         }))
         .catch(error => Observable.of(new ApiReadFailAction(this.toErrorPayload(payload.query, error))));
+    });
+
+  @Effect() queryStore$ = this.actions$
+    .ofType(NgrxJsonApiActionTypes.QUERY_STORE_INIT)
+    .map<Action, ResourceQuery>(toPayload)
+    .mergeMap((query: ResourceQuery) => {
+      return this.store.let(this.selectors.get$(query))
+      .map(results => Observable.of(new QueryStoreSuccessAction({
+        data: results
+      })));
     });
 
   @Effect() deleteResource$ = this.actions$

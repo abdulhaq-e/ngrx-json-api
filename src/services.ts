@@ -12,16 +12,17 @@ import {
   ApiUpdateInitAction,
   ApiDeleteInitAction,
   DeleteStoreResourceAction,
-  PostStoreResourceAction,
   PatchStoreResourceAction,
+  PostStoreResourceAction,
   RemoveQueryAction,
+  QueryStoreInitAction,
 } from './actions';
 import {
   NgrxJsonApiStore,
   Payload,
   QueryType,
   Resource,
-  ResourceDefinition
+  ResourceDefinition,
   ResourceIdentifier,
   ResourceQuery,
   ResourceQueryHandle,
@@ -50,9 +51,9 @@ export class NgrxJsonApiService {
     this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(query: ResourceQuery) : ResourceQueryHandle<Resource> {
+  public findOne(query: ResourceQuery, fromServer: boolean = true) : ResourceQueryHandle<Resource> {
     query.queryType = "getOne";
-    this.findInternal(query);
+    this.findInternal(query, fromServer);
 
     return {
       results : this.selectResults(query.queryId).map(it => {
@@ -68,9 +69,9 @@ export class NgrxJsonApiService {
     }
   }
 
-  public findMany(query: ResourceQuery) : ResourceQueryHandle<Array<Resource>> {
+  public findMany(query: ResourceQuery, fromServer: boolean = true) : ResourceQueryHandle<Array<Resource>> {
     query.queryType = "getMany";
-    this.findInternal(query);
+    this.findInternal(query, fromServer);
     return {
       results : this.selectResults(query.queryId),
       unsubscribe : () => this.removeQuery(query.queryId)
@@ -81,11 +82,16 @@ export class NgrxJsonApiService {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(query: ResourceQuery){
-    let payload : Payload = {
-      query: query
-    };
-    this.store.dispatch(new ApiReadInitAction(payload));
+  private findInternal(query: ResourceQuery, fromServer: boolean = true){
+    if (fromServer) {
+      let payload : Payload = {
+        query: query
+      };
+      this.store.dispatch(new ApiReadInitAction(payload));
+    } else {
+      this.store.dispatch(new QueryStoreInitAction(query));
+    }
+
   }
 
   /**

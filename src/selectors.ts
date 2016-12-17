@@ -33,46 +33,50 @@ import {
     filterResources
 } from './utils';
 
-export const getAllRaw$ = () => {
+export const getAll$ = () => {
     return (state$: Observable<NgrxJsonApiStore>) => {
         return state$
             .select(s => s.data);
     }
 }
 
-export const getAll$ = () => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAllRaw$())
-            .map(resources => transformStoreData(resources))
-    }
-}
+// export const getAll$ = () => {
+//     return (state$: Observable<NgrxJsonApiStore>) => {
+//         return state$.let(getAllRaw$())
+//             .map(resources => transformStoreData(resources))
+//     }
+// }
 
-export const getSingleTypeResourcesRaw$ = (query: ResourceQuery) => {
+export const getSingleTypeResources$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getAllRaw$())
+        return state$.let(getAll$())
             .map(resources => resources[query.type]);
     }
 }
 
-export const getSingleTypeResources$ = (query: ResourceQuery) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getSingleTypeResourcesRaw$(query))
-            .map(resources => transformStoreResources(resources))
-            .combineLatest(state$.let(getAllRaw$()),
-            (singleTypeResources, resources) => {
-                return singleTypeResources.map(resource => denormaliseResource(resource, resources));
-            });
-    }
-}
+// export const getSingleTypeResources$ = (query: ResourceQuery) => {
+//     return (state$: Observable<NgrxJsonApiStore>) => {
+//         return state$.let(getSingleTypeResourcesRaw$(query))
+//             .map(resources => transformStoreResources(resources))
+//             .combineLatest(state$.let(getAllRaw$()),
+//             (singleTypeResources, resources) => {
+//                 return singleTypeResources.map(resource => denormaliseResource(resource, resources));
+//             });
+//     }
+// }
 
-export const getOneRaw$ = (query: ResourceQuery) => {
+export const getOne$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getSingleTypeResourcesRaw$(query))
+        return state$.let(getSingleTypeResources$(query))
             .map(resources => {
                 if (typeof resources === 'undefined' || !query.hasOwnProperty('id')) {
                     return undefined;
                 }
-                return resources[query.id].resource;
+                if (resources[query.id]) {
+                  return resources[query.id].resource;
+                } else {
+                  return null;
+                }
             });
         // .mergeMap(resource => state$.let(getAllRaw$())
         //     .map(resources => denormaliseResource(resource, resources))
@@ -81,15 +85,15 @@ export const getOneRaw$ = (query: ResourceQuery) => {
     }
 }
 
-export const getOne$ = (query: ResourceQuery) => {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(getOneRaw$(query))
-            .combineLatest(state$.let(getAllRaw$()),
-            (resource, resources) => {
-                return denormaliseResource(resource, resources);
-            });
-    }
-}
+// export const getOne$ = (query: ResourceQuery) => {
+//     return (state$: Observable<NgrxJsonApiStore>) => {
+//         return state$.let(getOneRaw$(query))
+//             .combineLatest(state$.let(getAllRaw$()),
+//             (resource, resources) => {
+//                 return denormaliseResource(resource, resources);
+//             });
+//     }
+// }
 
 export const get$ = (query: ResourceQuery) => {
     return (state$: Observable<NgrxJsonApiStore>) => {
@@ -99,13 +103,13 @@ export const get$ = (query: ResourceQuery) => {
                 selected$ = state$.let(getOne$(query));
                 return selected$.distinctUntilChanged();
             case 'getMany':
-                selected$ = state$.let(getSingleTypeResources$(query))
-                    .map(resources => filterResources(resources, query));
+                selected$ = state$.let(getSingleTypeResources$(query));
+                    // .map(resources => filterResources(resources, query));
                 return selected$.distinctUntilChanged();
-            case 'getAll':
-                selected$ = state$.let(getAll$())
-                    .map(resources => filterResources(resources, query));
-                return selected$.distinctUntilChanged();
+            // case 'getAll':
+            //     selected$ = state$.let(getAll$())
+            //         .map(resources => filterResources(resources, query));
+            //     return selected$.distinctUntilChanged();
             default:
                 return state$
         }
