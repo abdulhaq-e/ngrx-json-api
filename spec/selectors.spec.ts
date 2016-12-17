@@ -1,18 +1,18 @@
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/let';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/merge';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/reduce';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/switchMapTo';
-
-import '@ngrx/core/add/operator/select';
-
+// import 'rxjs/add/observable/of';
+// import 'rxjs/add/operator/do';
+// import 'rxjs/add/operator/filter';
+// import 'rxjs/add/operator/let';
+// import 'rxjs/add/operator/map';
+// import 'rxjs/add/operator/mapTo';
+// import 'rxjs/add/operator/merge';
+// import 'rxjs/add/operator/mergeMap';
+// import 'rxjs/add/operator/reduce';
+// import 'rxjs/add/operator/switchMap';
+// import 'rxjs/add/operator/switchMapTo';
+//
+// import '@ngrx/core/add/operator/select';
+//
 import {
     async,
     inject,
@@ -20,25 +20,25 @@ import {
     tick,
     TestBed
 } from '@angular/core/testing';
-
-import _ = require('lodash');
-
-
+//
+// import _ = require('lodash');
+//
+//
 import {
     // getRelationsDefinitions,
     // getRelationDefinition,
     get$,
     getOne$,
-    getOneRaw$,
-    getAllRaw$,
+    // getOneRaw$,
+    // getAllRaw$,
     getSingleTypeResources$,
-    getSingleTypeResourcesRaw$,
+    // getSingleTypeResourcesRaw$,
     // getHasManyRelation,
     // getRelatedResources,
     // getRelated,
     NgrxJsonApiSelectors,
 } from '../src/selectors';
-
+//
 import {
     initialNgrxJsonApiState
 } from '../src/reducers';
@@ -59,11 +59,11 @@ describe('individual selectors', () => {
     });
     let obs = Observable.of(store);
 
-    describe('getOneRaw$', () => {
+    describe('getOne$', () => {
         it('should get a single resource given a type and id', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getOneRaw$({ type: 'Article', id: '1' }))
+                let(getOne$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res.title).not.toBeDefined();
@@ -75,7 +75,7 @@ describe('individual selectors', () => {
         it('should return undefined if the type does not exist', fakeAsync(() => {
             let res;
             let sub = Observable.of(Object.assign({}, initialNgrxJsonApiState))
-                .let(getOneRaw$({ type: 'Article', id: '1' }))
+                .let(getOne$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res).not.toBeDefined();
@@ -84,72 +84,72 @@ describe('individual selectors', () => {
         it('should return undefined if the id is not given', fakeAsync(() => {
             let res;
             let sub = Observable.of(Object.assign({}, initialNgrxJsonApiState))
-                .let(getOneRaw$({ type: 'Article'}))
+                .let(getOne$({ type: 'Article'}))
                 .subscribe(d => res = d);
             tick();
             expect(res).not.toBeDefined();
         }));
     });
+//
+//     describe('getOne$', () => {
+//         it('should get a single denormalised resource given a type and id', fakeAsync(() => {
+//             let res;
+//             let sub = obs.
+//                 let(getOne$({ type: 'Article', id: '1' }))
+//                 .subscribe(d => res = d);
+//             tick();
+//             expect(res.title).toEqual('Article 1');
+//             expect(res.type).toEqual('Article');
+//             expect(res.id).toEqual('1');
+//         }));
+//     });
 
-    describe('getOne$', () => {
-        it('should get a single denormalised resource given a type and id', fakeAsync(() => {
-            let res;
-            let sub = obs.
-                let(getOne$({ type: 'Article', id: '1' }))
-                .subscribe(d => res = d);
-            tick();
-            expect(res.title).toEqual('Article 1');
-            expect(res.type).toEqual('Article');
-            expect(res.id).toEqual('1');
-        }));
-    });
-
-    describe('getSingleTypeResourcesRaw$', () => {
+    describe('getSingleTypeResources$', () => {
         it('should get all resources of a given type in raw form', fakeAsync(() => {
             let res;
             let sub = obs.
-                let(getSingleTypeResourcesRaw$({ type: 'Article' }))
+                let(getSingleTypeResources$({ type: 'Article' }))
                 .subscribe(d => res = d);
             tick();
             expect(res['1']).toBeDefined();
             expect(res['2']).toBeDefined();
-            expect(res['1'].attributes.title).toEqual('Article 1');
-            expect(res['1'].id).toEqual('1');
-            expect(res['2'].attributes.title).toEqual('Article 2');
-            expect(res['2'].id).toEqual('2');
+            expect(res['1'].resource.attributes.title).toEqual('Article 1');
+            expect(res['1'].resource.id).toEqual('1');
+            expect(res['2'].resource.attributes.title).toEqual('Article 2');
+            expect(res['2'].resource.id).toEqual('2');
             expect(res['3']).not.toBeDefined();
         }));
 
         it('should return undefined if the resource type is not given', fakeAsync(() => {
           let res;
           let sub = obs.
-              let(getSingleTypeResourcesRaw$({}))
+              let(getSingleTypeResources$({}))
               .subscribe(d => res = d);
           tick();
           expect(res).not.toBeDefined();
         }));
     });
 
-    describe('getSingleTypeResources$', () => {
-        it('should get all denormalised resources of a given type', fakeAsync(() => {
-            let res;
-            let sub = obs.
-                let(getSingleTypeResources$({ type: 'Article' }))
-                .subscribe(d => res = d);
-            tick();
-            expect(res[0]).toBeDefined();
-            expect(res[1]).toBeDefined();
-            expect(res[0].title).toEqual('Article 1');
-            expect(res[0].author).toBeDefined();
-            expect(res[0].comments).toBeDefined();
-            expect(res[0].id).toEqual('1');
-            expect(res[1].title).toEqual('Article 2');
-            expect(res[1].author).toEqual(null);
-            expect(res[1].id).toEqual('2');
-            expect(res[2]).not.toBeDefined();
-        }));
-    });
-
+//     describe('getSingleTypeResources$', () => {
+//         it('should get all denormalised resources of a given type', fakeAsync(() => {
+//             let res;
+//             let sub = obs.
+//                 let(getSingleTypeResources$({ type: 'Article' }))
+//                 .subscribe(d => res = d);
+//             tick();
+//             expect(res[0]).toBeDefined();
+//             expect(res[1]).toBeDefined();
+//             expect(res[0].title).toEqual('Article 1');
+//             expect(res[0].author).toBeDefined();
+//             expect(res[0].comments).toBeDefined();
+//             expect(res[0].id).toEqual('1');
+//             expect(res[1].title).toEqual('Article 2');
+//             expect(res[1].author).toEqual(null);
+//             expect(res[1].id).toEqual('2');
+//             expect(res[2]).not.toBeDefined();
+//         }));
+//     });
+//
     describe('get$', () => {
 
         it('should use getOne$ given a type and id', fakeAsync(() => {
@@ -178,15 +178,15 @@ describe('individual selectors', () => {
                 .subscribe(r => expect(r).toEqual(res));
             tick();
         }));
-
-        it('should filter resources (TODO)', () => {
-
-        });
+//
+//         it('should filter resources (TODO)', () => {
+//
+//         });
     });
-
+//
 });
-
-
+//
+//
 describe('NgrxJsonApiSelectors', () => {
     let selectors;
 
@@ -226,15 +226,15 @@ describe('NgrxJsonApiSelectors', () => {
                 }))
                 .subscribe(d => res = d);
             tick();
-            expect(res[0]).toBeDefined();
-            expect(res[1]).toBeDefined();
-            expect(res[0].title).toEqual('Article 1');
-            expect(res[0].author).toBeDefined();
-            expect(res[0].id).toEqual('1');
-            expect(res[1].title).toEqual('Article 2');
-            expect(res[1].author).toBeDefined();
-            expect(res[1].id).toEqual('2');
-            expect(res[2]).not.toBeDefined();
+            expect(res['1']).toBeDefined();
+            expect(res['2']).toBeDefined();
+            expect(res['1'].resource.attributes.title).toEqual('Article 1');
+            expect(res['1'].resource.relationships.author).toBeDefined();
+            expect(res['1'].resource.id).toEqual('1');
+            expect(res['2'].resource.attributes.title).toEqual('Article 2');
+            expect(res['2'].resource.relationships.author).toBeDefined();
+            expect(res['2'].resource.id).toEqual('2');
+            expect(res['3']).not.toBeDefined();
         }));
 
         it('get should get a single resource given a type and id', fakeAsync(() => {
@@ -249,8 +249,8 @@ describe('NgrxJsonApiSelectors', () => {
                 .subscribe(d => res = d);
             tick();
             expect(res).toBeDefined();
-            expect(res.title).toEqual('Article 1');
-            expect(res.author).toBeDefined();
+            expect(res.attributes.title).toEqual('Article 1');
+            expect(res.relationships.author).toBeDefined();
             expect(res.id).toEqual('1');
         }));
     });

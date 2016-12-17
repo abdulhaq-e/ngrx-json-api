@@ -37,17 +37,11 @@ describe('ngrx json api', () => {
             collectionPath: 'people',
         }
     ];
-
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 BaseRequestOptions,
                 MockBackend,
-                {
-                    provide: NgrxJsonApi,
-                    useFactory: apiFactory,
-                    deps: [Http, API_URL, RESOURCE_DEFINITIONS]
-                },
                 {
                     provide: Http, useFactory: (backend: ConnectionBackend,
                         defaultOptions: BaseRequestOptions) => {
@@ -59,11 +53,16 @@ describe('ngrx json api', () => {
                 },
                 {
                     provide: RESOURCE_DEFINITIONS, useValue: resourcesDefinitions
-                }
+                },
+                {
+                  provide: NgrxJsonApi,
+                  useFactory: apiFactory,
+                  deps: [Http, API_URL, RESOURCE_DEFINITIONS]
+                },
             ]
         });
     });
-
+//
     beforeEach(inject([NgrxJsonApi], (api) => {
         jsonapi = api;
     }));

@@ -1,26 +1,25 @@
 import * as _ from 'lodash';
 
-
 import { Actions } from '@ngrx/effects';
 
 import {
-    FilteringParam,
-    SortingParam,
     Direction,
-    Resource,
-    ResourceStore,
+    Document,
+    FilteringParam,
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
     NgrxJsonApiStoreQueries,
-    ResourceQueryStore,
-    ResourceIdentifier,
-    ResourceState,
-    ResourceDefinition,
-    Document,
-    RelationDefinition,
-    ResourceQuery,
     QueryParams,
+    RelationDefinition,
+    Resource,
+    ResourceDefinition,
+    ResourceIdentifier,
+    ResourceQuery,
+    ResourceQueryStore,
+    ResourceStore,
+    ResourceState,
+    SortingParam,
 } from './interfaces';
 
 export const denormaliseObject = (
@@ -144,6 +143,16 @@ export const transformStoreData = (
 
 }
 
+export const deleteStoreResources = (state: NgrxJsonApiStoreData, query: ResourceQuery) => {
+    let newState = Object.assign({}, state);
+    // if an id is not provided, all resources of the provided type will be deleted
+    if (typeof query.id === 'undefined') {
+        newState[query.type] = {};
+    } else {
+        delete newState[query.type][query.id]
+    }
+    return newState;
+}
 
 export const updateResourceObject = (original: Resource,
     source: Resource): Resource => {
@@ -192,7 +201,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
         newResource= resource;
         persistedResource = resource;
         newResourceState = ResourceState.IN_SYNC;
-    }else {
+    } else {
         let mergedResource = updateResourceObject(foundResource, resource);
         if (_.isEqual(mergedResource, persistedResource)) {
             // no changes anymore, do nothing
@@ -219,13 +228,17 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
 };
 
 
-export const updateQueryErrors = (state: NgrxJsonApiStoreQueries, queryId: string, document : Document): NgrxJsonApiStoreQueries => {
+export const updateQueryErrors = (
+  state: NgrxJsonApiStoreQueries,
+  queryId: string,
+  document : Document): NgrxJsonApiStoreQueries => {
+
   if(!queryId || !state[queryId]){
     return state;
   }
   let newState = Object.assign({}, state);
   let newStoreQuery = Object.assign({}, newState[queryId]);
-  newStoreQuery.errors.length = 0;
+  newStoreQuery.errors = [];
   if(document.errors){
     newStoreQuery.errors.push(...document.errors);
   }
@@ -234,8 +247,12 @@ export const updateQueryErrors = (state: NgrxJsonApiStoreQueries, queryId: strin
 }
 
 
-export const updateResourceErrors = (state: NgrxJsonApiStoreData, query: ResourceQuery, document : Document): NgrxJsonApiStoreData => {
+export const updateResourceErrors = (
+  state: NgrxJsonApiStoreData,
+  query: ResourceQuery,
+  document : Document): NgrxJsonApiStoreData => {
   if(!query.type || !query.id || document.data instanceof Array){
+    // TODO: Why does document.data has to be an Array?
     throw new Error("invalid parameters");
   }
   if(!state[query.type] || !state[query.type][query.id]){
@@ -245,7 +262,7 @@ export const updateResourceErrors = (state: NgrxJsonApiStoreData, query: Resourc
   let newState: NgrxJsonApiStoreData = Object.assign({}, state);
   newState[query.type] = Object.assign({}, newState[query.type]);
   let storeResource =  Object.assign({}, newState[query.type][query.id]);
-  storeResource.errors.length = 0;
+  storeResource.errors = [];
   if(document.errors){
     storeResource.errors.push(...document.errors);
   }
@@ -340,41 +357,43 @@ export const updateResourceState = (state: NgrxJsonApiStoreData,
     return newState;
 };
 
-export const cloneQueryParams = (queryParams: QueryParams): QueryParams => {
-    let newQueryParams : QueryParams = {};
-    if(queryParams.include){
-        newQueryParams.include = queryParams.include.slice(0);
-    }
-    if(queryParams.fields){
-      newQueryParams.fields = queryParams.fields.slice(0);
-    }
-    if(queryParams.filtering){
-      newQueryParams.filtering = queryParams.filtering.map(it => Object.assign({}, it));
-    }
-    if(queryParams.sorting){
-      newQueryParams.sorting = queryParams.sorting.map(it => Object.assign({}, it));
-    }
-    return newQueryParams;
-}
-
-export const cloneResourceQuery = (query: ResourceQuery): ResourceQuery => {
-    let newQuery = Object.assign({}, query);
-    if(newQuery.params){
-        newQuery.params = cloneQueryParams(newQuery.params);
-    }
-    return newQuery;
-}
+// export const cloneQueryParams = (queryParams: QueryParams): QueryParams => {
+//     let newQueryParams : QueryParams = {};
+//     if(queryParams.include){
+//         newQueryParams.include = queryParams.include.slice(0);
+//     }
+//     if(queryParams.fields){
+//       newQueryParams.fields = queryParams.fields.slice(0);
+//     }
+//     if(queryParams.filtering){
+//       newQueryParams.filtering = queryParams.filtering.map(it => Object.assign({}, it));
+//     }
+//     if(queryParams.sorting){
+//       newQueryParams.sorting = queryParams.sorting.map(it => Object.assign({}, it));
+//     }
+//     return newQueryParams;
+// }
+//
+// export const cloneResourceQuery = (query: ResourceQuery): ResourceQuery => {
+//     let newQuery = Object.assign({}, query);
+//     if(newQuery.params){
+//         newQuery.params = cloneQueryParams(newQuery.params);
+//     }
+//     return newQuery;
+// }
 
 /**
  * Updates the query information for the given query in the store.
  */
 export const updateQueryParams = (state: NgrxJsonApiStoreQueries,
     query: ResourceQuery): NgrxJsonApiStoreQueries => {
-
+      // TODO: handle queries without a queryId
     let storeQuery : ResourceQueryStore = state[query.queryId];
+    // this will also handle an undefined query, i.e. a query not found in the store
     let newQueryStore = Object.assign({}, storeQuery);
     newQueryStore.loading = true;
-    newQueryStore.query = cloneResourceQuery(query);
+    // newQueryStore.query = cloneResourceQuery(query);
+    newQueryStore.query = _.cloneDeep(query);
     if(_.isUndefined(newQueryStore.errors)){
         newQueryStore.errors = [];
     }
@@ -394,7 +413,7 @@ export const removeQuery = (state: NgrxJsonApiStoreQueries,
     return newState;
 }
 
-const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
+export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
     return {type: resource.type, id : resource.id};
 }
 
@@ -423,7 +442,7 @@ export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId : str
 
 export const updateStoreResources = (state: NgrxJsonApiStoreData,
     payload: Document): NgrxJsonApiStoreData => {
-
+      // perhaps this should be named updateStoreData
     let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
     if (_.isUndefined(data)) {
@@ -453,16 +472,6 @@ export const updateStoreResources = (state: NgrxJsonApiStoreData,
             // result.data[resourcePath].data, resource);
             // return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
         }, state);
-};
-
-export const deleteFromState = (state: NgrxJsonApiStoreData, query: ResourceQuery) => {
-    let newState = Object.assign({}, state);
-    if (typeof query.id === 'undefined') {
-        newState[query.type] = {};
-    } else {
-        delete newState[query.type][query.id]
-    }
-    return newState;
 };
 
 export const filterResources = (resources, query: ResourceQuery) => {
@@ -616,33 +625,11 @@ export const generateSortingQueryParams = (sorting: Array<SortingParam>): string
 
 }
 
-export const generateQueryParams = (first: string, second: string, third: string, forth: string) => {
-
-  let arrayOfParams: Array<string> = []
-
-  if (first !== '') {
-    arrayOfParams.push(first);
+export const generateQueryParams = (...params: Array<string>) => {
+  let newParams = params.filter(p => p != '');
+  if (newParams.length != 0) {
+    return '?' + newParams.join('&')
+  } else {
+    return '';
   }
-
-  if (second !== '') {
-    arrayOfParams.push(second);
-  }
-
-  if (third !== '') {
-    arrayOfParams.push(third);
-  }
-
-  if (forth !== '') {
-    arrayOfParams.push(forth);
-  }
-
-  let queryParams = '?' + arrayOfParams.join('&');
-
-  // if both params are empty string, queryParams will end up to be '?',
-  // we don't want this to happen
-  if (queryParams !== '?') {
-    return queryParams;
-  }
-
-  return '';
 }

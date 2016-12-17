@@ -18,13 +18,14 @@ import { compose } from '@ngrx/core/compose';
 import { Store } from '@ngrx/store';
 
 import {
+    NgrxJsonApiStore,
+    NgrxJsonApiStoreData,
+    NgrxJsonApiStoreResources,
+    QueryType,
     ResourceIdentifier,
     Resource,
     ResourceQuery,
     ResourceStore,
-    NgrxJsonApiStore,
-    NgrxJsonApiStoreResources,
-    QueryType,
 } from './interfaces';
 import {
     denormaliseResource,
@@ -111,7 +112,7 @@ export const get$ = (query: ResourceQuery) => {
             //         .map(resources => filterResources(resources, query));
             //     return selected$.distinctUntilChanged();
             default:
-                return state$
+                return state$;
         }
     }
 };

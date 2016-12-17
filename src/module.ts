@@ -29,9 +29,10 @@ export const NGRX_JSON_API_STORE_LOCATION = new OpaqueToken(
 export const apiFactory = (
     http: Http,
     apiUrl: string,
-    resourceDefinitions: Array<ResourceDefinition>) => {
+    resourceDefinitions: Array<ResourceDefinition>
+  ) => {
     return new NgrxJsonApi(http, apiUrl, resourceDefinitions);
-};
+}
 
 export const selectorsFactory = (storeLocation: string) => {
     return new NgrxJsonApiSelectors<any>(storeLocation);
