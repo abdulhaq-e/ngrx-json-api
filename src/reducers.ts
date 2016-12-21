@@ -9,13 +9,14 @@ import {
     NgrxJsonApiStore
 } from './interfaces';
 import {
+    deleteStoreResources,
     updateQueryParams,
     updateQueryResults,
     updateQueryErrors,
-    deleteFromState,
     updateStoreResources,
     updateOrInsertResource,
     updateResourceState,
+    removeQuery,
     rollbackStoreResources,
     updateResourceErrors,
 } from './utils';
@@ -34,7 +35,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
     (state: NgrxJsonApiStore = initialNgrxJsonApiState, action: Action) => {
         let newState;
 
-        console.log("reduce", state, action);
+        // console.log("reduce", state, action);
 
         switch (action.type) {
             case NgrxJsonApiActionTypes.API_CREATE_INIT:
@@ -43,6 +44,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
             case NgrxJsonApiActionTypes.API_READ_INIT:
                 newState = Object.assign({}, state, { 'isReading': true });
                 let query = action.payload.query as ResourceQuery;
+                // FIXME: handle queries with no queryId
                 if(query.queryId){
                     newState = Object.assign({}, state, {
                         queries: updateQueryParams( state.queries, query),
@@ -53,7 +55,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
             case NgrxJsonApiActionTypes.REMOVE_QUERY:
                 let queryId = action.payload as string;
                 newState = Object.assign({}, state, {
-                    queries: this.removeQuery( state.queries, queryId),
+                    queries: removeQuery( state.queries, queryId),
                 });
                 return newState;
 
@@ -98,7 +100,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
 
             case NgrxJsonApiActionTypes.API_DELETE_SUCCESS:
                 newState = Object.assign({}, state,
-                    { data: deleteFromState(state.data, action.payload.query) },
+                    { data: deleteStoreResources(state.data, action.payload.query) },
                     { 'isDeleting': false });
                 return newState;
 

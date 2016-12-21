@@ -10,7 +10,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/switchMapTo';
-import 'rxjs/add/operator/toarray';
+import 'rxjs/add/operator/toArray';
 import 'rxjs/add/operator/concatAll';
 import 'rxjs/add/operator/mapTo';
 import 'rxjs/add/operator/take';
@@ -28,6 +28,7 @@ import {
   ApiUpdateFailAction,
   ApiUpdateSuccessAction,
   NgrxJsonApiActionTypes,
+  QueryStoreSuccessAction,
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
