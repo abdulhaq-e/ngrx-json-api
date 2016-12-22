@@ -357,6 +357,42 @@ describe('NgrxJsonApiReducer', () => {
             expect(newState.data['Article']['1']).toBeDefined();
             expect(newState2.data['Article']['1']).toBeDefined();
         });
+
+        it('should not update state on second identical post', () => {
+            let action = new PostStoreResourceAction(
+                { type: 'Article', id: '1', attributes : {title : 'sample title'} }
+            );
+            let newState = NgrxJsonApiStoreReducer(state, action);
+            let newState2 = NgrxJsonApiStoreReducer(newState, action);
+            expect(newState.data['Article']['1']).toBeDefined();
+            expect(newState2.data['Article']['1']).toBeDefined();
+            expect(newState2 === newState).toBeTruthy();
+        });
+
+        it('should not update state on second identical patch', () => {
+            let action = new PatchStoreResourceAction(
+                { type: 'Article', id: '1', attributes : {title : 'sample title', description : 'test description'} }
+            );
+            let newState = NgrxJsonApiStoreReducer(state, action);
+            let newState2 = NgrxJsonApiStoreReducer(newState, action);
+            expect(newState.data['Article']['1']).toBeDefined();
+            expect(newState2.data['Article']['1']).toBeDefined();
+            expect(newState2 === newState).toBeTruthy();
+        });
+
+        it('should not update state on second partial patch', () => {
+            let newState = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
+                { type: 'Article', id: '1', attributes : {title : 'sample title', description : 'sample description'} }
+            ));
+            let newState2 = NgrxJsonApiStoreReducer(newState, new PatchStoreResourceAction(
+                { type: 'Article', id: '1', attributes : {title : 'sample title'} }
+            ));
+            expect(newState.data['Article']['1'].resource.attributes.title).toEqual("sample title");
+            expect(newState.data['Article']['1'].resource.attributes.description).toEqual("sample description");
+            expect(newState2.data['Article']['1'].resource.attributes.title).toEqual("sample title");
+            expect(newState2.data['Article']['1'].resource.attributes.description).toEqual("sample description");
+            expect(newState2 === newState).toBeTruthy();
+        });
     });
 
     describe('API_COMMIT_INIT action', () => {
