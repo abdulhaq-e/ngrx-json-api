@@ -94,7 +94,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.QUERY_STORE_INIT)
     .map<Action, ResourceQuery>(toPayload)
     .mergeMap((query: ResourceQuery) => {
-      return this.store.let(this.selectors.get$(query))
+      return this.store.let(this.selectors.getResourceStore$(query))
       .map(results => Observable.of(new QueryStoreSuccessAction({
         data: results
       })));
