@@ -15,11 +15,9 @@ export interface Document {
 }
 
 export interface FilteringParam {
-    field?: string;
-    value?: any;
-    type?: string;
     path?: string;
-    api?: string;
+    type?: string;
+    value?: any;
 }
 
 export interface NgrxJsonApiStore {
@@ -36,6 +34,15 @@ export interface NgrxJsonApiModuleConfig {
     apiUrl: string;
     resourceDefinitions: Array<ResourceDefinition>;
     storeLocation: string;
+    utilityFunctions?: NgrxJsonApiUtilityFunctions;
+}
+
+export interface NgrxJsonApiUtilityFunctions {
+  generateFilteringQueryParams?: (params: Array<FilteringParam>) => string;
+  generateFieldsQueryParams?: (params: Array<string>) => string;
+  generateIncludedQueryParams?: (params: Array<string>) => string;
+  generateSortingQueryParams?: (params: Array<SortingParam>) => string;
+  generateQueryParams?: (params: Array<string>) => string;
 }
 
 export type NgrxJsonApiStoreResources = { [id: string]: ResourceStore };
