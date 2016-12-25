@@ -1,8 +1,7 @@
-import * as _ from 'lodash';
 import { Action, ActionReducer } from '@ngrx/store';
 
 import {
-  NgrxJsonApiActionTypes
+    NgrxJsonApiActionTypes
 } from './actions';
 import {
     ResourceQuery,
@@ -22,14 +21,14 @@ import {
     updateResourceErrors,
 } from './utils';
 
-export const initialNgrxJsonApiState = {
-    isCreating: false,
-    isReading: false,
-    isUpdating: false,
-    isDeleting: false,
-    isCommitting : false,
+export const initialNgrxJsonApiState: NgrxJsonApiStore = {
+    isCreating: 0,
+    isReading: 0,
+    isUpdating: 0,
+    isDeleting: 0,
+    isCommitting: 0,
     data: {},
-    queries : {}
+    queries: {}
 };
 
 export const NgrxJsonApiStoreReducer: ActionReducer<any> =
@@ -39,132 +38,136 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         // console.log("reduce", state, action);
 
         switch (action.type) {
-            case NgrxJsonApiActionTypes.API_CREATE_INIT:{
-                return Object.assign({}, state, { 'isCreating': true });
+            case NgrxJsonApiActionTypes.API_CREATE_INIT: {
+                return Object.assign({}, state, { isCreating: state['isCreating'] + 1 });
             }
-            case NgrxJsonApiActionTypes.API_READ_INIT:{
-                newState = Object.assign({}, state, { 'isReading': true });
+            case NgrxJsonApiActionTypes.API_READ_INIT: {
                 let query = action.payload.query as ResourceQuery;
                 // FIXME: handle queries with no queryId
-                if(query.queryId){
+                if (query.queryId) {
                     newState = Object.assign({}, state, {
-                        queries: updateQueryParams( state.queries, query),
+                        queries: updateQueryParams(state.queries, query),
+                        isReading: state.isReading + 1
                     });
                 }
                 return newState;
             }
-            case NgrxJsonApiActionTypes.REMOVE_QUERY:{
+            case NgrxJsonApiActionTypes.REMOVE_QUERY: {
                 let queryId = action.payload as string;
                 newState = Object.assign({}, state, {
-                    queries: removeQuery( state.queries, queryId),
+                    queries: removeQuery(state.queries, queryId),
                 });
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_UPDATE_INIT:{
-                return Object.assign({}, state, { 'isUpdating': true });
+            case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
+                return Object.assign({}, state, { isUpdating: state['isUpdating'] + 1 });
             }
-            case NgrxJsonApiActionTypes.API_DELETE_INIT:{
-                return Object.assign({}, state, { 'isDeleting': true });
+            case NgrxJsonApiActionTypes.API_DELETE_INIT: {
+                return Object.assign({}, state, { isDeleting: state['isDeleting'] + 1 });
             }
-            case NgrxJsonApiActionTypes.API_CREATE_SUCCESS:{
+            case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
                 newState = Object.assign({},
                     state, {
                         data: updateStoreResources(
-                          state.data, action.payload.jsonApiData),
-                    },
-                    { 'isCreating': false }
+                            state.data, action.payload.jsonApiData),
+                        isCreating: state.isCreating - 1
+                    }
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_READ_SUCCESS:{
+            case NgrxJsonApiActionTypes.API_READ_SUCCESS: {
                 newState = Object.assign({},
                     state, {
                         data: updateStoreResources(
-                          state.data, action.payload.jsonApiData),
+                            state.data, action.payload.jsonApiData),
                         queries: updateQueryResults(
                             state.queries, action.payload.query.queryId, action.payload.jsonApiData),
-                    },
-                    { 'isReading': false }
+                        isReading: state.isReading - 1
+                    }
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_UPDATE_SUCCESS:{
+            case NgrxJsonApiActionTypes.API_UPDATE_SUCCESS: {
                 newState = Object.assign(
                     {},
                     state, {
                         data: updateStoreResources(
-                          state.data, action.payload.jsonApiData),
-                    },
-                    { 'isUpdating': false }
+                            state.data, action.payload.jsonApiData),
+                        isUpdating: state.isUpdating - 1
+                    }
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_DELETE_SUCCESS:{
+            case NgrxJsonApiActionTypes.API_DELETE_SUCCESS: {
                 newState = Object.assign({}, state,
-                    { data: deleteStoreResources(state.data, action.payload.query) },
-                    { 'isDeleting': false });
+                    {
+                        data: deleteStoreResources(state.data, action.payload.query),
+                        isDeleting: state.isDeleting - 1
+                    });
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_CREATE_FAIL:{
+            case NgrxJsonApiActionTypes.API_CREATE_FAIL: {
                 newState = Object.assign({}, state, {
-                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
-                  'isCreating': false }
-                );
-                return newState;
-            }
-            case NgrxJsonApiActionTypes.API_READ_FAIL:{
-                newState = Object.assign({}, state, {
-                  queries: updateQueryErrors(state.queries, action.payload.query.queryId, action.payload.jsonApiData),
-                  'isReading': false
+                    data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                    isCreating: state.isCreating - 1
                 });
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_UPDATE_FAIL:{
+            case NgrxJsonApiActionTypes.API_READ_FAIL: {
                 newState = Object.assign({}, state, {
-                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
-                  'isUpdating': false }
+                    queries: updateQueryErrors(state.queries, action.payload.query.queryId, action.payload.jsonApiData),
+                    isReading: state.isReading - 1
+                });
+                return newState;
+            }
+            case NgrxJsonApiActionTypes.API_UPDATE_FAIL: {
+                newState = Object.assign({}, state, {
+                    data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                    isUpdating: state.isUpdating - 1
+                }
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_DELETE_FAIL:{
+            case NgrxJsonApiActionTypes.API_DELETE_FAIL: {
                 newState = Object.assign({}, state, {
-                  data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
-                  'isDeleting': false }
+                    data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+                    isDeleting: state.isDeleting - 1
+                }
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS:{
-              newState = Object.assign({}, state, {
-                queries: updateQueryResults(
-                    state.queries,
-                    action.payload.query.queryId,
-                    action.payload.jsonApiData),
-              })
-              return newState;
+            case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
+                newState = Object.assign({}, state, {
+                    queries: updateQueryResults(
+                        state.queries,
+                        action.payload.query.queryId,
+                        action.payload.jsonApiData),
+                })
+                return newState;
             }
-            case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE:{
+            case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE: {
                 let updatedData = updateOrInsertResource(state.data, action.payload, false, false);
-                if(updatedData !== state.data) {
+                if (updatedData !== state.data) {
                     newState = Object.assign({},
                         state, {
                             data: updatedData
                         }
                     );
                     return newState;
-                }else{
+                } else {
                     return state;
                 }
             }
-            case NgrxJsonApiActionTypes.POST_STORE_RESOURCE:{
+            case NgrxJsonApiActionTypes.POST_STORE_RESOURCE: {
                 let updatedData = updateOrInsertResource(state.data, action.payload, false, true)
-                if(updatedData !== state.data) {
+                if (updatedData !== state.data) {
                     newState = Object.assign({},
                         state, {
                             data: updatedData
                         }
                     );
                     return newState;
-                }else{
+                } else {
                     return state;
                 }
             }
@@ -178,7 +181,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 return newState;
             }
             case NgrxJsonApiActionTypes.API_COMMIT_INIT: {
-                newState = Object.assign({}, state, {'isCommitting': true});
+                newState = Object.assign({}, state, { isCommitting: state.isCommitting + 1 });
                 return newState;
             }
             case NgrxJsonApiActionTypes.API_COMMIT_SUCCESS:
@@ -189,10 +192,10 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 for (let commitAction of actions) {
                     newState = NgrxJsonApiStoreReducer(newState, commitAction);
                 }
-                newState = Object.assign({}, newState, {isCommitting: false});
+                newState = Object.assign({}, newState, { isCommitting: state['isCommitting'] - 1 });
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_ROLLBACK:{
+            case NgrxJsonApiActionTypes.API_ROLLBACK: {
                 newState = Object.assign({},
                     state, {
                         data: rollbackStoreResources(state.data)

@@ -10,6 +10,7 @@ import {
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
     NgrxJsonApiStoreQueries,
+    OperationType,
     QueryParams,
     RelationDefinition,
     Resource,
@@ -316,7 +317,6 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
         newState[resource.type] = {};
         newState[resource.type] = insertStoreResource(newState[resource.type], resource, fromServer);
         return newState;
-
     } else if (_.isUndefined(state[resource.type][resource.id]) || override) {
         let updatedTypeState = insertStoreResource(state[resource.type], resource, fromServer);
         if(updatedTypeState !== state[resource.type]) {
@@ -347,7 +347,7 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
  * @returns {NgrxJsonApiStoreData}
  */
 export const updateResourceState = (state: NgrxJsonApiStoreData,
-    resourceId: ResourceIdentifier, resourceState? : ResourceState, loading? : boolean): NgrxJsonApiStoreData => {
+    resourceId: ResourceIdentifier, resourceState? : ResourceState, loading? : OperationType): NgrxJsonApiStoreData => {
     if (_.isUndefined(state[resourceId.type]) || _.isUndefined(state[resourceId.type][resourceId.id])) {
         return state;
     }

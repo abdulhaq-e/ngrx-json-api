@@ -49,21 +49,26 @@ describe('NgrxJsonApiReducer', () => {
     deepFreeze(state);
 
     describe('API_CREATE_INIT action', () => {
-        it('should change isCreating status', () => {
+        it('should add 1 to isCreating', () => {
             let newState = NgrxJsonApiStoreReducer(state, new ApiCreateInitAction({}));
-            expect(newState.isCreating).toBe(true);
+            expect(newState.isCreating).toBe(1);
         });
     });
 
     describe('API_READ_INIT action', () => {
+        let newState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+            query: {
+                id: '1',
+                type: 'Article',
+                queryId: '111'
+            }
+        }));
+
+        it('should change isReading status by adding 1', () => {
+            expect(newState.isReading - state.isReading).toBe(1);
+        });
+
         it('should update the storeQueries', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
-                query: {
-                    id: '1',
-                    type: 'Article',
-                    queryId: '111'
-                }
-            }));
             expect(newState.queries['111'].query.type).toEqual('Article');
             expect(newState.queries['111'].query.id).toEqual('1');
         });
@@ -84,23 +89,23 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     describe('API_UPDATE_INIT action', () => {
-        it('should set isUpdating status to true', () => {
+        it('should add 1 to isUpdating', () => {
             let newState = NgrxJsonApiStoreReducer(state, new ApiUpdateInitAction({}));
-            expect(newState.isUpdating).toBe(true);
+            expect(newState.isUpdating).toBe(1);
         });
     });
 
     describe('API_DELETE_INIT action', () => {
-        it('should set isDeleting status to true', () => {
+        it('should add 1 isDeleting', () => {
             let newState = NgrxJsonApiStoreReducer(state, new ApiDeleteInitAction({}));
-            expect(newState.isDeleting).toBe(true);
+            expect(newState.isDeleting).toBe(1);
         });
     });
 
     describe('API_CREATE_SUCCESS action', () => {
-        it('should set isCreating status to false', () => {
+        it('should subtract 1 from isCreating', () => {
             let newState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({}));
-            expect(newState.isCreating).toBe(false);
+            expect(state.isCreating - newState.isCreating).toBe(1);
         });
 
         it('should add data to the store', () => {
@@ -117,19 +122,15 @@ describe('NgrxJsonApiReducer', () => {
             type: 'Article',
             id: '1'
         }
-        it('should set isReading status to false', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-                jsonApiData: testPayload,
-                query: query
-            }));
-            expect(newState.isReading).toBe(false);
+        let newState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+          jsonApiData: testPayload,
+          query: query
+        }));
+        it('should subtract 1 from isReading', () => {
+            expect(state.isReading - newState.isReading).toBe(1);
         });
 
         it('should add data to the store', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-                jsonApiData: testPayload,
-                query: query
-            }));
             expect(newState.data['Article']['1']).toBeDefined();
         })
 
@@ -156,105 +157,111 @@ describe('NgrxJsonApiReducer', () => {
             type: 'Article',
             id: '1'
         }
-        it('should set isUpdating status to false', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiUpdateSuccessAction({
-                jsonApiData: testPayload,
-            }));
-            expect(newState.isUpdating).toBe(false);
+        let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+          jsonApiData: testPayload,
+          query: {
+            id: '1',
+            type: 'Article',
+            queryId: '111'
+          }
+        }));
+        let newState = NgrxJsonApiStoreReducer(tempState, new ApiUpdateSuccessAction({
+          jsonApiData: {
+            data: {
+              type: 'Article',
+              id: '1',
+              attributes: {
+                title: 'bla bla bla'
+              }
+            }
+          },
+        }));
+
+        it('should subtract 1 from isUpdating', () => {
+            expect(state.isUpdating - newState.isUpdating).toBe(1);
         });
 
         it('should add data to the store', () => {
-            let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-                jsonApiData: testPayload,
-                query: {
-                    id: '1',
-                    type: 'Article',
-                    queryId: '111'
-                }
-            }));
-            let newState = NgrxJsonApiStoreReducer(tempState, new ApiUpdateSuccessAction({
-                jsonApiData: {
-                    data: {
-                        type: 'Article',
-                        id: '1',
-                        attributes: {
-                            title: 'bla bla bla'
-                        }
-                    }
-                },
-            }));
             expect(newState.data['Article']['1'].resource.attributes.title).toEqual('bla bla bla');
         })
     });
 
     describe('API_DELETE_SUCCESS', () => {
-        it('should set isDeleting status to false', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiDeleteSuccessAction({
-                query: {
-                    type: 'Article'
-                }
-            }));
-            expect(newState.isDeleting).toBe(false);
+
+        let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+          jsonApiData: testPayload,
+          query: {
+            id: '1',
+            type: 'Article',
+            queryId: '111'
+          }
+        }));
+        let newState = NgrxJsonApiStoreReducer(tempState, new ApiDeleteSuccessAction({
+          query: {
+            type: 'Article'
+          }
+        }));
+
+        it('should subtract 1 from isDeleting', () => {
+            expect(state.isDeleting - newState.isDeleting).toBe(1);
         });
 
         it('should remove resources from the store', () => {
-            let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-                jsonApiData: testPayload,
-                query: {
-                    id: '1',
-                    type: 'Article',
-                    queryId: '111'
-                }
-            }));
-            let newState = NgrxJsonApiStoreReducer(tempState, new ApiDeleteSuccessAction({
-                query: {
-                    type: 'Article'
-                }
-            }));
             expect(newState.data['Article']).toEqual({});
         });
     });
 
     describe('API_CREATE_FAIL', () => {
+        let tempState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({
+            jsonApiData: testPayload
+        }));
+        let newState = NgrxJsonApiStoreReducer(tempState, new ApiCreateFailAction({
+            jsonApiData: {
+                errors: [
+                    'permission denied'
+                ]
+            },
+            query: {
+                id: '1',
+                type: 'Article',
+            }
+        }));
         it('should add the errors to the resource', () => {
-            let tempState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({
-                jsonApiData: testPayload
-            }));
-            let newState = NgrxJsonApiStoreReducer(tempState, new ApiCreateFailAction({
-                jsonApiData: {
-                    errors: [
-                        'permission denied'
-                    ]
-                },
-                query: {
-                    id: '1',
-                    type: 'Article',
-                }
-            }));
             expect(newState.data['Article']['1'].errors[0]).toEqual('permission denied');
         });
+
+        it('should subtract 1 from isCreating', () => {
+            expect(tempState.isCreating - newState.isCreating).toBe(1);
+        });
+
     });
 
     describe('API_READ_FAIL', () => {
-        it('should add the errors to the resource', () => {
-            let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
-                query: {
-                    id: '1',
-                    type: 'Article',
-                    queryId: '111'
-                }
+        let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+            query: {
+                id: '1',
+                type: 'Article',
+                queryId: '111'
+            }
+        }));
+        let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadFailAction({
+            jsonApiData: {
+                errors: ['permission denied']
+            },
+            query: {
+                queryId: '111',
+                id: '1',
+                type: 'Article',
             }));
-            let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadFailAction({
-                jsonApiData: {
-                    errors: ['permission denied']
-                },
-                query: {
-                    queryId: '111',
-                    id: '1',
-                    type: 'Article',
-                }));
+
+        it('should add the errors to the resource', () => {
             expect(newState.queries['111'].errors[0]).toEqual('permission denied');
         });
+
+        it('should subtract 1 from isReading', () => {
+            expect(tempState.isReading - newState.isReading).toBe(1);
+        });
+
     });
 
     describe('API_UPDATE_FAIL action', () => {
@@ -280,8 +287,8 @@ describe('NgrxJsonApiReducer', () => {
                 type: 'Article',
             }
         }));
-        it('should set isUpdating status to false', () => {
-            expect(newState.isUpdating).toBe(false);
+        it('should subtract 1 from isUpdating', () => {
+            expect(tempState2.isUpdating - newState.isUpdating).toBe(1);
         });
 
         it('should add errors to the resource', () => {
@@ -312,8 +319,8 @@ describe('NgrxJsonApiReducer', () => {
                 type: 'Article',
             }
         }));
-        it('should set isDeleting status to false', () => {
-            expect(newState.isDeleting).toBe(false);
+        it('should subtract 1 from isDeleting', () => {
+            expect(tempState2.isDeleting - newState.isDeleting).toBe(1);
         });
 
         it('should add errors to the resource', () => {
@@ -360,18 +367,19 @@ describe('NgrxJsonApiReducer', () => {
 
         it('should not update state on second identical post', () => {
             let action = new PostStoreResourceAction(
-                { type: 'Article', id: '1', attributes : {title : 'sample title'} }
+                { type: 'Article', id: '1', attributes: { title: 'sample title' } }
             );
             let newState = NgrxJsonApiStoreReducer(state, action);
             let newState2 = NgrxJsonApiStoreReducer(newState, action);
             expect(newState.data['Article']['1']).toBeDefined();
             expect(newState2.data['Article']['1']).toBeDefined();
-            expect(newState2 === newState).toBeTruthy();
+            expect(newState).toBe(newState2);
+            // expect(newState2 === newState).toBeTruthy();
         });
 
         it('should not update state on second identical patch', () => {
             let action = new PatchStoreResourceAction(
-                { type: 'Article', id: '1', attributes : {title : 'sample title', description : 'test description'} }
+                { type: 'Article', id: '1', attributes: { title: 'sample title', description: 'test description' } }
             );
             let newState = NgrxJsonApiStoreReducer(state, action);
             let newState2 = NgrxJsonApiStoreReducer(newState, action);
@@ -382,10 +390,10 @@ describe('NgrxJsonApiReducer', () => {
 
         it('should not update state on second partial patch', () => {
             let newState = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
-                { type: 'Article', id: '1', attributes : {title : 'sample title', description : 'sample description'} }
+                { type: 'Article', id: '1', attributes: { title: 'sample title', description: 'sample description' } }
             ));
             let newState2 = NgrxJsonApiStoreReducer(newState, new PatchStoreResourceAction(
-                { type: 'Article', id: '1', attributes : {title : 'sample title'} }
+                { type: 'Article', id: '1', attributes: { title: 'sample title' } }
             ));
             expect(newState.data['Article']['1'].resource.attributes.title).toEqual("sample title");
             expect(newState.data['Article']['1'].resource.attributes.description).toEqual("sample description");
@@ -396,9 +404,9 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     describe('API_COMMIT_INIT action', () => {
-        it('should change isCommitting to true', () => {
+        it('should add 1 to isCommitting', () => {
             let newState = NgrxJsonApiStoreReducer(state, new ApiCommitInitAction());
-            expect(newState.isCommitting).toBe(true);
+            expect(newState.isCommitting - state.isCommitting).toBe(1);
         });
     });
 
@@ -407,10 +415,10 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     describe('ALL OTHER ACTIONS', () => {
-      it('should return the state', () => {
-        let newState = NgrxJsonApiStoreReducer(state, {type: 'RANDOM_ACTION'});
-        expect(newState).toEqual(state);
-      });
+        it('should return the state', () => {
+            let newState = NgrxJsonApiStoreReducer(state, { type: 'RANDOM_ACTION' });
+            expect(newState).toEqual(state);
+        });
     });
 
 });
