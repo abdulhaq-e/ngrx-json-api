@@ -25,11 +25,11 @@ export interface FilteringParam {
 export interface NgrxJsonApiStore {
     data: NgrxJsonApiStoreData;
     queries: NgrxJsonApiStoreQueries;
-    isCreating: boolean;
-    isReading: boolean;
-    isUpdating: boolean;
-    isDeleting: boolean;
-    isCommitting: boolean;
+    isCreating: number;
+    isReading: number;
+    isUpdating: number;
+    isDeleting: number;
+    isCommitting: number;
 }
 
 export interface NgrxJsonApiModuleConfig {
@@ -41,6 +41,13 @@ export interface NgrxJsonApiModuleConfig {
 export type NgrxJsonApiStoreResources = { [id: string]: ResourceStore };
 export type NgrxJsonApiStoreData = { [key: string]: NgrxJsonApiStoreResources };
 export type NgrxJsonApiStoreQueries = { [key: string]: ResourceQueryStore };
+
+export type OperationType
+        = 'CREATING'
+        | 'UPDATING'
+        | 'DELETING'
+        | 'READING'
+        | false
 
 export interface Payload {
     jsonApiData?: Document;
@@ -62,6 +69,7 @@ export type QueryType
     | 'update'
     | 'deleteOne'
     | 'create'
+
 
 export interface RelationDefinition {
     relation: string;
@@ -159,9 +167,9 @@ export interface ResourceStore {
      */
     persistedResource: Resource;
     /**
-     * True if any kind of operation is executed (post, patch, delete).
+     * One of the operation types: reading, creating, updating or deleting.
      */
-    loading?: boolean;
+    loading?: OperationType;
     /**
      * Errors received from the server after attempting to store the resource.
      */
