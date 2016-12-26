@@ -16,6 +16,7 @@ import 'rxjs/add/observable/throw';
 
 import {
     Document,
+    NgrxJsonApiConfig,
     Payload,
     ResourceDefinition,
     ResourceQuery,
@@ -37,13 +38,13 @@ export class NgrxJsonApi {
         'Accept': 'application/vnd.api+json'
     });
     public requestUrl: string;
+    public apiUrl = this.config.apiUrl;
+    public definitions = this.config.resourceDefinitions;
 
     constructor(
         private http: Http,
-        private apiUrl: string,
-        private definitions: Array<ResourceDefinition>
-    ) {
-    }
+        public config: NgrxJsonApiConfig
+    ) {}
 
     private urlBuilder(query: ResourceQuery) {
         switch (query.queryType) {

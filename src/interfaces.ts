@@ -30,14 +30,14 @@ export interface NgrxJsonApiStore {
     isCommitting: number;
 }
 
-export interface NgrxJsonApiModuleConfig {
+export interface NgrxJsonApiConfig {
     apiUrl: string;
     resourceDefinitions: Array<ResourceDefinition>;
     storeLocation: string;
-    utilityFunctions?: NgrxJsonApiUtilityFunctions;
+    urlBuilder?: NgrxJsonApiUrlBuilder;
 }
 
-export interface NgrxJsonApiUtilityFunctions {
+export interface NgrxJsonApiUrlBuilder {
   generateFilteringQueryParams?: (params: Array<FilteringParam>) => string;
   generateFieldsQueryParams?: (params: Array<string>) => string;
   generateIncludedQueryParams?: (params: Array<string>) => string;

@@ -19,11 +19,13 @@ import { Observable } from 'rxjs/Observable';
 
 import { NgrxJsonApi } from '../src/api';
 import {
-    API_URL,
-    RESOURCE_DEFINITIONS,
-    apiFactory
+    NGRX_JSON_API_CONFIG,
+    apiFactory,
 } from '../src/module';
-import { ResourceDefinition } from '../src/interfaces';
+import {
+    NgrxJsonApiConfig,
+    ResourceDefinition
+} from '../src/interfaces';
 
 describe('ngrx json api', () => {
     let jsonapi;
@@ -49,20 +51,21 @@ describe('ngrx json api', () => {
                     }, deps: [MockBackend, BaseRequestOptions]
                 },
                 {
-                    provide: API_URL, useValue: 'myapi.com'
+                    provide: NgrxJsonApi,
+                    useFactory: apiFactory,
+                    deps: [Http, NGRX_JSON_API_CONFIG]
                 },
                 {
-                    provide: RESOURCE_DEFINITIONS, useValue: resourcesDefinitions
-                },
-                {
-                  provide: NgrxJsonApi,
-                  useFactory: apiFactory,
-                  deps: [Http, API_URL, RESOURCE_DEFINITIONS]
+                    provide: NGRX_JSON_API_CONFIG,
+                    useValue: {
+                      apiUrl: 'myapi.com',
+                      resourceDefinitions: resourcesDefinitions
+                    }
                 },
             ]
         });
     });
-//
+    //
     beforeEach(inject([NgrxJsonApi], (api) => {
         jsonapi = api;
     }));
@@ -240,9 +243,9 @@ describe('ngrx json api', () => {
                 });
                 jsonapi.update({
                     jsonApiData: {
-                      data: {
-                        title: 'Hello', id: '1', type: 'Post'
-                      }
+                        data: {
+                            title: 'Hello', id: '1', type: 'Post'
+                        }
                     },
                     query: {
                         queryType: 'update',

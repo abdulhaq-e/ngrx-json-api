@@ -31,7 +31,7 @@ import {
 } from '../src/reducers';
 
 import {
-    NGRX_JSON_API_STORE_LOCATION,
+    NGRX_JSON_API_CONFIG,
     selectorsFactory
 } from '../src/module';
 
@@ -48,11 +48,13 @@ describe('NgrxJsonApiSelectors', () => {
                 {
                     provide: NgrxJsonApiSelectors,
                     useFactory: selectorsFactory,
-                    deps: [NGRX_JSON_API_STORE_LOCATION]
+                    deps: [NGRX_JSON_API_CONFIG]
                 },
                 {
-                    provide: NGRX_JSON_API_STORE_LOCATION,
-                    useValue: 'api'
+                    provide: NGRX_JSON_API_CONFIG,
+                    useValue: {
+                      storeLocation: 'api'
+                    }
                 },
             ]
         })

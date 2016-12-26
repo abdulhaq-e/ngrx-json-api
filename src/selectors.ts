@@ -22,6 +22,7 @@ import { compose } from '@ngrx/core/compose';
 import { Store } from '@ngrx/store';
 
 import {
+    NgrxJsonApiConfig,
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
@@ -41,8 +42,9 @@ import {
 
 export class NgrxJsonApiSelectors<T> {
 
-    constructor(public storeLocation: string) {
-        this.storeLocation = storeLocation;
+    public storeLocation: string = this.config.storeLocation;
+
+    constructor(public config: NgrxJsonApiConfig) {
     }
 
     private getStoreData$() {

@@ -17,61 +17,45 @@ import {
   GetResourcePipe
 } from './services';
 
-import { ResourceDefinition, NgrxJsonApiModuleConfig } from './interfaces';
+import { NgrxJsonApiConfig } from './interfaces';
 
-export const API_URL = new OpaqueToken('API_URL');
+export const NGRX_JSON_API_CONFIG = new OpaqueToken('NGRX_JSON_API_CONFIG');
 
-export const RESOURCE_DEFINITIONS = new OpaqueToken('RESOURCE_DEFINTIONS');
-
-export const NGRX_JSON_API_STORE_LOCATION = new OpaqueToken(
-    'NGRX_JSON_API_STORE_LOCATION')
-
-export const apiFactory = (
-    http: Http,
-    apiUrl: string,
-    resourceDefinitions: Array<ResourceDefinition>
-  ) => {
-    return new NgrxJsonApi(http, apiUrl, resourceDefinitions);
+export const apiFactory = (http: Http, config: NgrxJsonApiConfig) => {
+    return new NgrxJsonApi(http, config);
 }
 
-export const selectorsFactory = (storeLocation: string) => {
-    return new NgrxJsonApiSelectors<any>(storeLocation);
+export const selectorsFactory = (config: NgrxJsonApiConfig) => {
+    return new NgrxJsonApiSelectors<any>(config);
 }
 
 export const serviceFactory = (
     store: Store<any>,
-    selectors: NgrxJsonApiSelectors<any>,
-    apiUrl : string,
-    resourceDefinitions : Array<ResourceDefinition>) => {
-    return new NgrxJsonApiService(store, selectors, apiUrl, resourceDefinitions);
+    selectors: NgrxJsonApiSelectors<any>) => {
+    return new NgrxJsonApiService(store, selectors);
 }
 
-export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
+export const configure = (config: NgrxJsonApiConfig): Array<any> => {
 
     return [
         {
             provide: NgrxJsonApi,
             useFactory: apiFactory,
-            deps: [Http, API_URL, RESOURCE_DEFINITIONS]
+            deps: [Http, NGRX_JSON_API_CONFIG]
         },
         {
             provide: NgrxJsonApiSelectors,
             useFactory: selectorsFactory,
-            deps: [NGRX_JSON_API_STORE_LOCATION]
+            deps: [NGRX_JSON_API_CONFIG]
         },
         {
-            provide: NGRX_JSON_API_STORE_LOCATION, useValue: config.storeLocation
-        },
-        {
-            provide: API_URL, useValue: config.apiUrl
-        },
-        {
-            provide: RESOURCE_DEFINITIONS, useValue: config.resourceDefinitions
+          provide: NGRX_JSON_API_CONFIG,
+          useValue: config
         },
         {
             provide: NgrxJsonApiService,
             useFactory: serviceFactory,
-            deps: [Store, NgrxJsonApiSelectors, API_URL, RESOURCE_DEFINITIONS]
+            deps: [Store, NgrxJsonApiSelectors]
         }
     ]
 }
@@ -84,7 +68,7 @@ export const configure = (config: NgrxJsonApiModuleConfig): Array<any> => {
     ]
 })
 export class NgrxJsonApiModule {
-    static configure(config: NgrxJsonApiModuleConfig): ModuleWithProviders {
+    static configure(config: NgrxJsonApiConfig): ModuleWithProviders {
         return {
             ngModule: NgrxJsonApiModule,
             providers: configure(config)

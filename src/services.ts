@@ -44,8 +44,6 @@ export class NgrxJsonApiService {
     constructor(
         private store: Store<any>,
         private selectors: NgrxJsonApiSelectors<any>,
-        private apiUrl: string,
-        private resourceDefinitions: Array<ResourceDefinition>,
     ) {
 
         this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
