@@ -58,8 +58,8 @@ describe('ngrx json api', () => {
                 {
                     provide: NGRX_JSON_API_CONFIG,
                     useValue: {
-                      apiUrl: 'myapi.com',
-                      resourceDefinitions: resourcesDefinitions
+                        apiUrl: 'myapi.com',
+                        resourceDefinitions: resourcesDefinitions
                     }
                 },
             ]
@@ -275,4 +275,81 @@ describe('ngrx json api', () => {
                 tick();
             })));
     });
+
 });
+
+describe('ngrx json api with overridden configs', () => {
+  let jsonapi;
+  let resourcesDefinitions: Array<ResourceDefinition> = [
+    {
+      type: 'Post',
+      collectionPath: 'posts',
+    },
+    {
+      type: 'Person',
+      collectionPath: 'people',
+    }
+  ];
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        BaseRequestOptions,
+        MockBackend,
+        {
+          provide: Http, useFactory: (backend: ConnectionBackend,
+            defaultOptions: BaseRequestOptions) => {
+              return new Http(backend, defaultOptions);
+            }, deps: [MockBackend, BaseRequestOptions]
+          },
+          {
+            provide: NgrxJsonApi,
+            useFactory: apiFactory,
+            deps: [Http, NGRX_JSON_API_CONFIG]
+          },
+          {
+            provide: NGRX_JSON_API_CONFIG,
+            useValue: {
+              apiUrl: 'myapi.com',
+              resourceDefinitions: resourcesDefinitions,
+              urlBuilder: {
+                generateIncludedQueryParams: (params) => 'helloIncluded',
+                generateFilteringQueryParams: (params) => 'helloFiltering',
+                generateFieldsQueryParams: (params) => 'helloFields',
+                generateSortingQueryParams: (params) => 'helloSorting'
+                // generateQueryParams: (params) => 'helloGenerator'
+              }
+            }
+          },
+        ]
+      });
+    });
+    //
+    beforeEach(inject([NgrxJsonApi], (api) => {
+      jsonapi = api;
+    }));
+
+    it('should find resources with queryParams',
+        fakeAsync(inject([MockBackend], (mockBackend) => {
+            mockBackend.connections.subscribe(c => {
+                expect(c.request.url).toBe(
+                    'myapi.com/posts?helloIncluded&helloFiltering&helloSorting&helloFields');
+                expect(c.request.method).toBe(0);
+            });
+            jsonapi.find({
+                query: {
+                    queryType: 'getMany',
+                    type: 'Post'
+                        params: {
+                        filtering: [
+                            { api: 'person__name', value: 'smith' },
+                            { api: 'person__age', value: 20 }
+                        ],
+                        include: ['person', 'comments'],
+                        sorting: [{api: 'person', direction: 'ASC'}],
+                        fields: ['name']
+                    }
+                }
+            });
+            tick();
+        })));
+  });
