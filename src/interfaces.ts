@@ -20,6 +20,12 @@ export interface FilteringParam {
     value?: any;
 }
 
+export interface FilteringType {
+  name: string;
+  apiName?: string;
+  comparison: (value: any, resourceValue: any) => boolean;
+}
+
 export interface NgrxJsonApiStore {
     data: NgrxJsonApiStoreData;
     queries: NgrxJsonApiStoreQueries;
@@ -35,6 +41,12 @@ export interface NgrxJsonApiConfig {
     resourceDefinitions: Array<ResourceDefinition>;
     storeLocation: string;
     urlBuilder?: NgrxJsonApiUrlBuilder;
+    filteringConfig?: NgrxJsonApiFilteringConfig;
+}
+
+export interface NgrxJsonApiFilteringConfig {
+  pathSeparator?: string;
+  filteringType?: Array<FilteringType>;
 }
 
 export interface NgrxJsonApiUrlBuilder {
