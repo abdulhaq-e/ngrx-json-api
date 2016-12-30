@@ -64,10 +64,35 @@ export class NgrxJsonApiSelectors<T> {
         return (state$: Observable<NgrxJsonApiStore>) => {
             let selected$;
             switch (query.queryType) {
-                case 'getOne':
+                case 'getOne': {
+                  if (query.id && query.type) {
                     selected$ = state$.let(this.getResourceStore$(
-                        { id: query.id, type: query.type }));
+                      { id: query.id, type: query.type }));
+                  } else {
+                    selected$ = state$.let(
+                        this.getResourceStoreOfType$(query.type)
+                    ).combineLatest(
+                        state$.let(this.getStoreData$()),
+                            (resources: NgrxJsonApiStoreResources, storeData: NgrxJsonApiStoreData) => {
+                                return filterResources(
+                                  resources,
+                                  storeData,
+                                  query,
+                                  this.config.resourceDefinitions,
+                                  this.config.filteringConfig,
+                                );
+                            }).map(filteredResources => {
+                              if (filteredResources.length == 0) {
+                                return {};
+                              } else if (filteredResources.length == 1) {
+                                return filteredResources[0];
+                              } else {
+                                throw ('Got more than one resource');
+                              }
+                            });
+                  }
                     return selected$.distinctUntilChanged();
+                  }
                 case 'getMany':
                     selected$ = state$.let(
                         this.getResourceStoreOfType$(query.type)
