@@ -146,7 +146,7 @@ describe('NgrxJsonApiReducer', () => {
                 jsonApiData: testPayload,
                 query: query
             }));
-            expect(newState.queries['111'].resultIds.length).toEqual(9);
+            expect(newState.queries['111'].resultIds.length).toEqual(11);
             expect(newState.queries['111'].resultIds[8]).toEqual({ type: 'Blog', id: '3' });
         });
     });
@@ -347,7 +347,7 @@ describe('NgrxJsonApiReducer', () => {
                 jsonApiData: testPayload,
                 query: query
             }));
-            expect(newState.queries['111'].resultIds.length).toEqual(9);
+            expect(newState.queries['111'].resultIds.length).toEqual(11);
             expect(newState.queries['111'].resultIds[8]).toEqual({ type: 'Blog', id: '3' });
         });
     });

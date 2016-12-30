@@ -83,7 +83,7 @@ export const testPayload = {
             },
             relationships: {
                 author: {
-                    data: null
+                    data: { type: 'Person', id: '22'}
                 },
                 comments: {
                     data: []
@@ -102,6 +102,9 @@ export const testPayload = {
                       { type: 'Blog', id: '1' },
                       { type: 'Blog', id: '3' }
                     ]
+                },
+                profile: {
+                  data: { type: 'Profile', id: '1' }
                 }
             }
         },
@@ -150,6 +153,17 @@ export const testPayload = {
                     data: { type: 'Person', id: '1' }
                 }
             }
+        },
+        {
+          type: 'Profile',
+          id: '1',
+          attributes: {
+            id: 'firstProfile'
+          }
+        },
+        {
+          type: 'Whatever',
+          id: '1'
         }
     ]
 };

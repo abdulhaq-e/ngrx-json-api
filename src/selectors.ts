@@ -69,8 +69,19 @@ export class NgrxJsonApiSelectors<T> {
                         { id: query.id, type: query.type }));
                     return selected$.distinctUntilChanged();
                 case 'getMany':
-                    selected$ = state$.let(this.getResourceStoreOfType$(query.type));
-                    // .map(resources => filterResources(resources, query));
+                    selected$ = state$.let(
+                        this.getResourceStoreOfType$(query.type)
+                    ).combineLatest(
+                        state$.let(this.getStoreData$()),
+                            (resources: NgrxJsonApiStoreResources, storeData: NgrxJsonApiStoreData) => {
+                                return filterResources(
+                                  resources,
+                                  storeData,
+                                  query,
+                                  this.config.resourceDefinitions,
+                                  this.config.filteringConfig,
+                                );
+                            });
                     return selected$.distinctUntilChanged();
                 default:
                     return state$;
@@ -133,10 +144,10 @@ export class NgrxJsonApiSelectors<T> {
     }
 
     public getManyResource$(identifiers: Array<ResourceIdentifier>) {
-      return (state$: Observable<NgrxJsonApiStore>) => {
-        let obs = identifiers.map(id => state$.let(this.getResource$(id)));
-        return <Array<Resource>>Observable.zip(...obs)
-      }
+        return (state$: Observable<NgrxJsonApiStore>) => {
+            let obs = identifiers.map(id => state$.let(this.getResource$(id)));
+            return <Array<Resource>>Observable.zip(...obs)
+        }
     }
 
     public getPersistedResource$(store: Store<T>, identifier: ResourceIdentifier) {

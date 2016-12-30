@@ -89,13 +89,6 @@ export type QueryType
     | 'deleteOne'
     | 'create'
 
-
-export interface RelationDefinition {
-    relation: string;
-    type: string;
-    relationType: string;
-}
-
 export interface Resource extends ResourceIdentifier {
     attributes?: { [key: string]: any };
     relationships?: { [key: string]: ResourceRelationship };
@@ -103,10 +96,17 @@ export interface Resource extends ResourceIdentifier {
     links?: any;
 }
 
+export interface ResourceAttributeDefinition {
+  apiName?: string
+}
+
 export interface ResourceDefinition {
     type: string;
     collectionPath: string;
+    attributes?: { [key: string]: ResourceAttributeDefinition};
+    relationships?: { [key: string]: ResourceRelationDefinition };
 };
+
 
 export interface ResourceError {
     id?: string;
@@ -122,6 +122,11 @@ export interface ResourceError {
 export interface ResourceErrorSource {
     pointer?: string;
     parameter?: string;
+}
+
+export interface ResourceIdentifier {
+    type: string;
+    id: string;
 }
 
 export interface ResourceQuery {
@@ -150,15 +155,19 @@ export interface ResourceQueryHandle<T> extends AnonymousSubscription {
     results: Observable<T>;
 }
 
-export interface ResourceIdentifier {
-    type: string;
-    id: string;
-}
-
 export interface ResourceRelationship {
     data?: any;
     links?: any;
 }
+
+export interface ResourceRelationDefinition {
+    type: string;
+    relationType: ResourceRelationType;
+}
+
+export type ResourceRelationType
+    = 'hasOne'
+    | 'hasMany'
 
 export enum ResourceState {
     IN_SYNC,

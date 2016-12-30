@@ -197,19 +197,19 @@ describe('NgrxJsonApiSelectors', () => {
             tick();
         }));
 
-        it('should use getResourceStoreOfType$ given a query of type getMany', fakeAsync(() => {
-            let res;
-            let sub = obs
-                .select('api')
-                .let(selectors.queryStore$({
-                    type: 'Article',
-                    queryType: 'getMany'
-                }))
-                .subscribe(d => res = d);
-            obs.select('api').let(selectors.getResourceStoreOfType$('Article'))
-                .subscribe(r => expect(r).toEqual(res));
-            tick();
-        }));
+        // it('should use getResourceStoreOfType$ given a query of type getMany', fakeAsync(() => {
+        //     let res;
+        //     let sub = obs
+        //         .select('api')
+        //         .let(selectors.queryStore$({
+        //             type: 'Article',
+        //             queryType: 'getMany'
+        //         }))
+        //         .subscribe(d => res = d);
+        //     obs.select('api').let(selectors.getResourceStoreOfType$('Article'))
+        //         .subscribe(r => expect(r).toEqual(res));
+        //     tick();
+        // }));
     });
 
     describe('getStoreQueries$', () => {

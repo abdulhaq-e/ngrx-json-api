@@ -6,13 +6,14 @@ import {
     Direction,
     Document,
     FilteringParam,
+    NgrxJsonApiFilteringConfig,
     NgrxJsonApiStore,
     NgrxJsonApiStoreData,
     NgrxJsonApiStoreResources,
     NgrxJsonApiStoreQueries,
     OperationType,
     QueryParams,
-    RelationDefinition,
+    ResourceRelationDefinition,
     Resource,
     ResourceDefinition,
     ResourceIdentifier,
@@ -92,10 +93,10 @@ export const denormaliseResource = (
 
         let obj = Object.assign({}, resource);
 
-        var storeResource : ResourceStore = {
-            errors : [],
-            resource : obj,
-            persistedResource : obj
+        var storeResource: ResourceStore = {
+            errors: [],
+            resource: obj,
+            persistedResource: obj
         };
 
         bag[resource.type][resource.id] = storeResource;
@@ -163,41 +164,41 @@ export const updateResourceObject = (original: Resource,
 };
 
 export const insertStoreResource = (state: NgrxJsonApiStoreResources,
-    resource: Resource, fromServer : boolean): NgrxJsonApiStoreResources => {
+    resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
     let newState = Object.assign({}, state);
-    if(fromServer){
+    if (fromServer) {
         newState[resource.id] = {
-            resource : resource,
-            persistedResource : resource,
-            state : ResourceState.IN_SYNC,
-            errors : [],
-            loading : false
+            resource: resource,
+            persistedResource: resource,
+            state: ResourceState.IN_SYNC,
+            errors: [],
+            loading: false
         };
-    }else{
+    } else {
         newState[resource.id] = {
-            resource : resource,
-            persistedResource : null,
-            state : ResourceState.CREATED,
-            errors : [],
-            loading : false
+            resource: resource,
+            persistedResource: null,
+            state: ResourceState.CREATED,
+            errors: [],
+            loading: false
         };
     }
     return _.isEqual(state, newState) ? state : newState;
 };
 
 export const updateStoreResource = (state: NgrxJsonApiStoreResources,
-    resource: Resource, fromServer : boolean): NgrxJsonApiStoreResources => {
+    resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
     let foundResource = state[resource.id].resource;
     let persistedResource = state[resource.id].persistedResource;
 
-    let newResource : Resource;
-    let newResourceState : ResourceState;
-    if(fromServer){
+    let newResource: Resource;
+    let newResourceState: ResourceState;
+    if (fromServer) {
         // form server, override everything
         // TODO need to handle check and keep local updates?
-        newResource= resource;
+        newResource = resource;
         persistedResource = resource;
         newResourceState = ResourceState.IN_SYNC;
     } else {
@@ -217,11 +218,11 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
 
     let newState = Object.assign({}, state);
     newState[resource.id] = {
-        resource : newResource,
-        persistedResource : persistedResource,
-        state : newResourceState,
-        errors : [],
-        loading : false
+        resource: newResource,
+        persistedResource: persistedResource,
+        state: newResourceState,
+        errors: [],
+        loading: false
     };
 
     return _.isEqual(newState[resource.id], state[resource.id]) ? state : newState;
@@ -229,68 +230,68 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
 
 
 export const updateQueryErrors = (
-  state: NgrxJsonApiStoreQueries,
-  queryId: string,
-  document : Document): NgrxJsonApiStoreQueries => {
+    state: NgrxJsonApiStoreQueries,
+    queryId: string,
+    document: Document): NgrxJsonApiStoreQueries => {
 
-  if(!queryId || !state[queryId]){
-    return state;
-  }
-  let newState = Object.assign({}, state);
-  let newStoreQuery = Object.assign({}, newState[queryId]);
-  newStoreQuery.errors = [];
-  if(document.errors){
-    newStoreQuery.errors.push(...document.errors);
-  }
-  newState[queryId] = newStoreQuery;
-  return newState;
+    if (!queryId || !state[queryId]) {
+        return state;
+    }
+    let newState = Object.assign({}, state);
+    let newStoreQuery = Object.assign({}, newState[queryId]);
+    newStoreQuery.errors = [];
+    if (document.errors) {
+        newStoreQuery.errors.push(...document.errors);
+    }
+    newState[queryId] = newStoreQuery;
+    return newState;
 }
 
 
 export const updateResourceErrors = (
-  state: NgrxJsonApiStoreData,
-  query: ResourceQuery,
-  document : Document): NgrxJsonApiStoreData => {
-  if(!query.type || !query.id || document.data instanceof Array){
-    // TODO: Why does document.data has to be an Array?
-    throw new Error("invalid parameters");
-  }
-  if(!state[query.type] || !state[query.type][query.id]){
-    // resource is not locally stored, no need to update(?)
-    return state;
-  }
-  let newState: NgrxJsonApiStoreData = Object.assign({}, state);
-  newState[query.type] = Object.assign({}, newState[query.type]);
-  let storeResource =  Object.assign({}, newState[query.type][query.id]);
-  storeResource.errors = [];
-  if(document.errors){
-    storeResource.errors.push(...document.errors);
-  }
-  newState[query.type][query.id] = storeResource;
-  return newState;
+    state: NgrxJsonApiStoreData,
+    query: ResourceQuery,
+    document: Document): NgrxJsonApiStoreData => {
+    if (!query.type || !query.id || document.data instanceof Array) {
+        // TODO: Why does document.data has to be an Array?
+        throw new Error("invalid parameters");
+    }
+    if (!state[query.type] || !state[query.type][query.id]) {
+        // resource is not locally stored, no need to update(?)
+        return state;
+    }
+    let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+    newState[query.type] = Object.assign({}, newState[query.type]);
+    let storeResource = Object.assign({}, newState[query.type][query.id]);
+    storeResource.errors = [];
+    if (document.errors) {
+        storeResource.errors.push(...document.errors);
+    }
+    newState[query.type][query.id] = storeResource;
+    return newState;
 }
 
 export const rollbackStoreResources = (state: NgrxJsonApiStoreData): NgrxJsonApiStoreData => {
-  let newState: NgrxJsonApiStoreData = Object.assign({}, state);
-  for(let type in newState){
-    newState[type] = Object.assign({}, newState[type]);
-    for(let id in newState[type]){
-      let storeResource = newState[type][id];
-      if(storeResource.persistedResource == null){
-        delete newState[type][id];
-      }else if(storeResource.state != ResourceState.IN_SYNC){
-        newState[type][id] = Object.assign({}, newState[type][id], {
-          state : ResourceState.IN_SYNC,
-          resource :  newState[type][id].persistedResource
-        });
-      }
+    let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+    for (let type in newState) {
+        newState[type] = Object.assign({}, newState[type]);
+        for (let id in newState[type]) {
+            let storeResource = newState[type][id];
+            if (storeResource.persistedResource == null) {
+                delete newState[type][id];
+            } else if (storeResource.state != ResourceState.IN_SYNC) {
+                newState[type][id] = Object.assign({}, newState[type][id], {
+                    state: ResourceState.IN_SYNC,
+                    resource: newState[type][id].persistedResource
+                });
+            }
+        }
     }
-  }
-  return newState;
+    return newState;
 };
 
 export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
-    resource: Resource, fromServer : boolean, override : boolean): NgrxJsonApiStoreData => {
+    resource: Resource, fromServer: boolean, override: boolean): NgrxJsonApiStoreData => {
 
     // handle relationships first.
     // FIXME this is not working, the data section of a relationship contains only <type, id>, not a complete resource
@@ -319,7 +320,7 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
         return newState;
     } else if (_.isUndefined(state[resource.type][resource.id]) || override) {
         let updatedTypeState = insertStoreResource(state[resource.type], resource, fromServer);
-        if(updatedTypeState !== state[resource.type]) {
+        if (updatedTypeState !== state[resource.type]) {
             let newState: NgrxJsonApiStoreData = Object.assign({}, state);
             newState[resource.type] = updatedTypeState;
             return newState;
@@ -327,7 +328,7 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
         return state;
     } else {
         let updatedTypeState = updateStoreResource(state[resource.type], resource, fromServer);
-        if(updatedTypeState !== state[resource.type]){
+        if (updatedTypeState !== state[resource.type]) {
             let newState: NgrxJsonApiStoreData = Object.assign({}, state);
             newState[resource.type] = updatedTypeState;
             return newState;
@@ -347,17 +348,17 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
  * @returns {NgrxJsonApiStoreData}
  */
 export const updateResourceState = (state: NgrxJsonApiStoreData,
-    resourceId: ResourceIdentifier, resourceState? : ResourceState, loading? : OperationType): NgrxJsonApiStoreData => {
+    resourceId: ResourceIdentifier, resourceState?: ResourceState, loading?: OperationType): NgrxJsonApiStoreData => {
     if (_.isUndefined(state[resourceId.type]) || _.isUndefined(state[resourceId.type][resourceId.id])) {
         return state;
     }
     let newState: NgrxJsonApiStoreData = Object.assign({}, state);
     newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
     newState[resourceId.type][resourceId.id] = Object.assign({}, newState[resourceId.type][resourceId.id]);
-    if(resourceState != null){
+    if (resourceState != null) {
         newState[resourceId.type][resourceId.id].state = resourceState;
     }
-    if(loading != null){
+    if (loading != null) {
         newState[resourceId.type][resourceId.id].loading = loading;
     }
     return newState;
@@ -393,14 +394,14 @@ export const updateResourceState = (state: NgrxJsonApiStoreData,
  */
 export const updateQueryParams = (state: NgrxJsonApiStoreQueries,
     query: ResourceQuery): NgrxJsonApiStoreQueries => {
-      // TODO: handle queries without a queryId
-    let storeQuery : ResourceQueryStore = state[query.queryId];
+    // TODO: handle queries without a queryId
+    let storeQuery: ResourceQueryStore = state[query.queryId];
     // this will also handle an undefined query, i.e. a query not found in the store
     let newQueryStore = Object.assign({}, storeQuery);
     newQueryStore.loading = true;
     // newQueryStore.query = cloneResourceQuery(query);
     newQueryStore.query = _.cloneDeep(query);
-    if(_.isUndefined(newQueryStore.errors)){
+    if (_.isUndefined(newQueryStore.errors)) {
         newQueryStore.errors = [];
     }
 
@@ -420,22 +421,22 @@ export const removeQuery = (state: NgrxJsonApiStoreQueries,
 }
 
 export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
-    return {type: resource.type, id : resource.id};
+    return { type: resource.type, id: resource.id };
 }
 
 
 /**
  * Updates the query results for the given query in the store.
  */
-export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId : string,
+export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId: string,
     document: Document): NgrxJsonApiStoreQueries => {
 
-    let storeQuery : ResourceQueryStore = state[queryId];
-    if(storeQuery){
+    let storeQuery: ResourceQueryStore = state[queryId];
+    if (storeQuery) {
         let data = _.isArray(document.data) ? document.data : [document.data];
         let newQueryStore = Object.assign({}, storeQuery, {
-            resultIds : data.map(it => toResourceIdentifier(it)),
-            loading : false
+            resultIds: data.map(it => toResourceIdentifier(it)),
+            loading: false
         });
 
         let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
@@ -448,7 +449,7 @@ export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId : str
 
 export const updateStoreResources = (state: NgrxJsonApiStoreData,
     payload: Document): NgrxJsonApiStoreData => {
-      // perhaps this should be named updateStoreData
+    // perhaps this should be named updateStoreData
     let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
     if (_.isUndefined(data)) {
@@ -480,84 +481,101 @@ export const updateStoreResources = (state: NgrxJsonApiStoreData,
         }, state);
 };
 
-export const filterResources = (resources, query: ResourceQuery) => {
-    return resources.filter(resource => {
+export const filterResources = (
+    resources: NgrxJsonApiStoreResources,
+    storeData: NgrxJsonApiStoreData,
+    query: ResourceQuery,
+    resourceDefinitions: Array<ResourceDefinition>,
+    filteringConfig?: NgrxJsonApiFilteringConfig) => {
+    return _.filter(resources, (resource) => {
         if (query.hasOwnProperty('params') && query.params.hasOwnProperty('filtering')) {
             return query.params.filtering.every(element => {
-                let resolvedPath = element.hasOwnProperty('path') ? _.get(resource, element.path) : resource
 
-                if (_.isUndefined(resolvedPath) || _.isNull(resolvedPath)) {
-                    return false;
-                } else if (_.isArray(resolvedPath)) {
-                    let newQuery = {
-                        params: {
-                            filtering: [
-                                {
-                                    type: element.type,
-                                    field: element.field,
-                                    value: element.value
-                                }
-                            ]
-                        }
-                    };
-                    if (!_.isEmpty(filterResources(resolvedPath, newQuery))) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                let pathSeparator;
+                if (!_.isUndefined(filteringConfig) && filteringConfig.hasOwnProperty('pathSeparator')) {
+                    pathSeparator = filteringConfig.pathSeparator;
+                } else {
+                    pathSeparator = undefined;
                 }
-
-                let resourceField: any = _.get(resolvedPath, element.field);
+                // resource type and attribute
+                let fieldValue = getFieldFromPath(
+                    element.path,
+                    resource,
+                    storeData,
+                    resourceDefinitions,
+                    pathSeparator
+                );
+                //
+                // if (_.isUndefined(resolvedPath) || _.isNull(resolvedPath)) {
+                //     return false;
+                // } else if (_.isArray(resolvedPath)) {
+                //     let newQuery = {
+                //         params: {
+                //             filtering: [
+                //                 {
+                //                     type: element.type,
+                //                     field: element.field,
+                //                     value: element.value
+                //                 }
+                //             ]
+                //         }
+                //     };
+                //     if (!_.isEmpty(filterResources(resolvedPath, newQuery))) {
+                //         return true;
+                //     } else {
+                //         return false;
+                //     }
+                // }
                 element.type = element.hasOwnProperty('type') ? element.type : 'iexact';
 
                 switch (element.type) {
                     case 'iexact':
-                        if (_.isString(element.value) && _.isString(resourceField)) {
-                            return element.value.toLowerCase() === resourceField.toLowerCase()
+                        if (_.isString(element.value) && _.isString(fieldValue)) {
+                            return element.value.toLowerCase() === fieldValue.toLowerCase()
                         } else {
-                            return element.value === resourceField;
+                            return element.value === fieldValue;
                         }
 
                     case 'exact':
-                        return element.value === resourceField;
+                        return element.value === fieldValue;
 
                     case 'contains':
-                        return _.includes(resourceField, element.value);
+                        return _.includes(fieldValue, element.value);
 
                     case 'icontains':
-                        return _.includes(resourceField.toLowerCase(),
+                        return _.includes(fieldValue.toLowerCase(),
                             element.value.toLowerCase());
 
                     case 'in':
                         if (_.isArray(element.value)) {
-                            return _.includes(element.value, resourceField);
+                            return _.includes(element.value, fieldValue);
                         } else {
-                            return _.includes([element.value], resourceField);
+                            return _.includes([element.value], fieldValue);
                         }
                     case 'gt':
-                        return element.value > resourceField;
+                        return element.value > fieldValue;
 
                     case 'gte':
-                        return element.value >= resourceField;
+                        return element.value >= fieldValue;
 
                     case 'lt':
-                        return element.value < resourceField;
+                        return element.value < fieldValue;
 
                     case 'lte':
-                        return element.value <= resourceField;
+                        return element.value <= fieldValue;
 
                     case 'startswith':
-                        return _.startsWith(resourceField, element.value);
+                        return _.startsWith(fieldValue, element.value);
 
                     case 'istartswith':
-                        return _.startsWith(resourceField.toLowerCase(),
+                        return _.startsWith(fieldValue.toLowerCase(),
                             element.value.toLowerCase())
 
                     case 'endswith':
-                        return _.endsWith(resourceField, element.value);
+                        return _.endsWith(fieldValue, element.value);
 
                     case 'iendswith':
-                        return _.endsWith(resourceField.toLowerCase(),
+                        return _.endsWith(fieldValue.toLowerCase(),
                             element.value.toLowerCase());
 
                     default:
@@ -568,6 +586,68 @@ export const filterResources = (resources, query: ResourceQuery) => {
             return true;
         }
     });
+}
+
+/**
+ * Get the value for the last field in a given fitering path.
+ *
+ * @param path
+ * @param baseResourceStore
+ * @param storeData
+ * @param resourceDefinitions
+ * @param pathSepartor
+ * @returns the value of the last field in the path.
+ */
+export const getFieldFromPath = (
+    path: string,
+    baseResourceStore: ResourceStore,
+    storeData: NgrxJsonApiStoreData,
+    resourceDefinitions: Array<ResourceDefinition>,
+    pathSeparator?: string
+) => {
+    if (_.isUndefined(pathSeparator)) {
+        pathSeparator = '.'
+    }
+    let fields: Array<string> = path.split(pathSeparator);
+    let currentResourceStore = baseResourceStore;
+    for (let i = 0; i < fields.length; i++) {
+        let definition = _.find(resourceDefinitions, { type: currentResourceStore.resource.type });
+
+        if (_.isUndefined(definition)) {
+            throw ('Definition not found');
+        }
+        // if both attributes and relationships are missing, raise an error
+        if (_.isUndefined(definition.attributes) && _.isUndefined(definition.relationships)) {
+            throw ('Attributes or Relationships must be provided');
+        }
+        if (definition.attributes.hasOwnProperty(fields[i])) {
+            return _.get(currentResourceStore, 'resource.attributes.' + fields[i], null);
+        } else if (definition.relationships.hasOwnProperty(fields[i])) {
+            if (i == (fields.length - 1)) {
+                throw ('The last field in the filtering path cannot be a relation')
+            }
+            let resourceRelation = definition.relationships[fields[i]];
+            if (resourceRelation.relationType == 'hasMany') {
+                throw ('Cannot filter past a hasMany relation')
+            } else {
+              let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
+              if (!relation || !relation.data) {
+                return null;
+              } else {
+              let relatedPath = [
+                resourceRelation.type,
+                relation.data.id
+              ];
+                currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
+              }
+            }
+        } else {
+            throw ('Cannot find field in attributes or relationships');
+        }
+        if (_.isUndefined(currentResourceStore)) {
+          return null;
+        }
+    }
 }
 
 /**
@@ -607,35 +687,35 @@ export const generateIncludedQueryParams = (included: Array<string>): string => 
 }
 
 export const generateFieldsQueryParams = (fields: Array<string>): string => {
-  if (_.isEmpty(fields)) {
-    return '';
-  }
+    if (_.isEmpty(fields)) {
+        return '';
+    }
 
-  return 'fields=' + fields.join();
+    return 'fields=' + fields.join();
 
 }
 
 export const generateFilteringQueryParams = (filtering: Array<FilteringParam>): string => {
     if (_.isEmpty(filtering)) {
-      return '';
+        return '';
     }
-    let filteringParams = filtering.map(f => 'filter[' + f.api + ']'+ (f.type ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
+    let filteringParams = filtering.map(f => 'filter[' + f.api + ']' + (f.type ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
     return filteringParams.join('&');
 }
 
 export const generateSortingQueryParams = (sorting: Array<SortingParam>): string => {
-  if (_.isEmpty(sorting)) {
-    return '';
-  }
-  return "sort=" +  sorting.map(f => (f.direction == Direction.ASC ? '' : '-') + f.api).join(",");
+    if (_.isEmpty(sorting)) {
+        return '';
+    }
+    return "sort=" + sorting.map(f => (f.direction == Direction.ASC ? '' : '-') + f.api).join(",");
 
 }
 
 export const generateQueryParams = (...params: Array<string>) => {
-  let newParams = params.filter(p => p != '');
-  if (newParams.length != 0) {
-    return '?' + newParams.join('&')
-  } else {
-    return '';
-  }
+    let newParams = params.filter(p => p != '');
+    if (newParams.length != 0) {
+        return '?' + newParams.join('&')
+    } else {
+        return '';
+    }
 }
