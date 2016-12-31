@@ -2,22 +2,61 @@ import {
     ResourceDefinition
 } from '../src/interfaces';
 
-export const resourcesDefinitions: Array<ResourceDefinition> = [
+export const resourceDefinitions = [
     {
         type: 'Article',
         collectionPath: 'articles',
+        attributes: {
+            body: {},
+            text: {},
+            title: {},
+        },
+        relationships: {
+            author: {
+                type: 'Person',
+                relationType: 'hasOne'
+            },
+            comments: {
+              type: 'Comment',
+              relationType: 'hasMany'
+            },
+            blog: {
+              type: 'Blog',
+              relationType: 'hasOne'
+            }
+        },
     },
     {
-        type: 'Person',
-        collectionPath: 'people',
+      type: 'Person',
+      collectionPath: 'people',
+      attributes: {
+        firstName: {},
+        name: {}
+      },
+      relationships: {
+        profile: {
+          type: 'Profile',
+          relationType: 'hasOne'
+        }
+      }
     },
     {
-        type: 'Comment',
-        collectionPath: 'comments',
+      type: 'Comment',
+      collectionPath: 'comments',
     },
     {
-        type: 'Blog',
-        collectionPath: 'blogs',
+      type: 'Profile',
+      collectionPath: 'profiles',
+      attributes: {
+        id: {}
+      }
+    },
+    {
+      type: 'Blog',
+      collectionPAth: 'blogs',
+      attributes: {
+        name: {}
+      }
     }
 ];
 
@@ -83,7 +122,7 @@ export const testPayload = {
             },
             relationships: {
                 author: {
-                    data: null
+                    data: { type: 'Person', id: '22'}
                 },
                 comments: {
                     data: []
@@ -102,6 +141,9 @@ export const testPayload = {
                       { type: 'Blog', id: '1' },
                       { type: 'Blog', id: '3' }
                     ]
+                },
+                profile: {
+                  data: { type: 'Profile', id: '1' }
                 }
             }
         },
@@ -150,6 +192,17 @@ export const testPayload = {
                     data: { type: 'Person', id: '1' }
                 }
             }
+        },
+        {
+          type: 'Profile',
+          id: '1',
+          attributes: {
+            id: 'firstProfile'
+          }
+        },
+        {
+          type: 'Whatever',
+          id: '1'
         }
     ]
 };
