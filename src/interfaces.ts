@@ -15,11 +15,15 @@ export interface Document {
 }
 
 export interface FilteringParam {
-    field?: string;
-    value?: any;
-    type?: string;
     path?: string;
-    api?: string;
+    operator?: string;
+    value?: any;
+}
+
+export interface FilteringOperator {
+  name: string;
+  apiName?: string;
+  comparison: (value: any, resourceFieldValue: any) => boolean;
 }
 
 export interface NgrxJsonApiStore {
@@ -32,10 +36,25 @@ export interface NgrxJsonApiStore {
     isCommitting: number;
 }
 
-export interface NgrxJsonApiModuleConfig {
+export interface NgrxJsonApiConfig {
     apiUrl: string;
     resourceDefinitions: Array<ResourceDefinition>;
     storeLocation: string;
+    urlBuilder?: NgrxJsonApiUrlBuilder;
+    filteringConfig?: NgrxJsonApiFilteringConfig;
+}
+
+export interface NgrxJsonApiFilteringConfig {
+  pathSeparator?: string;
+  filteringOperators?: Array<FilteringOperator>;
+}
+
+export interface NgrxJsonApiUrlBuilder {
+  generateFilteringQueryParams?: (params: Array<FilteringParam>) => string;
+  generateFieldsQueryParams?: (params: Array<string>) => string;
+  generateIncludedQueryParams?: (params: Array<string>) => string;
+  generateSortingQueryParams?: (params: Array<SortingParam>) => string;
+  generateQueryParams?: (params: Array<string>) => string;
 }
 
 export type NgrxJsonApiStoreResources = { [id: string]: ResourceStore };
@@ -55,12 +74,12 @@ export interface Payload {
 }
 
 export interface QueryParams {
-    filtering?: Array<FilteringParam>
-    sorting?: Array<SortingParam>
-    include?: Array<string>
-    fields?: Array<string>
-    offset?: number
-    limit?: number
+    filtering?: Array<FilteringParam>;
+    sorting?: Array<SortingParam>;
+    include?: Array<string>;
+    fields?: Array<string>;
+    offset?: number;
+    limit?: number;
 }
 
 export type QueryType
@@ -70,13 +89,6 @@ export type QueryType
     | 'deleteOne'
     | 'create'
 
-
-export interface RelationDefinition {
-    relation: string;
-    type: string;
-    relationType: string;
-}
-
 export interface Resource extends ResourceIdentifier {
     attributes?: { [key: string]: any };
     relationships?: { [key: string]: ResourceRelationship };
@@ -84,10 +96,17 @@ export interface Resource extends ResourceIdentifier {
     links?: any;
 }
 
+export interface ResourceAttributeDefinition {
+  apiName?: string;
+}
+
 export interface ResourceDefinition {
     type: string;
     collectionPath: string;
+    attributes?: { [key: string]: ResourceAttributeDefinition};
+    relationships?: { [key: string]: ResourceRelationDefinition };
 };
+
 
 export interface ResourceError {
     id?: string;
@@ -105,6 +124,11 @@ export interface ResourceErrorSource {
     parameter?: string;
 }
 
+export interface ResourceIdentifier {
+    type: string;
+    id: string;
+}
+
 export interface ResourceQuery {
     /**
      * id to reference the query within the store.
@@ -120,26 +144,30 @@ export interface ResourceQuery {
 export interface ResourceQueryStore {
     query: ResourceQuery;
     loading: Boolean;
-    resultIds: Array<ResourceIdentifier>
+    resultIds: Array<ResourceIdentifier>;
     /**
      * Errors received from the server after attempting to perform a GET request.
      */
-    errors: Array<ResourceError>
+    errors: Array<ResourceError>;
 }
 
 export interface ResourceQueryHandle<T> extends AnonymousSubscription {
     results: Observable<T>;
 }
 
-export interface ResourceIdentifier {
-    type: string;
-    id: string;
-}
-
 export interface ResourceRelationship {
     data?: any;
     links?: any;
 }
+
+export interface ResourceRelationDefinition {
+    type: string;
+    relationType: ResourceRelationType;
+}
+
+export type ResourceRelationType
+    = 'hasOne'
+    | 'hasMany'
 
 export enum ResourceState {
     IN_SYNC,
@@ -173,7 +201,7 @@ export interface ResourceStore {
     /**
      * Errors received from the server after attempting to store the resource.
      */
-    errors: Array<ResourceError>
+    errors: Array<ResourceError>;
 }
 
 export interface SortingParam {

@@ -16,6 +16,7 @@ import 'rxjs/add/observable/throw';
 
 import {
     Document,
+    NgrxJsonApiConfig,
     Payload,
     ResourceDefinition,
     ResourceQuery,
@@ -37,13 +38,13 @@ export class NgrxJsonApi {
         'Accept': 'application/vnd.api+json'
     });
     public requestUrl: string;
+    public apiUrl = this.config.apiUrl;
+    public definitions = this.config.resourceDefinitions;
 
     constructor(
         private http: Http,
-        private apiUrl: string,
-        private definitions: Array<ResourceDefinition>
-    ) {
-    }
+        public config: NgrxJsonApiConfig
+    ) { }
 
     private urlBuilder(query: ResourceQuery) {
         switch (query.queryType) {
@@ -60,10 +61,10 @@ export class NgrxJsonApi {
 
     private collectionPathFor(type: string) {
         // assume that type == collectionPath if not configured otherwise
-        let definition = _.find(this.definitions,{ type: type })
-        if(definition){
+        let definition = _.find(this.definitions, { type: type })
+        if (definition) {
             return `${definition.collectionPath}`;
-        }else{
+        } else {
             return type;
         }
     }
@@ -85,41 +86,79 @@ export class NgrxJsonApi {
 
     public find(payload: Payload) {
 
-        let query = payload.query;
-        let queryParams = '';
-        let includedParam: string = '';
-        let filteringParams: string = '';
-        let sortingParams: string = '';
-        let fieldsParams: string = '';
+        if (this.config.hasOwnProperty('urlBuilder')) {
+            let urlBuilder = this.config.urlBuilder;
+            let _generateIncludedQueryParams;
+            let _generateFilteringQueryParams;
+            let _generateFieldsQueryParams;
+            let _generateSortingQueryParams;
+            let _generateQueryParams;
 
-        if (typeof query === undefined) {
-            return Observable.throw('Query not found');
+            if (urlBuilder.generateIncludedQueryParams) {
+                _generateIncludedQueryParams = urlBuilder.generateIncludedQueryParams;
+            } else {
+                _generateIncludedQueryParams = generateIncludedQueryParams;
+            }
+
+            if (urlBuilder.generateFilteringQueryParams) {
+                _generateFilteringQueryParams = urlBuilder.generateFilteringQueryParams;
+            } else {
+                _generateFilteringQueryParams = generateFilteringQueryParams;
+            }
+
+            if (urlBuilder.generateFieldsQueryParams) {
+                _generateFieldsQueryParams = urlBuilder.generateFieldsQueryParams;
+            } else {
+                _generateFieldsQueryParams = generateFieldsQueryParams;
+            }
+
+            if (urlBuilder.generateSortingQueryParams) {
+                _generateSortingQueryParams = urlBuilder.generateSortingQueryParams;
+            } else {
+                _generateSortingQueryParams = generateSortingQueryParams;
+            }
+
+            if (urlBuilder.generateQueryParams)) {
+                _generateQueryParams = urlBuilder.generateQueryParams;
+            } else {
+                _generateQueryParams = generateQueryParams;
+            }
+
+            let query = payload.query;
+            let queryParams = '';
+            let includedParam: string = '';
+            let filteringParams: string = '';
+            let sortingParams: string = '';
+            let fieldsParams: string = '';
+
+            if (typeof query === undefined) {
+                return Observable.throw('Query not found');
+            }
+
+            if (query.hasOwnProperty('params') && !_.isEmpty(query.params)) {
+                if (_.hasIn(query.params, 'include')) {
+                    includedParam = _generateIncludedQueryParams(query.params.include);
+                }
+                if (_.hasIn(query.params, 'filtering')) {
+                    filteringParams = _generateFilteringQueryParams(query.params.filtering);
+                }
+                if (_.hasIn(query.params, 'sorting')) {
+                    sortingParams = _generateSortingQueryParams(query.params.sorting);
+                }
+                if (_.hasIn(query.params, 'fields')) {
+                    fieldsParams = _generateFieldsQueryParams(query.params.fields);
+                }
+            }
+
+            queryParams = generateQueryParams(includedParam, filteringParams, sortingParams, fieldsParams);
+
+            let requestOptionsArgs = {
+                method: RequestMethod.Get,
+                url: this.urlBuilder(query) + queryParams,
+            };
+
+            return this.request(requestOptionsArgs);
         }
-
-        if (query.hasOwnProperty('params') && !_.isEmpty(query.params)) {
-            if (_.hasIn(query.params, 'include')) {
-                includedParam = generateIncludedQueryParams(query.params.include);
-            }
-            if (_.hasIn(query.params, 'filtering')) {
-                filteringParams = generateFilteringQueryParams(query.params.filtering);
-            }
-            if (_.hasIn(query.params, 'filtering')) {
-              sortingParams = generateSortingQueryParams(query.params.sorting);
-            }
-            if (_.hasIn(query.params, 'fields')) {
-              fieldsParams = generateFieldsQueryParams(query.params.fields);
-            }
-        }
-
-        queryParams = generateQueryParams(includedParam, filteringParams, sortingParams, fieldsParams);
-
-        let requestOptionsArgs = {
-            method: RequestMethod.Get,
-            url: this.urlBuilder(query) + queryParams,
-        };
-
-        return this.request(requestOptionsArgs);
-    }
 
     public create(payload: Payload) {
 

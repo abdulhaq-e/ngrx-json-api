@@ -19,11 +19,13 @@ import { Observable } from 'rxjs/Observable';
 
 import { NgrxJsonApi } from '../src/api';
 import {
-    API_URL,
-    RESOURCE_DEFINITIONS,
-    apiFactory
+    NGRX_JSON_API_CONFIG,
+    apiFactory,
 } from '../src/module';
-import { ResourceDefinition } from '../src/interfaces';
+import {
+    NgrxJsonApiConfig,
+    ResourceDefinition
+} from '../src/interfaces';
 
 describe('ngrx json api', () => {
     let jsonapi;
@@ -49,20 +51,21 @@ describe('ngrx json api', () => {
                     }, deps: [MockBackend, BaseRequestOptions]
                 },
                 {
-                    provide: API_URL, useValue: 'myapi.com'
+                    provide: NgrxJsonApi,
+                    useFactory: apiFactory,
+                    deps: [Http, NGRX_JSON_API_CONFIG]
                 },
                 {
-                    provide: RESOURCE_DEFINITIONS, useValue: resourcesDefinitions
-                },
-                {
-                  provide: NgrxJsonApi,
-                  useFactory: apiFactory,
-                  deps: [Http, API_URL, RESOURCE_DEFINITIONS]
+                    provide: NGRX_JSON_API_CONFIG,
+                    useValue: {
+                        apiUrl: 'myapi.com',
+                        resourceDefinitions: resourcesDefinitions
+                    }
                 },
             ]
         });
     });
-//
+    //
     beforeEach(inject([NgrxJsonApi], (api) => {
         jsonapi = api;
     }));
@@ -240,9 +243,9 @@ describe('ngrx json api', () => {
                 });
                 jsonapi.update({
                     jsonApiData: {
-                      data: {
-                        title: 'Hello', id: '1', type: 'Post'
-                      }
+                        data: {
+                            title: 'Hello', id: '1', type: 'Post'
+                        }
                     },
                     query: {
                         queryType: 'update',
@@ -272,4 +275,81 @@ describe('ngrx json api', () => {
                 tick();
             })));
     });
+
 });
+
+describe('ngrx json api with overridden configs', () => {
+  let jsonapi;
+  let resourcesDefinitions: Array<ResourceDefinition> = [
+    {
+      type: 'Post',
+      collectionPath: 'posts',
+    },
+    {
+      type: 'Person',
+      collectionPath: 'people',
+    }
+  ];
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        BaseRequestOptions,
+        MockBackend,
+        {
+          provide: Http, useFactory: (backend: ConnectionBackend,
+            defaultOptions: BaseRequestOptions) => {
+              return new Http(backend, defaultOptions);
+            }, deps: [MockBackend, BaseRequestOptions]
+          },
+          {
+            provide: NgrxJsonApi,
+            useFactory: apiFactory,
+            deps: [Http, NGRX_JSON_API_CONFIG]
+          },
+          {
+            provide: NGRX_JSON_API_CONFIG,
+            useValue: {
+              apiUrl: 'myapi.com',
+              resourceDefinitions: resourcesDefinitions,
+              urlBuilder: {
+                generateIncludedQueryParams: (params) => 'helloIncluded',
+                generateFilteringQueryParams: (params) => 'helloFiltering',
+                generateFieldsQueryParams: (params) => 'helloFields',
+                generateSortingQueryParams: (params) => 'helloSorting'
+                // generateQueryParams: (params) => 'helloGenerator'
+              }
+            }
+          },
+        ]
+      });
+    });
+    //
+    beforeEach(inject([NgrxJsonApi], (api) => {
+      jsonapi = api;
+    }));
+
+    it('should find resources with queryParams',
+        fakeAsync(inject([MockBackend], (mockBackend) => {
+            mockBackend.connections.subscribe(c => {
+                expect(c.request.url).toBe(
+                    'myapi.com/posts?helloIncluded&helloFiltering&helloSorting&helloFields');
+                expect(c.request.method).toBe(0);
+            });
+            jsonapi.find({
+                query: {
+                    queryType: 'getMany',
+                    type: 'Post'
+                        params: {
+                        filtering: [
+                            { api: 'person__name', value: 'smith' },
+                            { api: 'person__age', value: 20 }
+                        ],
+                        include: ['person', 'comments'],
+                        sorting: [{api: 'person', direction: 'ASC'}],
+                        fields: ['name']
+                    }
+                }
+            });
+            tick();
+        })));
+  });

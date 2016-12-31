@@ -31,13 +31,16 @@ import {
 } from '../src/reducers';
 
 import {
-    NGRX_JSON_API_STORE_LOCATION,
+    NGRX_JSON_API_CONFIG,
     selectorsFactory
 } from '../src/module';
 
 import { updateStoreResources } from '../src/utils';
 
-import { testPayload } from './test_utils';
+import {
+  testPayload,
+  resourceDefinitions
+} from './test_utils';
 
 describe('NgrxJsonApiSelectors', () => {
     let selectors;
@@ -48,11 +51,14 @@ describe('NgrxJsonApiSelectors', () => {
                 {
                     provide: NgrxJsonApiSelectors,
                     useFactory: selectorsFactory,
-                    deps: [NGRX_JSON_API_STORE_LOCATION]
+                    deps: [NGRX_JSON_API_CONFIG]
                 },
                 {
-                    provide: NGRX_JSON_API_STORE_LOCATION,
-                    useValue: 'api'
+                    provide: NGRX_JSON_API_CONFIG,
+                    useValue: {
+                      storeLocation: 'api',
+                      resourceDefinitions: resourceDefinitions
+                    }
                 },
             ]
         })
@@ -180,7 +186,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     describe('queryStore$', () => {
 
-        it('should use getResourceStore$ given a query of type getOne', fakeAsync(() => {
+        it('should return a single resource store given a getOne query with id and type', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
@@ -195,7 +201,59 @@ describe('NgrxJsonApiSelectors', () => {
             tick();
         }));
 
-        it('should use getResourceStoreOfType$ given a query of type getMany', fakeAsync(() => {
+        it('should return a single resource using filters given a getOne query with type only', fakeAsync(() => {
+            let res;
+            let sub = obs
+                .select('api')
+                .let(selectors.queryStore$({
+                    type: 'Article',
+                    queryType: 'getOne',
+                    params: {
+                      filtering: [
+                        { path: 'author.profile.id', value: 'firstProfile'}
+                      ]
+                  }
+                }))
+                .subscribe(d => res = d);
+            tick();
+            expect(res.resource.id).toEqual('1');
+            expect(res.resource.type).toEqual('Article');
+        }));
+
+        it('should return an empty object for getOne queries that are not found', fakeAsync(() => {
+            let res;
+            let sub = obs
+                .select('api')
+                .let(selectors.queryStore$({
+                    type: 'Article',
+                    queryType: 'getOne',
+                    params: {
+                      filtering: [
+                        { path: 'author.profile.id', value: 'blablabla'}
+                      ]
+                  }
+                }))
+                .subscribe(d => res = d);
+            tick();
+            expect(res).toEqual({});
+        }));
+
+        // it doesn't work, don't know why
+        // fit('should throw an error for getOne queries that return more than one resourceStore', fakeAsync(() => {
+        //     let res;
+        //     let sub = obs
+        //         .select('api')
+        //         .let(selectors.queryStore$({
+        //             type: 'Article',
+        //             queryType: 'getOne',
+        //         }))
+        //         .subscribe(d => res = d);
+        //     expect(() => {
+        //       tick();
+        //     }).toThrow();
+        // }));
+
+        it('should return an array of resourceStore given a getMany query', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
@@ -204,10 +262,51 @@ describe('NgrxJsonApiSelectors', () => {
                     queryType: 'getMany'
                 }))
                 .subscribe(d => res = d);
-            obs.select('api').let(selectors.getResourceStoreOfType$('Article'))
-                .subscribe(r => expect(r).toEqual(res));
             tick();
+            expect(_.isArray(res)).toBeTruthy();
+            expect(res.length).toBe(2);
         }));
+
+        it('should return an array of filtered resourceStore given a getMany query', fakeAsync(() => {
+              let res;
+              let sub = obs
+                  .select('api')
+                  .let(selectors.queryStore$({
+                      type: 'Article',
+                      queryType: 'getMany',
+                      params: {
+                        filtering: [
+                          { path: 'author.profile.id', value: 'firstProfile'}
+                        ]
+                    }
+                  }))
+                  .subscribe(d => res = d);
+              tick();
+              expect(_.isArray(res)).toBeTruthy();
+              expect(res.length).toBe(1);
+              expect(res[0].resource.type).toEqual('Article');
+              expect(res[0].resource.id).toEqual('1');
+          }));
+
+          it('should return an empty array of filtered resourceStore given a getMany query that return nothing', fakeAsync(() => {
+                let res;
+                let sub = obs
+                    .select('api')
+                    .let(selectors.queryStore$({
+                        type: 'Article',
+                        queryType: 'getMany',
+                        params: {
+                          filtering: [
+                            { path: 'author.profile.id', value: 'blablabla'}
+                          ]
+                      }
+                    }))
+                    .subscribe(d => res = d);
+                tick();
+                expect(_.isArray(res)).toBeTruthy();
+                expect(res.length).toBe(0);
+            }));
+
     });
 
     describe('getStoreQueries$', () => {
