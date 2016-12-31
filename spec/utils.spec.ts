@@ -50,7 +50,7 @@ import {
 } from '../src/interfaces';
 
 import {
-    resourcesDefinitions,
+    resourceDefinitions,
     documentPayload,
     testPayload,
 } from './test_utils';
@@ -678,49 +678,6 @@ describe('filterResources (TODO: test remaining types)', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
 
     let resources = storeData['Article'];
-    let resourceDefinitions = [
-        {
-            type: 'Article',
-            collectionPath: 'articles',
-            attributes: {
-                title: {},
-                date: {},
-                stars: {},
-            },
-            relationships: {
-                author: {
-                    type: 'Person',
-                    relationType: 'hasOne'
-                },
-                comments: {
-                  type: 'Comment',
-                  relationType: 'hasMany'
-                }
-            },
-        },
-        {
-          type: 'Person',
-          collectionPath: 'people',
-          attributes: {
-            name: {},
-          },
-          relationships: {
-            profile: { type: 'Profile', relationType: 'hasOne'}
-          }
-        },
-        {
-          type: 'Comment',
-          collectionPath: 'comments',
-        },
-        {
-          type: 'Profile',
-          collectionPath: 'profiles',
-          attributes: {
-            id: {}
-          }
-        }
-    ]
-
     it('should filter resources using an iexact filter if no type is given', () => {
         let query = {
             type: 'Article',
@@ -784,6 +741,19 @@ describe('filterResources (TODO: test remaining types)', () => {
         expect(filtered[0].resource.type).toBe('Article');
     });
 
+    it('should return no results if the fieldValue is null', () => {
+        let query = {
+            type: 'Article',
+            params: {
+                filtering: [
+                    { path: 'body', value: 'person 1', type: 'iexact', }
+                ]
+            }
+        }
+        let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+        expect(filtered.length).toBe(0);
+    });
+
     // it('should filter hasMany related resources using iexact filter', () => {
     //     let query = {
     //         type: 'Article',
@@ -803,63 +773,6 @@ describe('filterResources (TODO: test remaining types)', () => {
 
 describe('getFieldFromPath', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
-    let resourceDefinitions = [
-        {
-            type: 'Article',
-            collectionPath: 'articles',
-            attributes: {
-                body: {},
-                text: {},
-                title: {},
-            },
-            relationships: {
-                author: {
-                    type: 'Person',
-                    relationType: 'hasOne'
-                },
-                comments: {
-                  type: 'Comment',
-                  relationType: 'hasMany'
-                },
-                blog: {
-                  type: 'Blog',
-                  relationType: 'hasOne'
-                }
-            },
-        },
-        {
-          type: 'Person',
-          collectionPath: 'people',
-          attributes: {
-            firstName: {},
-            name: {}
-          },
-          relationships: {
-            profile: {
-              type: 'Profile',
-              relationType: 'hasOne'
-            }
-          }
-        },
-        {
-          type: 'Comment',
-          collectionPath: 'comments',
-        },
-        {
-          type: 'Profile',
-          collectionPath: 'profiles',
-          attributes: {
-            id: {}
-          }
-        },
-        {
-          type: 'Blog',
-          collectionPAth: 'blogs',
-          attributes: {
-            name: {}
-          }
-        }
-    ]
 
     it('should throw an error if the definition was not found', () => {
       let baseResource = storeData['Whatever']['1'];

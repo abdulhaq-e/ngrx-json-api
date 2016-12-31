@@ -505,6 +505,9 @@ export const filterResources = (
                     resourceDefinitions,
                     pathSeparator
                 );
+                if (!fieldValue) {
+                  return false;
+                }
                 //
                 // if (_.isUndefined(resolvedPath) || _.isNull(resolvedPath)) {
                 //     return false;
