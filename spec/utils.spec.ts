@@ -21,7 +21,7 @@ import {
     generateFilteringQueryParams,
     generateQueryParams,
     generateSortingQueryParams,
-    getFieldFromPath,
+    getResourceFieldValueFromPath,
     //     transformStoreData,
     //     transformStoreResources,
     removeQuery,
@@ -696,7 +696,7 @@ describe('filterResources (TODO: test remaining types)', () => {
             type: 'Article',
             params: {
                 filtering: [
-                    { path: 'title', value: 'article 2', type: 'iexact' }
+                    { path: 'title', value: 'article 2', operator: 'iexact' }
                 ]
             }
         }
@@ -714,7 +714,7 @@ describe('filterResources (TODO: test remaining types)', () => {
                     {
                         path: 'title',
                         value: ['Article 2', 'Article 1'],
-                        type: 'in'
+                        operator: 'in'
                     }
                 ]
             }
@@ -731,7 +731,7 @@ describe('filterResources (TODO: test remaining types)', () => {
             type: 'Article',
             params: {
                 filtering: [
-                    { path: 'author.name', value: 'person 1', type: 'iexact', }
+                    { path: 'author.name', value: 'person 1', operator: 'iexact', }
                 ]
             }
         }
@@ -741,18 +741,42 @@ describe('filterResources (TODO: test remaining types)', () => {
         expect(filtered[0].resource.type).toBe('Article');
     });
 
-    it('should return no results if the fieldValue is null', () => {
+    it('should return no results if the resourceFieldValue is null', () => {
         let query = {
             type: 'Article',
             params: {
                 filtering: [
-                    { path: 'body', value: 'person 1', type: 'iexact', }
+                    { path: 'body', value: 'person 1', operator: 'iexact', }
                 ]
             }
         }
         let filtered = filterResources(resources, storeData, query, resourceDefinitions);
         expect(filtered.length).toBe(0);
     });
+
+    it('should correctly use custom filter operators', () => {
+        let query = {
+            type: 'Article',
+            params: {
+                filtering: [
+                    { path: 'title', value: 'Article', operator: 'firstLetterEqual', }
+                ]
+            }
+        }
+        let filteringConfig = {
+          filteringOperators: [
+            {
+                name: 'firstLetterEqual',
+                comparison: (value, fieldValue) => value[0] == fieldValue[0]
+            }
+          ]
+        };
+        let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
+        expect(filtered.length).toBe(2);
+        expect(filtered[0].resource.id).toBe('1');
+        expect(filtered[0].resource.type).toBe('Article');
+    });
+
 
     // it('should filter hasMany related resources using iexact filter', () => {
     //     let query = {
@@ -771,72 +795,72 @@ describe('filterResources (TODO: test remaining types)', () => {
 
 });
 
-describe('getFieldFromPath', () => {
+describe('getResourceFieldValueFromPath', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
 
     it('should throw an error if the definition was not found', () => {
       let baseResource = storeData['Whatever']['1'];
-        expect(() => getFieldFromPath('whatever', baseResource, storeData, resourceDefinitions)
+        expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
         ).toThrow();
     });
 
     it('should throw an error if definition has no attributes or relations', () => {
       let baseResource = storeData['Comment']['1'];
-      expect(() => getFieldFromPath('whatever', baseResource, storeData, resourceDefinitions)
+      expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
     ).toThrow();
     });
 
     it('should return the attribute if the path is made of a single field', () => {
         let baseResource = storeData['Article']['1'];
-        let typeAttrib = getFieldFromPath('title', baseResource, storeData, resourceDefinitions);
+        let typeAttrib = getResourceFieldValueFromPath('title', baseResource, storeData, resourceDefinitions);
         expect(typeAttrib).toEqual('Article 1');
     });
 
     it('should return null if the field is found in attributes definition but not in resource', () => {
         let baseResource = storeData['Article']['1'];
-        let value = getFieldFromPath('body', baseResource, storeData, resourceDefinitions);
+        let value = getResourceFieldValueFromPath('body', baseResource, storeData, resourceDefinitions);
         expect(value).toBeNull();
     });
 
     it('should throw an error if the last field in the path is a relationship', () => {
       let baseResource = storeData['Article']['1'];
-      expect(() => getFieldFromPath('blog', baseResource, storeData, resourceDefinitions)
+      expect(() => getResourceFieldValueFromPath('blog', baseResource, storeData, resourceDefinitions)
     ).toThrow();
     });
 
     it('should throw an error if the path contains a hasMany relationship', () => {
       let baseResource = storeData['Article']['1'];
-      expect(() => getFieldFromPath('author.comments.text', baseResource, storeData, resourceDefinitions)
+      expect(() => getResourceFieldValueFromPath('author.comments.text', baseResource, storeData, resourceDefinitions)
     ).toThrow();
     });
 
     it('should return null if the field is found in relationships definition but not in resource', () => {
         let baseResource = storeData['Article']['1'];
-        let value = getFieldFromPath('blog.name', baseResource, storeData, resourceDefinitions);
+        let value = getResourceFieldValueFromPath('blog.name', baseResource, storeData, resourceDefinitions);
         expect(value).toBeNull();
     });
 
     it('should return the attribute for a complex path', () => {
       let baseResource = storeData['Article']['1'];
-      let value = getFieldFromPath('author.name', baseResource, storeData, resourceDefinitions);
+      let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
       expect(value).toEqual('Person 1');
     });
 
     it('should throw an error if the field is not found in attributes or relationships', () => {
       let baseResource = storeData['Article']['1'];
-        expect(() => getFieldFromPath('whatever', baseResource, storeData, resourceDefinitions)
+        expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
         ).toThrow();
     });
 
     it('should return null if a related resource was not found', () => {
         let baseResource = storeData['Article']['2'];
-        let value = getFieldFromPath('author.name', baseResource, storeData, resourceDefinitions);
+        let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
         expect(value).toBeNull();
     });
 
     it('should return the attribute for a very complex path', () => {
       let baseResource = storeData['Article']['1'];
-      let value = getFieldFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
+      let value = getResourceFieldValueFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
       expect(value).toEqual('firstProfile');
     });
 

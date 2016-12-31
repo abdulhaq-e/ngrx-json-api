@@ -16,14 +16,14 @@ export interface Document {
 
 export interface FilteringParam {
     path?: string;
-    type?: string;
+    operator?: string;
     value?: any;
 }
 
-export interface FilteringType {
+export interface FilteringOperator {
   name: string;
   apiName?: string;
-  comparison: (value: any, resourceValue: any) => boolean;
+  comparison: (value: any, resourceFieldValue: any) => boolean;
 }
 
 export interface NgrxJsonApiStore {
@@ -46,7 +46,7 @@ export interface NgrxJsonApiConfig {
 
 export interface NgrxJsonApiFilteringConfig {
   pathSeparator?: string;
-  filteringType?: Array<FilteringType>;
+  filteringOperators?: Array<FilteringOperator>;
 }
 
 export interface NgrxJsonApiUrlBuilder {
@@ -74,12 +74,12 @@ export interface Payload {
 }
 
 export interface QueryParams {
-    filtering?: Array<FilteringParam>
-    sorting?: Array<SortingParam>
-    include?: Array<string>
-    fields?: Array<string>
-    offset?: number
-    limit?: number
+    filtering?: Array<FilteringParam>;
+    sorting?: Array<SortingParam>;
+    include?: Array<string>;
+    fields?: Array<string>;
+    offset?: number;
+    limit?: number;
 }
 
 export type QueryType
@@ -97,7 +97,7 @@ export interface Resource extends ResourceIdentifier {
 }
 
 export interface ResourceAttributeDefinition {
-  apiName?: string
+  apiName?: string;
 }
 
 export interface ResourceDefinition {
@@ -144,11 +144,11 @@ export interface ResourceQuery {
 export interface ResourceQueryStore {
     query: ResourceQuery;
     loading: Boolean;
-    resultIds: Array<ResourceIdentifier>
+    resultIds: Array<ResourceIdentifier>;
     /**
      * Errors received from the server after attempting to perform a GET request.
      */
-    errors: Array<ResourceError>
+    errors: Array<ResourceError>;
 }
 
 export interface ResourceQueryHandle<T> extends AnonymousSubscription {
@@ -201,7 +201,7 @@ export interface ResourceStore {
     /**
      * Errors received from the server after attempting to store the resource.
      */
-    errors: Array<ResourceError>
+    errors: Array<ResourceError>;
 }
 
 export interface SortingParam {

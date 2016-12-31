@@ -5,6 +5,7 @@ import { Actions } from '@ngrx/effects';
 import {
     Direction,
     Document,
+    FilteringOperator,
     FilteringParam,
     NgrxJsonApiFilteringConfig,
     NgrxJsonApiStore,
@@ -490,95 +491,82 @@ export const filterResources = (
     return _.filter(resources, (resource) => {
         if (query.hasOwnProperty('params') && query.params.hasOwnProperty('filtering')) {
             return query.params.filtering.every(element => {
-
                 let pathSeparator;
-                if (!_.isUndefined(filteringConfig) && filteringConfig.hasOwnProperty('pathSeparator')) {
-                    pathSeparator = filteringConfig.pathSeparator;
-                } else {
-                    pathSeparator = undefined;
+                let filteringOperators;
+
+                if (!_.isUndefined(filteringConfig)) {
+                    pathSeparator = <string>_.get(filteringConfig, 'pathSeparator');
+                    filteringOperators = <Array<FilteringOperator>>_.get(filteringConfig, 'filteringOperators');
                 }
                 // resource type and attribute
-                let fieldValue = getFieldFromPath(
+                let resourceFieldValue = getResourceFieldValueFromPath(
                     element.path,
                     resource,
                     storeData,
                     resourceDefinitions,
                     pathSeparator
                 );
-                if (!fieldValue) {
+                if (!resourceFieldValue) {
                   return false;
                 }
-                //
-                // if (_.isUndefined(resolvedPath) || _.isNull(resolvedPath)) {
-                //     return false;
-                // } else if (_.isArray(resolvedPath)) {
-                //     let newQuery = {
-                //         params: {
-                //             filtering: [
-                //                 {
-                //                     type: element.type,
-                //                     field: element.field,
-                //                     value: element.value
-                //                 }
-                //             ]
-                //         }
-                //     };
-                //     if (!_.isEmpty(filterResources(resolvedPath, newQuery))) {
-                //         return true;
-                //     } else {
-                //         return false;
-                //     }
-                // }
-                element.type = element.hasOwnProperty('type') ? element.type : 'iexact';
 
-                switch (element.type) {
+                let operator = _.find(filteringOperators, { name: element.operator });
+
+                if (operator) {
+                  console.log(operator);
+                  return operator.comparison(element.value, resourceFieldValue);
+                }
+
+                element.operator = element.hasOwnProperty('operator') ? element.operator : 'iexact';
+
+                switch (element.operator) {
                     case 'iexact':
-                        if (_.isString(element.value) && _.isString(fieldValue)) {
-                            return element.value.toLowerCase() === fieldValue.toLowerCase()
+                        if (_.isString(element.value) && _.isString(resourceFieldValue)) {
+                            return element.value.toLowerCase() === resourceFieldValue.toLowerCase()
                         } else {
-                            return element.value === fieldValue;
+                            return element.value === resourceFieldValue;
                         }
 
                     case 'exact':
-                        return element.value === fieldValue;
+                        return element.value === resourceFieldValue;
 
                     case 'contains':
-                        return _.includes(fieldValue, element.value);
+                        return _.includes(resourceFieldValue, element.value);
 
                     case 'icontains':
-                        return _.includes(fieldValue.toLowerCase(),
+                        return _.includes(resourceFieldValue.toLowerCase(),
                             element.value.toLowerCase());
 
                     case 'in':
                         if (_.isArray(element.value)) {
-                            return _.includes(element.value, fieldValue);
+                            return _.includes(element.value, resourceFieldValue);
                         } else {
-                            return _.includes([element.value], fieldValue);
+                            return _.includes([element.value], resourceFieldValue);
                         }
                     case 'gt':
-                        return element.value > fieldValue;
+                        return element.value > resourceFieldValue;
 
                     case 'gte':
-                        return element.value >= fieldValue;
+                        return element.value >= resourceFieldValue;
 
                     case 'lt':
-                        return element.value < fieldValue;
+                        return element.value < resourceFieldValue;
 
                     case 'lte':
-                        return element.value <= fieldValue;
+                        return element.value <= resourceFieldValue;
 
                     case 'startswith':
-                        return _.startsWith(fieldValue, element.value);
+                        return _.startsWith(resourceFieldValue, element.value);
 
                     case 'istartswith':
-                        return _.startsWith(fieldValue.toLowerCase(),
+                        return _.startsWith(resourceFieldValue.toLowerCase(),
                             element.value.toLowerCase())
 
                     case 'endswith':
-                        return _.endsWith(fieldValue, element.value);
+                        return _.endsWith(resourceFieldValue, element.value);
 
                     case 'iendswith':
-                        return _.endsWith(fieldValue.toLowerCase(),
+                        return _.endsWith(resourceFieldValue.toLowerCase(),
                             element.value.toLowerCase());
 
                     default:
@@ -601,7 +589,7 @@ export const filterResources = (
  * @param pathSepartor
  * @returns the value of the last field in the path.
  */
-export const getFieldFromPath = (
+export const getResourceFieldValueFromPath = (
     path: string,
     baseResourceStore: ResourceStore,
     storeData: NgrxJsonApiStoreData,
@@ -702,7 +690,7 @@ export const generateFilteringQueryParams = (filtering: Array<FilteringParam>): 
     if (_.isEmpty(filtering)) {
         return '';
     }
-    let filteringParams = filtering.map(f => 'filter[' + f.api + ']' + (f.type ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
+    let filteringParams = filtering.map(f => 'filter[' + f.path + ']' + (f.operator ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
     return filteringParams.join('&');
 }
 
