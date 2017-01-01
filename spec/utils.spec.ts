@@ -10,8 +10,8 @@ let deepFreeze = require('deep-freeze');
 //
 import {
     deleteStoreResources,
-    //     denormaliseObject,
-    //     denormaliseResource,
+    denormaliseObject,
+    denormalise,
     filterResources,
     //     getSingleResource,
     //     getMultipleResources,
@@ -129,47 +129,69 @@ deepFreeze(initialNgrxJsonApiState);
 //     });
 //
 //
-//     describe('denormaliseResource and denormaliseObject', () => {
-//         it('should denormalise a resource with no relatios', () => {
-//             expect(denormaliseResource(resources['Person']['2'], resources)).toEqual({
-//                 type: 'Person',
-//                 id: '2',
-//                 name: 'Person 2'
-//             });
-//             expect(denormaliseResource(resources['Blog']['2'], resources)).toEqual({
-//                 type: 'Blog',
-//                 id: '2',
-//             });
-//         });
-//
-//         it('should denormalise a resource with relations', () => {
-//             let dR = denormaliseResource(resources['Blog']['1'], resources);
-//             expect(dR.name).toEqual('Blog 1');
-//             expect(dR.id).toEqual('1');
-//             expect(dR.author).toBeDefined();
-//             expect(dR.author.name).toEqual('Person 2');
-//
-//         });
-//
-//         it('should denormalise a resource with deep relations', () => {
-//             let dR = denormaliseResource(resources['Person']['1'], resources);
-//             expect(_.isArray(dR.blogs)).toBeTruthy();
-//             expect(dR.blogs[0].type).toEqual('Blog');
-//             expect(dR.blogs[0].id).toEqual('1');
-//             expect(dR.blogs[1].type).toEqual('Blog');
-//             expect(dR.blogs[1].id).toEqual('3');
-//             expect(dR.blogs[0].author.name).toEqual('Person 2');
-//         });
-//
-//         it('should denormalise a resource with very deep relations (circular dependency)',
-//             () => {
-//                 let denormalisedResource = denormaliseResource(
-//                     resources['Article']['1'], resources);
-//                 expect(denormalisedResource.author).toEqual(
-//                     denormalisedResource.author.blogs[1].author);
-//             });
-//     });
 // });
+
+describe('denormalise and denormaliseObject', () => {
+    let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload)
+    deepFreeze(storeData);
+    it('should denormalise a resource with no relatios', () => {
+        let dR1 = denormalise(storeData['Person']['2'], storeData, {}, 'ResourceStore');
+        expect(dR1.resource).toEqual({
+            type: 'Person',
+            id: '2',
+            name: 'Person 2'
+        });
+        let dR2 = denormalise(storeData['Blog']['2'], storeData, {}, 'ResourceStore');
+        expect(dR2.resource).toEqual({
+            type: 'Blog',
+            id: '2',
+        });
+    });
+
+    it('should denormalise a resource with relations', () => {
+        let dR = denormalise(storeData['Blog']['1'], storeData, {}, 'ResourceStore');
+        expect(dR.resource.name).toEqual('Blog 1');
+        expect(dR.resource.id).toEqual('1');
+        expect(dR.resource.author).toBeDefined();
+        expect(dR.resource.author.resource.name).toEqual('Person 2');
+    });
+
+    it('should denormalise a resource with deep relations', () => {
+        let dR = denormalise(storeData['Person']['1'], storeData, {}, 'ResourceStore');
+        expect(_.isArray(dR.resource.blogs)).toBeTruthy();
+        expect(dR.resource.blogs[0].resource.type).toEqual('Blog');
+        expect(dR.resource.blogs[0].resource.id).toEqual('1');
+        expect(dR.resource.blogs[1].resource.type).toEqual('Blog');
+        expect(dR.resource.blogs[1].resource.id).toEqual('3');
+        expect(dR.resource.blogs[0].resource.author.resource.name).toEqual('Person 2');
+    });
+
+    it('should denormalise a resource with very deep relations (circular dependency)', () => {
+        let dR = denormalise(storeData['Article']['1'], storeData, {}, 'ResourceStore');
+            expect(dR.resource.author.resource).toEqual(
+                dR.resource.author.resource.blogs[1].resource.author.resource);
+    });
+
+    it('should return a denormalised resource only when using the default dernomalisation type', () => {
+        let dR = denormalise(storeData['Person']['1'], storeData);
+        expect(_.isArray(dR.blogs)).toBeTruthy();
+        expect(dR.blogs[0].type).toEqual('Blog');
+        expect(dR.blogs[0].id).toEqual('1');
+        expect(dR.blogs[1].type).toEqual('Blog');
+        expect(dR.blogs[1].id).toEqual('3');
+        expect(dR.blogs[0].author.name).toEqual('Person 2');
+    });
+
+    it('should return a denormalise resource only when using the default dernomalisation type', () => {
+        let dR = denormalise(storeData['Blog']['1'], storeData, {}, 'Resource');
+        expect(dR.name).toEqual('Blog 1');
+        expect(dR.id).toEqual('1');
+        expect(dR.author).toBeDefined();
+        expect(dR.author.name).toEqual('Person 2');
+
+    });
+
+});
 
 describe('deleteStoreResources', () => {
     let storeData = {
@@ -764,12 +786,12 @@ describe('filterResources (TODO: test remaining types)', () => {
             }
         }
         let filteringConfig = {
-          filteringOperators: [
-            {
-                name: 'firstLetterEqual',
-                comparison: (value, fieldValue) => value[0] == fieldValue[0]
-            }
-          ]
+            filteringOperators: [
+                {
+                    name: 'firstLetterEqual',
+                    comparison: (value, fieldValue) => value[0] == fieldValue[0]
+                }
+            ]
         };
         let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
         expect(filtered.length).toBe(2);
@@ -799,15 +821,15 @@ describe('getResourceFieldValueFromPath', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
 
     it('should throw an error if the definition was not found', () => {
-      let baseResource = storeData['Whatever']['1'];
+        let baseResource = storeData['Whatever']['1'];
         expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
         ).toThrow();
     });
 
     it('should throw an error if definition has no attributes or relations', () => {
-      let baseResource = storeData['Comment']['1'];
-      expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
-    ).toThrow();
+        let baseResource = storeData['Comment']['1'];
+        expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
+        ).toThrow();
     });
 
     it('should return the attribute if the path is made of a single field', () => {
@@ -823,15 +845,15 @@ describe('getResourceFieldValueFromPath', () => {
     });
 
     it('should throw an error if the last field in the path is a relationship', () => {
-      let baseResource = storeData['Article']['1'];
-      expect(() => getResourceFieldValueFromPath('blog', baseResource, storeData, resourceDefinitions)
-    ).toThrow();
+        let baseResource = storeData['Article']['1'];
+        expect(() => getResourceFieldValueFromPath('blog', baseResource, storeData, resourceDefinitions)
+        ).toThrow();
     });
 
     it('should throw an error if the path contains a hasMany relationship', () => {
-      let baseResource = storeData['Article']['1'];
-      expect(() => getResourceFieldValueFromPath('author.comments.text', baseResource, storeData, resourceDefinitions)
-    ).toThrow();
+        let baseResource = storeData['Article']['1'];
+        expect(() => getResourceFieldValueFromPath('author.comments.text', baseResource, storeData, resourceDefinitions)
+        ).toThrow();
     });
 
     it('should return null if the field is found in relationships definition but not in resource', () => {
@@ -841,13 +863,13 @@ describe('getResourceFieldValueFromPath', () => {
     });
 
     it('should return the attribute for a complex path', () => {
-      let baseResource = storeData['Article']['1'];
-      let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
-      expect(value).toEqual('Person 1');
+        let baseResource = storeData['Article']['1'];
+        let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
+        expect(value).toEqual('Person 1');
     });
 
     it('should throw an error if the field is not found in attributes or relationships', () => {
-      let baseResource = storeData['Article']['1'];
+        let baseResource = storeData['Article']['1'];
         expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
         ).toThrow();
     });
@@ -859,9 +881,9 @@ describe('getResourceFieldValueFromPath', () => {
     });
 
     it('should return the attribute for a very complex path', () => {
-      let baseResource = storeData['Article']['1'];
-      let value = getResourceFieldValueFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
-      expect(value).toEqual('firstProfile');
+        let baseResource = storeData['Article']['1'];
+        let value = getResourceFieldValueFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
+        expect(value).toEqual('firstProfile');
     });
 
 });

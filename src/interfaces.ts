@@ -1,6 +1,11 @@
 import { Observable } from "rxjs/Observable";
 import { AnonymousSubscription } from 'rxjs/Subscription';
 
+export type DenormalisationType
+    = 'ResourceStore'
+    | 'Resource'
+    | 'PersistedResource'
+
 export enum Direction {
     ASC,
     DESC

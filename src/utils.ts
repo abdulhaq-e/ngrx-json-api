@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { Actions } from '@ngrx/effects';
 
 import {
+    DenormalisationType,
     Direction,
     Document,
     FilteringOperator,
@@ -27,11 +28,12 @@ import {
 
 export const denormaliseObject = (
     resource: Resource,
-    resources: NgrxJsonApiStoreData,
-    bag: NgrxJsonApiStoreData): any => {
+    storeData: NgrxJsonApiStoreData,
+    bag: NgrxJsonApiStoreData,
+    denormalisationType: DenormalisationType = 'Resource'
+): any => {
     // this function MUST MUTATE resource
-
-    let denormalised: any = resource;
+    let denormalised = resource;
 
     if (resource.hasOwnProperty('attributes')) {
         Object.keys(resource.attributes)
@@ -44,7 +46,6 @@ export const denormaliseObject = (
 
         Object.keys(resource.relationships)
             .forEach(relation => {
-
                 let data = resource.relationships[relation].data;
                 let denormalisedRelation;
 
@@ -54,14 +55,14 @@ export const denormaliseObject = (
 
                 } else if (_.isPlainObject(data)) {
                     // hasOne relation
-                    let relatedResource = getSingleResource(data, resources);
-                    denormalisedRelation = denormaliseResource(
-                        relatedResource, resources, bag);
+                    let relatedResource = getSingleResourceStore(data, storeData);
+                    denormalisedRelation = denormalise(
+                        relatedResource, storeData, bag, denormalisationType);
                 } else if (_.isArray(data)) {
                     // hasMany relation
-                    let relatedResources = getMultipleResources(data, resources);
+                    let relatedResources = getMultipleResourceStore(data, storeData);
                     denormalisedRelation = relatedResources.map(
-                        r => denormaliseResource(r, resources, bag));
+                        r => denormalise(r, storeData, bag, denormalisationType));
                 }
 
                 denormalised = _.set(
@@ -78,49 +79,73 @@ export const denormaliseObject = (
     return denormalised;
 }
 
-export const denormaliseResource = (
-    resource: Resource, resources: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData = {}
-): any => {
+export const denormalise = (
+    resourceStore: ResourceStore,
+    storeData: NgrxJsonApiStoreData,
+    bag: NgrxJsonApiStoreData = {},
+    denormalisationType: DenormalisationType = 'Resource'): any => {
 
-    if (_.isUndefined(resource)) {
-        return undefined;
+    if (!resourceStore) {
+        return null;
     }
+
+    let resource = resourceStore.resource;
 
     if (_.isUndefined(bag[resource.type])) {
         bag[resource.type] = {};
     }
-
     if (_.isUndefined(bag[resource.type][resource.id])) {
 
-        let obj = Object.assign({}, resource);
-
-        var storeResource: ResourceStore = {
-            errors: [],
-            resource: obj,
-            persistedResource: obj
-        };
-
-        bag[resource.type][resource.id] = storeResource;
-        storeResource.resource = denormaliseObject(obj, resources, bag);
+        let newResourceStore = <ResourceStore>_.cloneDeep(resourceStore);
+        switch (denormalisationType) {
+            case 'ResourceStore': {
+                bag[resource.type][resource.id] = newResourceStore;
+                newResourceStore.resource = denormaliseObject(
+                    newResourceStore.resource,
+                    storeData,
+                    bag,
+                    denormalisationType);
+                newResourceStore.persistedResource = denormaliseObject(
+                    newResourceStore.persistedResource,
+                    storeData,
+                    bag,
+                    denormalisationType);
+                break;
+            }
+            case 'Resource': {
+                bag[resource.type][resource.id] = newResourceStore.resource;
+                newResourceStore.resource = denormaliseObject(
+                  newResourceStore.resource,
+                  storeData,
+                  bag,
+                  denormalisationType);
+                break;
+            }
+            case 'PersistedResource': {
+                bag[resource.type][resource.id] = newResourceStore.persistedResource;
+                newResourceStore.persistedResource = denormaliseObject(
+                  newResourceStore.persistedResource,
+                  storeData,
+                  bag,
+                  denormalisationType);
+                break;
+            }
+        }
     }
 
     return bag[resource.type][resource.id];
 }
 
-export const getSingleResource = (
-    query: ResourceQuery,
-    resources: NgrxJsonApiStoreData): Resource => {
-    if (_.isUndefined(resources[query.type])) {
-        return undefined;
-    }
-    let storeResource = resources[query.type][query.id];
-    return storeResource ? storeResource.resource : null;
+export const getSingleResourceStore = (
+    resourceId: ResourceIdentifier,
+    storeData: NgrxJsonApiStoreData): ResourceStore => {
+    return _.get(storeData, [resourceId.type, resourceId.id], null);
 }
 
-export const getMultipleResources = (
-    queries: Array<ResourceQuery>,
+export const getMultipleResourceStore = (
+    resourceIds: Array<ResourceIdentifier>,
     resources: NgrxJsonApiStoreData): Array<Resource> => {
-    return queries.map(query => getSingleResource(query, resources));
+    return resourceIds.map(id => getSingleResourceStore(id, resources));
 }
 
 export const getSingleTypeResources = (
@@ -507,14 +532,13 @@ export const filterResources = (
                     pathSeparator
                 );
                 if (!resourceFieldValue) {
-                  return false;
+                    return false;
                 }
 
                 let operator = _.find(filteringOperators, { name: element.operator });
 
                 if (operator) {
-                  console.log(operator);
-                  return operator.comparison(element.value, resourceFieldValue);
+                    return operator.comparison(element.value, resourceFieldValue);
                 }
 
                 element.operator = element.hasOwnProperty('operator') ? element.operator : 'iexact';
@@ -621,22 +645,22 @@ export const getResourceFieldValueFromPath = (
             if (resourceRelation.relationType == 'hasMany') {
                 throw ('Cannot filter past a hasMany relation')
             } else {
-              let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
-              if (!relation || !relation.data) {
-                return null;
-              } else {
-              let relatedPath = [
-                resourceRelation.type,
-                relation.data.id
-              ];
-                currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
-              }
+                let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
+                if (!relation || !relation.data) {
+                    return null;
+                } else {
+                    let relatedPath = [
+                        resourceRelation.type,
+                        relation.data.id
+                    ];
+                    currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
+                }
             }
         } else {
             throw ('Cannot find field in attributes or relationships');
         }
         if (_.isUndefined(currentResourceStore)) {
-          return null;
+            return null;
         }
     }
 }
