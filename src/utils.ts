@@ -27,100 +27,111 @@ import {
 
 export const denormaliseObject = (
     resource: Resource,
-    resources: NgrxJsonApiStoreData,
-    bag: NgrxJsonApiStoreData): any => {
+    storeData: NgrxJsonApiStoreData,
+    bag: NgrxJsonApiStoreData,
+    isRSdenorm: boolean,
+): any => {
     // this function MUST MUTATE resource
-
-    let denormalised: any = resource;
-
-    if (resource.hasOwnProperty('attributes')) {
-        Object.keys(resource.attributes)
-            .forEach(attribute => {
-                denormalised[attribute] = resource.attributes[attribute]
-            });
-    }
+    let denormalised = resource;
 
     if (resource.hasOwnProperty('relationships')) {
 
         Object.keys(resource.relationships)
             .forEach(relation => {
-
-                let data = resource.relationships[relation].data;
-                let denormalisedRelation;
+                resource.relationships[relation]['reference'] = {}
+                let data: ResourceIdentifier | Array<ResourceIdentifier> = resource.relationships[relation].data;
+                // denormalised relation
+                let relationDenorm;
 
                 if (data === null || _.isEqual(data, [])) {
 
-                    denormalisedRelation = data;
+                    relationDenorm = data;
 
                 } else if (_.isPlainObject(data)) {
                     // hasOne relation
-                    let relatedResource = getSingleResource(data, resources);
-                    denormalisedRelation = denormaliseResource(
-                        relatedResource, resources, bag);
+                    let relatedRS: Resource | ResourceStore = getSingleResourceStore(
+                      <ResourceIdentifier>data, storeData);
+                    relatedRS = isRSdenorm ? relatedRS : relatedRS.resource;
+                    relationDenorm = denormaliseResource(
+                        relatedRS, storeData, bag);
                 } else if (_.isArray(data)) {
                     // hasMany relation
-                    let relatedResources = getMultipleResources(data, resources);
-                    denormalisedRelation = relatedResources.map(
-                        r => denormaliseResource(r, resources, bag));
+                    let relatedRSs: Array<ResourceStore> = getMultipleResourceStore(data, storeData);
+                    relationDenorm = relatedRSs
+                        .map(r => isRSdenorm ? r : r.resource)
+                        .map(r => denormaliseResource(r, storeData, bag));
                 }
-
-                denormalised = _.set(
+                let relationDenormPath = 'relationships.' + relation + '.reference';
+                denormalised = <Resource>_.set(
                     denormalised,
-                    relation,
-                    denormalisedRelation
+                    relationDenormPath,
+                    relationDenorm
                 );
             });
     }
-
-    delete denormalised.attributes;
-    delete denormalised.relationships;
 
     return denormalised;
 }
 
 export const denormaliseResource = (
-    resource: Resource, resources: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData = {}
-): any => {
+    item: ResourceStore | Resource,
+    storeData: NgrxJsonApiStoreData,
+    bag: any = {}): any => {
 
-    if (_.isUndefined(resource)) {
-        return undefined;
+    if (!item) {
+        return null;
+    }
+    let isResourceStore = item.hasOwnProperty('resource');
+    let resourceStore;
+    let resource : Resource;
+    if (isResourceStore) {
+      resourceStore = _.cloneDeep(<ResourceStore>item);
+      resource = resourceStore.resource;
+    } else {
+      resource = _.cloneDeep(<Resource>item);
     }
 
     if (_.isUndefined(bag[resource.type])) {
         bag[resource.type] = {};
     }
-
     if (_.isUndefined(bag[resource.type][resource.id])) {
 
-        let obj = Object.assign({}, resource);
-
-        var storeResource: ResourceStore = {
-            errors: [],
-            resource: obj,
-            persistedResource: obj
-        };
-
-        bag[resource.type][resource.id] = storeResource;
-        storeResource.resource = denormaliseObject(obj, resources, bag);
+        if (isResourceStore) {
+            bag[resource.type][resource.id] = resourceStore;
+            resourceStore.resource = denormaliseObject(
+                resourceStore.resource,
+                storeData,
+                bag,
+                isResourceStore);
+            resourceStore.persistedResource = denormaliseObject(
+                resourceStore.persistedResource,
+                storeData,
+                bag,
+                isResourceStore);
+        } else {
+            bag[resource.type][resource.id] = resource;
+            resource = denormaliseObject(
+                resource,
+                storeData,
+                bag,
+                isResourceStore);
+        }
     }
 
     return bag[resource.type][resource.id];
+
 }
 
-export const getSingleResource = (
-    query: ResourceQuery,
-    resources: NgrxJsonApiStoreData): Resource => {
-    if (_.isUndefined(resources[query.type])) {
-        return undefined;
-    }
-    let storeResource = resources[query.type][query.id];
-    return storeResource ? storeResource.resource : null;
+export const getSingleResourceStore = (
+    resourceId: ResourceIdentifier,
+    storeData: NgrxJsonApiStoreData): ResourceStore => {
+    return _.get(storeData, [resourceId.type, resourceId.id], null);
 }
 
-export const getMultipleResources = (
-    queries: Array<ResourceQuery>,
-    resources: NgrxJsonApiStoreData): Array<Resource> => {
-    return queries.map(query => getSingleResource(query, resources));
+export const getMultipleResourceStore = (
+    resourceIds: Array<ResourceIdentifier>,
+    resources: NgrxJsonApiStoreData): Array<ResourceStore> => {
+    return resourceIds.map(id => getSingleResourceStore(id, resources));
 }
 
 export const getSingleTypeResources = (
@@ -507,14 +518,13 @@ export const filterResources = (
                     pathSeparator
                 );
                 if (!resourceFieldValue) {
-                  return false;
+                    return false;
                 }
 
-                let operator = _.find(filteringOperators, { name: element.operator });
+                let operator = <FilteringOperator>_.find(filteringOperators, { name: element.operator });
 
                 if (operator) {
-                  console.log(operator);
-                  return operator.comparison(element.value, resourceFieldValue);
+                    return operator.comparison(element.value, resourceFieldValue);
                 }
 
                 element.operator = element.hasOwnProperty('operator') ? element.operator : 'iexact';
@@ -621,22 +631,22 @@ export const getResourceFieldValueFromPath = (
             if (resourceRelation.relationType == 'hasMany') {
                 throw ('Cannot filter past a hasMany relation')
             } else {
-              let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
-              if (!relation || !relation.data) {
-                return null;
-              } else {
-              let relatedPath = [
-                resourceRelation.type,
-                relation.data.id
-              ];
-                currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
-              }
+                let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
+                if (!relation || !relation.data) {
+                    return null;
+                } else {
+                    let relatedPath = [
+                        resourceRelation.type,
+                        relation.data.id
+                    ];
+                    currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
+                }
             }
         } else {
             throw ('Cannot find field in attributes or relationships');
         }
         if (_.isUndefined(currentResourceStore)) {
-          return null;
+            return null;
         }
     }
 }
@@ -690,7 +700,7 @@ export const generateFilteringQueryParams = (filtering: Array<FilteringParam>): 
     if (_.isEmpty(filtering)) {
         return '';
     }
-    let filteringParams = filtering.map(f => 'filter[' + f.path + ']' + (f.operator ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
+    let filteringParams = filtering.map(f => 'filter[' + f.path + ']' + (f.operator ? '[' + f.operator + ']' : '') + '=' + encodeURIComponent(f.value));
     return filteringParams.join('&');
 }
 

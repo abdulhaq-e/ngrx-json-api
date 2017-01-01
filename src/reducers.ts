@@ -26,7 +26,7 @@ export const initialNgrxJsonApiState: NgrxJsonApiStore = {
     isReading: 0,
     isUpdating: 0,
     isDeleting: 0,
-    isCommitting: 0,
+    isApplying: 0,
     data: {},
     queries: {}
 };
@@ -136,6 +136,15 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 );
                 return newState;
             }
+            case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
+                let query = action.payload as ResourceQuery;
+                if (query.queryId) {
+                    newState = Object.assign({}, state, {
+                        queries: updateQueryParams(state.queries, query),
+                    });
+                }
+                return newState;
+            }
             case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
                 newState = Object.assign({}, state, {
                     queries: updateQueryResults(
@@ -180,19 +189,19 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 );
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_COMMIT_INIT: {
-                newState = Object.assign({}, state, { isCommitting: state.isCommitting + 1 });
+            case NgrxJsonApiActionTypes.API_APPLY_INIT: {
+                newState = Object.assign({}, state, { isApplying: state.isApplying + 1 });
                 return newState;
             }
-            case NgrxJsonApiActionTypes.API_COMMIT_SUCCESS:
-            case NgrxJsonApiActionTypes.API_COMMIT_FAIL: {
+            case NgrxJsonApiActionTypes.API_APPLY_SUCCESS:
+            case NgrxJsonApiActionTypes.API_APPLY_FAIL: {
                 // apply all the committed or failed changes
                 let actions = action.payload as Array<Action>;
                 newState = state;
                 for (let commitAction of actions) {
                     newState = NgrxJsonApiStoreReducer(newState, commitAction);
                 }
-                newState = Object.assign({}, newState, { isCommitting: state['isCommitting'] - 1 });
+                newState = Object.assign({}, newState, { isApplying: state['isApplying'] - 1 });
                 return newState;
             }
             case NgrxJsonApiActionTypes.API_ROLLBACK: {

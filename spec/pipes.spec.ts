@@ -15,6 +15,12 @@ import { NgrxJsonApi } from '../src/api';
 import { NgrxJsonApiService } from '../src/services';
 import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
+import {
+    DenormaliseResourcePipe,
+    GetResourcePipe,
+    SelectResourcePipe,
+    SelectResourceStorePipe,
+} from '../src/pipes';
 
 import {
     initialNgrxJsonApiState,
@@ -36,7 +42,7 @@ import {
 } from './test_utils';
 
 describe('NgrxJsonApiService', () => {
-    let service;
+    let pipe;
 
     beforeEach(() => {
         let store = {
@@ -74,55 +80,42 @@ describe('NgrxJsonApiService', () => {
                         resourceDefinitions: resourceDefinitions
                     }
                 },
+                DenormaliseResourcePipe,
+                GetResourcePipe,
+                SelectResourcePipe,
+                SelectResourceStorePipe,
             ],
         })
     });
 
-    beforeEach(inject([NgrxJsonApiService], (s) => {
-        service = s;
-    }));
 
-    describe('findOne', () => {
-
-    });
-
-    describe('findMany', () => {
+    describe('GetResourcePipe', () => {
+        beforeEach(inject([GetResourcePipe], (p) => {
+            pipe = p;
+        }));
 
     });
 
-    describe('findInternal', () => {
+    describe('SelectResourcePipe', () => {
+        beforeEach(inject([SelectResourcePipe], (p) => {
+            pipe = p;
+        }));
 
     });
 
-    describe('removeQuery', () => {
+    describe('SelectResourceStorePipe', () => {
+        beforeEach(inject([SelectResourceStorePipe], (p) => {
+            pipe = p;
+        }));
 
     });
 
-    describe('getResourceSnapshot', () => {
+    describe('DenormaliseResourcePipe', () => {
 
-    });
+        beforeEach(inject([DenormaliseResourcePipe], (p) => {
+            pipe = p;
+        }));
 
-    describe('getPersistedResourceSnapshot', () => {
-
-    });
-
-    describe('selectResults', () => {
-
-    });
-
-    describe('selectResultIdentifiers', () => {
-
-    });
-
-    describe('selectResource', () => {
-
-    });
-
-    describe('selectResourceStore', () => {
-
-    });
-
-    describe('denormalise', () => {
         it('should denormalise a Resource', () => {
             let query = {
                 id: '1',
@@ -130,11 +123,11 @@ describe('NgrxJsonApiService', () => {
                 queryType: 'getOne',
                 queryId: '22'
             }
-            let resourceStore = service.findOne(query, false)
+            let resourceStore = pipe.service.findOne(query, false, true)
                 .results
-                .let(service.denormalise());
-            resourceStore.subscribe(it => {
-              expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
+            let denormalised = pipe.transform(resourceStore);
+            denormalised.subscribe(it => {
+                expect(_.get(it, 'relationships.author.reference')).toBeDefined();
             });
         });
     });

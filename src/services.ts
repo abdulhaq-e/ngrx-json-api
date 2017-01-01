@@ -1,4 +1,3 @@
-import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -19,6 +18,7 @@ import {
 } from './actions';
 import {
     NgrxJsonApiStore,
+    NgrxJsonApiStoreData,
     Payload,
     QueryType,
     Resource,
@@ -29,9 +29,10 @@ import {
     ResourceRelationship,
     ResourceStore,
 } from './interfaces';
+import {
+    denormaliseResource
+} from './utils';
 
-
-@Injectable()
 export class NgrxJsonApiService {
 
     private test: boolean = true;
@@ -45,11 +46,14 @@ export class NgrxJsonApiService {
         private store: Store<any>,
         private selectors: NgrxJsonApiSelectors<any>,
     ) {
-
         this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
     }
 
-    public findOne(query: ResourceQuery, fromServer: boolean = true): ResourceQueryHandle<Resource> {
+    public findOne(
+        query: ResourceQuery,
+        fromServer: boolean = true,
+        resource: boolean = false
+    ): ResourceQueryHandle<Resource> {
         query.queryType = "getOne";
         this.findInternal(query, fromServer);
 
@@ -58,7 +62,7 @@ export class NgrxJsonApiService {
                 if (it.length == 0) {
                     return null;
                 } else if (it.length == 1) {
-                    return it[0];
+                    return resource ? it[0].resource : it[0];
                 } else {
                     throw new Error("Unique result expected");
                 }
@@ -68,11 +72,16 @@ export class NgrxJsonApiService {
         }
     }
 
-    public findMany(query: ResourceQuery, fromServer: boolean = true): ResourceQueryHandle<Array<Resource>> {
+    public findMany(
+      query: ResourceQuery,
+      fromServer: boolean = true,
+      resource: boolean = false
+    ): ResourceQueryHandle<Array<Resource>> {
         query.queryType = "getMany";
         this.findInternal(query, fromServer);
         return {
-            results: this.selectResults(query.queryId),
+            results: this.selectResults(query.queryId)
+                .map(it => resource ? it.map(r => r.resource) : it),
             unsubscribe: () => this.removeQuery(query.queryId)
         }
     }
@@ -126,7 +135,7 @@ export class NgrxJsonApiService {
      * @param queryId
      * @returns observable holding the results as array of resources.
      */
-    public selectResults(queryId: string): Observable<Array<Resource>> {
+    public selectResults(queryId: string): Observable<Array<ResourceStore>> {
         return this.store
             .select(this.selectors.storeLocation)
             .let(this.selectors.getResults$(queryId));
@@ -150,8 +159,8 @@ export class NgrxJsonApiService {
      */
     public selectResource(identifier: ResourceIdentifier): Observable<Resource> {
         return this.store
-        .select(this.selectors.storeLocation)
-        .let(this.selectors.getResource$(identifier));
+            .select(this.selectors.storeLocation)
+            .let(this.selectors.getResource$(identifier));
     }
 
     /**
@@ -160,8 +169,23 @@ export class NgrxJsonApiService {
      */
     public selectResourceStore(identifier: ResourceIdentifier): Observable<ResourceStore> {
         return this.store
-        .select(this.selectors.storeLocation)
-        .let(this.selectors.getResourceStore$(identifier));
+            .select(this.selectors.storeLocation)
+            .let(this.selectors.getResourceStore$(identifier));
+    }
+
+    public denormalise() {
+        return (resourceStore$: Observable<ResourceStore | ResourceStore>) => {
+            return resourceStore$
+                .combineLatest(this.store
+                    .select(this.selectors.storeLocation)
+                    .let(this.selectors.getStoreData$()),
+                (
+                    resourceStore: ResourceStore,
+                    storeData: NgrxJsonApiStoreData
+                ) => {
+                    return denormaliseResource(resourceStore, storeData)
+                });
+        }
     }
 
     /**
@@ -170,8 +194,27 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public patchResource(resource: Resource) {
+    public patchResource(resource: Resource, toRemote : boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'update',
+                type: resource.type,
+                id: resource.id
+            }
+        };
+        this.store.dispatch(new ApiUpdateInitAction(payload));
+      } else {
         this.store.dispatch(new PatchStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -181,8 +224,26 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public postResource(resource: Resource) {
+    public postResource(resource: Resource, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'create',
+                type: resource.type
+            }
+        };
+        this.store.dispatch(new ApiCreateInitAction(payload));
+      } else {
         this.store.dispatch(new PostStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -190,8 +251,19 @@ export class NgrxJsonApiService {
      *
      * @param resourceId
      */
-    public deleteResource(resourceId: ResourceIdentifier) {
+    public deleteResource(resourceId: ResourceIdentifier, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            query: {
+                queryType: 'deleteOne',
+                type: resourceId.type,
+                id: resourceId.id
+            }
+        };
+        this.store.dispatch(new ApiDeleteInitAction(payload));
+      } else {
         this.store.dispatch(new DeleteStoreResourceAction(resourceId));
+      }
     }
 
     /**
@@ -200,41 +272,5 @@ export class NgrxJsonApiService {
     public commit() {
         let storeLocation = this.selectors.storeLocation;
         this.store.dispatch(new ApiCommitInitAction(storeLocation));
-    }
-}
-
-
-
-@Pipe({ name: 'jaGetResource' })
-export class GetResourcePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Resource {
-        return this.service.getResourceSnapshot(id);
-    }
-}
-
-@Pipe({ name: 'jaSelectResource' })
-export class SelectResourcePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Observable<Resource> {
-        return this.service.selectResource(id);
-    }
-}
-
-
-@Pipe({ name: 'jaSelectResourceStore' })
-export class SelectResourceStorePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Observable<ResourceStore> {
-        return this.service.selectResourceStore(id);
     }
 }

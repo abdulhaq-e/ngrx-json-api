@@ -10,12 +10,13 @@ import { EffectsModule } from '@ngrx/effects';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiSelectors } from './selectors';
+import { NgrxJsonApiService } from './services';
 import {
-  NgrxJsonApiService,
-  SelectResourceStorePipe,
+  DenormaliseResourcePipe,
+  GetResourcePipe,
   SelectResourcePipe,
-  GetResourcePipe
-} from './services';
+  SelectResourceStorePipe,
+} from './pipes';
 
 import { NgrxJsonApiConfig } from './interfaces';
 
@@ -61,7 +62,12 @@ export const configure = (config: NgrxJsonApiConfig): Array<any> => {
 }
 
 @NgModule({
-    declarations : [SelectResourceStorePipe, SelectResourcePipe, GetResourcePipe],
+    declarations : [
+      DenormaliseResourcePipe,
+      GetResourcePipe,
+      SelectResourcePipe,
+      SelectResourceStorePipe,
+    ],
     imports: [
         HttpModule,
         EffectsModule.run(NgrxJsonApiEffects)

@@ -33,7 +33,7 @@ export interface NgrxJsonApiStore {
     isReading: number;
     isUpdating: number;
     isDeleting: number;
-    isCommitting: number;
+    isApplying: number;
 }
 
 export interface NgrxJsonApiConfig {

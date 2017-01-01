@@ -14,9 +14,9 @@ import {
     initialNgrxJsonApiState
 } from '../src/reducers';
 import {
-    ApiCommitInitAction,
-    ApiCommitSuccessAction,
-    ApiCommitFailAction,
+    ApiApplyInitAction,
+    ApiApplySuccessAction,
+    ApiApplyFailAction,
     ApiCreateInitAction,
     ApiCreateSuccessAction,
     ApiCreateFailAction,
@@ -45,7 +45,6 @@ import { testPayload } from './test_utils';
 describe('NgrxJsonApiReducer', () => {
 
     let state = initialNgrxJsonApiState;
-
     deepFreeze(state);
 
     describe('API_CREATE_INIT action', () => {
@@ -123,8 +122,8 @@ describe('NgrxJsonApiReducer', () => {
             id: '1'
         }
         let newState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-          jsonApiData: testPayload,
-          query: query
+            jsonApiData: testPayload,
+            query: query
         }));
         it('should subtract 1 from isReading', () => {
             expect(state.isReading - newState.isReading).toBe(1);
@@ -158,23 +157,23 @@ describe('NgrxJsonApiReducer', () => {
             id: '1'
         }
         let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-          jsonApiData: testPayload,
-          query: {
-            id: '1',
-            type: 'Article',
-            queryId: '111'
-          }
+            jsonApiData: testPayload,
+            query: {
+                id: '1',
+                type: 'Article',
+                queryId: '111'
+            }
         }));
         let newState = NgrxJsonApiStoreReducer(tempState, new ApiUpdateSuccessAction({
-          jsonApiData: {
-            data: {
-              type: 'Article',
-              id: '1',
-              attributes: {
-                title: 'bla bla bla'
-              }
-            }
-          },
+            jsonApiData: {
+                data: {
+                    type: 'Article',
+                    id: '1',
+                    attributes: {
+                        title: 'bla bla bla'
+                    }
+                }
+            },
         }));
 
         it('should subtract 1 from isUpdating', () => {
@@ -189,17 +188,17 @@ describe('NgrxJsonApiReducer', () => {
     describe('API_DELETE_SUCCESS', () => {
 
         let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-          jsonApiData: testPayload,
-          query: {
-            id: '1',
-            type: 'Article',
-            queryId: '111'
-          }
+            jsonApiData: testPayload,
+            query: {
+                id: '1',
+                type: 'Article',
+                queryId: '111'
+            }
         }));
         let newState = NgrxJsonApiStoreReducer(tempState, new ApiDeleteSuccessAction({
-          query: {
-            type: 'Article'
-          }
+            query: {
+                type: 'Article'
+            }
         }));
 
         it('should subtract 1 from isDeleting', () => {
@@ -244,15 +243,17 @@ describe('NgrxJsonApiReducer', () => {
                 queryId: '111'
             }
         }));
-        let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadFailAction({
-            jsonApiData: {
-                errors: ['permission denied']
-            },
-            query: {
-                queryId: '111',
-                id: '1',
-                type: 'Article',
-            }));
+        let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadFailAction(
+            {
+                jsonApiData: {
+                    errors: ['permission denied']
+                },
+                query: {
+                    queryId: '111',
+                    id: '1',
+                    type: 'Article',
+                }
+              }));
 
         it('should add the errors to the resource', () => {
             expect(newState.queries['111'].errors[0]).toEqual('permission denied');
@@ -403,14 +404,14 @@ describe('NgrxJsonApiReducer', () => {
         });
     });
 
-    describe('API_COMMIT_INIT action', () => {
-        it('should add 1 to isCommitting', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiCommitInitAction());
-            expect(newState.isCommitting - state.isCommitting).toBe(1);
+    describe('API_APPLY_INIT action', () => {
+        it('should add 1 to isApplying', () => {
+            let newState = NgrxJsonApiStoreReducer(state, new ApiApplyInitAction());
+            expect(newState.isApplying - state.isApplying).toBe(1);
         });
     });
 
-    describe('API_COMMIT/SUCCESS_FAIL actions', () => {
+    describe('API_APPLY/SUCCESS_FAIL actions', () => {
 
     });
 

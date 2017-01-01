@@ -6,15 +6,16 @@ import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/concat';
-import 'rxjs/add/observable/zip';
-import 'rxjs/add/operator/let';
-import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/combineLatest';
-import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/concat';
 import 'rxjs/add/operator/concatMap';
-import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/let';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/observable/zip';
 
 import '@ngrx/core/add/operator/select';
 
@@ -33,9 +34,6 @@ import {
     ResourceStore,
 } from './interfaces';
 import {
-    denormaliseResource,
-    transformStoreData,
-    transformStoreResources,
     filterResources
 } from './utils';
 
@@ -47,80 +45,88 @@ export class NgrxJsonApiSelectors<T> {
     constructor(public config: NgrxJsonApiConfig) {
     }
 
-    private getStoreData$() {
+    public getStoreData$() {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.select('data');
         }
     }
 
-    private getResourceStoreOfType$(type: string) {
+    public getResourceStoreOfType$(type: string) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.let(this.getStoreData$())
                 .map(resources => resources[type]);
         }
     }
 
-    private queryStore$(query: ResourceQuery) {
+    public queryStore$(query: ResourceQuery) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             let selected$;
             switch (query.queryType) {
                 case 'getOne': {
-                  if (query.id && query.type) {
-                    selected$ = state$.let(this.getResourceStore$(
-                      { id: query.id, type: query.type }));
-                  } else {
+                    if (query.id && query.type) {
+                        selected$ = state$
+                            .let(this.getResourceStore$({
+                                id: query.id,
+                                type: query.type
+                            }))
+                            .map(it => it.resource);
+                    } else {
+                        selected$ = state$
+                            .let(this.getResourceStoreOfType$(query.type))
+                            .combineLatest(state$.let(this.getStoreData$()),
+                            (
+                                resources: NgrxJsonApiStoreResources,
+                                storeData: NgrxJsonApiStoreData
+                            ) => filterResources(
+                                resources,
+                                storeData,
+                                query,
+                                this.config.resourceDefinitions,
+                                this.config.filteringConfig,
+                                ))
+                            .map(filteredResources => {
+                                if (filteredResources.length == 0) {
+                                    return {};
+                                } else if (filteredResources.length == 1) {
+                                    return filteredResources[0].resource;
+                                } else {
+                                    throw ('Got more than one resource');
+                                }
+                            });
+                    }
+                    return selected$.distinctUntilChanged();
+                }
+                case 'getMany': {
                     selected$ = state$.let(
                         this.getResourceStoreOfType$(query.type)
                     ).combineLatest(
                         state$.let(this.getStoreData$()),
-                            (resources: NgrxJsonApiStoreResources, storeData: NgrxJsonApiStoreData) => {
-                                return filterResources(
-                                  resources,
-                                  storeData,
-                                  query,
-                                  this.config.resourceDefinitions,
-                                  this.config.filteringConfig,
-                                );
-                            }).map(filteredResources => {
-                              if (filteredResources.length == 0) {
-                                return {};
-                              } else if (filteredResources.length == 1) {
-                                return filteredResources[0];
-                              } else {
-                                throw ('Got more than one resource');
-                              }
-                            });
-                  }
+                        (
+                            resources: NgrxJsonApiStoreResources,
+                            storeData: NgrxJsonApiStoreData
+                        ) => filterResources(
+                            resources,
+                            storeData,
+                            query,
+                            this.config.resourceDefinitions,
+                            this.config.filteringConfig,
+                        ).map(it => it.resource)
+                        );
                     return selected$.distinctUntilChanged();
-                  }
-                case 'getMany':
-                    selected$ = state$.let(
-                        this.getResourceStoreOfType$(query.type)
-                    ).combineLatest(
-                        state$.let(this.getStoreData$()),
-                            (resources: NgrxJsonApiStoreResources, storeData: NgrxJsonApiStoreData) => {
-                                return filterResources(
-                                  resources,
-                                  storeData,
-                                  query,
-                                  this.config.resourceDefinitions,
-                                  this.config.filteringConfig,
-                                );
-                            });
-                    return selected$.distinctUntilChanged();
+                }
                 default:
                     return state$;
             }
         }
     }
 
-    private getStoreQueries$() {
+    public getStoreQueries$() {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.select('queries');
         }
     }
 
-    private getResourceQuery$(queryId: string) {
+    public getResourceQuery$(queryId: string) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$
                 .let(this.getStoreQueries$())
@@ -141,7 +147,7 @@ export class NgrxJsonApiSelectors<T> {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$
                 .let(this.getResultIdentifiers$(queryId))
-                .mergeMap(ids => state$.let(this.getManyResource$(ids)))
+                .mergeMap(ids => state$.let(this.getManyResourceStore$(ids)))
         }
     }
 
@@ -156,7 +162,7 @@ export class NgrxJsonApiSelectors<T> {
     public getManyResourceStore$(identifiers: Array<ResourceIdentifier>) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             let obs = identifiers.map(id => state$.let(this.getResourceStore$(id)));
-            return <Array<ResourceStore>>Observable.zip(...obs);
+            return Observable.zip(...obs);
         }
     }
 
@@ -170,8 +176,8 @@ export class NgrxJsonApiSelectors<T> {
 
     public getManyResource$(identifiers: Array<ResourceIdentifier>) {
         return (state$: Observable<NgrxJsonApiStore>) => {
-            let obs = identifiers.map(id => state$.let(this.getResource$(id)));
-            return <Array<Resource>>Observable.zip(...obs)
+            return state$.let(this.getManyResourceStore$(identifiers))
+                .map(it => it.map(r => r.resource));
         }
     }
 

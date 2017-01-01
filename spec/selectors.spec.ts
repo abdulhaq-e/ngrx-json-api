@@ -186,7 +186,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     describe('queryStore$', () => {
 
-        it('should return a single resource store given a getOne query with id and type', fakeAsync(() => {
+        it('should return a single resource given a getOne query with id and type', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
@@ -197,7 +197,7 @@ describe('NgrxJsonApiSelectors', () => {
                 }))
                 .subscribe(d => res = d);
             obs.select('api').let(selectors.getResourceStore$({ type: 'Article', id: '1' }))
-                .subscribe(r => expect(r).toEqual(res));
+                .subscribe(r => expect(r.resource).toEqual(res));
             tick();
         }));
 
@@ -216,8 +216,8 @@ describe('NgrxJsonApiSelectors', () => {
                 }))
                 .subscribe(d => res = d);
             tick();
-            expect(res.resource.id).toEqual('1');
-            expect(res.resource.type).toEqual('Article');
+            expect(res.id).toEqual('1');
+            expect(res.type).toEqual('Article');
         }));
 
         it('should return an empty object for getOne queries that are not found', fakeAsync(() => {
@@ -253,7 +253,7 @@ describe('NgrxJsonApiSelectors', () => {
         //     }).toThrow();
         // }));
 
-        it('should return an array of resourceStore given a getMany query', fakeAsync(() => {
+        it('should return an array of resources given a getMany query', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
@@ -284,8 +284,8 @@ describe('NgrxJsonApiSelectors', () => {
               tick();
               expect(_.isArray(res)).toBeTruthy();
               expect(res.length).toBe(1);
-              expect(res[0].resource.type).toEqual('Article');
-              expect(res[0].resource.id).toEqual('1');
+              expect(res[0].type).toEqual('Article');
+              expect(res[0].id).toEqual('1');
           }));
 
           it('should return an empty array of filtered resourceStore given a getMany query that return nothing', fakeAsync(() => {
@@ -352,15 +352,15 @@ describe('NgrxJsonApiSelectors', () => {
     });
 
     describe('getResults$', () => {
-      it('should get the actual resources that are the results of a query', fakeAsync(() => {
+      it('should get the resourceStore(s) that are the results of a query', fakeAsync(() => {
         let res;
         let sub = obs
         .select('api')
         .let(selectors.getResults$('1'))
         .subscribe(d => res = d);
         tick();
-        expect(res[0].id).toEqual('1');
-        expect(res[1].id).toEqual('2');
+        expect(res[0].resource.id).toEqual('1');
+        expect(res[1].resource.id).toEqual('2');
       }));
     });
 
