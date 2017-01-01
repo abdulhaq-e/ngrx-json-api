@@ -134,14 +134,17 @@ deepFreeze(initialNgrxJsonApiState);
 describe('denormalise and denormaliseObject', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload)
     deepFreeze(storeData);
-    it('should denormalise a resource with no relatios', () => {
-        let dR1 = denormaliseResource(storeData['Person']['2'], storeData, {}, 'ResourceStore');
+
+    it('should do nothing given a resource with attributes only', () => {
+        let dR1 = denormaliseResource(storeData['Person']['2'], storeData, {});
         expect(dR1.resource).toEqual({
             type: 'Person',
             id: '2',
-            name: 'Person 2'
+            attributes: {
+              name: 'Person 2'
+            }
         });
-        let dR2 = denormaliseResource(storeData['Blog']['2'], storeData, {}, 'ResourceStore');
+        let dR2 = denormaliseResource(storeData['Blog']['2'], storeData, {});
         expect(dR2.resource).toEqual({
             type: 'Blog',
             id: '2',
@@ -149,45 +152,63 @@ describe('denormalise and denormaliseObject', () => {
     });
 
     it('should denormalise a resource with relations', () => {
-        let dR = denormaliseResource(storeData['Blog']['1'], storeData, {}, 'ResourceStore');
-        expect(dR.resource.name).toEqual('Blog 1');
+        let dR = denormaliseResource(storeData['Blog']['1'], storeData, {});
+        expect(dR.resource.attributes.name).toEqual('Blog 1');
         expect(dR.resource.id).toEqual('1');
-        expect(dR.resource.author).toBeDefined();
-        expect(dR.resource.author.resource.name).toEqual('Person 2');
+        expect(dR.resource.relationships.author.reference).toBeDefined();
+        expect(dR.resource.relationships.author.reference.resource.attributes.name).toEqual('Person 2');
     });
 
     it('should denormalise a resource with deep relations', () => {
-        let dR = denormaliseResource(storeData['Person']['1'], storeData, {}, 'ResourceStore');
-        expect(_.isArray(dR.resource.blogs)).toBeTruthy();
-        expect(dR.resource.blogs[0].resource.type).toEqual('Blog');
-        expect(dR.resource.blogs[0].resource.id).toEqual('1');
-        expect(dR.resource.blogs[1].resource.type).toEqual('Blog');
-        expect(dR.resource.blogs[1].resource.id).toEqual('3');
-        expect(dR.resource.blogs[0].resource.author.resource.name).toEqual('Person 2');
+        let dR = denormaliseResource(storeData['Person']['1'], storeData, {});
+        expect(_.isArray(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference']))).toBeTruthy();
+        expect(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference', '0',
+          'resource', 'type'])).toEqual('Blog');
+        expect(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference', '0',
+          'resource', 'id'])).toEqual('1');
+        expect(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference', '1',
+          'resource', 'type'])).toEqual('Blog');
+        expect(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference', '1',
+          'resource', 'id'])).toEqual('3');
+        expect(_.get(dR,
+          ['resource', 'relationships', 'blogs', 'reference', '0',
+          'resource', 'relationships', 'author', 'reference',
+          'resource', 'attributes', 'name'])).toEqual('Person 2');
     });
 
     it('should denormalise a resource with very deep relations (circular dependency)', () => {
-        let dR = denormaliseResource(storeData['Article']['1'], storeData, {}, 'ResourceStore');
-            expect(dR.resource.author.resource).toEqual(
-                dR.resource.author.resource.blogs[1].resource.author.resource);
+        let dR = denormaliseResource(storeData['Article']['1'], storeData, {});
+            expect(_.get(dR, [
+              'resource', 'relationships', 'author', 'reference', 'resource'
+            ])).toEqual(
+                _.get(dR, [
+                  'resource', 'relationships', 'author', 'reference',
+                  'resource', 'relationships', 'blogs', 'reference', '1',
+                  'resource', 'relationships', 'author', 'reference', 'resource'
+                ]));
     });
 
-    it('should return a denormalised resource only when using the default dernomalisation type', () => {
-        let dR = denormaliseResource(storeData['Person']['1'], storeData);
-        expect(_.isArray(dR.blogs)).toBeTruthy();
-        expect(dR.blogs[0].type).toEqual('Blog');
-        expect(dR.blogs[0].id).toEqual('1');
-        expect(dR.blogs[1].type).toEqual('Blog');
-        expect(dR.blogs[1].id).toEqual('3');
-        expect(dR.blogs[0].author.name).toEqual('Person 2');
+    it('should return a denormalised resource given a resource as input ', () => {
+        let dR = denormaliseResource(storeData['Person']['1'].resource, storeData);
+        expect(_.isArray(dR.relationships.blogs.reference)).toBeTruthy();
+        expect(dR.relationships.blogs.reference[0].type).toEqual('Blog');
+        expect(dR.relationships.blogs.reference[0].id).toEqual('1');
+        expect(dR.relationships.blogs.reference[1].type).toEqual('Blog');
+        expect(dR.relationships.blogs.reference[1].id).toEqual('3');
+        expect(dR.relationships.blogs.reference[0].relationships.author.reference.attributes.name).toEqual('Person 2');
     });
 
-    it('should return a denormalise resource only when using the default dernomalisation type', () => {
-        let dR = denormaliseResource(storeData['Blog']['1'], storeData, {}, 'Resource');
-        expect(dR.name).toEqual('Blog 1');
+    it('should return a denormalise resource given a resource as input (2)', () => {
+        let dR = denormaliseResource(storeData['Blog']['1'].resource, storeData, {});
+        expect(dR.attributes.name).toEqual('Blog 1');
         expect(dR.id).toEqual('1');
-        expect(dR.author).toBeDefined();
-        expect(dR.author.name).toEqual('Person 2');
+        expect(dR.relationships.author).toBeDefined();
+        expect(dR.relationships.author.reference.attributes.name).toEqual('Person 2');
 
     });
 

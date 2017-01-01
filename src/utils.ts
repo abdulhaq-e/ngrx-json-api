@@ -3,7 +3,6 @@ import * as _ from 'lodash';
 import { Actions } from '@ngrx/effects';
 
 import {
-    DenormalisationType,
     Direction,
     Document,
     FilteringOperator,
@@ -30,110 +29,97 @@ export const denormaliseObject = (
     resource: Resource,
     storeData: NgrxJsonApiStoreData,
     bag: NgrxJsonApiStoreData,
-    denormalisationType: DenormalisationType = 'Resource'
+    isRSdenorm: boolean,
 ): any => {
     // this function MUST MUTATE resource
     let denormalised = resource;
-
-    if (resource.hasOwnProperty('attributes')) {
-        Object.keys(resource.attributes)
-            .forEach(attribute => {
-                denormalised[attribute] = resource.attributes[attribute]
-            });
-    }
 
     if (resource.hasOwnProperty('relationships')) {
 
         Object.keys(resource.relationships)
             .forEach(relation => {
+                resource.relationships[relation]['reference'] = {}
                 let data = resource.relationships[relation].data;
-                let denormalisedRelation;
+                // denormalised relation
+                let relationDenorm;
 
                 if (data === null || _.isEqual(data, [])) {
 
-                    denormalisedRelation = data;
+                    relationDenorm = data;
 
                 } else if (_.isPlainObject(data)) {
                     // hasOne relation
-                    let relatedResource = getSingleResourceStore(data, storeData);
-                    denormalisedRelation = denormaliseResource(
-                        relatedResource, storeData, bag, denormalisationType);
+                    let relatedRS = getSingleResourceStore(data, storeData);
+                    relatedRS = isRSdenorm ? relatedRS : relatedRS.resource;
+                    relationDenorm = denormaliseResource(
+                        relatedRS, storeData, bag);
                 } else if (_.isArray(data)) {
                     // hasMany relation
-                    let relatedResources = getMultipleResourceStore(data, storeData);
-                    denormalisedRelation = relatedResources.map(
-                        r => denormaliseResource(r, storeData, bag, denormalisationType));
+                    let relatedRSs = getMultipleResourceStore(data, storeData);
+                    relationDenorm = relatedRSs
+                        .map(r => isRSdenorm ? r : r.resource)
+                        .map(r => denormaliseResource(r, storeData, bag));
                 }
-
+                let relationDenormPath = 'relationships.' + relation + '.reference';
                 denormalised = _.set(
                     denormalised,
-                    relation,
-                    denormalisedRelation
+                    relationDenormPath,
+                    relationDenorm
                 );
             });
     }
-
-    delete denormalised.attributes;
-    delete denormalised.relationships;
 
     return denormalised;
 }
 
 export const denormaliseResource = (
-    resourceStore: ResourceStore,
+    item: ResourceStore | Resource,
     storeData: NgrxJsonApiStoreData,
-    bag: NgrxJsonApiStoreData = {},
-    denormalisationType: DenormalisationType = 'Resource'): any => {
+    bag: NgrxJsonApiStoreData = {}): any => {
 
-    if (!resourceStore) {
+    if (!item) {
         return null;
     }
 
-    let resource = resourceStore.resource;
+    let newItem = <ResourceStore | Resource>_.cloneDeep(item);
+    let isResourceStore = newItem.hasOwnProperty('resource');
+
+    let resource;
+    if (isResourceStore) {
+        resource = newItem.resource;
+    } else {
+        resource = newItem;
+    }
 
     if (_.isUndefined(bag[resource.type])) {
         bag[resource.type] = {};
     }
     if (_.isUndefined(bag[resource.type][resource.id])) {
 
-        let newResourceStore = <ResourceStore>_.cloneDeep(resourceStore);
-        switch (denormalisationType) {
-            case 'ResourceStore': {
-                bag[resource.type][resource.id] = newResourceStore;
-                newResourceStore.resource = denormaliseObject(
-                    newResourceStore.resource,
-                    storeData,
-                    bag,
-                    denormalisationType);
-                newResourceStore.persistedResource = denormaliseObject(
-                    newResourceStore.persistedResource,
-                    storeData,
-                    bag,
-                    denormalisationType);
-                break;
-            }
-            case 'Resource': {
-                bag[resource.type][resource.id] = newResourceStore.resource;
-                newResourceStore.resource = denormaliseObject(
-                  newResourceStore.resource,
-                  storeData,
-                  bag,
-                  denormalisationType);
-                break;
-            }
-            case 'PersistedResource': {
-                bag[resource.type][resource.id] = newResourceStore.persistedResource;
-                newResourceStore.persistedResource = denormaliseObject(
-                  newResourceStore.persistedResource,
-                  storeData,
-                  bag,
-                  denormalisationType);
-                break;
-            }
+        if (isResourceStore) {
+            bag[resource.type][resource.id] = newItem;
+            newItem.resource = denormaliseObject(
+                newItem.resource,
+                storeData,
+                bag,
+                isResourceStore);
+            newItem.persistedResource = denormaliseObject(
+                newItem.persistedResource,
+                storeData,
+                bag,
+                isResourceStore);
+        } else {
+            bag[resource.type][resource.id] = resource;
+            resource = denormaliseObject(
+                resource,
+                storeData,
+                bag,
+                isResourceStore);
         }
     }
 
     return bag[resource.type][resource.id];
+
 }
 
 export const getSingleResourceStore = (
