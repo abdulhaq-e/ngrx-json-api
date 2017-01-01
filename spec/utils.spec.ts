@@ -11,7 +11,7 @@ let deepFreeze = require('deep-freeze');
 import {
     deleteStoreResources,
     denormaliseObject,
-    denormalise,
+    denormaliseResource,
     filterResources,
     //     getSingleResource,
     //     getMultipleResources,
@@ -135,13 +135,13 @@ describe('denormalise and denormaliseObject', () => {
     let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload)
     deepFreeze(storeData);
     it('should denormalise a resource with no relatios', () => {
-        let dR1 = denormalise(storeData['Person']['2'], storeData, {}, 'ResourceStore');
+        let dR1 = denormaliseResource(storeData['Person']['2'], storeData, {}, 'ResourceStore');
         expect(dR1.resource).toEqual({
             type: 'Person',
             id: '2',
             name: 'Person 2'
         });
-        let dR2 = denormalise(storeData['Blog']['2'], storeData, {}, 'ResourceStore');
+        let dR2 = denormaliseResource(storeData['Blog']['2'], storeData, {}, 'ResourceStore');
         expect(dR2.resource).toEqual({
             type: 'Blog',
             id: '2',
@@ -149,7 +149,7 @@ describe('denormalise and denormaliseObject', () => {
     });
 
     it('should denormalise a resource with relations', () => {
-        let dR = denormalise(storeData['Blog']['1'], storeData, {}, 'ResourceStore');
+        let dR = denormaliseResource(storeData['Blog']['1'], storeData, {}, 'ResourceStore');
         expect(dR.resource.name).toEqual('Blog 1');
         expect(dR.resource.id).toEqual('1');
         expect(dR.resource.author).toBeDefined();
@@ -157,7 +157,7 @@ describe('denormalise and denormaliseObject', () => {
     });
 
     it('should denormalise a resource with deep relations', () => {
-        let dR = denormalise(storeData['Person']['1'], storeData, {}, 'ResourceStore');
+        let dR = denormaliseResource(storeData['Person']['1'], storeData, {}, 'ResourceStore');
         expect(_.isArray(dR.resource.blogs)).toBeTruthy();
         expect(dR.resource.blogs[0].resource.type).toEqual('Blog');
         expect(dR.resource.blogs[0].resource.id).toEqual('1');
@@ -167,13 +167,13 @@ describe('denormalise and denormaliseObject', () => {
     });
 
     it('should denormalise a resource with very deep relations (circular dependency)', () => {
-        let dR = denormalise(storeData['Article']['1'], storeData, {}, 'ResourceStore');
+        let dR = denormaliseResource(storeData['Article']['1'], storeData, {}, 'ResourceStore');
             expect(dR.resource.author.resource).toEqual(
                 dR.resource.author.resource.blogs[1].resource.author.resource);
     });
 
     it('should return a denormalised resource only when using the default dernomalisation type', () => {
-        let dR = denormalise(storeData['Person']['1'], storeData);
+        let dR = denormaliseResource(storeData['Person']['1'], storeData);
         expect(_.isArray(dR.blogs)).toBeTruthy();
         expect(dR.blogs[0].type).toEqual('Blog');
         expect(dR.blogs[0].id).toEqual('1');
@@ -183,7 +183,7 @@ describe('denormalise and denormaliseObject', () => {
     });
 
     it('should return a denormalise resource only when using the default dernomalisation type', () => {
-        let dR = denormalise(storeData['Blog']['1'], storeData, {}, 'Resource');
+        let dR = denormaliseResource(storeData['Blog']['1'], storeData, {}, 'Resource');
         expect(dR.name).toEqual('Blog 1');
         expect(dR.id).toEqual('1');
         expect(dR.author).toBeDefined();

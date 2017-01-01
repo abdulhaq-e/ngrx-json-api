@@ -19,6 +19,7 @@ import {
 } from './actions';
 import {
     NgrxJsonApiStore,
+    NgrxJsonApiStoreData,
     Payload,
     QueryType,
     Resource,
@@ -29,7 +30,9 @@ import {
     ResourceRelationship,
     ResourceStore,
 } from './interfaces';
-
+import {
+    denormaliseResource
+} from './utils';
 
 @Injectable()
 export class NgrxJsonApiService {
@@ -150,8 +153,8 @@ export class NgrxJsonApiService {
      */
     public selectResource(identifier: ResourceIdentifier): Observable<Resource> {
         return this.store
-        .select(this.selectors.storeLocation)
-        .let(this.selectors.getResource$(identifier));
+            .select(this.selectors.storeLocation)
+            .let(this.selectors.getResource$(identifier));
     }
 
     /**
@@ -160,8 +163,23 @@ export class NgrxJsonApiService {
      */
     public selectResourceStore(identifier: ResourceIdentifier): Observable<ResourceStore> {
         return this.store
-        .select(this.selectors.storeLocation)
-        .let(this.selectors.getResourceStore$(identifier));
+            .select(this.selectors.storeLocation)
+            .let(this.selectors.getResourceStore$(identifier));
+    }
+
+    public denormalise() {
+        return (resourceStore$: Observable<ResourceStore | Array<ResourceStore>>) {
+            return resourceStore$
+                .combineLatest(this.store
+                    .select(this.selectors.storeLocation)
+                    .let(this.selectors.getStoreData$()),
+                (
+                    resourceStore: ResourceStore,
+                    storeData: NgrxJsonApiStoreData
+                ) => {
+                    return denormaliseResource(resourceStore, storeData)
+                });
+        }
     }
 
     /**

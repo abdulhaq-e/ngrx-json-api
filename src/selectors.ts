@@ -33,7 +33,7 @@ import {
     ResourceStore,
 } from './interfaces';
 import {
-    denormaliseResource,
+    ddenormaliseResourceStore
     transformStoreData,
     transformStoreResources,
     filterResources
@@ -47,20 +47,20 @@ export class NgrxJsonApiSelectors<T> {
     constructor(public config: NgrxJsonApiConfig) {
     }
 
-    private getStoreData$() {
+    public getStoreData$() {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.select('data');
         }
     }
 
-    private getResourceStoreOfType$(type: string) {
+    public getResourceStoreOfType$(type: string) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.let(this.getStoreData$())
                 .map(resources => resources[type]);
         }
     }
 
-    private queryStore$(query: ResourceQuery) {
+    public queryStore$(query: ResourceQuery) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             let selected$;
             switch (query.queryType) {
@@ -114,13 +114,13 @@ export class NgrxJsonApiSelectors<T> {
         }
     }
 
-    private getStoreQueries$() {
+    public getStoreQueries$() {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$.select('queries');
         }
     }
 
-    private getResourceQuery$(queryId: string) {
+    public getResourceQuery$(queryId: string) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$
                 .let(this.getStoreQueries$())

@@ -56,13 +56,13 @@ export const denormaliseObject = (
                 } else if (_.isPlainObject(data)) {
                     // hasOne relation
                     let relatedResource = getSingleResourceStore(data, storeData);
-                    denormalisedRelation = denormalise(
+                    denormalisedRelation = denormaliseResource(
                         relatedResource, storeData, bag, denormalisationType);
                 } else if (_.isArray(data)) {
                     // hasMany relation
                     let relatedResources = getMultipleResourceStore(data, storeData);
                     denormalisedRelation = relatedResources.map(
-                        r => denormalise(r, storeData, bag, denormalisationType));
+                        r => denormaliseResource(r, storeData, bag, denormalisationType));
                 }
 
                 denormalised = _.set(
@@ -79,7 +79,7 @@ export const denormaliseObject = (
     return denormalised;
 }
 
-export const denormalise = (
+export const denormaliseResource = (
     resourceStore: ResourceStore,
     storeData: NgrxJsonApiStoreData,
     bag: NgrxJsonApiStoreData = {},
