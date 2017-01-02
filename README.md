@@ -1,189 +1,96 @@
 # ngrx-json-api
 
-[![CircleCI](https://circleci.com/gh/abdulhaq-e/ngrx-json-api.svg?style=shield&circle-token=:af0b4d120bc34d24279b9d3266d0db5fe0293d3b)](https://circleci.com/gh/abdulhaq-e/ngrx-json-api) [![npm version](https://badge.fury.io/js/ngrx-json-api.svg)](https://badge.fury.io/js/ngrx-json-api)
+[![CircleCI](https://circleci.com/gh/abdulhaq-e/ngrx-json-api.svg?style=shield&circle-token=:af0b4d120bc34d24279b9d3266d0db5fe0293d3b)](https://circleci.com/gh/abdulhaq-e/ngrx-json-api)
+[![npm version](https://badge.fury.io/js/ngrx-json-api.svg)](https://badge.fury.io/js/ngrx-json-api)
 
-## A JSON API client for ngrx
+** A JSON API client library for ngrx. **
 
-### Getting Started
+## Table of Contents
 
-1- Import what is is required, the ngModule and the reducer:
+- [Getting Started](#getting-started)
+- [Basic Usage](#basic-usage)
+  - [Reading data](#reading-data)
+  - [Adding data](#adding-data)
+  - [Updating data](#updating-data)
+  - [Deleting data](#deleting-data)
 
-```typescript
-import { NgrxJsonApiModule, NgrxJsonApiStoreReducer } from 'ngrx-json-api'.
+## Getting Started
+
+**1- Install the library:**
 ```
-
-2- Create an array of resource definitions (see `src/interfaces.ts`):
-
-```typescript
+npm i ngrx-json-api --save
+```
+**2- Define the resources:**
+```ts
+import { ResourceDefinition } from 'ngrx-json-api';
 let resourceDefinitions: Array<ResourceDefinition> = [
-    {
-      type: 'Article',
-      collectionPath: 'articles',
-    },
-    {
-      type: 'Person',
-      collectionPath: 'people',
-    }
-    {
-      type: 'Comment',
-      collectionPath: 'comments',
-    },
-    {
-      type: 'Blog',
-      collectionPath: 'blogs',
-    }
+    { type: 'Article', collectionPath: 'articles' }
+    { type: 'Person', collectionPath: 'people' }
+    { type: 'Comment', collectionPath: 'comments' }
+    { type: 'Blog', collectionPath: 'blogs' }
 ];
 ```
+**3- Import `NgrxJsonApiModule` providing the above definitions, the API url and the JSON API state location as configuration.**
 
-3- Use `NgrxJsonApiStoreReducer` as a reducer for the JSON API state.
-
-```typescript
-StoreModule.provide({ counter: counterReducer, api: NgrxJsonApiStoreReducer})
-```
-
-It's important to know where in the state lives `NgrxJsonApiStore` because it will be used in the next step (in the above example it's 'api')
-
-3- Place `NgrxJsonApiModule` in the `import` property of the root module configurations (usually AppModule) and pass the required config object:
-
-```typescript
-@NgModule({
-  imports: [
-    CommonModule,
-    BrowserModule,
-    // Other imports
-    StoreModule.provide({ counter: counterReducer, api: NgrxStoreReducer}),
-    // This is what we want.
-    NgrxJsonApiModule.configure({
-      apiUrl: 'http://localhost.com',
-      resourceDefinitions: resourceDefinitions,
-      storeLocation: 'api'
-    })
-  ],
-  declarations: [ AppComponent ],
-  providers: [ ],
-  bootstrap: [ AppComponent ]
-})
-export class AppModule { }
-```
-
-As can be seen, the config object passed to `configure` must have three properties:
-- `apiUrl` is a string for the root location of the api, e.g.: `http://127.0.0.1`
-- `resourceDefinitions` is an `Array` of resource definition as defined above:
-- `storeLocation` is the location of `NgrxJsonApiStore` in the main state. This is required for selectors to function properly.
-
-4- Import `NgrxJsonApiService` inside the component and use one of its methods to interact with this library.
-
-For example:
-
+Also use `NgrxJsonApiStoreReducer` as a reducer for the JSON API state.
 ```ts
+@NgModule({
+    imports: [
+      BrowserModule,  
+      /* other imports */
+      NgrxJsonApiModule.configure({
+        apiUrl: 'http://localhost.com',
+        resourceDefinitions: resourceDefinitions,
+        storeLocation: 'api'
+      }),
+      StoreModule.provide({ counter: counterReducer,  api: NgrxJsonApiStoreReducer})
+    ],
+    declarations: [AppComponent]
+    bootstrap: [AppComponent]
+})
+export class AppModule {}
+```
+**4- Inject `NgrxJsonApiService` into the component:**
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'my-component',
+})
 export class MyComponent {
-  constructor(private ngrxJsonApiService: NgrxJsonApiService<AppState>) {}
-  // to create a resource
-  this.ngrxJsonApiService.create({
-    jsonApiData: {
-      data: {
-        id: '1',
-        type: 'Person',
-        attributes: {
-          name: 'John Smith',
-          age: 50
-        }          
-      }
-    },
-    query: {
-      type: 'Person',
-      queryType: 'create'
-    }
-    });
-    // to read a resource from the api
-    this.ngrxJsonApiService.read({
-      query: {
-        type: 'Person',
-        id: '1',
-        queryType: 'getOne'
-      }
-    });
-    // if we wanted to read all resources of type Person
-    this.ngrxJsonApiService.read({
-      query: {
-        type: 'Person',
-        queryType: 'getMany'
-      }
-    });
-    // to delete a single resource
-    this.ngrxJsonApiService.delete({
-      query: {
-        type: 'Person',
-        id: '1',
-        queryType: 'deleteOne'
-      }
-    });
-    // similarly, to delete from the store (no request to api)
-    this.ngrxJsonApiService.deleteFromState({
-      query: {
-        type: 'Person',
-        id: '1',
-      }
-    });
-    // or all resources can be deleted
-    this.ngrxJsonApiService.deleteFromState({
-      query: {
-        type: 'Person',
-      }
-    });
-    // to update a single resource
-    this.ngrxJsonApiService.update({
-      jsonApiData: {
-        data: {
-          id: '1',
-          type: 'Person',
-          attributes: {
-            name: 'John Smith',
-            age: 50
-          }          
-        }
-      },
-      query: {
-        type: 'Person',
-        queryType: 'update'
-      }
-    });
+  constructor(private ngrxJsonApiService: NgrxJsonApiService) {}
+}
+```
+**5- Use the service to interact with the JSON API server and/or state:**
+
+For example, to read data from the server and display this data in the view:
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'my-component',
+  template: {{ resourcesQuery.results | async }}
+})
+export class MyComponent {
+  constructor(private ngrxJsonApiService: NgrxJsonApiService) {  }
+
+  public resourcesQuery = this.ngrxJsonApiService
+    .findMany({
+      queryType: 'getMany',
+      type: 'Article'
+      });
 }
 ```
 
-Now all we've done is interact with API using the instance of `NgrxJsonApiService` which will be responsible for updating the store after a response arrives. Using the same service we fetch data from the store to put in the view. This is done using selectors. Building on the above example and assuming the instance is called `ngrxJsonApiService`:
+## Basic Usage
 
-```ts
-// to select a single resource:
-this.ngrxJsonApiService.select$({
-  query: {
-    queryType: 'getOne',
-    type: 'Person'
-    id: '1'
-  }
-});
+### Fetching data
 
-// to select all resources of type Person:
-this.ngrxJsonApiService.select$({
-  query: {
-    queryType: 'getMany',
-    type: 'Person'
-  }
-});
+### Adding data
 
-// to select all resources:
-this.ngrxJsonApiService.select$({
-  query: {
-    queryType: 'getAll'
-  }
-});
-```
+### Updating data
 
-Most of the time, when selecting all resources or resources of one type (`getMany`), filtering is used. Filtering is explained in the docs.
-
-### Documentation
-
-* [Filters](./docs/filters.md)
+### Deleting data
 
 # THANKS :heart:
 
