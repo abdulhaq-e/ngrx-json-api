@@ -81,14 +81,14 @@ export const denormaliseResource = (
         return null;
     }
 
-    let newItem = <ResourceStore | Resource>_.cloneDeep(item);
+    let newItem = _.cloneDeep(item);
     let isResourceStore = newItem.hasOwnProperty('resource');
 
-    let resource;
+    let resource : Resource;
     if (isResourceStore) {
-        resource = newItem.resource;
+        resource = <ResourceStore>newItem.resource;
     } else {
-        resource = newItem;
+        resource = <Resource>newItem;
     }
 
     if (_.isUndefined(bag[resource.type])) {

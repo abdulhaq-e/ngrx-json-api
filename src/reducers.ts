@@ -136,6 +136,15 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
                 );
                 return newState;
             }
+            case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
+                let query = action.payload as ResourceQuery;
+                if (query.queryId) {
+                    newState = Object.assign({}, state, {
+                        queries: updateQueryParams(state.queries, query),
+                    });
+                }
+                return newState;
+            }
             case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
                 newState = Object.assign({}, state, {
                     queries: updateQueryResults(

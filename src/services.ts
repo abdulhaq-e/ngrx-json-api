@@ -34,7 +34,6 @@ import {
     denormaliseResource
 } from './utils';
 
-@Injectable()
 export class NgrxJsonApiService {
 
     private test: boolean = true;
@@ -48,7 +47,6 @@ export class NgrxJsonApiService {
         private store: Store<any>,
         private selectors: NgrxJsonApiSelectors<any>,
     ) {
-
         this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
     }
 
@@ -168,7 +166,7 @@ export class NgrxJsonApiService {
     }
 
     public denormalise() {
-        return (resourceStore$: Observable<ResourceStore | Array<ResourceStore>>) {
+        return (resourceStore$: Observable<ResourceStore | Array<ResourceStore>>) => {
             return resourceStore$
                 .combineLatest(this.store
                     .select(this.selectors.storeLocation)
