@@ -194,8 +194,27 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public patchResource(resource: Resource) {
+    public patchResource(resource: Resource, toRemote : boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'update',
+                type: resource.type,
+                id: resource.id
+            }
+        };
+        this.store.dispatch(new ApiUpdateInitAction(payload));
+      } else {
         this.store.dispatch(new PatchStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -205,8 +224,26 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public postResource(resource: Resource) {
+    public postResource(resource: Resource, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'create',
+                type: resource.type
+            }
+        };
+        this.store.dispatch(new ApiCreateInitAction(payload));
+      } else {
         this.store.dispatch(new PostStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -214,8 +251,19 @@ export class NgrxJsonApiService {
      *
      * @param resourceId
      */
-    public deleteResource(resourceId: ResourceIdentifier) {
+    public deleteResource(resourceId: ResourceIdentifier, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            query: {
+                queryType: 'deleteOne',
+                type: resourceId.type,
+                id: resourceId.id
+            }
+        };
+        this.store.dispatch(new ApiDeleteInitAction(payload));
+      } else {
         this.store.dispatch(new DeleteStoreResourceAction(resourceId));
+      }
     }
 
     /**
