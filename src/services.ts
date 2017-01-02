@@ -218,39 +218,3 @@ export class NgrxJsonApiService {
         this.store.dispatch(new ApiCommitInitAction(storeLocation));
     }
 }
-
-
-
-@Pipe({ name: 'jaGetResource' })
-export class GetResourcePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Resource {
-        return this.service.getResourceSnapshot(id);
-    }
-}
-
-@Pipe({ name: 'jaSelectResource' })
-export class SelectResourcePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Observable<Resource> {
-        return this.service.selectResource(id);
-    }
-}
-
-
-@Pipe({ name: 'jaSelectResourceStore' })
-export class SelectResourceStorePipe implements PipeTransform {
-
-    constructor(private service: NgrxJsonApiService) {
-    }
-
-    transform(id: ResourceIdentifier): Observable<ResourceStore> {
-        return this.service.selectResourceStore(id);
-    }
-}
