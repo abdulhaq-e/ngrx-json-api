@@ -134,7 +134,7 @@ describe('NgrxJsonApiService', () => {
                 .results
                 .let(service.denormalise());
             resourceStore.subscribe(it => {
-              expect(_.get(it, 'relationships.author.reference')).toBeDefined();
+              expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
             });
         });
     });

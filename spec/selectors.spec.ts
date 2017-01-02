@@ -352,15 +352,15 @@ describe('NgrxJsonApiSelectors', () => {
     });
 
     describe('getResults$', () => {
-      it('should get the actual resources that are the results of a query', fakeAsync(() => {
+      it('should get the resourceStore(s) that are the results of a query', fakeAsync(() => {
         let res;
         let sub = obs
         .select('api')
         .let(selectors.getResults$('1'))
         .subscribe(d => res = d);
         tick();
-        expect(res[0].id).toEqual('1');
-        expect(res[1].id).toEqual('2');
+        expect(res[0].resource.id).toEqual('1');
+        expect(res[1].resource.id).toEqual('2');
       }));
     });
 

@@ -1,4 +1,3 @@
-import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -50,7 +49,11 @@ export class NgrxJsonApiService {
         this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
     }
 
-    public findOne(query: ResourceQuery, fromServer: boolean = true): ResourceQueryHandle<Resource> {
+    public findOne(
+        query: ResourceQuery,
+        fromServer: boolean = true,
+        resource: boolean = false
+    ): ResourceQueryHandle<Resource> {
         query.queryType = "getOne";
         this.findInternal(query, fromServer);
 
@@ -59,7 +62,7 @@ export class NgrxJsonApiService {
                 if (it.length == 0) {
                     return null;
                 } else if (it.length == 1) {
-                    return it[0];
+                    return resource ? it[0].resource : it[0];
                 } else {
                     throw new Error("Unique result expected");
                 }
@@ -69,11 +72,16 @@ export class NgrxJsonApiService {
         }
     }
 
-    public findMany(query: ResourceQuery, fromServer: boolean = true): ResourceQueryHandle<Array<Resource>> {
+    public findMany(
+      query: ResourceQuery,
+      fromServer: boolean = true,
+      resource: boolean = false
+    ): ResourceQueryHandle<Array<Resource>> {
         query.queryType = "getMany";
         this.findInternal(query, fromServer);
         return {
-            results: this.selectResults(query.queryId),
+            results: this.selectResults(query.queryId)
+                .map(it => resource ? it.resource : it),
             unsubscribe: () => this.removeQuery(query.queryId)
         }
     }

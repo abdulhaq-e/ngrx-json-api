@@ -123,7 +123,7 @@ describe('NgrxJsonApiService', () => {
                 queryType: 'getOne',
                 queryId: '22'
             }
-            let resourceStore = pipe.service.findOne(query, false)
+            let resourceStore = pipe.service.findOne(query, false, true)
                 .results
             let denormalised = pipe.transform(resourceStore);
             denormalised.subscribe(it => {

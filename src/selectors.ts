@@ -147,7 +147,7 @@ export class NgrxJsonApiSelectors<T> {
         return (state$: Observable<NgrxJsonApiStore>) => {
             return state$
                 .let(this.getResultIdentifiers$(queryId))
-                .mergeMap(ids => state$.let(this.getManyResource$(ids)))
+                .mergeMap(ids => state$.let(this.getManyResourceStore$(ids)))
         }
     }
 
@@ -176,8 +176,8 @@ export class NgrxJsonApiSelectors<T> {
 
     public getManyResource$(identifiers: Array<ResourceIdentifier>) {
         return (state$: Observable<NgrxJsonApiStore>) => {
-            let obs = identifiers.map(id => state$.let(this.getResource$(id)));
-            return <Array<Resource>>Observable.zip(...obs)
+            return state$.let(this.getManyResourceStore$(identifiers))
+                .map(it => it.map(r => r.resource));
         }
     }
 
