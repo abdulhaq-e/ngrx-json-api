@@ -5,7 +5,11 @@ import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
 import { NgrxJsonApi } from './api';
-import { Payload } from './interfaces';
+import {
+  Payload,
+  ResourceQuery,
+ } from './interfaces';
+import { NgrxJsonApiEffects } from './effects';
 
 
 export class JsonApiMock {
@@ -41,14 +45,7 @@ export class JsonApiMock {
                 })
             ));
         } else if (payload.query.type === 'FAIL') {
-            let res = {
-                data: {
-                    type: 'FAIL'
-                }
-            }
-            return Observable.throw(new Response(
-                new ResponseOptions({ status: 404 })
-            ));
+            return Observable.throw('FAIL QUERY');
         }
     }
 
@@ -57,8 +54,7 @@ export class JsonApiMock {
             return Observable.of(new Response(
                 new ResponseOptions({})));
         } else if (payload.query.type === 'FAIL') {
-            return Observable.throw(new Response(
-                new ResponseOptions({ status: 404 })));
+            return Observable.throw('FAIL QUERY');
         }
     }
 }
@@ -66,4 +62,26 @@ export class JsonApiMock {
 export const MOCK_JSON_API_PROVIDERS = [
     { provide: JsonApiMock, useClass: JsonApiMock },
     { provide: NgrxJsonApi, useExisting: JsonApiMock }
+];
+
+
+export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
+  // constructor() {
+  //   // super()
+  // }
+
+  private toErrorPayload(query: ResourceQuery, response: Response): Payload {
+    if (response == 'FAIL QUERY') {
+      return { query: query }
+    }
+    return ({
+      query: query,
+      jsonApiData: { data : { type: response } }
+    })
+  }
+}
+
+export const MOCK_NGRX_EFFECTS_PROVIDERS = [
+    { provide: NgrxJsonApiMockEffects, useClass: NgrxJsonApiMockEffects },
+    { provide: NgrxJsonApiEffects, useExisting: NgrxJsonApiMockEffects }
 ];

@@ -119,7 +119,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             // TODO add support for bulk updates as well (jsonpatch, etc.)
             // to get atomicity for multiple updates
 
-            let pending: Array<ResourceStore> = this.getPendingChanges(store);
+            let pending: Array<ResourceStore> = this.getPendingChanges(this.store.take(1));
             if (pending.length > 0) {
                 pending = this.sortPendingChanges(pending);
 

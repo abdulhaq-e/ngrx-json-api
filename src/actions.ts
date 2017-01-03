@@ -38,7 +38,6 @@ export const NgrxJsonApiActionTypes = {
 
 export class ApiApplyInitAction implements Action {
     type = NgrxJsonApiActionTypes.API_APPLY_INIT;
-    constructor() {}
 }
 
 export class ApiApplySuccessAction implements Action {

@@ -48,7 +48,6 @@ describe('NgrxJsonApiService', () => {
             imports: [
                 HttpModule,
                 EffectsModule.run(NgrxJsonApiEffects),
-                // EffectsModule.run(NgrxJsonApiEffects),
                 StoreModule.provideStore({ api: NgrxJsonApiStoreReducer }, store),
             ],
             providers: [
