@@ -19,9 +19,9 @@ import {
     ApiDeleteInitAction,
     ApiDeleteSuccessAction,
     ApiDeleteFailAction,
-    ApiCommitInitAction,
-    ApiCommitSuccessAction,
-    ApiCommitFailAction,
+    ApiApplyInitAction,
+    ApiApplySuccessAction,
+    ApiApplyFailAction,
     ApiRollbackAction,
     QueryStoreInitAction,
     QueryStoreSuccessAction,
@@ -34,6 +34,10 @@ import {
 describe('Json Api Actions', () => {
 
     let actions;
+
+    it('should have a fixed number of actions', () => {
+      expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(22);
+    });
 
     it('should have an api create init action', () => {
         expect(NgrxJsonApiActionTypes.API_CREATE_INIT).toBeDefined();
@@ -96,18 +100,18 @@ describe('Json Api Actions', () => {
     });
 
     it('should have an api commit init action', () => {
-        expect(NgrxJsonApiActionTypes.API_COMMIT_INIT).toBeDefined();
-        expect(NgrxJsonApiActionTypes.API_COMMIT_INIT).toBe('API_COMMIT_INIT');
+        expect(NgrxJsonApiActionTypes.API_APPLY_INIT).toBeDefined();
+        expect(NgrxJsonApiActionTypes.API_APPLY_INIT).toBe('API_APPLY_INIT');
     });
 
     it('should have an api commit success action', () => {
-        expect(NgrxJsonApiActionTypes.API_COMMIT_SUCCESS).toBeDefined();
-        expect(NgrxJsonApiActionTypes.API_COMMIT_SUCCESS).toBe('API_COMMIT_SUCCESS');
+        expect(NgrxJsonApiActionTypes.API_APPLY_SUCCESS).toBeDefined();
+        expect(NgrxJsonApiActionTypes.API_APPLY_SUCCESS).toBe('API_APPLY_SUCCESS');
     });
 
     it('should have an api commit fail action', () => {
-        expect(NgrxJsonApiActionTypes.API_COMMIT_FAIL).toBeDefined();
-        expect(NgrxJsonApiActionTypes.API_COMMIT_FAIL).toBe('API_COMMIT_FAIL');
+        expect(NgrxJsonApiActionTypes.API_APPLY_FAIL).toBeDefined();
+        expect(NgrxJsonApiActionTypes.API_APPLY_FAIL).toBe('API_APPLY_FAIL');
     });
 
     it('should have a query store init action', () => {
@@ -212,21 +216,21 @@ describe('Json Api Actions', () => {
         expect(action.payload).toEqual({});
     });
 
-    it('should generate an api commit init action using ApiCommitInit', () => {
-      let action = new ApiCommitInitAction({});
-        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_COMMIT_INIT);
+    it('should generate an api commit init action using ApiApplyInit', () => {
+      let action = new ApiApplyInitAction({});
+        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_INIT);
+        expect(action.payload).not.toBeDefined();
+    });
+
+    it('should generate an api commit success action using ApiApplySuccess', () => {
+      let action = new ApiApplySuccessAction({});
+        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_SUCCESS);
         expect(action.payload).toEqual({});
     });
 
-    it('should generate an api commit success action using ApiCommitSuccess', () => {
-      let action = new ApiCommitSuccessAction({});
-        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_COMMIT_SUCCESS);
-        expect(action.payload).toEqual({});
-    });
-
-    it('should generate an api commit fail action using ApiCommitFail', () => {
-      let action = new ApiCommitFailAction({});
-        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_COMMIT_FAIL);
+    it('should generate an api commit fail action using ApiApplyFail', () => {
+      let action = new ApiApplyFailAction({});
+        expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_FAIL);
         expect(action.payload).toEqual({});
     });
 

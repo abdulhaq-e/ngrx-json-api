@@ -39,7 +39,7 @@ export const denormaliseObject = (
         Object.keys(resource.relationships)
             .forEach(relation => {
                 resource.relationships[relation]['reference'] = {}
-                let data = resource.relationships[relation].data;
+                let data: ResourceIdentifier | Array<ResourceIdentifier> = resource.relationships[relation].data;
                 // denormalised relation
                 let relationDenorm;
 
@@ -49,19 +49,20 @@ export const denormaliseObject = (
 
                 } else if (_.isPlainObject(data)) {
                     // hasOne relation
-                    let relatedRS = getSingleResourceStore(data, storeData);
+                    let relatedRS: Resource | ResourceStore = getSingleResourceStore(
+                      <ResourceIdentifier>data, storeData);
                     relatedRS = isRSdenorm ? relatedRS : relatedRS.resource;
                     relationDenorm = denormaliseResource(
                         relatedRS, storeData, bag);
                 } else if (_.isArray(data)) {
                     // hasMany relation
-                    let relatedRSs = getMultipleResourceStore(data, storeData);
+                    let relatedRSs: Array<ResourceStore> = getMultipleResourceStore(data, storeData);
                     relationDenorm = relatedRSs
                         .map(r => isRSdenorm ? r : r.resource)
                         .map(r => denormaliseResource(r, storeData, bag));
                 }
                 let relationDenormPath = 'relationships.' + relation + '.reference';
-                denormalised = _.set(
+                denormalised = <Resource>_.set(
                     denormalised,
                     relationDenormPath,
                     relationDenorm
@@ -75,20 +76,19 @@ export const denormaliseObject = (
 export const denormaliseResource = (
     item: ResourceStore | Resource,
     storeData: NgrxJsonApiStoreData,
-    bag: NgrxJsonApiStoreData = {}): any => {
+    bag: any = {}): any => {
 
     if (!item) {
         return null;
     }
-
-    let newItem = _.cloneDeep(item);
-    let isResourceStore = newItem.hasOwnProperty('resource');
-
+    let isResourceStore = item.hasOwnProperty('resource');
+    let resourceStore;
     let resource : Resource;
     if (isResourceStore) {
-        resource = <ResourceStore>newItem.resource;
+      resourceStore = _.cloneDeep(<ResourceStore>item);
+      resource = resourceStore.resource;
     } else {
-        resource = <Resource>newItem;
+      resource = _.cloneDeep(<Resource>item);
     }
 
     if (_.isUndefined(bag[resource.type])) {
@@ -97,14 +97,14 @@ export const denormaliseResource = (
     if (_.isUndefined(bag[resource.type][resource.id])) {
 
         if (isResourceStore) {
-            bag[resource.type][resource.id] = newItem;
-            newItem.resource = denormaliseObject(
-                newItem.resource,
+            bag[resource.type][resource.id] = resourceStore;
+            resourceStore.resource = denormaliseObject(
+                resourceStore.resource,
                 storeData,
                 bag,
                 isResourceStore);
-            newItem.persistedResource = denormaliseObject(
-                newItem.persistedResource,
+            resourceStore.persistedResource = denormaliseObject(
+                resourceStore.persistedResource,
                 storeData,
                 bag,
                 isResourceStore);
@@ -130,7 +130,7 @@ export const getSingleResourceStore = (
 
 export const getMultipleResourceStore = (
     resourceIds: Array<ResourceIdentifier>,
-    resources: NgrxJsonApiStoreData): Array<Resource> => {
+    resources: NgrxJsonApiStoreData): Array<ResourceStore> => {
     return resourceIds.map(id => getSingleResourceStore(id, resources));
 }
 
@@ -521,7 +521,7 @@ export const filterResources = (
                     return false;
                 }
 
-                let operator = _.find(filteringOperators, { name: element.operator });
+                let operator = <FilteringOperator>_.find(filteringOperators, { name: element.operator });
 
                 if (operator) {
                     return operator.comparison(element.value, resourceFieldValue);
@@ -700,7 +700,7 @@ export const generateFilteringQueryParams = (filtering: Array<FilteringParam>): 
     if (_.isEmpty(filtering)) {
         return '';
     }
-    let filteringParams = filtering.map(f => 'filter[' + f.path + ']' + (f.operator ? '[' + f.type + ']' : '') + '=' + encodeURIComponent(f.value));
+    let filteringParams = filtering.map(f => 'filter[' + f.path + ']' + (f.operator ? '[' + f.operator + ']' : '') + '=' + encodeURIComponent(f.value));
     return filteringParams.join('&');
 }
 

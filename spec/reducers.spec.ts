@@ -14,9 +14,9 @@ import {
     initialNgrxJsonApiState
 } from '../src/reducers';
 import {
-    ApiCommitInitAction,
-    ApiCommitSuccessAction,
-    ApiCommitFailAction,
+    ApiApplyInitAction,
+    ApiApplySuccessAction,
+    ApiApplyFailAction,
     ApiCreateInitAction,
     ApiCreateSuccessAction,
     ApiCreateFailAction,
@@ -404,14 +404,14 @@ describe('NgrxJsonApiReducer', () => {
         });
     });
 
-    describe('API_COMMIT_INIT action', () => {
-        it('should add 1 to isCommitting', () => {
-            let newState = NgrxJsonApiStoreReducer(state, new ApiCommitInitAction());
-            expect(newState.isCommitting - state.isCommitting).toBe(1);
+    describe('API_APPLY_INIT action', () => {
+        it('should add 1 to isApplying', () => {
+            let newState = NgrxJsonApiStoreReducer(state, new ApiApplyInitAction());
+            expect(newState.isApplying - state.isApplying).toBe(1);
         });
     });
 
-    describe('API_COMMIT/SUCCESS_FAIL actions', () => {
+    describe('API_APPLY/SUCCESS_FAIL actions', () => {
 
     });
 

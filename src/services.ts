@@ -81,7 +81,7 @@ export class NgrxJsonApiService {
         this.findInternal(query, fromServer);
         return {
             results: this.selectResults(query.queryId)
-                .map(it => resource ? it.resource : it),
+                .map(it => resource ? it.map(r => r.resource) : it),
             unsubscribe: () => this.removeQuery(query.queryId)
         }
     }
@@ -135,7 +135,7 @@ export class NgrxJsonApiService {
      * @param queryId
      * @returns observable holding the results as array of resources.
      */
-    public selectResults(queryId: string): Observable<Array<Resource>> {
+    public selectResults(queryId: string): Observable<Array<ResourceStore>> {
         return this.store
             .select(this.selectors.storeLocation)
             .let(this.selectors.getResults$(queryId));
@@ -174,7 +174,7 @@ export class NgrxJsonApiService {
     }
 
     public denormalise() {
-        return (resourceStore$: Observable<ResourceStore | Array<ResourceStore>>) => {
+        return (resourceStore$: Observable<ResourceStore | ResourceStore>) => {
             return resourceStore$
                 .combineLatest(this.store
                     .select(this.selectors.storeLocation)
@@ -194,8 +194,27 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public patchResource(resource: Resource) {
+    public patchResource(resource: Resource, toRemote : boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'update',
+                type: resource.type,
+                id: resource.id
+            }
+        };
+        this.store.dispatch(new ApiUpdateInitAction(payload));
+      } else {
         this.store.dispatch(new PatchStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -205,8 +224,26 @@ export class NgrxJsonApiService {
      *
      * @param resource
      */
-    public postResource(resource: Resource) {
+    public postResource(resource: Resource, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            jsonApiData: {
+                data: {
+                    id: resource.id,
+                    type: resource.type,
+                    attributes: resource.attributes,
+                    relationships: resource.relationships
+                },
+            },
+            query: {
+                queryType: 'create',
+                type: resource.type
+            }
+        };
+        this.store.dispatch(new ApiCreateInitAction(payload));
+      } else {
         this.store.dispatch(new PostStoreResourceAction(resource));
+      }
     }
 
     /**
@@ -214,8 +251,19 @@ export class NgrxJsonApiService {
      *
      * @param resourceId
      */
-    public deleteResource(resourceId: ResourceIdentifier) {
+    public deleteResource(resourceId: ResourceIdentifier, toRemote: boolean = false) {
+      if (toRemote) {
+        let payload: Payload = {
+            query: {
+                queryType: 'deleteOne',
+                type: resourceId.type,
+                id: resourceId.id
+            }
+        };
+        this.store.dispatch(new ApiDeleteInitAction(payload));
+      } else {
         this.store.dispatch(new DeleteStoreResourceAction(resourceId));
+      }
     }
 
     /**

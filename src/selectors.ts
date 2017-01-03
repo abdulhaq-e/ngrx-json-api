@@ -162,7 +162,7 @@ export class NgrxJsonApiSelectors<T> {
     public getManyResourceStore$(identifiers: Array<ResourceIdentifier>) {
         return (state$: Observable<NgrxJsonApiStore>) => {
             let obs = identifiers.map(id => state$.let(this.getResourceStore$(id)));
-            return <Array<ResourceStore>>Observable.zip(...obs);
+            return Observable.zip(...obs);
         }
     }
 
