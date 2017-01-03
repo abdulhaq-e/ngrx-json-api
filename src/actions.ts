@@ -24,9 +24,9 @@ export const NgrxJsonApiActionTypes = {
     API_DELETE_INIT: type('API_DELETE_INIT'),
     API_DELETE_SUCCESS: type('API_DELETE_SUCCESS'),
     API_DELETE_FAIL: type('API_DELETE_FAIL'),
-    API_COMMIT_INIT: type('API_COMMIT_INIT'),
-    API_COMMIT_SUCCESS: type('API_COMMIT_SUCCESS'),
-    API_COMMIT_FAIL: type('API_COMMIT_FAIL'),
+    API_APPLY_INIT: type('API_APPLY_INIT'),
+    API_APPLY_SUCCESS: type('API_APPLY_SUCCESS'),
+    API_APPLY_FAIL: type('API_APPLY_FAIL'),
     API_ROLLBACK: type('API_ROLLBACK'),
     QUERY_STORE_INIT: type('QUERY_STORE_INIT'),
     QUERY_STORE_SUCCESS: type('QUERY_STORE_SUCCESS'),
@@ -36,18 +36,18 @@ export const NgrxJsonApiActionTypes = {
     REMOVE_QUERY: type('REMOVE_QUERY'),
 }
 
-export class ApiCommitInitAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_INIT;
-    constructor(public payload : String) { }
+export class ApiApplyInitAction implements Action {
+    type = NgrxJsonApiActionTypes.API_APPLY_INIT;
+    constructor() {}
 }
 
-export class ApiCommitSuccessAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_SUCCESS;
+export class ApiApplySuccessAction implements Action {
+    type = NgrxJsonApiActionTypes.API_APPLY_SUCCESS;
     constructor(public payload : Array<Action>) {}
 }
 
-export class ApiCommitFailAction implements Action {
-    type = NgrxJsonApiActionTypes.API_COMMIT_FAIL;
+export class ApiApplyFailAction implements Action {
+    type = NgrxJsonApiActionTypes.API_APPLY_FAIL;
     constructor(public payload : Array<Action>) { }
 }
 
@@ -147,9 +147,9 @@ export class QueryStoreSuccessAction implements Action {
 }
 
 export type NgrxJsonApiActions
-    = ApiCommitInitAction
-    | ApiCommitSuccessAction
-    | ApiCommitFailAction
+    = ApiApplyInitAction
+    | ApiApplySuccessAction
+    | ApiApplyFailAction
     | ApiCreateInitAction
     | ApiCreateSuccessAction
     | ApiCreateFailAction

@@ -18,8 +18,8 @@ import 'rxjs/add/operator/toArray';
 
 
 import {
-    ApiCommitFailAction,
-    ApiCommitSuccessAction,
+    ApiApplyFailAction,
+    ApiApplySuccessAction,
     ApiCreateFailAction,
     ApiCreateSuccessAction,
     ApiDeleteFailAction,
@@ -113,11 +113,9 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 .catch(error => Observable.of(new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
         });
 
-    @Effect() commitResources$ = this.actions$
-        .ofType(NgrxJsonApiActionTypes.API_COMMIT_INIT)
-        .map<Action, string>(toPayload)
-        .mergeMap((storeLocation: string) => this.store.select(storeLocation).take(1))
-        .mergeMap((store: NgrxJsonApiStore) => {
+    @Effect() applyResources$ = this.actions$
+        .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
+        .mergeMap(() => {
             // TODO add support for bulk updates as well (jsonpatch, etc.)
             // to get atomicity for multiple updates
 
@@ -192,21 +190,21 @@ export class NgrxJsonApiEffects implements OnDestroy {
                     }
                 }
 
-                return Observable.of(...actions).concatAll().toArray().map(actions => this.toCommitAction(actions));
+                return Observable.of(...actions).concatAll().toArray().map(actions => this.toApplyAction(actions));
             } else {
-                return Observable.of(new ApiCommitSuccessAction([]));
+                return Observable.of(new ApiApplySuccessAction([]));
             }
         });
 
-    private toCommitAction(actions: Array<Action>): any {
+    private toApplyAction(actions: Array<Action>): any {
         for (let action of actions) {
             if (action.type == NgrxJsonApiActionTypes.API_CREATE_FAIL
                 || action.type == NgrxJsonApiActionTypes.API_UPDATE_FAIL
                 || action.type == NgrxJsonApiActionTypes.API_DELETE_FAIL) {
-                return new ApiCommitFailAction(actions);
+                return new ApiApplyFailAction(actions);
             }
         }
-        return new ApiCommitSuccessAction(actions);
+        return new ApiApplySuccessAction(actions);
     }
 
     private toErrorPayload(query: ResourceQuery, response: Response): Payload {
