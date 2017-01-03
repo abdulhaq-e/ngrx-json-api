@@ -118,7 +118,7 @@ export class NgrxJsonApi {
                 _generateSortingQueryParams = generateSortingQueryParams;
             }
 
-            if (urlBuilder.generateQueryParams)) {
+            if (urlBuilder.generateQueryParams) {
                 _generateQueryParams = urlBuilder.generateQueryParams;
             } else {
                 _generateQueryParams = generateQueryParams;
@@ -159,6 +159,7 @@ export class NgrxJsonApi {
 
             return this.request(requestOptionsArgs);
         }
+    }
 
     public create(payload: Payload) {
 

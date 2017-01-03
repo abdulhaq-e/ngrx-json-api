@@ -81,7 +81,7 @@ export class NgrxJsonApiService {
         this.findInternal(query, fromServer);
         return {
             results: this.selectResults(query.queryId)
-                .map(it => resource ? it.resource : it),
+                .map(it => resource ? it.map(r => r.resource) : it),
             unsubscribe: () => this.removeQuery(query.queryId)
         }
     }
@@ -135,7 +135,7 @@ export class NgrxJsonApiService {
      * @param queryId
      * @returns observable holding the results as array of resources.
      */
-    public selectResults(queryId: string): Observable<Array<Resource>> {
+    public selectResults(queryId: string): Observable<Array<ResourceStore>> {
         return this.store
             .select(this.selectors.storeLocation)
             .let(this.selectors.getResults$(queryId));
@@ -174,7 +174,7 @@ export class NgrxJsonApiService {
     }
 
     public denormalise() {
-        return (resourceStore$: Observable<ResourceStore | Array<ResourceStore>>) => {
+        return (resourceStore$: Observable<ResourceStore | ResourceStore>) => {
             return resourceStore$
                 .combineLatest(this.store
                     .select(this.selectors.storeLocation)

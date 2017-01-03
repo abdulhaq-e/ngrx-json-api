@@ -50,7 +50,7 @@ export class DenormaliseResourcePipe implements PipeTransform {
   }
 
   transform(obs: Observable<Resource> | Observable<ResourceStore>): Observable<any> {
-      return obs.let(this.service.denormalise());
+      return obs.let<Resource | ResourceStore, any>(this.service.denormalise());
   }
 
 }

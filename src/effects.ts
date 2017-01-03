@@ -198,7 +198,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             }
         });
 
-    private toCommitAction(actions: Array<Action>) {
+    private toCommitAction(actions: Array<Action>): any {
         for (let action of actions) {
             if (action.type == NgrxJsonApiActionTypes.API_CREATE_FAIL
                 || action.type == NgrxJsonApiActionTypes.API_UPDATE_FAIL
