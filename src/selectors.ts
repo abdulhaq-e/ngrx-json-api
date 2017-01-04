@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/concat';
+import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/concat';
 import 'rxjs/add/operator/concatMap';
@@ -115,7 +116,7 @@ export class NgrxJsonApiSelectors<T> {
                     return selected$.distinctUntilChanged();
                 }
                 default:
-                    return state$;
+                    return Observable.throw('Unknown query');
             }
         }
     }

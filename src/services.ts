@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 
 import { NgrxJsonApiSelectors } from './selectors';
 import {
-    ApiCommitInitAction,
+    ApiApplyInitAction,
     ApiCreateInitAction,
     ApiReadInitAction,
     ApiUpdateInitAction,
@@ -269,8 +269,7 @@ export class NgrxJsonApiService {
     /**
      * Applies all pending changes to the remote JSON API endpoint.
      */
-    public commit() {
-        let storeLocation = this.selectors.storeLocation;
-        this.store.dispatch(new ApiCommitInitAction(storeLocation));
+    public apply() {
+        this.store.dispatch(new ApiApplyInitAction());
     }
 }

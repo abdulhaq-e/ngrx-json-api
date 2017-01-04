@@ -30,6 +30,7 @@ import {
     ApiUpdateSuccessAction,
     NgrxJsonApiActionTypes,
     QueryStoreSuccessAction,
+    QueryStoreFailAction,
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
@@ -101,7 +102,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 .map(results => new QueryStoreSuccessAction({
                     jsonApiData: { data: results },
                     query: query
-                }));
+                }))
+                .catch(error => Observable.of(new QueryStoreFailAction(this.toErrorPayload(query, error))));
         });
 
     @Effect() deleteResource$ = this.actions$
@@ -119,7 +121,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             // TODO add support for bulk updates as well (jsonpatch, etc.)
             // to get atomicity for multiple updates
 
-            let pending: Array<ResourceStore> = this.getPendingChanges(store);
+            let pending: Array<ResourceStore> = this.getPendingChanges(this.store.take(1));
             if (pending.length > 0) {
                 pending = this.sortPendingChanges(pending);
 
