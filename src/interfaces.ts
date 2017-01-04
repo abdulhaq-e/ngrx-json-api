@@ -1,23 +1,23 @@
-import { Observable } from "rxjs/Observable";
+import { Observable } from 'rxjs/Observable';
 import { AnonymousSubscription } from 'rxjs/Subscription';
 
 export enum Direction {
-    ASC,
-    DESC
+  ASC,
+  DESC
 }
 
 export interface Document {
-    data?: any;
-    included?: any;
-    meta?: any;
-    links?: any;
-    errors?: Array<ResourceError>
+  data?: any;
+  included?: any;
+  meta?: any;
+  links?: any;
+  errors?: Array<ResourceError>;
 }
 
 export interface FilteringParam {
-    path?: string;
-    operator?: string;
-    value?: any;
+  path?: string;
+  operator?: string;
+  value?: any;
 }
 
 export interface FilteringOperator {
@@ -27,21 +27,21 @@ export interface FilteringOperator {
 }
 
 export interface NgrxJsonApiStore {
-    data: NgrxJsonApiStoreData;
-    queries: NgrxJsonApiStoreQueries;
-    isCreating: number;
-    isReading: number;
-    isUpdating: number;
-    isDeleting: number;
-    isApplying: number;
+  data: NgrxJsonApiStoreData;
+  queries: NgrxJsonApiStoreQueries;
+  isCreating: number;
+  isReading: number;
+  isUpdating: number;
+  isDeleting: number;
+  isApplying: number;
 }
 
 export interface NgrxJsonApiConfig {
-    apiUrl: string;
-    resourceDefinitions: Array<ResourceDefinition>;
-    storeLocation: string;
-    urlBuilder?: NgrxJsonApiUrlBuilder;
-    filteringConfig?: NgrxJsonApiFilteringConfig;
+  apiUrl: string;
+  resourceDefinitions: Array<ResourceDefinition>;
+  storeLocation: string;
+  urlBuilder?: NgrxJsonApiUrlBuilder;
+  filteringConfig?: NgrxJsonApiFilteringConfig;
 }
 
 export interface NgrxJsonApiFilteringConfig {
@@ -57,43 +57,51 @@ export interface NgrxJsonApiUrlBuilder {
   generateQueryParams?: (params: Array<string>) => string;
 }
 
-export type NgrxJsonApiStoreResources = { [id: string]: ResourceStore };
-export type NgrxJsonApiStoreData = { [key: string]: NgrxJsonApiStoreResources };
-export type NgrxJsonApiStoreQueries = { [key: string]: ResourceQueryStore };
+export interface NgrxJsonApiStoreResources {
+  [id: string]: ResourceStore;
+};
+
+export interface NgrxJsonApiStoreData {
+  [key: string]: NgrxJsonApiStoreResources;
+};
+
+export interface NgrxJsonApiStoreQueries {
+  [key: string]: ResourceQueryStore;
+};
 
 export type OperationType
-        = 'CREATING'
-        | 'UPDATING'
-        | 'DELETING'
-        | 'READING'
-        | false
+  = 'CREATING'
+  | 'UPDATING'
+  | 'DELETING'
+  | 'READING'
+  | false;
 
 export interface Payload {
-    jsonApiData?: Document;
-    query: ResourceQuery;
+  jsonApiData?: Document;
+  query: ResourceQuery;
 }
 
 export interface QueryParams {
-    filtering?: Array<FilteringParam>;
-    sorting?: Array<SortingParam>;
-    include?: Array<string>;
-    fields?: Array<string>;
-    offset?: number;
-    limit?: number;
+  filtering?: Array<FilteringParam>;
+  sorting?: Array<SortingParam>;
+  include?: Array<string>;
+  fields?: Array<string>;
+  offset?: number;
+  limit?: number;
 }
 
 export type QueryType
-    = 'getOne'
-    | 'getMany'
-    | 'update'
-    | 'deleteOne'
-    | 'create'
+  = 'getOne'
+  | 'getMany'
+  | 'update'
+  | 'deleteOne'
+  | 'create';
 
 export interface Resource extends ResourceIdentifier {
-    attributes?: { [key: string]: any };
-    relationships?: { [key: string]: ResourceRelationship };
-    meta?: any;
-    links?: any;
+  attributes?: { [key: string]: any };
+  relationships?: { [key: string]: ResourceRelationship };
+  meta?: any;
+  links?: any;
 }
 
 export interface ResourceAttributeDefinition {
@@ -101,110 +109,110 @@ export interface ResourceAttributeDefinition {
 }
 
 export interface ResourceDefinition {
-    type: string;
-    collectionPath: string;
-    attributes?: { [key: string]: ResourceAttributeDefinition};
-    relationships?: { [key: string]: ResourceRelationDefinition };
+  type: string;
+  collectionPath: string;
+  attributes?: { [key: string]: ResourceAttributeDefinition };
+  relationships?: { [key: string]: ResourceRelationDefinition };
 };
 
 
 export interface ResourceError {
-    id?: string;
-    links?: any;
-    status?: string;
-    code?: string;
-    title?: string;
-    detail?: string;
-    source?: ResourceErrorSource;
-    meta?: any;
+  id?: string;
+  links?: any;
+  status?: string;
+  code?: string;
+  title?: string;
+  detail?: string;
+  source?: ResourceErrorSource;
+  meta?: any;
 }
 
 export interface ResourceErrorSource {
-    pointer?: string;
-    parameter?: string;
+  pointer?: string;
+  parameter?: string;
 }
 
 export interface ResourceIdentifier {
-    type: string;
-    id: string;
+  type: string;
+  id: string;
 }
 
 export interface ResourceQuery {
-    /**
-     * id to reference the query within the store.
-     * Does not have any impact on the actual query.
-     */
-    queryId?: string;
-    type?: string;
-    id?: string;
-    params?: QueryParams;
-    queryType?: QueryType;
+  /**
+   * id to reference the query within the store.
+   * Does not have any impact on the actual query.
+   */
+  queryId?: string;
+  type?: string;
+  id?: string;
+  params?: QueryParams;
+  queryType?: QueryType;
 }
 
 export interface ResourceQueryStore {
-    query: ResourceQuery;
-    loading: Boolean;
-    resultIds: Array<ResourceIdentifier>;
-    /**
-     * Errors received from the server after attempting to perform a GET request.
-     */
-    errors: Array<ResourceError>;
+  query: ResourceQuery;
+  loading: Boolean;
+  resultIds: Array<ResourceIdentifier>;
+  /**
+   * Errors received from the server after attempting to perform a GET request.
+   */
+  errors: Array<ResourceError>;
 }
 
 export interface ResourceQueryHandle<T> extends AnonymousSubscription {
-    results: Observable<T>;
+  results: Observable<T>;
 }
 
 export interface ResourceRelationship {
-    data?: any;
-    links?: any;
+  data?: any;
+  links?: any;
 }
 
 export interface ResourceRelationDefinition {
-    type: string;
-    relationType: ResourceRelationType;
+  type: string;
+  relationType: ResourceRelationType;
 }
 
 export type ResourceRelationType
-    = 'hasOne'
-    | 'hasMany'
+  = 'hasOne'
+  | 'hasMany';
 
 export enum ResourceState {
-    IN_SYNC,
-    CREATED,
-    UPDATED,
-    DELETED
+  IN_SYNC,
+  CREATED,
+  UPDATED,
+  DELETED
 }
 
 /**
  * Container to hold a Resource in the store with state information.
  */
 export interface ResourceStore {
-    /**
-     * State of the resource to track local changes not yet
-     * published to the json api endpoint.
-     */
-    state?: ResourceState;
-    /**
-     * The actual resource. This corresponds to persistedResource
-     * if no changes were applied.
-     */
-    resource: Resource;
-    /**
-     * The original resource obtained from the server.
-     */
-    persistedResource: Resource;
-    /**
-     * One of the operation types: reading, creating, updating or deleting.
-     */
-    loading?: OperationType;
-    /**
-     * Errors received from the server after attempting to store the resource.
-     */
-    errors: Array<ResourceError>;
+  /**
+   * State of the resource to track local changes not yet
+   * published to the json api endpoint.
+   */
+  state?: ResourceState;
+  /**
+   * The actual resource. This corresponds to persistedResource
+   * if no changes were applied.
+   */
+  resource: Resource;
+  /**
+   * The original resource obtained from the server.
+   */
+  persistedResource: Resource;
+  /**
+   * One of the operation types: reading, creating, updating or deleting.
+   */
+  loading?: OperationType;
+  /**
+   * Errors received from the server after attempting to store the resource.
+   */
+  errors: Array<ResourceError>;
 }
 
 export interface SortingParam {
-    api: string;
-    direction: Direction;
+  api: string;
+  direction: Direction;
 }
