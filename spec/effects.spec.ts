@@ -42,6 +42,9 @@ import {
     ApiDeleteInitAction,
     ApiDeleteSuccessAction,
     ApiDeleteFailAction,
+    QueryStoreInitAction,
+    QueryStoreSuccessAction,
+    QueryStoreFailAction
 } from '../src/actions';
 
 import {
@@ -57,7 +60,7 @@ import {
   MOCK_NGRX_EFFECTS_PROVIDERS
 } from '../src/testing';
 
-fdescribe('NgrxJsonApiEffects', () => {
+describe('NgrxJsonApiEffects', () => {
     let runner: EffectsRunner;
     let effects;
 
@@ -221,5 +224,37 @@ fdescribe('NgrxJsonApiEffects', () => {
         });
         expect(res).toBeDefined();
     });
+
+    it('should respond to successfull QUERY_STORE_INIT action', () => {
+        let res;
+        let query = {
+          type: 'Article',
+          id: '1',
+          queryType: 'getOne',
+          queryId: '11'
+        }
+        runner.queue(new QueryStoreInitAction(query));
+        effects.queryStore$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new QueryStoreSuccessAction({
+                  jsonApiData: { data: result.payload.jsonApiData.data },
+                  query: query,
+                }));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed QUERY_STORE_INIT action', () => {
+        let res;
+        runner.queue(new QueryStoreInitAction(failQuery));
+        effects.queryStore$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new QueryStoreFailAction(failQuery));
+        });
+        expect(res).toBeDefined();
+    });
+
 
 });

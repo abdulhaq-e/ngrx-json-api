@@ -36,7 +36,7 @@ describe('Json Api Actions', () => {
     let actions;
 
     it('should have a fixed number of actions', () => {
-      expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(22);
+      expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(23);
     });
 
     it('should have an api create init action', () => {

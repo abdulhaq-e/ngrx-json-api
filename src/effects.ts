@@ -30,6 +30,7 @@ import {
     ApiUpdateSuccessAction,
     NgrxJsonApiActionTypes,
     QueryStoreSuccessAction,
+    QueryStoreFailAction,
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
@@ -101,7 +102,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 .map(results => new QueryStoreSuccessAction({
                     jsonApiData: { data: results },
                     query: query
-                }));
+                }))
+                .catch(error => Observable.of(new QueryStoreFailAction(this.toErrorPayload(query, error))));
         });
 
     @Effect() deleteResource$ = this.actions$

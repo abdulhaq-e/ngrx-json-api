@@ -30,6 +30,7 @@ export const NgrxJsonApiActionTypes = {
     API_ROLLBACK: type('API_ROLLBACK'),
     QUERY_STORE_INIT: type('QUERY_STORE_INIT'),
     QUERY_STORE_SUCCESS: type('QUERY_STORE_SUCCESS'),
+    QUERY_STORE_FAIL: type('QUERY_STORE_FAIL'),
     DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE'),
     PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
     POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
@@ -145,6 +146,11 @@ export class QueryStoreSuccessAction implements Action {
   constructor(public payload: Payload) { }
 }
 
+export class QueryStoreFailAction implements Action {
+  type = NgrxJsonApiActionTypes.QUERY_STORE_FAIL;
+  constructor(public payload: Payload) { }
+}
+
 export type NgrxJsonApiActions
     = ApiApplyInitAction
     | ApiApplySuccessAction
@@ -168,3 +174,4 @@ export type NgrxJsonApiActions
     | RemoveQueryAction
     | QueryStoreInitAction
     | QueryStoreSuccessAction
+    | QueryStoreFailAction

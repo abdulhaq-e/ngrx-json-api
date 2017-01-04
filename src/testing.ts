@@ -72,12 +72,14 @@ export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
 
   private toErrorPayload(query: ResourceQuery, response: Response): Payload {
     if (response == 'FAIL QUERY') {
-      return { query: query }
+      return { query: query };
+    } else if (response == 'Unknown query') {
+      return query;
     }
     return ({
       query: query,
       jsonApiData: { data : { type: response } }
-    })
+    });
   }
 }
 
