@@ -150,7 +150,8 @@ export class NgrxJsonApi {
         }
       }
 
-      queryParams = generateQueryParams(includedParam, filteringParams, sortingParams, fieldsParams);
+      queryParams = generateQueryParams(includedParam, filteringParams, sortingParams,
+        fieldsParams);
 
       let requestOptionsArgs = {
         method: RequestMethod.Get,
