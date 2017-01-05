@@ -7,7 +7,7 @@ import { NgrxJsonApiService } from './services';
 import {
   Resource,
   ResourceIdentifier,
-  ResourceStore
+  StoreResource
 } from './interfaces';
 
 @Pipe({ name: 'jaGetResource' })
@@ -32,14 +32,14 @@ export class SelectResourcePipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'jaSelectResourceStore' })
-export class SelectResourceStorePipe implements PipeTransform {
+@Pipe({ name: 'jaSelectStoreResource' })
+export class SelectStoreResourcePipe implements PipeTransform {
 
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(id: ResourceIdentifier): Observable<ResourceStore> {
-    return this.service.selectResourceStore(id);
+  transform(id: ResourceIdentifier): Observable<StoreResource> {
+    return this.service.selectStoreResource(id);
   }
 }
 
@@ -49,8 +49,8 @@ export class DenormaliseResourcePipe implements PipeTransform {
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(obs: Observable<Resource> | Observable<ResourceStore>): Observable<any> {
-    return obs.let<Resource | ResourceStore, any>(this.service.denormalise());
+  transform(obs: Observable<Resource> | Observable<StoreResource>): Observable<any> {
+    return obs.let<Resource | StoreResource, any>(this.service.denormalise());
   }
 
 }

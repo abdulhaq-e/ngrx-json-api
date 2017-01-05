@@ -4,7 +4,7 @@ import {
   NgrxJsonApiActionTypes
 } from './actions';
 import {
-  ResourceQuery,
+  Query,
   ResourceState,
   NgrxJsonApiStore
 } from './interfaces';
@@ -13,8 +13,8 @@ import {
   updateQueryParams,
   updateQueryResults,
   updateQueryErrors,
-  updateStoreResources,
-  updateOrInsertResource,
+  updateStoreDataFromPayload,
+  updateStoreDataFromResource,
   updateResourceState,
   removeQuery,
   rollbackStoreResources,
@@ -42,7 +42,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         return Object.assign({}, state, { isCreating: state['isCreating'] + 1 });
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
-        let query = action.payload.query as ResourceQuery;
+        let query = action.payload.query as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
           isReading: state.isReading + 1
@@ -65,7 +65,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
       case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
         newState = Object.assign({},
           state, {
-            data: updateStoreResources(
+            data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
             isCreating: state.isCreating - 1
           }
@@ -75,7 +75,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
       case NgrxJsonApiActionTypes.API_READ_SUCCESS: {
         newState = Object.assign({},
           state, {
-            data: updateStoreResources(
+            data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
             queries: updateQueryResults(
               state.queries, action.payload.query.queryId, action.payload.jsonApiData),
@@ -88,7 +88,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         newState = Object.assign(
           {},
           state, {
-            data: updateStoreResources(
+            data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
             isUpdating: state.isUpdating - 1
           }
@@ -134,7 +134,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         return newState;
       }
       case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
-        let query = action.payload as ResourceQuery;
+        let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
         });
@@ -150,7 +150,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         return newState;
       }
       case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE: {
-        let updatedData = updateOrInsertResource(state.data, action.payload, false, false);
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
         if (updatedData !== state.data) {
           newState = Object.assign({},
             state, {
@@ -163,7 +163,7 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         }
       }
       case NgrxJsonApiActionTypes.POST_STORE_RESOURCE: {
-        let updatedData = updateOrInsertResource(state.data, action.payload, false, true);
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         if (updatedData !== state.data) {
           newState = Object.assign({},
             state, {

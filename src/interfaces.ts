@@ -6,6 +6,18 @@ export enum Direction {
   DESC
 }
 
+export interface DenormalisedResource extends Resource {
+  relationships?: {[key: string]: DenormalisedResourceRelationship};
+}
+
+export interface DenormalisedResourceRelationship extends ResourceRelationship {
+    reference?: DenormalisedResource;
+}
+
+export interface DenormalisedStoreResource extends StoreResource {
+  resource: DenormalisedResource;
+}
+
 export interface Document {
   data?: any;
   included?: any;
@@ -26,6 +38,14 @@ export interface FilteringOperator {
   comparison: (value: any, resourceFieldValue: any) => boolean;
 }
 
+export interface NgrxJsonApiConfig {
+  apiUrl: string;
+  resourceDefinitions: Array<ResourceDefinition>;
+  storeLocation: string;
+  urlBuilder?: NgrxJsonApiUrlBuilder;
+  filteringConfig?: NgrxJsonApiFilteringConfig;
+}
+
 export interface NgrxJsonApiStore {
   data: NgrxJsonApiStoreData;
   queries: NgrxJsonApiStoreQueries;
@@ -36,13 +56,18 @@ export interface NgrxJsonApiStore {
   isApplying: number;
 }
 
-export interface NgrxJsonApiConfig {
-  apiUrl: string;
-  resourceDefinitions: Array<ResourceDefinition>;
-  storeLocation: string;
-  urlBuilder?: NgrxJsonApiUrlBuilder;
-  filteringConfig?: NgrxJsonApiFilteringConfig;
-}
+export interface NgrxJsonApiStoreData {
+  [id: string]: NgrxJsonApiStoreResources;
+};
+
+export interface NgrxJsonApiStoreQueries {
+  [id: string]: StoreQuery;
+};
+
+export interface NgrxJsonApiStoreResources {
+  [id: string]: StoreResource;
+};
+
 
 export interface NgrxJsonApiFilteringConfig {
   pathSeparator?: string;
@@ -57,18 +82,6 @@ export interface NgrxJsonApiUrlBuilder {
   generateQueryParams?: (params: Array<string>) => string;
 }
 
-export interface NgrxJsonApiStoreResources {
-  [id: string]: ResourceStore;
-};
-
-export interface NgrxJsonApiStoreData {
-  [key: string]: NgrxJsonApiStoreResources;
-};
-
-export interface NgrxJsonApiStoreQueries {
-  [key: string]: ResourceQueryStore;
-};
-
 export type OperationType
   = 'CREATING'
   | 'UPDATING'
@@ -78,7 +91,19 @@ export type OperationType
 
 export interface Payload {
   jsonApiData?: Document;
-  query: ResourceQuery;
+  query: Query;
+}
+
+export interface Query {
+  queryId?: string;
+  type?: string;
+  id?: string;
+  params?: QueryParams;
+  queryType?: QueryType;
+}
+
+export interface QueryHandle<T> extends AnonymousSubscription {
+  results: Observable<T>;
 }
 
 export interface QueryParams {
@@ -115,7 +140,6 @@ export interface ResourceDefinition {
   relationships?: { [key: string]: ResourceRelationDefinition };
 };
 
-
 export interface ResourceError {
   id?: string;
   links?: any;
@@ -135,32 +159,6 @@ export interface ResourceErrorSource {
 export interface ResourceIdentifier {
   type: string;
   id: string;
-}
-
-export interface ResourceQuery {
-  /**
-   * id to reference the query within the store.
-   * Does not have any impact on the actual query.
-   */
-  queryId?: string;
-  type?: string;
-  id?: string;
-  params?: QueryParams;
-  queryType?: QueryType;
-}
-
-export interface ResourceQueryStore {
-  query: ResourceQuery;
-  loading: Boolean;
-  resultIds: Array<ResourceIdentifier>;
-  /**
-   * Errors received from the server after attempting to perform a GET request.
-   */
-  errors: Array<ResourceError>;
-}
-
-export interface ResourceQueryHandle<T> extends AnonymousSubscription {
-  results: Observable<T>;
 }
 
 export interface ResourceRelationship {
@@ -184,35 +182,45 @@ export enum ResourceState {
   DELETED
 }
 
-/**
- * Container to hold a Resource in the store with state information.
- */
-export interface ResourceStore {
+export interface SortingParam {
+  api: string;
+  direction: Direction;
+}
+
+export interface StoreQuery {
+  query: Query;
+  loading: Boolean;
+  resultIds: Array<ResourceIdentifier>;
   /**
-   * State of the resource to track local changes not yet
-   * published to the json api endpoint.
-   */
-  state?: ResourceState;
-  /**
-   * The actual resource. This corresponds to persistedResource
-   * if no changes were applied.
-   */
-  resource: Resource;
-  /**
-   * The original resource obtained from the server.
-   */
-  persistedResource: Resource;
-  /**
-   * One of the operation types: reading, creating, updating or deleting.
-   */
-  loading?: OperationType;
-  /**
-   * Errors received from the server after attempting to store the resource.
+   * Errors received from the server after attempting to perform a GET request.
    */
   errors: Array<ResourceError>;
 }
 
-export interface SortingParam {
-  api: string;
-  direction: Direction;
+/**
+* Container to hold a Resource in the store with state information.
+*/
+export interface StoreResource {
+  /**
+  * State of the resource to track local changes not yet
+  * published to the json api endpoint.
+  */
+  state?: ResourceState;
+  /**
+  * The actual resource. This corresponds to persistedResource
+  * if no changes were applied.
+  */
+  resource: Resource;
+  /**
+  * The original resource obtained from the server.
+  */
+  persistedResource: Resource;
+  /**
+  * One of the operation types: reading, creating, updating or deleting.
+  */
+  loading?: OperationType;
+  /**
+  * Errors received from the server after attempting to store the resource.
+  */
+  errors: Array<ResourceError>;
 }

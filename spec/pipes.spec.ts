@@ -19,7 +19,7 @@ import {
     DenormaliseResourcePipe,
     GetResourcePipe,
     SelectResourcePipe,
-    SelectResourceStorePipe,
+    SelectStoreResourcePipe,
 } from '../src/pipes';
 
 import {
@@ -34,7 +34,7 @@ import {
     serviceFactory,
 } from '../src/module';
 
-import { updateStoreResources } from '../src/utils';
+import { updateStoreDataFromPayload } from '../src/utils';
 
 import {
     testPayload,
@@ -47,7 +47,7 @@ describe('NgrxJsonApiService', () => {
     beforeEach(() => {
         let store = {
             api: Object.assign({}, initialNgrxJsonApiState, {
-                data: updateStoreResources({}, testPayload),
+                data: updateStoreDataFromPayload({}, testPayload),
             }, )
         };
         TestBed.configureTestingModule({
@@ -83,7 +83,7 @@ describe('NgrxJsonApiService', () => {
                 DenormaliseResourcePipe,
                 GetResourcePipe,
                 SelectResourcePipe,
-                SelectResourceStorePipe,
+                SelectStoreResourcePipe,
             ],
         })
     });
@@ -103,8 +103,8 @@ describe('NgrxJsonApiService', () => {
 
     });
 
-    describe('SelectResourceStorePipe', () => {
-        beforeEach(inject([SelectResourceStorePipe], (p) => {
+    describe('SelectStoreResourcePipe', () => {
+        beforeEach(inject([SelectStoreResourcePipe], (p) => {
             pipe = p;
         }));
 
@@ -123,9 +123,9 @@ describe('NgrxJsonApiService', () => {
                 queryType: 'getOne',
                 queryId: '22'
             }
-            let resourceStore = pipe.service.findOne(query, false, true)
+            let StoreResource = pipe.service.findOne(query, false, true)
                 .results
-            let denormalised = pipe.transform(resourceStore);
+            let denormalised = pipe.transform(StoreResource);
             denormalised.subscribe(it => {
                 expect(_.get(it, 'relationships.author.reference')).toBeDefined();
             });

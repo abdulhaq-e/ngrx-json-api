@@ -28,7 +28,7 @@ import {
     serviceFactory,
 } from '../src/module';
 
-import { updateStoreResources } from '../src/utils';
+import { updateStoreDataFromPayload } from '../src/utils';
 
 import {
     testPayload,
@@ -41,7 +41,7 @@ describe('NgrxJsonApiService', () => {
     beforeEach(() => {
         let store = {
             api: Object.assign({}, initialNgrxJsonApiState, {
-                data: updateStoreResources({}, testPayload),
+                data: updateStoreDataFromPayload({}, testPayload),
             }, )
         };
         TestBed.configureTestingModule({
@@ -117,7 +117,7 @@ describe('NgrxJsonApiService', () => {
 
     });
 
-    describe('selectResourceStore', () => {
+    describe('selectStoreResource', () => {
 
     });
 
@@ -129,10 +129,10 @@ describe('NgrxJsonApiService', () => {
                 queryType: 'getOne',
                 queryId: '22'
             }
-            let resourceStore = service.findOne(query, false)
+            let StoreResource = service.findOne(query, false)
                 .results
                 .let(service.denormalise());
-            resourceStore.subscribe(it => {
+            StoreResource.subscribe(it => {
               expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
             });
         });

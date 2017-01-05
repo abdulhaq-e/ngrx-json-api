@@ -19,7 +19,7 @@ import {
   NgrxJsonApiConfig,
   Payload,
   ResourceDefinition,
-  ResourceQuery,
+  Query,
   QueryParams,
   QueryType,
 } from './interfaces';
@@ -46,7 +46,7 @@ export class NgrxJsonApi {
     public config: NgrxJsonApiConfig
   ) { }
 
-  private urlBuilder(query: ResourceQuery) {
+  private urlBuilder(query: Query) {
     switch (query.queryType) {
       case 'getOne':
       case 'deleteOne':

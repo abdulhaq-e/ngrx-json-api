@@ -13,9 +13,8 @@ import {
     denormaliseObject,
     denormaliseResource,
     filterResources,
-    //     getSingleResource,
-    //     getMultipleResources,
-    //     getSingleTypeResources,
+    //     getSingleStoreResource,
+    //     getMultipleStoreResource,
     generateFieldsQueryParams,
     generateIncludedQueryParams,
     generateFilteringQueryParams,
@@ -27,13 +26,13 @@ import {
     removeQuery,
     rollbackStoreResources,
     toResourceIdentifier,
-    updateOrInsertResource,
+    updateStoreDataFromResource,
     updateQueryErrors,
     updateQueryParams,
     updateQueryResults,
     updateResourceObject,
     updateStoreResource,
-    updateStoreResources,
+    updateStoreDataFromPayload,
     updateResourceState,
     updateResourceErrors,
 } from '../src/utils';
@@ -97,42 +96,10 @@ deepFreeze(initialNgrxJsonApiState);
 //                 .toEqual('Person 2');
 //         });
 //     });
-//
-//     describe('getSingleTypeResources', () => {
-//         it('should get an NgrxJsonApiStoreResources given a type', () => {
-//             let obtainedResources = getSingleTypeResources(
-//                 { type: 'Blog' }, resources);
-//             expect(obtainedResources['1'].id).toEqual('1');
-//             expect(obtainedResources['1'].attributes.name).toEqual('Blog 1');
-//             expect(obtainedResources['2'].id).toEqual('2');
-//             expect(obtainedResources['3'].id).toEqual('3');
-//         });
-//     });
-//
-//     describe('transformStoreResources', () => {
-//         it('should provide an array of all resources given a NgrxJsonApiStoreResources', () => {
-//             let allResources = transformStoreResources(
-//                 getSingleTypeResources({ type: 'Article' }, resources));
-//             expect(allResources.length).toEqual(2);
-//             expect(allResources[0].type).toEqual("Article");
-//             expect(allResources[0].id).toEqual("1");
-//         });
-//     });
-//
-//     describe('transformStoreData', () => {
-//         it('should provide an array of all resources given a NgrxJsonApiStoreData', () => {
-//             let allResources = transformStoreData(resources);
-//             expect(allResources.length).toEqual(9);
-//             expect(allResources[0].type).toEqual("Person");
-//             expect(allResources[0].id).toEqual("1");
-//         });
-//     });
-//
-//
 // });
 
 describe('denormalise and denormaliseObject', () => {
-    let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload)
+    let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload)
     deepFreeze(storeData);
 
     it('should do nothing given a resource with attributes only', () => {
@@ -470,7 +437,7 @@ describe('rollbackStoreResources', () => {
     });
 });
 
-describe('updateOrInsertResource', () => {
+describe('updateStoreData', () => {
 
     it(`should insert a resource if it was not found`, () => {
         let state = {
@@ -492,7 +459,7 @@ describe('updateOrInsertResource', () => {
             type: 'Article',
             id: '3'
         };
-        let newState = updateOrInsertResource(state, newResource, true, true);
+        let newState = updateStoreDataFromResource(state, newResource, true, true);
         expect(newState['Article']['3']).toBeDefined();
         expect(newState['Article']['3'].resource.id).toEqual('3')
         expect(newState['Article']['1']).toBeDefined();
@@ -522,7 +489,7 @@ describe('updateOrInsertResource', () => {
                 tag: 'Whatever'
             }
         };
-        let newState = updateOrInsertResource(state, newResource, true, true);
+        let newState = updateStoreDataFromResource(state, newResource, true, true);
         expect(newState['Article']['1']).toBeDefined();
         expect(newState['Article']['1'].resource.attributes.tag).toEqual('Whatever');
     });
@@ -535,7 +502,7 @@ describe('updateOrInsertResource', () => {
             type: 'Article',
             id: '3'
         };
-        let newState = updateOrInsertResource(state, newResource, true, true);
+        let newState = updateStoreDataFromResource(state, newResource, true, true);
         expect(newState['Article']).toBeDefined();
         expect(newState['Article']['3']).toBeDefined();
     });
@@ -704,7 +671,7 @@ describe('updateQueryResults', () => {
 
 describe('updateStoreResources', () => {
     it('should update the store data given a JsonApiDocument', () => {
-        let newState = updateStoreResources(initialNgrxJsonApiState.data, documentPayload);
+        let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
         expect(newState['Article']).toBeDefined();
         expect(newState['Person']).toBeDefined();
         expect(newState['Article']['1']).toBeDefined();
@@ -718,7 +685,7 @@ describe('updateStoreResources', () => {
 
 describe('filterResources (TODO: test remaining types)', () => {
 
-    let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
+    let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
 
     let resources = storeData['Article'];
     it('should filter resources using an iexact filter if no type is given', () => {
@@ -839,7 +806,7 @@ describe('filterResources (TODO: test remaining types)', () => {
 });
 
 describe('getResourceFieldValueFromPath', () => {
-    let storeData = updateStoreResources(initialNgrxJsonApiState.data, testPayload);
+    let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
 
     it('should throw an error if the definition was not found', () => {
         let baseResource = storeData['Whatever']['1'];
