@@ -403,19 +403,22 @@ export const updateResourceState = (state: NgrxJsonApiStoreData,
  */
 export const updateQueryParams = (state: NgrxJsonApiStoreQueries,
   query: ResourceQuery): NgrxJsonApiStoreQueries => {
-  // TODO: handle queries without a queryId
-  let storeQuery: ResourceQueryStore = state[query.queryId];
-  // this will also handle an undefined query, i.e. a query not found in the store
-  let newQueryStore = Object.assign({}, storeQuery);
-  newQueryStore.loading = true;
-  // newQueryStore.query = cloneResourceQuery(query);
-  newQueryStore.query = _.cloneDeep(query);
-  if (_.isUndefined(newQueryStore.errors)) {
-    newQueryStore.errors = [];
+
+  let newStoreQuery = Object.assign({}, state[query.queryId]);
+  newStoreQuery.loading = true;
+  newStoreQuery.query = _.cloneDeep(query);
+
+  if (!query.queryId) {
+    let queryId = uuid();
+    newStoreQuery.query.queryId = queryId;
+  }
+
+  if (_.isUndefined(newStoreQuery.errors)) {
+    newStoreQuery.errors = [];
   }
 
   let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
-  newState[query.queryId] = newQueryStore;
+  newState[newStoreQuery.query.queryId] = newStoreQuery;
   return newState;
 };
 
@@ -701,7 +704,7 @@ export const generateFilteringQueryParams = (filtering: Array<FilteringParam>): 
     .map(f => {
       return 'filter[' + f.path + ']' +
         (f.operator ? '[' + f.operator + ']' : '') +
-        '=' + encodeURIComponent(f.value)
+        '=' + encodeURIComponent(f.value);
     });
   return filteringParams.join('&');
 };
@@ -722,3 +725,17 @@ export const generateQueryParams = (...params: Array<string>) => {
     return '';
   }
 };
+
+/* tslint:disable */
+export const uuid = () => {
+  let lut = []; for (let i=0; i<256; i++) { lut[i] = (i<16?'0':'')+(i).toString(16); }
+  let d0 = Math.random()*0xffffffff|0;
+  let d1 = Math.random()*0xffffffff|0;
+  let d2 = Math.random()*0xffffffff|0;
+  let d3 = Math.random()*0xffffffff|0;
+  return lut[d0&0xff]+lut[d0>>8&0xff]+lut[d0>>16&0xff]+lut[d0>>24&0xff]+'-'+
+  lut[d1&0xff]+lut[d1>>8&0xff]+'-'+lut[d1>>16&0x0f|0x40]+lut[d1>>24&0xff]+'-'+
+  lut[d2&0x3f|0x80]+lut[d2>>8&0xff]+'-'+lut[d2>>16&0xff]+lut[d2>>24&0xff]+
+  lut[d3&0xff]+lut[d3>>8&0xff]+lut[d3>>16&0xff]+lut[d3>>24&0xff];
+};
+/* tslint:enable */
