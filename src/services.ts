@@ -24,10 +24,10 @@ import {
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
-  ResourceQuery,
-  ResourceQueryHandle,
+  Query,
+  QueryHandle,
   ResourceRelationship,
-  ResourceStore,
+  StoreResource,
 } from './interfaces';
 import {
   denormaliseResource
@@ -50,10 +50,10 @@ export class NgrxJsonApiService {
   }
 
   public findOne(
-    query: ResourceQuery,
+    query: Query,
     fromServer = true,
     resource = false
-  ): ResourceQueryHandle<Resource> {
+  ): QueryHandle<Resource> {
     query.queryType = 'getOne';
     this.findInternal(query, fromServer);
 
@@ -73,10 +73,10 @@ export class NgrxJsonApiService {
   }
 
   public findMany(
-    query: ResourceQuery,
+    query: Query,
     fromServer = true,
     resource = false
-  ): ResourceQueryHandle<Array<Resource>> {
+  ): QueryHandle<Array<Resource>> {
     query.queryType = 'getMany';
     this.findInternal(query, fromServer);
     return {
@@ -90,7 +90,7 @@ export class NgrxJsonApiService {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(query: ResourceQuery, fromServer = true) {
+  private findInternal(query: Query, fromServer = true) {
     if (fromServer) {
       let payload: Payload = {
         query: query
@@ -135,7 +135,7 @@ export class NgrxJsonApiService {
    * @param queryId
    * @returns observable holding the results as array of resources.
    */
-  public selectResults(queryId: string): Observable<Array<ResourceStore>> {
+  public selectResults(queryId: string): Observable<Array<StoreResource>> {
     return this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getResults$(queryId));
@@ -167,23 +167,23 @@ export class NgrxJsonApiService {
    * @param identifier of the resource
    * @returns observable of the resource
    */
-  public selectResourceStore(identifier: ResourceIdentifier): Observable<ResourceStore> {
+  public selectStoreResource(identifier: ResourceIdentifier): Observable<StoreResource> {
     return this.store
       .select(this.selectors.storeLocation)
-      .let(this.selectors.getResourceStore$(identifier));
+      .let(this.selectors.getStoreResource$(identifier));
   }
 
   public denormalise() {
-    return (resourceStore$: Observable<ResourceStore | ResourceStore>) => {
-      return resourceStore$
+    return (StoreResource$: Observable<StoreResource | StoreResource>) => {
+      return StoreResource$
         .combineLatest(this.store
           .select(this.selectors.storeLocation)
           .let(this.selectors.getStoreData$()),
         (
-          resourceStore: ResourceStore,
+          StoreResource: StoreResource,
           storeData: NgrxJsonApiStoreData
         ) => {
-          return denormaliseResource(resourceStore, storeData);
+          return denormaliseResource(StoreResource, storeData);
         });
     };
   }

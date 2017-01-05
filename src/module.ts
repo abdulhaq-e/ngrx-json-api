@@ -15,7 +15,7 @@ import {
   DenormaliseResourcePipe,
   GetResourcePipe,
   SelectResourcePipe,
-  SelectResourceStorePipe,
+  SelectStoreResourcePipe,
 } from './pipes';
 
 import { NgrxJsonApiConfig } from './interfaces';
@@ -66,7 +66,7 @@ export const configure = (config: NgrxJsonApiConfig): Array<any> => {
     DenormaliseResourcePipe,
     GetResourcePipe,
     SelectResourcePipe,
-    SelectResourceStorePipe,
+    SelectStoreResourcePipe,
   ],
   imports: [
     HttpModule,

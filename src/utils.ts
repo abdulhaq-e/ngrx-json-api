@@ -13,24 +13,21 @@ import {
   NgrxJsonApiStoreResources,
   NgrxJsonApiStoreQueries,
   OperationType,
+  Query,
   QueryParams,
-  ResourceRelationDefinition,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
-  ResourceQuery,
-  ResourceQueryStore,
-  ResourceStore,
+  ResourceRelationDefinition,
   ResourceState,
+  StoreQuery,
   SortingParam,
+  StoreResource,
 } from './interfaces';
 
-export const denormaliseObject = (
-  resource: Resource,
-  storeData: NgrxJsonApiStoreData,
-  bag: NgrxJsonApiStoreData,
-  isRSdenorm: boolean,
-): any => {
+export const denormaliseObject = (resource: Resource,
+  storeData: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData,
+  isRSdenorm: boolean): any => {
   // this function MUST MUTATE resource
   let denormalised = resource;
 
@@ -49,14 +46,14 @@ export const denormaliseObject = (
 
         } else if (_.isPlainObject(data)) {
           // hasOne relation
-          let relatedRS: Resource | ResourceStore = getSingleResourceStore(
+          let relatedRS: Resource | StoreResource = getSingleStoreResource(
             <ResourceIdentifier>data, storeData);
           relatedRS = isRSdenorm ? relatedRS : relatedRS.resource;
           relationDenorm = denormaliseResource(
             relatedRS, storeData, bag);
         } else if (_.isArray(data)) {
           // hasMany relation
-          let relatedRSs: Array<ResourceStore> = getMultipleResourceStore(data, storeData);
+          let relatedRSs: Array<StoreResource> = getMultipleStoreResource(data, storeData);
           relationDenorm = relatedRSs
             .map(r => isRSdenorm ? r : r.resource)
             .map(r => denormaliseResource(r, storeData, bag));
@@ -73,20 +70,18 @@ export const denormaliseObject = (
   return denormalised;
 };
 
-export const denormaliseResource = (
-  item: ResourceStore | Resource,
-  storeData: NgrxJsonApiStoreData,
-  bag: any = {}): any => {
+export const denormaliseResource = (item: StoreResource | Resource,
+  storeData: NgrxJsonApiStoreData, bag: any = {}): any => {
 
   if (!item) {
     return null;
   }
-  let isResourceStore = item.hasOwnProperty('resource');
-  let resourceStore;
+  let isStoreResource = item.hasOwnProperty('resource');
+  let StoreResource;
   let resource: Resource;
-  if (isResourceStore) {
-    resourceStore = _.cloneDeep(<ResourceStore>item);
-    resource = resourceStore.resource;
+  if (isStoreResource) {
+    StoreResource = _.cloneDeep(<StoreResource>item);
+    resource = StoreResource.resource;
   } else {
     resource = _.cloneDeep(<Resource>item);
   }
@@ -96,25 +91,25 @@ export const denormaliseResource = (
   }
   if (_.isUndefined(bag[resource.type][resource.id])) {
 
-    if (isResourceStore) {
-      bag[resource.type][resource.id] = resourceStore;
-      resourceStore.resource = denormaliseObject(
-        resourceStore.resource,
+    if (isStoreResource) {
+      bag[resource.type][resource.id] = StoreResource;
+      StoreResource.resource = denormaliseObject(
+        StoreResource.resource,
         storeData,
         bag,
-        isResourceStore);
-      resourceStore.persistedResource = denormaliseObject(
-        resourceStore.persistedResource,
+        isStoreResource);
+      StoreResource.persistedResource = denormaliseObject(
+        StoreResource.persistedResource,
         storeData,
         bag,
-        isResourceStore);
+        isStoreResource);
     } else {
       bag[resource.type][resource.id] = resource;
       resource = denormaliseObject(
         resource,
         storeData,
         bag,
-        isResourceStore);
+        isStoreResource);
     }
   }
 
@@ -122,51 +117,20 @@ export const denormaliseResource = (
 
 };
 
-export const getSingleResourceStore = (
-  resourceId: ResourceIdentifier,
-  storeData: NgrxJsonApiStoreData): ResourceStore => {
+export const getSingleStoreResource = (resourceId: ResourceIdentifier,
+  storeData: NgrxJsonApiStoreData): StoreResource => {
   return _.get(storeData, [resourceId.type, resourceId.id], null);
 };
 
-export const getMultipleResourceStore = (
-  resourceIds: Array<ResourceIdentifier>,
-  resources: NgrxJsonApiStoreData): Array<ResourceStore> => {
-  return resourceIds.map(id => getSingleResourceStore(id, resources));
+export const getMultipleStoreResource = (resourceIds: Array<ResourceIdentifier>,
+  resources: NgrxJsonApiStoreData): Array<StoreResource> => {
+  return resourceIds.map(id => getSingleStoreResource(id, resources));
 };
 
-export const getSingleTypeResources = (
-  query: ResourceQuery,
-  resources: NgrxJsonApiStoreData): NgrxJsonApiStoreResources => {
-  return resources[query.type];
-};
-
-export const transformStoreResources = (
-  resources: NgrxJsonApiStoreResources): Array<Resource> => {
-
-  return <Array<Resource>>_.flatMap(resources);
-};
-
-export const transformStoreData = (
-  resources: NgrxJsonApiStoreData): Array<Resource> => {
-
-  return Object.keys(resources).reduce((result, key) => {
-    return [...result, ...transformStoreResources(getSingleTypeResources(
-      { type: key }, resources))];
-  }, []);
-
-};
-
-export const deleteStoreResources = (state: NgrxJsonApiStoreData, query: ResourceQuery) => {
-  let newState = Object.assign({}, state);
-  // if an id is not provided, all resources of the provided type will be deleted
-  if (typeof query.id === 'undefined') {
-    newState[query.type] = {};
-  } else {
-    delete newState[query.type][query.id];
-  }
-  return newState;
-};
-
+/**
+ * Given two objects, it will merge the second in the first.
+ *
+ */
 export const updateResourceObject = (original: Resource,
   source: Resource): Resource => {
 
@@ -174,12 +138,16 @@ export const updateResourceObject = (original: Resource,
 
 };
 
-export const insertStoreResource = (state: NgrxJsonApiStoreResources,
+/**
+ * Insert a StoreResource given the Resource and the StoreResources
+ *
+ */
+export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
   resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
-  let newState = Object.assign({}, state);
+  let newStoreResources = Object.assign({}, storeResources);
   if (fromServer) {
-    newState[resource.id] = {
+    newStoreResources[resource.id] = {
       resource: resource,
       persistedResource: resource,
       state: ResourceState.IN_SYNC,
@@ -187,7 +155,7 @@ export const insertStoreResource = (state: NgrxJsonApiStoreResources,
       loading: false
     };
   } else {
-    newState[resource.id] = {
+    newStoreResources[resource.id] = {
       resource: resource,
       persistedResource: null,
       state: ResourceState.CREATED,
@@ -195,7 +163,35 @@ export const insertStoreResource = (state: NgrxJsonApiStoreResources,
       loading: false
     };
   }
-  return _.isEqual(state, newState) ? state : newState;
+  return _.isEqual(storeResources, newStoreResources) ? storeResources : newStoreResources;
+};
+
+/**
+ * Updates the state of a StoreResource in the store.
+ *
+ * @param storeData
+ * @param resourceId
+ * @param resourceState
+ * @param loading
+ * @returns {NgrxJsonApiStoreData}
+ */
+export const updateResourceState = (storeData: NgrxJsonApiStoreData,
+  resourceId: ResourceIdentifier, resourceState?: ResourceState,
+  loading?: OperationType): NgrxJsonApiStoreData => {
+  if (_.isUndefined(storeData[resourceId.type])
+    || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
+    return storeData;
+  }
+  let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
+  newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
+  newState[resourceId.type][resourceId.id] = Object.assign({}, newState[resourceId.type][resourceId.id]);
+  if (resourceState !== null) {
+    newState[resourceId.type][resourceId.id].state = resourceState;
+  }
+  if (loading != null) {
+    newState[resourceId.type][resourceId.id].loading = loading;
+  }
+  return newState;
 };
 
 export const updateStoreResource = (state: NgrxJsonApiStoreResources,
@@ -238,38 +234,17 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   return _.isEqual(newState[resource.id], state[resource.id]) ? state : newState;
 };
 
-
-export const updateQueryErrors = (
-  state: NgrxJsonApiStoreQueries,
-  queryId: string,
-  document: Document): NgrxJsonApiStoreQueries => {
-
-  if (!queryId || !state[queryId]) {
-    return state;
-  }
-  let newState = Object.assign({}, state);
-  let newStoreQuery = Object.assign({}, newState[queryId]);
-  newStoreQuery.errors = [];
-  if (document.errors) {
-    newStoreQuery.errors.push(...document.errors);
-  }
-  newState[queryId] = newStoreQuery;
-  return newState;
-};
-
-export const updateResourceErrors = (
-  state: NgrxJsonApiStoreData,
-  query: ResourceQuery,
-  document: Document): NgrxJsonApiStoreData => {
+export const updateResourceErrors = (storeData: NgrxJsonApiStoreData,
+  query: Query, document: Document): NgrxJsonApiStoreData => {
   if (!query.type || !query.id || document.data instanceof Array) {
     // TODO: Why does document.data has to be an Array?
     throw new Error('invalid parameters');
   }
-  if (!state[query.type] || !state[query.type][query.id]) {
+  if (!storeData[query.type] || !storeData[query.type][query.id]) {
     // resource is not locally stored, no need to update(?)
-    return state;
+    return storeData;
   }
-  let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+  let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   newState[query.type] = Object.assign({}, newState[query.type]);
   let storeResource = Object.assign({}, newState[query.type][query.id]);
   storeResource.errors = [];
@@ -280,8 +255,8 @@ export const updateResourceErrors = (
   return newState;
 };
 
-export const rollbackStoreResources = (state: NgrxJsonApiStoreData): NgrxJsonApiStoreData => {
-  let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+export const rollbackStoreResources = (storeData: NgrxJsonApiStoreData): NgrxJsonApiStoreData => {
+  let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   Object.keys(newState).forEach(type => {
     newState[type] = Object.assign({}, newState[type]);
     Object.keys(newState[type]).forEach(id => {
@@ -299,8 +274,31 @@ export const rollbackStoreResources = (state: NgrxJsonApiStoreData): NgrxJsonApi
   return newState;
 };
 
-export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
-  resource: Resource, fromServer: boolean, override: boolean): NgrxJsonApiStoreData => {
+export const deleteStoreResources = (storeData: NgrxJsonApiStoreData, query: Query) => {
+  let newState = Object.assign({}, storeData);
+  // if an id is not provided, all resources of the provided type will be deleted
+  if (typeof query.id === 'undefined') {
+    newState[query.type] = {};
+  } else {
+    delete newState[query.type][query.id];
+  }
+  return newState;
+};
+
+/**
+ * Updates a given storeData by either inserting a resource or updating
+ * an existing resource.
+ *
+ * @param storeData
+ * @param resource
+ * @param fromServer
+ * @param override
+ *
+ * @returns a new NgrxJsonApiStoreData with an inserted/updated resource.
+ */
+export const updateStoreDataFromResource = (storeData: NgrxJsonApiStoreData,
+  resource: Resource, fromServer: boolean, override: boolean
+): NgrxJsonApiStoreData => {
 
   // handle relationships first.
   // FIXME this is not working, the data section of a relationship contains only <type, id>, not a complete resource
@@ -321,151 +319,38 @@ export const updateOrInsertResource = (state: NgrxJsonApiStoreData,
   //        });
   // }
 
-  if (_.isUndefined(state[resource.type])) {
+  if (_.isUndefined(storeData[resource.type])) {
     // we must mutate the main state (ngrxjsonapistoredata)
-    let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+    let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
     newState[resource.type] = {};
     newState[resource.type] = insertStoreResource(newState[resource.type], resource, fromServer);
     return newState;
-  } else if (_.isUndefined(state[resource.type][resource.id]) || override) {
-    let updatedTypeState = insertStoreResource(state[resource.type], resource, fromServer);
-    if (updatedTypeState !== state[resource.type]) {
-      let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+  } else if (_.isUndefined(storeData[resource.type][resource.id]) || override) {
+    let updatedTypeState = insertStoreResource(storeData[resource.type], resource, fromServer);
+    if (updatedTypeState !== storeData[resource.type]) {
+      let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
       newState[resource.type] = updatedTypeState;
       return newState;
     }
-    return state;
+    return storeData;
   } else {
-    let updatedTypeState = updateStoreResource(state[resource.type], resource, fromServer);
-    if (updatedTypeState !== state[resource.type]) {
-      let newState: NgrxJsonApiStoreData = Object.assign({}, state);
+    let updatedTypeState = updateStoreResource(storeData[resource.type], resource, fromServer);
+    if (updatedTypeState !== storeData[resource.type]) {
+      let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
       newState[resource.type] = updatedTypeState;
       return newState;
     }
-    return state;
+    return storeData;
   }
 
 };
 
-/**
- * Updates the state of a resource in the store.
- *
- * @param state
- * @param resourceId
- * @param resourceState
- * @param loading
- * @returns {NgrxJsonApiStoreData}
- */
-export const updateResourceState = (state: NgrxJsonApiStoreData,
-  resourceId: ResourceIdentifier, resourceState?: ResourceState, loading?: OperationType): NgrxJsonApiStoreData => {
-  if (_.isUndefined(state[resourceId.type]) || _.isUndefined(state[resourceId.type][resourceId.id])) {
-    return state;
-  }
-  let newState: NgrxJsonApiStoreData = Object.assign({}, state);
-  newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
-  newState[resourceId.type][resourceId.id] = Object.assign({}, newState[resourceId.type][resourceId.id]);
-  if (resourceState !== null) {
-    newState[resourceId.type][resourceId.id].state = resourceState;
-  }
-  if (loading != null) {
-    newState[resourceId.type][resourceId.id].loading = loading;
-  }
-  return newState;
-};
-
-// export const cloneQueryParams = (queryParams: QueryParams): QueryParams => {
-//     let newQueryParams : QueryParams = {};
-//     if(queryParams.include){
-//         newQueryParams.include = queryParams.include.slice(0);
-//     }
-//     if(queryParams.fields){
-//       newQueryParams.fields = queryParams.fields.slice(0);
-//     }
-//     if(queryParams.filtering){
-//       newQueryParams.filtering = queryParams.filtering.map(it => Object.assign({}, it));
-//     }
-//     if(queryParams.sorting){
-//       newQueryParams.sorting = queryParams.sorting.map(it => Object.assign({}, it));
-//     }
-//     return newQueryParams;
-// }
-//
-// export const cloneResourceQuery = (query: ResourceQuery): ResourceQuery => {
-//     let newQuery = Object.assign({}, query);
-//     if(newQuery.params){
-//         newQuery.params = cloneQueryParams(newQuery.params);
-//     }
-//     return newQuery;
-// }
-
-/**
- * Updates the query information for the given query in the store.
- */
-export const updateQueryParams = (state: NgrxJsonApiStoreQueries,
-  query: ResourceQuery): NgrxJsonApiStoreQueries => {
-
-  let newStoreQuery = Object.assign({}, state[query.queryId]);
-  newStoreQuery.loading = true;
-  newStoreQuery.query = _.cloneDeep(query);
-
-  if (!query.queryId) {
-    let queryId = uuid();
-    newStoreQuery.query.queryId = queryId;
-  }
-
-  if (_.isUndefined(newStoreQuery.errors)) {
-    newStoreQuery.errors = [];
-  }
-
-  let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
-  newState[newStoreQuery.query.queryId] = newStoreQuery;
-  return newState;
-};
-
-/**
- * Removes the given query from the store.
- */
-export const removeQuery = (state: NgrxJsonApiStoreQueries,
-  queryId: string): NgrxJsonApiStoreQueries => {
-  let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
-  delete newState[queryId];
-  return newState;
-};
-
-export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
-  return { type: resource.type, id: resource.id };
-};
-
-
-/**
- * Updates the query results for the given query in the store.
- */
-export const updateQueryResults = (state: NgrxJsonApiStoreQueries, queryId: string,
-  document: Document): NgrxJsonApiStoreQueries => {
-
-  let storeQuery: ResourceQueryStore = state[queryId];
-  if (storeQuery) {
-    let data = _.isArray(document.data) ? document.data : [document.data];
-    let newQueryStore = Object.assign({}, storeQuery, {
-      resultIds: data.map(it => toResourceIdentifier(it)),
-      loading: false
-    });
-
-    let newState: NgrxJsonApiStoreQueries = Object.assign({}, state);
-    newState[queryId] = newQueryStore;
-    return newState;
-  }
-  return state;
-};
-
-
-export const updateStoreResources = (state: NgrxJsonApiStoreData,
+export const updateStoreDataFromPayload = (storeData: NgrxJsonApiStoreData,
   payload: Document): NgrxJsonApiStoreData => {
-  // perhaps this should be named updateStoreData
   let data = <Array<Resource> | Resource>_.get(payload, 'data');
 
   if (_.isUndefined(data)) {
-    return state;
+    return storeData;
   }
 
   data = _.isArray(data) ? data : [data];
@@ -486,17 +371,107 @@ export const updateStoreResources = (state: NgrxJsonApiStoreData,
       // newPartialState.data[resourcePath] = { data: {} } ;
       // newPartialState.data = updateOrInsertResource(
       // result.data, resource);
-      return updateOrInsertResource(result, resource, true, true);
+      return updateStoreDataFromResource(result, resource, true, true);
       // result.data[resourcePath].data = updateOrInsertResource(
       // result.data[resourcePath].data, resource);
       // return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
-    }, state);
+    }, storeData);
 };
 
-export const filterResources = (
-  resources: NgrxJsonApiStoreResources,
-  storeData: NgrxJsonApiStoreData,
-  query: ResourceQuery,
+/**
+ * Updates the storeQueries by either adding a new ResourceQueryStore
+ * or modifying an existing one.
+ *
+ * @param storeQueries
+ * @param query
+ *
+ * @return a new NgrxJsonApiStoreQueries with the inserted/modified
+ * ResourceQueryStore
+ */
+export const updateQueryParams = (storeQueries: NgrxJsonApiStoreQueries,
+  query: Query): NgrxJsonApiStoreQueries => {
+
+  let newStoreQuery = Object.assign({}, storeQueries[query.queryId]);
+  newStoreQuery.loading = true;
+  newStoreQuery.query = _.cloneDeep(query);
+
+  if (!query.queryId) {
+    let queryId = uuid();
+    newStoreQuery.query.queryId = queryId;
+  }
+
+  if (_.isUndefined(newStoreQuery.errors)) {
+    newStoreQuery.errors = [];
+  }
+
+  let newState: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
+  newState[newStoreQuery.query.queryId] = newStoreQuery;
+  return newState;
+};
+
+/**
+ * Updates the query results for given a queryId and the results.
+ */
+export const updateQueryResults = (storeQueries: NgrxJsonApiStoreQueries,
+  queryId: string, document: Document): NgrxJsonApiStoreQueries => {
+
+  let storeQuery: StoreQuery = storeQueries[queryId];
+  if (storeQuery) {
+    let data = _.isArray(document.data) ? document.data : [document.data];
+    let newQueryStore = Object.assign({}, storeQuery, {
+      resultIds: data.map(it => toResourceIdentifier(it)),
+      loading: false
+    });
+
+    let newState: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
+    newState[queryId] = newQueryStore;
+    return newState;
+  }
+  return storeQueries;
+};
+
+/**
+ * Update the query errors given the queryId and a storeQueries and the
+ * document containing the error
+ *
+ *
+ */
+export const updateQueryErrors = (storeQueries: NgrxJsonApiStoreQueries,
+  queryId: string, document: Document): NgrxJsonApiStoreQueries => {
+
+  if (!queryId || !storeQueries[queryId]) {
+    return storeQueries;
+  }
+  let newState = Object.assign({}, storeQueries);
+  let newStoreQuery = Object.assign({}, newState[queryId]);
+  newStoreQuery.errors = [];
+  if (document.errors) {
+    newStoreQuery.errors.push(...document.errors);
+  }
+  newState[queryId] = newStoreQuery;
+  return newState;
+};
+
+/**
+ * Removes a query given its queryId from the NgrxJsonApiStoreQueries.
+ */
+export const removeQuery = (storeQueries: NgrxJsonApiStoreQueries, queryId: string
+): NgrxJsonApiStoreQueries => {
+  let newState: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
+  delete newState[queryId];
+  return newState;
+};
+
+/**
+ * Given a resource, it will return an object containing the resource id and type.
+ */
+export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
+  return { type: resource.type, id: resource.id };
+};
+
+
+export const filterResources = (resources: NgrxJsonApiStoreResources,
+  storeData: NgrxJsonApiStoreData, query: Query,
   resourceDefinitions: Array<ResourceDefinition>,
   filteringConfig?: NgrxJsonApiFilteringConfig) => {
   return _.filter(resources, (resource) => {
@@ -593,26 +568,22 @@ export const filterResources = (
  * Get the value for the last field in a given fitering path.
  *
  * @param path
- * @param baseResourceStore
+ * @param baseStoreResource
  * @param storeData
  * @param resourceDefinitions
  * @param pathSepartor
  * @returns the value of the last field in the path.
  */
-export const getResourceFieldValueFromPath = (
-  path: string,
-  baseResourceStore: ResourceStore,
-  storeData: NgrxJsonApiStoreData,
-  resourceDefinitions: Array<ResourceDefinition>,
-  pathSeparator?: string
-) => {
+export const getResourceFieldValueFromPath = (path: string,
+  baseStoreResource: StoreResource, storeData: NgrxJsonApiStoreData,
+  resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string) => {
   if (_.isUndefined(pathSeparator)) {
     pathSeparator = '.';
   }
   let fields: Array<string> = path.split(pathSeparator);
-  let currentResourceStore = baseResourceStore;
+  let currentStoreResource = baseStoreResource;
   for (let i = 0; i < fields.length; i++) {
-    let definition = _.find(resourceDefinitions, { type: currentResourceStore.resource.type });
+    let definition = _.find(resourceDefinitions, { type: currentStoreResource.resource.type });
 
     if (_.isUndefined(definition)) {
       throw new Error('Definition not found');
@@ -622,7 +593,7 @@ export const getResourceFieldValueFromPath = (
       throw new Error('Attributes or Relationships must be provided');
     }
     if (definition.attributes.hasOwnProperty(fields[i])) {
-      return _.get(currentResourceStore, 'resource.attributes.' + fields[i], null);
+      return _.get(currentStoreResource, 'resource.attributes.' + fields[i], null);
     } else if (definition.relationships.hasOwnProperty(fields[i])) {
       if (i === (fields.length - 1)) {
         throw new Error('The last field in the filtering path cannot be a relation');
@@ -631,7 +602,7 @@ export const getResourceFieldValueFromPath = (
       if (resourceRelation.relationType === 'hasMany') {
         throw new Error('Cannot filter past a hasMany relation');
       } else {
-        let relation = _.get(currentResourceStore, 'resource.relationships.' + fields[i], null);
+        let relation = _.get(currentStoreResource, 'resource.relationships.' + fields[i], null);
         if (!relation || !relation.data) {
           return null;
         } else {
@@ -639,13 +610,13 @@ export const getResourceFieldValueFromPath = (
             resourceRelation.type,
             relation.data.id
           ];
-          currentResourceStore = <ResourceStore>_.get(storeData, relatedPath);
+          currentStoreResource = <StoreResource>_.get(storeData, relatedPath);
         }
       }
     } else {
       throw new Error('Cannot find field in attributes or relationships');
     }
-    if (_.isUndefined(currentResourceStore)) {
+    if (_.isUndefined(currentStoreResource)) {
       return null;
     }
   }
@@ -728,14 +699,14 @@ export const generateQueryParams = (...params: Array<string>) => {
 
 /* tslint:disable */
 export const uuid = () => {
-  let lut = []; for (let i=0; i<256; i++) { lut[i] = (i<16?'0':'')+(i).toString(16); }
-  let d0 = Math.random()*0xffffffff|0;
-  let d1 = Math.random()*0xffffffff|0;
-  let d2 = Math.random()*0xffffffff|0;
-  let d3 = Math.random()*0xffffffff|0;
-  return lut[d0&0xff]+lut[d0>>8&0xff]+lut[d0>>16&0xff]+lut[d0>>24&0xff]+'-'+
-  lut[d1&0xff]+lut[d1>>8&0xff]+'-'+lut[d1>>16&0x0f|0x40]+lut[d1>>24&0xff]+'-'+
-  lut[d2&0x3f|0x80]+lut[d2>>8&0xff]+'-'+lut[d2>>16&0xff]+lut[d2>>24&0xff]+
-  lut[d3&0xff]+lut[d3>>8&0xff]+lut[d3>>16&0xff]+lut[d3>>24&0xff];
+  let lut = []; for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
+  let d0 = Math.random() * 0xffffffff | 0;
+  let d1 = Math.random() * 0xffffffff | 0;
+  let d2 = Math.random() * 0xffffffff | 0;
+  let d3 = Math.random() * 0xffffffff | 0;
+  return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] + lut[d0 >> 24 & 0xff] + '-' +
+    lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' + lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' +
+    lut[d2 & 0x3f | 0x80] + lut[d2 >> 8 & 0xff] + '-' + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] +
+    lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
 };
 /* tslint:enable */

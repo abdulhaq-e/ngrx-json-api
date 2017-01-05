@@ -39,17 +39,17 @@ import {
   Payload,
   ResourceError,
   ResourceIdentifier,
-  ResourceQuery,
+  Query,
   ResourceState,
-  ResourceStore,
+  StoreResource,
 } from './interfaces';
 
 interface TopologySortContext {
-  pendingResources: Array<ResourceStore>;
+  pendingResources: Array<StoreResource>;
   cursor: number;
-  sorted: Array<ResourceStore>;
+  sorted: Array<StoreResource>;
   visited: Array<boolean>;
-  dependencies: { [id: string]: Array<ResourceStore> };
+  dependencies: { [id: string]: Array<StoreResource> };
 }
 
 @Injectable()
@@ -88,8 +88,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() queryStore$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.QUERY_STORE_INIT)
-    .map<Action, ResourceQuery>(toPayload)
-    .mergeMap((query: ResourceQuery) => {
+    .map<Action, Query>(toPayload)
+    .mergeMap((query: Query) => {
       return this.store
         .select(this.selectors.storeLocation)
         .let(this.selectors.queryStore$(query))
@@ -115,7 +115,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
       // TODO add support for bulk updates as well (jsonpatch, etc.)
       // to get atomicity for multiple updates
 
-      let pending: Array<ResourceStore> = this.getPendingChanges(this.store.take(1));
+      let pending: Array<StoreResource> = this.getPendingChanges(this.store.take(1));
       if (pending.length > 0) {
         pending = this.sortPendingChanges(pending);
 
@@ -214,7 +214,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return new ApiApplySuccessAction(actions);
   }
 
-  private toErrorPayload(query: ResourceQuery, response: Response): Payload {
+  private toErrorPayload(query: Query, response: Response): Payload {
 
     let contentType = response.headers.get('Content-Type');
     let document = null;
@@ -250,7 +250,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return id.id + '@' + id.type;
   }
 
-  private sortPendingChanges(pendingResources: Array<ResourceStore>): Array<ResourceStore> {
+  private sortPendingChanges(pendingResources: Array<StoreResource>): Array<StoreResource> {
 
     // allocate dependency
     let dependencies: any = {};
@@ -300,7 +300,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 
-  private visit(pendingResource: ResourceStore, i, predecessors, context: TopologySortContext) {
+  private visit(pendingResource: StoreResource, i, predecessors, context: TopologySortContext) {
     let key = this.toKey(pendingResource.resource);
     if (predecessors.indexOf(key) >= 0) {
       throw new Error('Cyclic dependency: ' + key + ' with ' + JSON.stringify(predecessors));
@@ -312,7 +312,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     context.visited[i] = true;
 
     // outgoing edges
-    let outgoing: Array<ResourceStore> = context.dependencies[key];
+    let outgoing: Array<StoreResource> = context.dependencies[key];
 
     let preds = predecessors.concat(key);
     for (let child of outgoing) {
@@ -323,8 +323,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
   }
 
 
-  private getPendingChanges(state: NgrxJsonApiStore): Array<ResourceStore> {
-    let pending: Array<ResourceStore> = [];
+  private getPendingChanges(state: NgrxJsonApiStore): Array<StoreResource> {
+    let pending: Array<StoreResource> = [];
     Object.keys(state.data).forEach(type => {
       Object.keys(state.data[type]).forEach(id => {
         let storeResource = state.data[type][id];

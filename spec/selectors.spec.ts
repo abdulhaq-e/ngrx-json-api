@@ -35,7 +35,7 @@ import {
     selectorsFactory
 } from '../src/module';
 
-import { updateStoreResources } from '../src/utils';
+import { updateStoreDataFromPayload } from '../src/utils';
 
 import {
   testPayload,
@@ -83,7 +83,7 @@ describe('NgrxJsonApiSelectors', () => {
     }
     let store = {
         api: Object.assign({}, initialNgrxJsonApiState, {
-            data: updateStoreResources({}, testPayload),
+            data: updateStoreDataFromPayload({}, testPayload),
             queries: queries;
         }, )
     };
@@ -102,12 +102,12 @@ describe('NgrxJsonApiSelectors', () => {
         }));
     })
 
-    describe('getResourceStoreOfType$', () => {
+    describe('getStoreResourceOfType$', () => {
         it('should get all resources of a given type', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
-                .let(selectors.getResourceStoreOfType$('Article'))
+                .let(selectors.getStoreResourceOfType$('Article'))
                 .subscribe(d => res = d);
             tick();
             expect(res['1']).toBeDefined();
@@ -123,19 +123,19 @@ describe('NgrxJsonApiSelectors', () => {
             let res;
             let sub = obs
                 .select('api')
-                .let(selectors.getResourceStoreOfType$({}))
+                .let(selectors.getStoreResourceOfType$({}))
                 .subscribe(d => res = d);
             tick();
             expect(res).not.toBeDefined();
         }));
     });
 
-    describe('getResourceStore$', () => {
+    describe('getStoreResource$', () => {
         it('should get a single resource given a type and id', fakeAsync(() => {
             let res;
             let sub = obs
                 .select('api')
-                .let(selectors.getResourceStore$({ type: 'Article', id: '1' }))
+                .let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
                 .subscribe(d => res = d);
             tick();
             expect(res.resource.attributes.title).toEqual('Article 1');
@@ -144,12 +144,12 @@ describe('NgrxJsonApiSelectors', () => {
         }));
 
 
-        describe('getManyResourceStore$', () => {
+        describe('getManyStoreResource$', () => {
             it('should get the a single query given a queryId', fakeAsync(() => {
                 let res;
                 let sub = obs
                     .select('api')
-                    .let(selectors.getManyResourceStore$(
+                    .let(selectors.getManyStoreResource$(
                         [
                             { type: 'Article', id: '1' },
                             { type: 'Article', id: '2' }
@@ -167,7 +167,7 @@ describe('NgrxJsonApiSelectors', () => {
         //     let res;
         //     let sub = obs
         //         .select('api')
-        //         .let(selectors.getOneResourceStore$({ type: 'Tag', id: '1' }))
+        //         .let(selectors.getOneStoreResource$({ type: 'Tag', id: '1' }))
         //         .subscribe(d => res = d);
         //     tick();
         //     expect(res).toBeNull();
@@ -177,7 +177,7 @@ describe('NgrxJsonApiSelectors', () => {
         //     let res;
         //     let sub = obs
         //         .select('api')
-        //         .let(selectors.getOneResourceStore$({ type: 'Article' }))
+        //         .let(selectors.getOneStoreResource$({ type: 'Article' }))
         //         .subscribe(d => res = d);
         //     tick();
         //     expect(res).toBeNull();
@@ -196,7 +196,7 @@ describe('NgrxJsonApiSelectors', () => {
                     queryType: 'getOne'
                 }))
                 .subscribe(d => res = d);
-            obs.select('api').let(selectors.getResourceStore$({ type: 'Article', id: '1' }))
+            obs.select('api').let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
                 .subscribe(r => expect(r.resource).toEqual(res));
             tick();
         }));
@@ -239,7 +239,7 @@ describe('NgrxJsonApiSelectors', () => {
         }));
 
         // it doesn't work, don't know why
-        // fit('should throw an error for getOne queries that return more than one resourceStore', fakeAsync(() => {
+        // fit('should throw an error for getOne queries that return more than one StoreResource', fakeAsync(() => {
         //     let res;
         //     let sub = obs
         //         .select('api')
@@ -267,7 +267,7 @@ describe('NgrxJsonApiSelectors', () => {
             expect(res.length).toBe(2);
         }));
 
-        it('should return an array of filtered resourceStore given a getMany query', fakeAsync(() => {
+        it('should return an array of filtered StoreResource given a getMany query', fakeAsync(() => {
               let res;
               let sub = obs
                   .select('api')
@@ -288,7 +288,7 @@ describe('NgrxJsonApiSelectors', () => {
               expect(res[0].id).toEqual('1');
           }));
 
-          it('should return an empty array of filtered resourceStore given a getMany query that return nothing', fakeAsync(() => {
+          it('should return an empty array of filtered StoreResource given a getMany query that return nothing', fakeAsync(() => {
                 let res;
                 let sub = obs
                     .select('api')
@@ -352,7 +352,7 @@ describe('NgrxJsonApiSelectors', () => {
     });
 
     describe('getResults$', () => {
-      it('should get the resourceStore(s) that are the results of a query', fakeAsync(() => {
+      it('should get the StoreResource(s) that are the results of a query', fakeAsync(() => {
         let res;
         let sub = obs
         .select('api')

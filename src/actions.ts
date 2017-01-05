@@ -6,7 +6,7 @@ import {
   Payload,
   Resource,
   ResourceIdentifier,
-  ResourceQuery,
+  Query,
 } from './interfaces';
 import { type } from './utils';
 
@@ -138,7 +138,7 @@ export class RemoveQueryAction implements Action {
 
 export class QueryStoreInitAction implements Action {
   type = NgrxJsonApiActionTypes.QUERY_STORE_INIT;
-  constructor(public payload: ResourceQuery) { }
+  constructor(public payload: Query) { }
 }
 
 export class QueryStoreSuccessAction implements Action {

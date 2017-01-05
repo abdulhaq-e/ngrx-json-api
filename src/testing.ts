@@ -7,7 +7,7 @@ import 'rxjs/add/observable/throw';
 import { NgrxJsonApi } from './api';
 import {
   Payload,
-  ResourceQuery,
+  Query,
 } from './interfaces';
 import { NgrxJsonApiEffects } from './effects';
 
@@ -70,7 +70,7 @@ export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
   //   // super()
   // }
 
-  private toErrorPayload(query: ResourceQuery, response: Response): Payload {
+  private toErrorPayload(query: Query, response: Response): Payload {
     if (response === 'FAIL QUERY') {
       return { query: query };
     } else if (response === 'Unknown query') {

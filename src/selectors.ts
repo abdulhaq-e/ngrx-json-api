@@ -31,8 +31,8 @@ import {
   QueryType,
   ResourceIdentifier,
   Resource,
-  ResourceQuery,
-  ResourceStore,
+  Query,
+  StoreResource,
 } from './interfaces';
 import {
   filterResources
@@ -52,28 +52,28 @@ export class NgrxJsonApiSelectors<T> {
     };
   }
 
-  public getResourceStoreOfType$(type: string) {
+  public getStoreResourceOfType$(type: string) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$.let(this.getStoreData$())
         .map(resources => resources[type]);
     };
   }
 
-  public queryStore$(query: ResourceQuery) {
+  public queryStore$(query: Query) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       let selected$;
       switch (query.queryType) {
         case 'getOne': {
           if (query.id && query.type) {
             selected$ = state$
-              .let(this.getResourceStore$({
+              .let(this.getStoreResource$({
                 id: query.id,
                 type: query.type
               }))
               .map(it => it.resource);
           } else {
             selected$ = state$
-              .let(this.getResourceStoreOfType$(query.type))
+              .let(this.getStoreResourceOfType$(query.type))
               .combineLatest(state$.let(this.getStoreData$()),
               (
                 resources: NgrxJsonApiStoreResources,
@@ -99,7 +99,7 @@ export class NgrxJsonApiSelectors<T> {
         }
         case 'getMany': {
           selected$ = state$.let(
-            this.getResourceStoreOfType$(query.type)
+            this.getStoreResourceOfType$(query.type)
           ).combineLatest(
             state$.let(this.getStoreData$()),
             (
@@ -148,21 +148,21 @@ export class NgrxJsonApiSelectors<T> {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
         .let(this.getResultIdentifiers$(queryId))
-        .mergeMap(ids => state$.let(this.getManyResourceStore$(ids)));
+        .mergeMap(ids => state$.let(this.getManyStoreResource$(ids)));
     };
   }
 
-  public getResourceStore$(identifier: ResourceIdentifier) {
+  public getStoreResource$(identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getResourceStoreOfType$(identifier.type))
+        .let(this.getStoreResourceOfType$(identifier.type))
         .map(resources => resources[identifier.id]);
     };
   }
 
-  public getManyResourceStore$(identifiers: Array<ResourceIdentifier>) {
+  public getManyStoreResource$(identifiers: Array<ResourceIdentifier>) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      let obs = identifiers.map(id => state$.let(this.getResourceStore$(id)));
+      let obs = identifiers.map(id => state$.let(this.getStoreResource$(id)));
       return Observable.zip(...obs);
     };
   }
@@ -170,14 +170,14 @@ export class NgrxJsonApiSelectors<T> {
   public getResource$(identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getResourceStore$(identifier))
+        .let(this.getStoreResource$(identifier))
         .map(it => it ? it.resource : null);
     };
   }
 
   public getManyResource$(identifiers: Array<ResourceIdentifier>) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$.let(this.getManyResourceStore$(identifiers))
+      return state$.let(this.getManyStoreResource$(identifiers))
         .map(it => it.map(r => r.resource));
     };
   }
@@ -185,7 +185,7 @@ export class NgrxJsonApiSelectors<T> {
   public getPersistedResource$(store: Store<T>, identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getResourceStore$(identifier))
+        .let(this.getStoreResource$(identifier))
         .map(it => it ? it.persistedResource : null);
     };
   }

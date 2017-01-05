@@ -52,7 +52,7 @@ import {
     resourceDefinitions
 } from './test_utils';
 
-import { updateStoreResources } from '../src/utils';
+import { updateStoreDataFromPayload } from '../src/utils';
 
 
 import {
@@ -67,7 +67,7 @@ describe('NgrxJsonApiEffects', () => {
     beforeEach(() => {
       let store = {
           api: Object.assign({}, initialNgrxJsonApiState, {
-              data: updateStoreResources({}, testPayload),
+              data: updateStoreDataFromPayload({}, testPayload),
           }, )
       };
       TestBed.configureTestingModule({
