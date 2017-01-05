@@ -43,13 +43,10 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
         let query = action.payload.query as ResourceQuery;
-        // FIXME: handle queries with no queryId
-        if (query.queryId) {
-          newState = Object.assign({}, state, {
-            queries: updateQueryParams(state.queries, query),
-            isReading: state.isReading + 1
-          });
-        }
+        newState = Object.assign({}, state, {
+          queries: updateQueryParams(state.queries, query),
+          isReading: state.isReading + 1
+        });
         return newState;
       }
       case NgrxJsonApiActionTypes.REMOVE_QUERY: {
@@ -138,11 +135,9 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
       }
       case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
         let query = action.payload as ResourceQuery;
-        if (query.queryId) {
-          newState = Object.assign({}, state, {
-            queries: updateQueryParams(state.queries, query),
-          });
-        }
+        newState = Object.assign({}, state, {
+          queries: updateQueryParams(state.queries, query),
+        });
         return newState;
       }
       case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {

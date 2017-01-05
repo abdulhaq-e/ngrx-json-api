@@ -71,6 +71,18 @@ describe('NgrxJsonApiReducer', () => {
             expect(newState.queries['111'].query.type).toEqual('Article');
             expect(newState.queries['111'].query.id).toEqual('1');
         });
+
+        it('should accept queries with no queryId', () => {
+          let newState2 = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+              query: {
+                  id: '2',
+                  type: 'Article',
+                  queryType: 'getOne'
+              }
+          }));
+          expect(Object.keys(newState2.queries).length).toEqual(1);
+          expect(newState2.queries[Object.keys(newState2.queries)[0]].query.queryType).toEqual('getOne');
+        });
     });
 
     describe('REMOVE_QUERY action', () => {
