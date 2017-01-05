@@ -112,7 +112,8 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
       }
       case NgrxJsonApiActionTypes.API_READ_FAIL: {
         newState = Object.assign({}, state, {
-          queries: updateQueryErrors(state.queries, action.payload.query.queryId, action.payload.jsonApiData),
+          queries: updateQueryErrors(state.queries, action.payload.query.queryId,
+            action.payload.jsonApiData),
           isReading: state.isReading - 1
         });
         return newState;

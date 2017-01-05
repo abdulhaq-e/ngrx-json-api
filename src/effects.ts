@@ -61,7 +61,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.create(payload)
         .mapTo(new ApiCreateSuccessAction(payload))
-        .catch(error => Observable.of(new ApiCreateFailAction(this.toErrorPayload(payload.query, error))));
+        .catch(error => Observable.of(
+          new ApiCreateFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() updateResource$ = this.actions$
@@ -70,7 +71,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.update(payload)
         .mapTo(new ApiUpdateSuccessAction(payload))
-        .catch(error => Observable.of(new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))));
+        .catch(error => Observable.of(
+          new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() readResource$ = this.actions$
@@ -83,7 +85,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
           jsonApiData: data,
           query: payload.query
         }))
-        .catch(error => Observable.of(new ApiReadFailAction(this.toErrorPayload(payload.query, error))));
+        .catch(error => Observable.of(
+          new ApiReadFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() queryStore$ = this.actions$
@@ -97,7 +100,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
           jsonApiData: { data: results },
           query: query
         }))
-        .catch(error => Observable.of(new QueryStoreFailAction(this.toErrorPayload(query, error))));
+        .catch(error => Observable.of(
+          new QueryStoreFailAction(this.toErrorPayload(query, error))));
     });
 
   @Effect() deleteResource$ = this.actions$
@@ -106,7 +110,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi.delete(payload)
         .mapTo(new ApiDeleteSuccessAction(payload))
-        .catch(error => Observable.of(new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
+        .catch(error => Observable.of(
+          new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
     });
 
   @Effect() applyResources$ = this.actions$
@@ -138,7 +143,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
             };
             actions.push(this.jsonApi.create(payload)
               .mapTo(new ApiCreateSuccessAction(payload))
-              .catch(error => Observable.of(new ApiCreateFailAction(this.toErrorPayload(payload.query, error))))
+              .catch(error => Observable.of(
+                new ApiCreateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.UPDATED) {
             // prepare payload, omit links and meta information
@@ -163,7 +169,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 jsonApiData: data,
                 query: payload.query
               }))
-              .catch(error => Observable.of(new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))))
+              .catch(error => Observable.of(
+                new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.DELETED) {
             let payload: Payload = {
@@ -179,14 +186,18 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 jsonApiData: data,
                 query: payload.query
               }))
-              .catch(error => Observable.of(new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))))
+              .catch(error => Observable.of(
+                new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else {
             throw new Error('unknown state ' + pendingChange.state);
           }
         }
 
-        return Observable.of(...actions).concatAll().toArray().map(actions => this.toApplyAction(actions));
+        return Observable.of(...actions)
+          .concatAll()
+          .toArray()
+          .map(actions => this.toApplyAction(actions));
       } else {
         return Observable.of(new ApiApplySuccessAction([]));
       }

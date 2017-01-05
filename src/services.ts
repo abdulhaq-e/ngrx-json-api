@@ -46,7 +46,8 @@ export class NgrxJsonApiService {
     private store: Store<any>,
     private selectors: NgrxJsonApiSelectors<any>,
   ) {
-    this.store.select(selectors.storeLocation).subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
+    this.store.select(selectors.storeLocation)
+      .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
   public findOne(
@@ -103,7 +104,8 @@ export class NgrxJsonApiService {
   }
 
   /**
-   * Gets the current state of the given resources. Consider the use of selectResource(...) to get an observable of the resource.
+   * Gets the current state of the given resources.
+   * Consider the use of selectResource(...) to get an observable of the resource.
    *
    * @param identifier
    */
@@ -116,8 +118,8 @@ export class NgrxJsonApiService {
   }
 
   /**
-   * Gets the current persisted state of the given resources. Consider the use of selectResource(...) to get an observable of the
-   * resource.
+   * Gets the current persisted state of the given resources.
+   * Consider the use of selectResource(...) to get an observable of the resource.
    *
    * @param identifier
    */

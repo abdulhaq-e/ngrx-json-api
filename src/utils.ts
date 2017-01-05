@@ -36,7 +36,8 @@ export const denormaliseObject = (resource: Resource,
     Object.keys(resource.relationships)
       .forEach(relation => {
         resource.relationships[relation]['reference'] = {};
-        let data: ResourceIdentifier | Array<ResourceIdentifier> = resource.relationships[relation].data;
+        let data: ResourceIdentifier | Array<ResourceIdentifier> = resource
+          .relationships[relation].data;
         // denormalised relation
         let relationDenorm;
 
@@ -184,7 +185,8 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
-  newState[resourceId.type][resourceId.id] = Object.assign({}, newState[resourceId.type][resourceId.id]);
+  newState[resourceId.type][resourceId.id] = Object.assign({},
+    newState[resourceId.type][resourceId.id]);
   if (resourceState !== null) {
     newState[resourceId.type][resourceId.id].state = resourceState;
   }
@@ -296,12 +298,10 @@ export const deleteStoreResources = (storeData: NgrxJsonApiStoreData, query: Que
  *
  * @returns a new NgrxJsonApiStoreData with an inserted/updated resource.
  */
-export const updateStoreDataFromResource = (storeData: NgrxJsonApiStoreData,
-  resource: Resource, fromServer: boolean, override: boolean
-): NgrxJsonApiStoreData => {
+export const updateStoreDataFromResource = (storeData: NgrxJsonApiStoreData, resource: Resource,
+  fromServer: boolean, override: boolean): NgrxJsonApiStoreData => {
 
   // handle relationships first.
-  // FIXME this is not working, the data section of a relationship contains only <type, id>, not a complete resource
   // if (resource.hasOwnProperty('relationships')) {
   //    Object.keys(resource.relationships)
   //       .forEach(relation => {
@@ -312,8 +312,8 @@ export const updateStoreDataFromResource = (storeData: NgrxJsonApiStoreData,
   //           } else if (_.isArray(data)) {
   //                // hasMany relation
   //                newState = <NgrxJsonApiStoreData>data.reduce(
-  //                    (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
-  //                        return updateOrInsertResource(partialState, currentResource, resourceState);
+  //   (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
+  //                 return updateOrInsertResource(partialState, currentResource, resourceState);
   //                    }, newState);
   //            }
   //        });
@@ -482,7 +482,8 @@ export const filterResources = (resources: NgrxJsonApiStoreResources,
 
         if (!_.isUndefined(filteringConfig)) {
           pathSeparator = <string>_.get(filteringConfig, 'pathSeparator');
-          filteringOperators = <Array<FilteringOperator>>_.get(filteringConfig, 'filteringOperators');
+          filteringOperators = <Array<FilteringOperator>>_.get(
+            filteringConfig, 'filteringOperators');
         }
         // resource type and attribute
         let resourceFieldValue = getResourceFieldValueFromPath(
