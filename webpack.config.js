@@ -17,6 +17,15 @@ var config = {
         libraryTarget: 'umd',
         umdNamedDefine: true
     },
+    externals: [
+      '@angular/core',
+      '@angular/http',
+      '@ngrx/core',
+      '@ngrx/store',
+      '@ngrx/effects',
+      'lodash',
+      'rxjs',
+    ],
     module: {
         rules: [{
             test: /\.js$/,
