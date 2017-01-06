@@ -5,5 +5,6 @@ export * from './src/interfaces';
 export * from './src/module';
 export * from './src/reducers';
 export * from './src/selectors';
-export * from './src/utils';
 export * from './src/services';
+export * from './src/tokens';
+export * from './src/utils';
