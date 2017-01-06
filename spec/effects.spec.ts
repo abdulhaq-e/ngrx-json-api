@@ -6,12 +6,29 @@ import {
     TestBed
 } from '@angular/core/testing';
 
+import { Store, StoreModule } from '@ngrx/store';
+
 import {
     EffectsTestingModule,
     EffectsRunner
 } from '@ngrx/effects/testing';
 
+import { NgrxJsonApi } from '../src/api';
+import { NgrxJsonApiService } from '../src/services';
+import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
+
+import {
+    NGRX_JSON_API_CONFIG,
+    apiFactory,
+    selectorsFactory,
+} from '../src/module';
+
+import {
+    initialNgrxJsonApiState,
+    NgrxJsonApiStoreReducer,
+} from '../src/reducers';
+
 import {
     ApiCreateInitAction,
     ApiCreateSuccessAction,
@@ -25,24 +42,57 @@ import {
     ApiDeleteInitAction,
     ApiDeleteSuccessAction,
     ApiDeleteFailAction,
-    DeleteFromStateAction
+    QueryStoreInitAction,
+    QueryStoreSuccessAction,
+    QueryStoreFailAction
 } from '../src/actions';
 
-import { MOCK_JSON_API_PROVIDERS } from '../src/testing';
+import {
+    testPayload,
+    resourceDefinitions
+} from './test_utils';
+
+import { updateStoreDataFromPayload } from '../src/utils';
+
+
+import {
+  MOCK_JSON_API_PROVIDERS,
+  MOCK_NGRX_EFFECTS_PROVIDERS
+} from './testing';
 
 describe('NgrxJsonApiEffects', () => {
     let runner: EffectsRunner;
     let effects;
 
-    beforeEach(() => TestBed.configureTestingModule({
+    beforeEach(() => {
+      let store = {
+          api: Object.assign({}, initialNgrxJsonApiState, {
+              data: updateStoreDataFromPayload({}, testPayload),
+          }, )
+      };
+      TestBed.configureTestingModule({
         imports: [
-            EffectsTestingModule
+            EffectsTestingModule,
+            StoreModule.provideStore({ api: NgrxJsonApiStoreReducer }, store),
         ],
         providers: [
             ...MOCK_JSON_API_PROVIDERS,
-            NgrxJsonApiEffects
+            ...MOCK_NGRX_EFFECTS_PROVIDERS,
+            {
+                provide: NgrxJsonApiSelectors,
+                useFactory: selectorsFactory,
+                deps: [NGRX_JSON_API_CONFIG]
+            },
+            {
+                provide: NGRX_JSON_API_CONFIG,
+                useValue: {
+                    storeLocation: 'api',
+                    resourceDefinitions: resourceDefinitions
+                }
+            }
         ]
-    }));
+    })
+  });
 
     beforeEach(inject([EffectsRunner, NgrxJsonApiEffects],
         (_runner, _effects) => {
@@ -70,7 +120,7 @@ describe('NgrxJsonApiEffects', () => {
         },
         query: {
             queryType: 'create',
-            type: 'SUCCESS'
+            type: 'FAIL'
         }
     };
     let successQuery = {
@@ -84,10 +134,9 @@ describe('NgrxJsonApiEffects', () => {
         }
     };
 
-
     it('should respond to successfull CREATE_INIT action', () => {
-        runner.queue(new ApiCreateInitAction(successPayload));
         let res;
+        runner.queue(new ApiCreateInitAction(successPayload));
         effects.createResource$.subscribe(result => {
             res = result;
             expect(result).toEqual(
@@ -175,5 +224,37 @@ describe('NgrxJsonApiEffects', () => {
         });
         expect(res).toBeDefined();
     });
+
+    it('should respond to successfull QUERY_STORE_INIT action', () => {
+        let res;
+        let query = {
+          type: 'Article',
+          id: '1',
+          queryType: 'getOne',
+          queryId: '11'
+        }
+        runner.queue(new QueryStoreInitAction(query));
+        effects.queryStore$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new QueryStoreSuccessAction({
+                  jsonApiData: { data: result.payload.jsonApiData.data },
+                  query: query,
+                }));
+        });
+        expect(res).toBeDefined();
+    });
+
+    it('should respond to failed QUERY_STORE_INIT action', () => {
+        let res;
+        runner.queue(new QueryStoreInitAction(failQuery));
+        effects.queryStore$.subscribe(result => {
+            res = result;
+            expect(result).toEqual(
+                new QueryStoreFailAction(failQuery));
+        });
+        expect(res).toBeDefined();
+    });
+
 
 });

@@ -24,7 +24,7 @@ module.exports = function(karma) {
         mime: {
           'text/x-typescript': ['ts','tsx']
         },
-        reporters: ['mocha', 'coverage'],
+        reporters: ['jasmine-diff', 'mocha', 'coverage'],
 
         coverageReporter: {
             dir: 'coverage/',
