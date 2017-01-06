@@ -1,5 +1,6 @@
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/finally';
 
 import { Store } from '@ngrx/store';
 
@@ -25,7 +26,6 @@ import {
   ResourceDefinition,
   ResourceIdentifier,
   Query,
-  QueryHandle,
   ResourceRelationship,
   StoreResource,
 } from './interfaces';
@@ -50,16 +50,13 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(
-    query: Query,
-    fromServer = true,
-    resource = false
-  ): QueryHandle<Resource> {
+  public findOne(query: Query, fromServer = true,
+    resource = false): Observable<Resource | StoreResource> {
     query.queryType = 'getOne';
     this.findInternal(query, fromServer);
 
-    return {
-      results: this.selectResults(query.queryId).map(it => {
+    return this.selectResults(query.queryId)
+      .map(it => {
         if (it.length === 0) {
           return null;
         } else if (it.length === 1) {
@@ -67,25 +64,18 @@ export class NgrxJsonApiService {
         } else {
           throw new Error('Unique result expected');
         }
-      }
-      ),
-      unsubscribe: () => this.removeQuery(query.queryId)
-    };
-  }
+      })
+      .finally(() => this.removeQuery(query.queryId))
+  };
 
-  public findMany(
-    query: Query,
-    fromServer = true,
-    resource = false
-  ): QueryHandle<Array<Resource>> {
+  public findMany(query: Query, fromServer = true,
+    resource = false): Observable<Array<Resource> | Array<StoreResource>> {
     query.queryType = 'getMany';
     this.findInternal(query, fromServer);
-    return {
-      results: this.selectResults(query.queryId)
-        .map(it => resource ? it.map(r => r.resource) : it),
-      unsubscribe: () => this.removeQuery(query.queryId)
-    };
-  }
+    return this.selectResults(query.queryId)
+      .map(it => resource ? it.map(r => r.resource) : it)
+      .finally(() => this.removeQuery(query.queryId));
+  };
 
   private removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));

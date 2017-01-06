@@ -102,10 +102,6 @@ export interface Query {
   queryType?: QueryType;
 }
 
-export interface QueryHandle<T> extends AnonymousSubscription {
-  results: Observable<T>;
-}
-
 export interface QueryParams {
   filtering?: Array<FilteringParam>;
   sorting?: Array<SortingParam>;
