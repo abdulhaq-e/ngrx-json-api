@@ -301,44 +301,30 @@ export const deleteStoreResources = (storeData: NgrxJsonApiStoreData, query: Que
 export const updateStoreDataFromResource = (storeData: NgrxJsonApiStoreData, resource: Resource,
   fromServer: boolean, override: boolean): NgrxJsonApiStoreData => {
 
-  // handle relationships first.
-  // if (resource.hasOwnProperty('relationships')) {
-  //    Object.keys(resource.relationships)
-  //       .forEach(relation => {
-  //           let data = resource.relationships[relation].data;
-  //           if (_.isPlainObject(data)) {
-  //               // hasOne relation
-  //               newState = updateOrInsertResource(state, data, resourceState);
-  //           } else if (_.isArray(data)) {
-  //                // hasMany relation
-  //                newState = <NgrxJsonApiStoreData>data.reduce(
-  //   (partialState: NgrxJsonApiStoreData, currentResource: Resource): NgrxJsonApiStoreData => {
-  //                 return updateOrInsertResource(partialState, currentResource, resourceState);
-  //                    }, newState);
-  //            }
-  //        });
-  // }
-
   if (_.isUndefined(storeData[resource.type])) {
-    // we must mutate the main state (ngrxjsonapistoredata)
-    let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
-    newState[resource.type] = {};
-    newState[resource.type] = insertStoreResource(newState[resource.type], resource, fromServer);
-    return newState;
+    let newStoreData: NgrxJsonApiStoreData = Object.assign({}, storeData);
+    newStoreData[resource.type] = {};
+    newStoreData[resource.type] = insertStoreResource(newStoreData[resource.type],
+      resource, fromServer);
+    return newStoreData;
   } else if (_.isUndefined(storeData[resource.type][resource.id]) || override) {
-    let updatedTypeState = insertStoreResource(storeData[resource.type], resource, fromServer);
-    if (updatedTypeState !== storeData[resource.type]) {
-      let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
-      newState[resource.type] = updatedTypeState;
-      return newState;
+    let updatedStoreResources = insertStoreResource(storeData[resource.type], resource, fromServer);
+
+    // check if nothing has changed
+    if (updatedStoreResources !== storeData[resource.type]) {
+      let newStoreData: NgrxJsonApiStoreData = Object.assign({}, storeData);
+      newStoreData[resource.type] = updatedStoreResources;
+      return newStoreData;
     }
     return storeData;
   } else {
-    let updatedTypeState = updateStoreResource(storeData[resource.type], resource, fromServer);
-    if (updatedTypeState !== storeData[resource.type]) {
-      let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
-      newState[resource.type] = updatedTypeState;
-      return newState;
+    let updatedStoreResources = updateStoreResource(storeData[resource.type], resource, fromServer);
+
+    // check if nothing has changed
+    if (updatedStoreResources !== storeData[resource.type]) {
+      let newStoreData: NgrxJsonApiStoreData = Object.assign({}, storeData);
+      newStoreData[resource.type] = updatedStoreResources;
+      return newStoreData;
     }
     return storeData;
   }
