@@ -79,7 +79,7 @@ export interface NgrxJsonApiUrlBuilder {
   generateFieldsQueryParams?: (params: Array<string>) => string;
   generateIncludedQueryParams?: (params: Array<string>) => string;
   generateSortingQueryParams?: (params: Array<SortingParam>) => string;
-  generateQueryParams?: (params: Array<string>) => string;
+  generateQueryParams?: (...params: Array<string>) => string;
 }
 
 export type OperationType
