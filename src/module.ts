@@ -1,4 +1,4 @@
-import { ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule, OpaqueToken } from '@angular/core';
 
 import {
   Http, HttpModule
@@ -19,8 +19,8 @@ import {
 } from './pipes';
 
 import { NgrxJsonApiConfig } from './interfaces';
-import { NGRX_JSON_API_CONFIG } from './tokens';
 
+export const NGRX_JSON_API_CONFIG = new OpaqueToken('NGRX_JSON_API_CONFIG');
 
 export function apiFactory(http: Http, config: NgrxJsonApiConfig) {
   return new NgrxJsonApi(http, config);
@@ -48,14 +48,14 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
       deps: [NGRX_JSON_API_CONFIG]
     },
     {
-      provide: NGRX_JSON_API_CONFIG,
-      useValue: config
-    },
-    {
       provide: NgrxJsonApiService,
       useFactory: serviceFactory,
       deps: [Store, NgrxJsonApiSelectors]
-    }
+    },
+    {
+      provide: NGRX_JSON_API_CONFIG,
+      useValue: config
+    },
   ];
 };
 

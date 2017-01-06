@@ -23,8 +23,8 @@ var config = {
       '@ngrx/core',
       '@ngrx/store',
       '@ngrx/effects',
-      'lodash',
-      'rxjs',
+      // 'lodash',
+      // 'rxjs',
     ],
     module: {
         rules: [{
