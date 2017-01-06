@@ -8,5 +8,4 @@ export * from './pipes';
 export * from './reducers';
 export * from './selectors';
 export * from './services';
-export * from './testing';
 export * from './utils';

@@ -4,12 +4,12 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
-import { NgrxJsonApi } from './api';
+import { NgrxJsonApi } from '../src/api';
 import {
   Payload,
   Query,
-} from './interfaces';
-import { NgrxJsonApiEffects } from './effects';
+} from '../src/interfaces';
+import { NgrxJsonApiEffects } from '../src/effects';
 
 
 export class JsonApiMock {

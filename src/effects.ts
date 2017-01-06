@@ -116,11 +116,12 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
-    .mergeMap(() => {
+    .mergeMap(() => this.store.select(this.selectors.storeLocation).take(1))
+    .mergeMap((ngrxstore: NgrxJsonApiStore) => {
       // TODO add support for bulk updates as well (jsonpatch, etc.)
       // to get atomicity for multiple updates
 
-      let pending: Array<StoreResource> = this.getPendingChanges(this.store.take(1));
+      let pending: Array<StoreResource> = this.getPendingChanges(ngrxstore);
       if (pending.length > 0) {
         pending = this.sortPendingChanges(pending);
 

@@ -58,7 +58,7 @@ import { updateStoreDataFromPayload } from '../src/utils';
 import {
   MOCK_JSON_API_PROVIDERS,
   MOCK_NGRX_EFFECTS_PROVIDERS
-} from '../src/testing';
+} from './testing';
 
 describe('NgrxJsonApiEffects', () => {
     let runner: EffectsRunner;
