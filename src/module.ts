@@ -22,21 +22,19 @@ import { NgrxJsonApiConfig } from './interfaces';
 
 export const NGRX_JSON_API_CONFIG = new OpaqueToken('NGRX_JSON_API_CONFIG');
 
-export const apiFactory = (http: Http, config: NgrxJsonApiConfig) => {
+export function apiFactory(http: Http, config: NgrxJsonApiConfig) {
   return new NgrxJsonApi(http, config);
 };
 
-export const selectorsFactory = (config: NgrxJsonApiConfig) => {
+export function selectorsFactory(config: NgrxJsonApiConfig) {
   return new NgrxJsonApiSelectors<any>(config);
 };
 
-export const serviceFactory = (
-  store: Store<any>,
-  selectors: NgrxJsonApiSelectors<any>) => {
+export function serviceFactory(store: Store<any>, selectors: NgrxJsonApiSelectors<any>) {
   return new NgrxJsonApiService(store, selectors);
 };
 
-export const configure = (config: NgrxJsonApiConfig): Array<any> => {
+export function configure(config: NgrxJsonApiConfig): Array<any> {
 
   return [
     {
