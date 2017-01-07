@@ -673,13 +673,13 @@ export const generatePayload = (resource, queryType): Payload => {
         attributes: resource.attributes,
         relationships: resource.relationships
       }
-    }
+    };
   }
 
   // 'delete' only needs a query and it also needs an id in its query
   // 'update' also needs an id in its query
   if (queryType === 'update' || queryType === 'delete') {
-    payload.query.id = resource.id
+    payload.query.id = resource.id;
   }
 
   return payload;

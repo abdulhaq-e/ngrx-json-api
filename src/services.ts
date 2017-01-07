@@ -66,7 +66,8 @@ export class NgrxJsonApiService {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(query: Query, fromServer = true): Observable<StoreResource | StoreResource[]> {
+  private findInternal(query: Query,
+    fromServer = true): Observable<StoreResource | StoreResource[]> {
     if (!query.queryId) {
       query.queryId = this.uuid();
     }

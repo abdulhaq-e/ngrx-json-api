@@ -39,7 +39,18 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
 
     switch (action.type) {
       case NgrxJsonApiActionTypes.API_CREATE_INIT: {
-        return Object.assign({}, state, { isCreating: state['isCreating'] + 1 });
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
+        if (updatedData !== state.data) {
+          newState = Object.assign({},
+            state, {
+              data: updatedData,
+              isCreating: state.isCreating + 1
+            }
+          );
+          return newState;
+        } else {
+          return state;
+        }
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
         let query = action.payload.query as Query;
