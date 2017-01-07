@@ -103,7 +103,7 @@ export class ApiRollbackAction implements Action {
 
 export class ApiUpdateInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_UPDATE_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Resource) { }
 }
 
 export class ApiUpdateSuccessAction implements Action {

@@ -37,7 +37,8 @@ import {
   QueryStoreSuccessAction,
 } from '../src/actions';
 import {
-  NgrxJsonApiStore
+  NgrxJsonApiStore,
+  ResourceState,
 } from '../src/interfaces';
 
 import { testPayload } from './test_utils';
@@ -88,10 +89,39 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_UPDATE_INIT action', () => {
+    let action = new ApiUpdateInitAction({
+      id: '1',
+      type: 'Article',
+      attributes: {
+        title: 'Test'
+      }
+    });
+    let newState = NgrxJsonApiStoreReducer(state, action);
     it('should add 1 to isUpdating', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiUpdateInitAction({}));
       expect(newState.isUpdating).toBe(1);
     });
+
+    it('should add the Resource (and or StoreResource) to the storeData', () => {
+      expect(newState.data['Article']['1']).toBeDefined();
+      expect(newState.data['Article']['1'].resource).toBeDefined();
+      expect(newState.data['Article']['1'].persistedResource).toBeDefined();
+      expect(newState.data['Article']['1'].persistedResource).toBeNull();
+      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+    });
+
+    it('should keep the ResourceState as CREATED if the new data was also no from the server', () => {
+      let action2 =  new ApiUpdateInitAction({
+        id: '1',
+        type: 'Article',
+        attributes: {
+          title: 'Test 2'
+        }
+      });
+      let newState2 = NgrxJsonApiStoreReducer(state, action2);
+      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+      expect(newState2.data['Article']['1'].persistedResource).toBeNull();
+    });
+
   });
 
   describe('API_DELETE_INIT action', () => {

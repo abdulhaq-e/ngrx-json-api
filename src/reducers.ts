@@ -57,7 +57,18 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         return newState;
       }
       case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
-        return Object.assign({}, state, { isUpdating: state['isUpdating'] + 1 });
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
+        if (updatedData !== state.data) {
+          newState = Object.assign({},
+            state, {
+              data: updatedData,
+              isUpdating: state.isUpdating + 1
+            }
+          );
+          return newState;
+        } else {
+          return state;
+        }
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
         return Object.assign({}, state, { isDeleting: state['isDeleting'] + 1 });
