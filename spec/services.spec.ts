@@ -6,6 +6,8 @@ import {
   TestBed
 } from '@angular/core/testing';
 
+import * as _ from 'lodash';
+
 import { Http, HttpModule } from '@angular/http';
 
 import { Store, StoreModule } from '@ngrx/store';
@@ -107,6 +109,19 @@ describe('NgrxJsonApiService', () => {
       subs.unsubscribe();
       expect(service.storeSnapshot.queries['22']).not.toBeDefined()
     });
+
+    it('shoud run without a provided queryId and should remote it properly when done', () => {
+      let query = {
+        id: '1',
+        type: 'Article',
+      }
+      let storeResource = service.findOne(query, false);
+      let subs = storeResource.subscribe();
+      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(1)
+      subs.unsubscribe();
+      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(0)
+    });
+
   });
 
   describe('findMany', () => {

@@ -30,7 +30,8 @@ import {
   StoreResource,
 } from './interfaces';
 import {
-  denormaliseStoreResource
+  denormaliseStoreResource,
+  uuid
 } from './utils';
 
 export class NgrxJsonApiService {
@@ -65,6 +66,9 @@ export class NgrxJsonApiService {
   }
 
   private findInternal(query: Query, fromServer = true): Observable<StoreResource | StoreResource[]> {
+    if (!query.queryId) {
+      query.queryId = this.uuid();
+    }
     if (fromServer) {
       let payload: Payload = {
         query: query
@@ -91,6 +95,10 @@ export class NgrxJsonApiService {
         }
       })
       .finally(() => this.removeQuery(query.queryId));
+  }
+
+  private uuid() {
+    return uuid();
   }
 
   /**

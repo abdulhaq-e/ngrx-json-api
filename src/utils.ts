@@ -347,22 +347,21 @@ export const updateStoreDataFromPayload = (storeData: NgrxJsonApiStoreData,
 export const updateQueryParams = (storeQueries: NgrxJsonApiStoreQueries,
   query: Query): NgrxJsonApiStoreQueries => {
 
+  if (!query.queryId) {
+    return storeQueries;
+  }
+
   let newStoreQuery = Object.assign({}, storeQueries[query.queryId]);
   newStoreQuery.loading = true;
   newStoreQuery.query = _.cloneDeep(query);
-
-  if (!query.queryId) {
-    let queryId = uuid();
-    newStoreQuery.query.queryId = queryId;
-  }
 
   if (_.isUndefined(newStoreQuery.errors)) {
     newStoreQuery.errors = [];
   }
 
-  let newState: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
-  newState[newStoreQuery.query.queryId] = newStoreQuery;
-  return newState;
+  let newStoreQueries: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
+  newStoreQueries[newStoreQuery.query.queryId] = newStoreQuery;
+  return newStoreQueries;
 };
 
 /**

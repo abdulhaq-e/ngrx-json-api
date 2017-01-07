@@ -575,16 +575,6 @@ describe('updateQueryParams', () => {
     expect(newStoreQueries['4']).toBeDefined();
     expect(newStoreQueries['4'].query.type).toEqual('getOne');
   });
-
-  // it('should create a random query id if the query has no id', () => {
-  //   let newQuery = {
-  //     type: 'getOne'
-  //   }
-  //   let newStoreQueries = updateQueryParams(storeQueries, newQuery);
-  //   expect(newStoreQueries['4']).toBeDefined();
-  //   expect(newStoreQueries['4'].query.type).toEqual('getOne');
-  // });
-
 });
 
 describe('removeQuery', () => {
