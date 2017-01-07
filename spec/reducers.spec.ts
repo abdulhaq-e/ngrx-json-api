@@ -48,9 +48,21 @@ describe('NgrxJsonApiReducer', () => {
   deepFreeze(state);
 
   describe('API_CREATE_INIT action', () => {
+    let action = new ApiCreateInitAction({
+      query: {
+        id: '1',
+        type: 'Article',
+        queryId: '111'
+      }
+    });
+    let newState = NgrxJsonApiStoreReducer(state, action);
     it('should add 1 to isCreating', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiCreateInitAction({}));
       expect(newState.isCreating).toBe(1);
+    });
+
+    it('should update the storeQueries', () => {
+      expect(newState.queries['111'].query.type).toEqual('Article');
+      expect(newState.queries['111'].query.id).toEqual('1');
     });
   });
 
@@ -88,17 +100,44 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_UPDATE_INIT action', () => {
+    let action = new ApiUpdateInitAction({
+      query: {
+        id: '1',
+        type: 'Article',
+        queryId: '111'
+      }
+    });
+    let newState = NgrxJsonApiStoreReducer(state, action);
     it('should add 1 to isUpdating', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiUpdateInitAction({}));
       expect(newState.isUpdating).toBe(1);
+    });
+
+    it('should add the query to the storeQueries', () => {
+      expect(newState.queries['111']).toBeDefined();
+      expect(newState.queries['111'].query.type).toEqual('Article');
+      expect(newState.queries['111'].query.id).toEqual('1');
     });
   });
 
   describe('API_DELETE_INIT action', () => {
+    let action = new ApiDeleteInitAction({
+      query: {
+        id: '1',
+        type: 'Article',
+        queryId: '111'
+      }
+    });
+    let newState = NgrxJsonApiStoreReducer(state, action);
     it('should add 1 isDeleting', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiDeleteInitAction({}));
       expect(newState.isDeleting).toBe(1);
     });
+
+    it('should add the query to the storeQueries', () => {
+      expect(newState.queries['111']).toBeDefined();
+      expect(newState.queries['111'].query.type).toEqual('Article');
+      expect(newState.queries['111'].query.id).toEqual('1');
+    });
+
   });
 
   describe('API_CREATE_SUCCESS action', () => {
