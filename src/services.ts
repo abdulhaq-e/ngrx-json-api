@@ -31,6 +31,7 @@ import {
 } from './interfaces';
 import {
   denormaliseStoreResource,
+  generatePayload,
   uuid
 } from './utils';
 
@@ -196,21 +197,7 @@ export class NgrxJsonApiService {
    */
   public patchResource(resource: Resource, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = {
-        jsonApiData: {
-          data: {
-            id: resource.id,
-            type: resource.type,
-            attributes: resource.attributes,
-            relationships: resource.relationships
-          },
-        },
-        query: {
-          queryType: 'update',
-          type: resource.type,
-          id: resource.id
-        }
-      };
+      let payload: Payload = generatePayload(resource, 'update');
       this.store.dispatch(new ApiUpdateInitAction(payload));
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource));
@@ -226,20 +213,7 @@ export class NgrxJsonApiService {
    */
   public postResource(resource: Resource, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = {
-        jsonApiData: {
-          data: {
-            id: resource.id,
-            type: resource.type,
-            attributes: resource.attributes,
-            relationships: resource.relationships
-          },
-        },
-        query: {
-          queryType: 'create',
-          type: resource.type
-        }
-      };
+      let payload: Payload = generatePayload(resource, 'create');
       this.store.dispatch(new ApiCreateInitAction(payload));
     } else {
       this.store.dispatch(new PostStoreResourceAction(resource));
@@ -253,13 +227,7 @@ export class NgrxJsonApiService {
    */
   public deleteResource(resourceId: ResourceIdentifier, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = {
-        query: {
-          queryType: 'deleteOne',
-          type: resourceId.type,
-          id: resourceId.id
-        }
-      };
+      let payload: Payload = generatePayload(resourceId, 'delete');
       this.store.dispatch(new ApiDeleteInitAction(payload));
     } else {
       this.store.dispatch(new DeleteStoreResourceAction(resourceId));

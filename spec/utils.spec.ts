@@ -19,6 +19,7 @@ import {
   generateIncludedQueryParams,
   generateFilteringQueryParams,
   generateQueryParams,
+  generatePayload,
   generateSortingQueryParams,
   getResourceFieldValueFromPath,
   //     transformStoreData,
@@ -904,4 +905,45 @@ describe('generateQueryParams', () => {
   it('should return an empty string given no params', () => {
     expect(generateQueryParams()).toEqual('');
   });
-})
+});
+
+describe('generatePayload', () => {
+  it('should generate a payload for a "create" request given a resource', () => {
+    let resource = {
+      id: '10',
+      type: 'Article'
+    }
+    let payload = generatePayload(resource, 'create');
+    expect(payload.query.queryType).toEqual('create');
+    expect(payload.query.id).not.toBeDefined();
+    expect(payload.query.type).toEqual('Article');
+    expect(payload.jsonApiData.data.id).toEqual('10');
+    expect(payload.jsonApiData.data.type).toEqual('Article');
+  });
+
+  it('should generate a payload for a "update" request given a resource', () => {
+    let resource = {
+      id: '10',
+      type: 'Article'
+    }
+    let payload = generatePayload(resource, 'update');
+    expect(payload.query.queryType).toEqual('update');
+    expect(payload.query.id).toEqual('10');
+    expect(payload.query.type).toEqual('Article');
+    expect(payload.jsonApiData.data.id).toEqual('10');
+    expect(payload.jsonApiData.data.type).toEqual('Article');
+  });
+
+  it('should generate a payload for a "delete" request given a resource', () => {
+    let resource = {
+      id: '10',
+      type: 'Article'
+    }
+    let payload = generatePayload(resource, 'delete');
+    expect(payload.query.queryType).toEqual('delete');
+    expect(payload.query.id).toEqual('10');
+    expect(payload.query.type).toEqual('Article');
+    expect(payload.jsonApiData).not.toBeDefined();
+  });
+
+});

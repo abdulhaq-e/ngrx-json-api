@@ -13,6 +13,7 @@ import {
   NgrxJsonApiStoreResources,
   NgrxJsonApiStoreQueries,
   OperationType,
+  Payload,
   Query,
   QueryParams,
   Resource,
@@ -78,10 +79,10 @@ export const denormaliseStoreResource = (item: StoreResource, storeData: NgrxJso
     bag[resource.type] = {};
   }
   if (_.isUndefined(bag[resource.type][resource.id])) {
-      bag[resource.type][resource.id] = storeResource;
-      storeResource.resource = denormaliseObject(storeResource.resource, storeData, bag);
-      storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
-        storeData, bag);
+    bag[resource.type][resource.id] = storeResource;
+    storeResource.resource = denormaliseObject(storeResource.resource, storeData, bag);
+    storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
+      storeData, bag);
   }
 
   return bag[resource.type][resource.id];
@@ -651,6 +652,37 @@ export const generateQueryParams = (...params: Array<string>) => {
   } else {
     return '';
   }
+};
+
+export const generatePayload = (resource, queryType): Payload => {
+  let payload: Payload = {
+    query: {
+      type: resource.type,
+    }
+  };
+
+  // queryType is common for all payloads
+  payload.query.queryType = queryType;
+
+  // the data to be updated or created
+  if (queryType === 'create' || queryType === 'update') {
+    payload.jsonApiData = {
+      data: {
+        id: resource.id,
+        type: resource.type,
+        attributes: resource.attributes,
+        relationships: resource.relationships
+      }
+    }
+  }
+
+  // 'delete' only needs a query and it also needs an id in its query
+  // 'update' also needs an id in its query
+  if (queryType === 'update' || queryType === 'delete') {
+    payload.query.id = resource.id
+  }
+
+  return payload;
 };
 
 /* tslint:disable */
