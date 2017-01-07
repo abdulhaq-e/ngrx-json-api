@@ -295,10 +295,15 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_CREATE_FAIL', () => {
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({
-      jsonApiData: testPayload
-    }));
-    let newState = NgrxJsonApiStoreReducer(tempState, new ApiCreateFailAction({
+    let action0 = new ApiCreateInitAction({
+      id: '1',
+      type: 'Article',
+      attributes: {
+        title: 'Test 0'
+      }
+    });
+    let newState0 = NgrxJsonApiStoreReducer(state, action0);
+    let createFailAction = new ApiCreateFailAction({
       jsonApiData: {
         errors: [
           'permission denied'
@@ -308,26 +313,28 @@ describe('NgrxJsonApiReducer', () => {
         id: '1',
         type: 'Article',
       }
-    }));
+    });
+    let newState = NgrxJsonApiStoreReducer(newState0, createFailAction);
     it('should add the errors to the resource', () => {
       expect(newState.data['Article']['1'].errors[0]).toEqual('permission denied');
     });
 
     it('should subtract 1 from isCreating', () => {
-      expect(tempState.isCreating - newState.isCreating).toBe(1);
+      expect(newState0.isCreating - newState.isCreating).toBe(1);
     });
 
   });
 
   describe('API_READ_FAIL', () => {
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+    let action0 = new ApiReadInitAction({
       query: {
         id: '1',
         type: 'Article',
         queryId: '111'
       }
-    }));
-    let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadFailAction(
+    });
+    let tempState = NgrxJsonApiStoreReducer(state, action0);
+    let failAction = new ApiReadFailAction(
       {
         jsonApiData: {
           errors: ['permission denied']
@@ -337,7 +344,8 @@ describe('NgrxJsonApiReducer', () => {
           id: '1',
           type: 'Article',
         }
-      }));
+      });
+    let newState = NgrxJsonApiStoreReducer(tempState, failAction);
 
     it('should add the errors to the resource', () => {
       expect(newState.queries['111'].errors[0]).toEqual('permission denied');
@@ -350,30 +358,27 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_UPDATE_FAIL action', () => {
-    let query = {
-      queryId: '111',
+    let action = new ApiUpdateInitAction({
+      id: '1',
       type: 'Article',
-      id: '1'
-    };
-
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-      jsonApiData: testPayload,
-      query: query
-    }));
-    let tempState2 = NgrxJsonApiStoreReducer(tempState, new ApiUpdateInitAction({}));
-
-    let newState = NgrxJsonApiStoreReducer(tempState2, new ApiUpdateFailAction({
+      attributes: {
+        title: 'Test'
+      }
+    });
+    let tempState = NgrxJsonApiStoreReducer(state, action);
+    let updateFailAction = new ApiUpdateFailAction({
       jsonApiData: {
         errors: ['permission denied']
       },
       query: {
-        queryId: '111',
         id: '1',
         type: 'Article',
       }
-    }));
+    });
+    let newState = NgrxJsonApiStoreReducer(tempState, updateFailAction);
+
     it('should subtract 1 from isUpdating', () => {
-      expect(tempState2.isUpdating - newState.isUpdating).toBe(1);
+      expect(tempState.isUpdating - newState.isUpdating).toBe(1);
     });
 
     it('should add errors to the resource', () => {
@@ -382,30 +387,26 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_DELETE_FAIL action', () => {
-    let query = {
-      queryId: '111',
+    let action0 = new ApiCreateInitAction({
+      id: '1',
       type: 'Article',
-      id: '1'
-    };
+      attributes: {
+        title: 'Test 0'
+      }
+    });
+    let newState0 = NgrxJsonApiStoreReducer(state, action0);
 
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
-      jsonApiData: testPayload,
-      query: query
-    }));
-    let tempState2 = NgrxJsonApiStoreReducer(tempState, new ApiDeleteInitAction({}));
-
-    let newState = NgrxJsonApiStoreReducer(tempState2, new ApiDeleteFailAction({
+    let newState = NgrxJsonApiStoreReducer(newState0, new ApiDeleteFailAction({
       jsonApiData: {
         errors: ['permission denied']
       },
       query: {
-        queryId: '111',
         id: '1',
         type: 'Article',
       }
     }));
     it('should subtract 1 from isDeleting', () => {
-      expect(tempState2.isDeleting - newState.isDeleting).toBe(1);
+      expect(newState0.isDeleting - newState.isDeleting).toBe(1);
     });
 
     it('should add errors to the resource', () => {
