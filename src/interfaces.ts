@@ -175,7 +175,8 @@ export enum ResourceState {
   IN_SYNC,
   CREATED,
   UPDATED,
-  DELETED
+  DELETED,
+  NOT_LOADED
 }
 
 export interface SortingParam {

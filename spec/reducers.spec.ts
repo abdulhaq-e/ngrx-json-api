@@ -183,6 +183,19 @@ describe('NgrxJsonApiReducer', () => {
     it('should mark the StoreResource for deletion', () => {
       expect(newState.data['Article']['1'].state).toEqual(ResourceState.DELETED);
     });
+
+    it('should add StoreResources that are not found and add the errors and NOT_LOADED state', () => {
+      let deleteRandomResource = new ApiDeleteInitAction({
+          id: '123',
+          type: 'Article',
+      });
+      let newState = NgrxJsonApiStoreReducer(state, deleteRandomResource);
+      expect(newState.data['Article']['123']).toBeDefined();
+      expect(newState.data['Article']['123'].resource.type).toEqual('Article');
+      expect(newState.data['Article']['123'].resource.id).toEqual('123');
+      expect(newState.data['Article']['123'].state).toEqual(ResourceState.NOT_LOADED);
+    });
+
   });
 
   describe('API_CREATE_SUCCESS action', () => {
@@ -412,7 +425,6 @@ describe('NgrxJsonApiReducer', () => {
     it('should add errors to the resource', () => {
       expect(newState.data['Article']['1'].errors[0]).toEqual('permission denied');
     });
-
   });
 
   describe('QUERY_STORE_SUCCESS action', () => {

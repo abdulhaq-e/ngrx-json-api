@@ -152,7 +152,22 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   loading?: OperationType): NgrxJsonApiStoreData => {
   if (_.isUndefined(storeData[resourceId.type])
     || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
-    return storeData;
+
+      if (resourceState === ResourceState.DELETED) {
+        let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
+        newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
+        newState[resourceId.type][resourceId.id] = Object.assign({},
+          newState[resourceId.type][resourceId.id]);
+        newState[resourceId.type][resourceId.id].persistedResource = null;
+        newState[resourceId.type][resourceId.id].resource = {
+          type: resourceId.type,
+          id: resourceId.id
+        };
+        newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
+        return newState;
+      } else {
+        return storeData;
+      }
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
@@ -214,7 +229,6 @@ export const updateResourceErrors = (storeData: NgrxJsonApiStoreData,
     throw new Error('invalid parameters');
   }
   if (!storeData[query.type] || !storeData[query.type][query.id]) {
-    // resource is not locally stored, no need to update(?)
     return storeData;
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
