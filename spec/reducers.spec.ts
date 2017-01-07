@@ -162,9 +162,26 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_DELETE_INIT action', () => {
+    let action0 = new ApiCreateInitAction({
+      id: '1',
+      type: 'Article',
+      attributes: {
+        title: 'Test 0'
+      }
+    });
+    let newState0 = NgrxJsonApiStoreReducer(state, action0);
+    let action = new ApiDeleteInitAction({
+      type: 'Article',
+      id: '1'
+    })
+    let newState = NgrxJsonApiStoreReducer(newState0, action);
+
     it('should add 1 isDeleting', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiDeleteInitAction({}));
       expect(newState.isDeleting).toBe(1);
+    });
+
+    it('should mark the StoreResource for deletion', () => {
+      expect(newState.data['Article']['1'].state).toEqual(ResourceState.DELETED);
     });
   });
 

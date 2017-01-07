@@ -82,7 +82,14 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         }
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
-        return Object.assign({}, state, { isDeleting: state['isDeleting'] + 1 });
+        newState = Object.assign({},
+          state, {
+            data: updateResourceState(
+              state.data, action.payload, ResourceState.DELETED),
+            isDeleting: state.isDeleting + 1
+          }
+        );
+        return newState;
       }
       case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
         newState = Object.assign({},
