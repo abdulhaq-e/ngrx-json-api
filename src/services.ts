@@ -30,7 +30,7 @@ import {
   StoreResource,
 } from './interfaces';
 import {
-  denormaliseResource
+  denormaliseStoreResource
 } from './utils';
 
 export class NgrxJsonApiService {
@@ -50,38 +50,21 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(query: Query, fromServer = true,
-    resource = false): Observable<Resource | StoreResource> {
+  public findOne(query: Query, fromServer = true): Observable<StoreResource> {
     query.queryType = 'getOne';
-    this.findInternal(query, fromServer);
-
-    return this.selectResults(query.queryId)
-      .map(it => {
-        if (it.length === 0) {
-          return null;
-        } else if (it.length === 1) {
-          return resource ? it[0].resource : it[0];
-        } else {
-          throw new Error('Unique result expected');
-        }
-      })
-      .finally(() => this.removeQuery(query.queryId))
+    return this.findInternal(query, fromServer);
   };
 
-  public findMany(query: Query, fromServer = true,
-    resource = false): Observable<Array<Resource> | Array<StoreResource>> {
+  public findMany(query: Query, fromServer = true): Observable<Array<StoreResource>> {
     query.queryType = 'getMany';
-    this.findInternal(query, fromServer);
-    return this.selectResults(query.queryId)
-      .map(it => resource ? it.map(r => r.resource) : it)
-      .finally(() => this.removeQuery(query.queryId));
+    return this.findInternal(query, fromServer);
   };
 
   private removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(query: Query, fromServer = true) {
+  private findInternal(query: Query, fromServer = true): Observable<StoreResource | StoreResource[]> {
     if (fromServer) {
       let payload: Payload = {
         query: query
@@ -90,7 +73,24 @@ export class NgrxJsonApiService {
     } else {
       this.store.dispatch(new QueryStoreInitAction(query));
     }
-
+    return this.selectResults(query.queryId)
+      .map(it => {
+        switch (query.queryType) {
+          case 'getMany': {
+            return it;
+          }
+          case 'getOne': {
+            if (it.length === 0) {
+              return null;
+            } else if (it.length === 1) {
+              return it[0];
+            } else {
+              throw new Error('Unique result expected');
+            }
+          }
+        }
+      })
+      .finally(() => this.removeQuery(query.queryId));
   }
 
   /**
@@ -175,7 +175,7 @@ export class NgrxJsonApiService {
           StoreResource: StoreResource,
           storeData: NgrxJsonApiStoreData
         ) => {
-          return denormaliseResource(StoreResource, storeData);
+          return denormaliseStoreResource(StoreResource, storeData);
         });
     };
   }

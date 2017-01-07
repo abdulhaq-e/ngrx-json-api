@@ -123,11 +123,10 @@ describe('NgrxJsonApiService', () => {
                 queryType: 'getOne',
                 queryId: '22'
             }
-            let StoreResource = pipe.service.findOne(query, false, true)
-                .results
-            let denormalised = pipe.transform(StoreResource);
+            let storeResource = pipe.service.findOne(query, false);
+            let denormalised = pipe.transform(storeResource);
             denormalised.subscribe(it => {
-                expect(_.get(it, 'relationships.author.reference')).toBeDefined();
+                expect(_.get(it, 'resource.relationships.author.reference')).toBeDefined();
             });
         });
     });

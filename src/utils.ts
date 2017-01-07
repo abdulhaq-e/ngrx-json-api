@@ -26,8 +26,7 @@ import {
 } from './interfaces';
 
 export const denormaliseObject = (resource: Resource,
-  storeData: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData,
-  isRSdenorm: boolean): any => {
+  storeData: NgrxJsonApiStoreData, bag: NgrxJsonApiStoreData): any => {
   // this function MUST MUTATE resource
   let denormalised = resource;
 
@@ -47,17 +46,12 @@ export const denormaliseObject = (resource: Resource,
 
         } else if (_.isPlainObject(data)) {
           // hasOne relation
-          let relatedRS: Resource | StoreResource = getSingleStoreResource(
-            <ResourceIdentifier>data, storeData);
-          relatedRS = isRSdenorm ? relatedRS : relatedRS.resource;
-          relationDenorm = denormaliseResource(
-            relatedRS, storeData, bag);
+          let relatedRS = getSingleStoreResource(<ResourceIdentifier>data, storeData);
+          relationDenorm = denormaliseStoreResource(relatedRS, storeData, bag);
         } else if (_.isArray(data)) {
           // hasMany relation
           let relatedRSs: Array<StoreResource> = getMultipleStoreResource(data, storeData);
-          relationDenorm = relatedRSs
-            .map(r => isRSdenorm ? r : r.resource)
-            .map(r => denormaliseResource(r, storeData, bag));
+          relationDenorm = relatedRSs.map(r => denormaliseStoreResource(r, storeData, bag));
         }
         let relationDenormPath = 'relationships.' + relation + '.reference';
         denormalised = <Resource>_.set(
@@ -71,47 +65,23 @@ export const denormaliseObject = (resource: Resource,
   return denormalised;
 };
 
-export const denormaliseResource = (item: StoreResource | Resource,
-  storeData: NgrxJsonApiStoreData, bag: any = {}): any => {
+export const denormaliseStoreResource = (item: StoreResource, storeData: NgrxJsonApiStoreData,
+  bag: any = {}): any => {
 
   if (!item) {
     return null;
   }
-  let isStoreResource = item.hasOwnProperty('resource');
-  let StoreResource;
-  let resource: Resource;
-  if (isStoreResource) {
-    StoreResource = _.cloneDeep(<StoreResource>item);
-    resource = StoreResource.resource;
-  } else {
-    resource = _.cloneDeep(<Resource>item);
-  }
+  let storeResource = _.cloneDeep(<StoreResource>item);
+  let resource = storeResource.resource;
 
   if (_.isUndefined(bag[resource.type])) {
     bag[resource.type] = {};
   }
   if (_.isUndefined(bag[resource.type][resource.id])) {
-
-    if (isStoreResource) {
-      bag[resource.type][resource.id] = StoreResource;
-      StoreResource.resource = denormaliseObject(
-        StoreResource.resource,
-        storeData,
-        bag,
-        isStoreResource);
-      StoreResource.persistedResource = denormaliseObject(
-        StoreResource.persistedResource,
-        storeData,
-        bag,
-        isStoreResource);
-    } else {
-      bag[resource.type][resource.id] = resource;
-      resource = denormaliseObject(
-        resource,
-        storeData,
-        bag,
-        isStoreResource);
-    }
+      bag[resource.type][resource.id] = storeResource;
+      storeResource.resource = denormaliseObject(storeResource.resource, storeData, bag);
+      storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
+        storeData, bag);
   }
 
   return bag[resource.type][resource.id];

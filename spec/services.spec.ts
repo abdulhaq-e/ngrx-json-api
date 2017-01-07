@@ -90,23 +90,8 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findOne(query, false);
       storeResource.subscribe(it => {
-        console.log(it);
         expect(_.get(it, 'resource.type')).toEqual('Article');
         expect(_.get(it, 'resource.id')).toEqual('1');
-      });
-    });
-
-    it('find a single Resource from the state', () => {
-      let query = {
-        id: '1',
-        type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findOne(query, false, true);
-      storeResource.subscribe(it => {
-        console.log(it);
-        expect(_.get(it, 'type')).toEqual('Article');
-        expect(_.get(it, 'id')).toEqual('1');
       });
     });
 
@@ -116,7 +101,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.findOne(query, false, true);
+      let storeResource = service.findOne(query, false);
       let subs = storeResource.subscribe();
       expect(service.storeSnapshot.queries['22']).toBeDefined()
       subs.unsubscribe();
@@ -132,26 +117,10 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findMany(query, false);
       storeResource.subscribe(it => {
-        console.log(it);
         expect(_.get(it[0], 'resource.type')).toEqual('Article');
         expect(_.get(it[0], 'resource.id')).toEqual('1');
         expect(_.get(it[1], 'resource.type')).toEqual('Article');
         expect(_.get(it[1], 'resource.id')).toEqual('2');
-      });
-    });
-
-    it('find multiple Resources from the state', () => {
-      let query = {
-        type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findMany(query, false, true);
-      storeResource.subscribe(it => {
-        console.log(it);
-        expect(_.get(it[0], 'type')).toEqual('Article');
-        expect(_.get(it[0], 'id')).toEqual('1');
-        expect(_.get(it[1], 'type')).toEqual('Article');
-        expect(_.get(it[1], 'id')).toEqual('2');
       });
     });
 
@@ -208,10 +177,9 @@ describe('NgrxJsonApiService', () => {
         queryType: 'getOne',
         queryId: '22'
       }
-      let StoreResource = service.findOne(query, false)
-        .results
+      let storeResource = service.findOne(query, false)
         .let(service.denormalise());
-      StoreResource.subscribe(it => {
+      storeResource.subscribe(it => {
         expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
       });
     });
