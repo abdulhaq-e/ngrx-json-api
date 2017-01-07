@@ -39,7 +39,11 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
 
     switch (action.type) {
       case NgrxJsonApiActionTypes.API_CREATE_INIT: {
-        return Object.assign({}, state, { isCreating: state['isCreating'] + 1 });
+        let query = action.payload.query as Query;
+        return Object.assign({}, state, {
+          queries: updateQueryParams(state.queries, query),
+          isCreating: state.isCreating + 1
+        });
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
         let query = action.payload.query as Query;
@@ -57,10 +61,20 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         return newState;
       }
       case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
-        return Object.assign({}, state, { isUpdating: state['isUpdating'] + 1 });
+        let query = action.payload.query as Query;
+        return Object.assign({}, state,
+          {
+            queries: updateQueryParams(state.queries, query),
+            isUpdating: state['isUpdating'] + 1 }
+          );
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
-        return Object.assign({}, state, { isDeleting: state['isDeleting'] + 1 });
+        let query = action.payload.query as Query
+
+        return Object.assign({}, state, {
+          queries: updateQueryParams(state.queries, query),
+          isDeleting: state['isDeleting'] + 1
+        });
       }
       case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
         newState = Object.assign({},
