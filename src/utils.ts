@@ -16,6 +16,7 @@ import {
   Payload,
   Query,
   QueryParams,
+  QueryType,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
@@ -152,7 +153,22 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   loading?: OperationType): NgrxJsonApiStoreData => {
   if (_.isUndefined(storeData[resourceId.type])
     || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
-    return storeData;
+
+      if (resourceState === ResourceState.DELETED) {
+        let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
+        newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
+        newState[resourceId.type][resourceId.id] = Object.assign({},
+          newState[resourceId.type][resourceId.id]);
+        newState[resourceId.type][resourceId.id].persistedResource = null;
+        newState[resourceId.type][resourceId.id].resource = {
+          type: resourceId.type,
+          id: resourceId.id
+        };
+        newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
+        return newState;
+      } else {
+        return storeData;
+      }
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
@@ -214,7 +230,6 @@ export const updateResourceErrors = (storeData: NgrxJsonApiStoreData,
     throw new Error('invalid parameters');
   }
   if (!storeData[query.type] || !storeData[query.type][query.id]) {
-    // resource is not locally stored, no need to update(?)
     return storeData;
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
@@ -654,7 +669,7 @@ export const generateQueryParams = (...params: Array<string>) => {
   }
 };
 
-export const generatePayload = (resource, queryType): Payload => {
+export const generatePayload = (resource: Resource, queryType: QueryType): Payload => {
   let payload: Payload = {
     query: {
       type: resource.type,
@@ -673,13 +688,13 @@ export const generatePayload = (resource, queryType): Payload => {
         attributes: resource.attributes,
         relationships: resource.relationships
       }
-    }
+    };
   }
 
   // 'delete' only needs a query and it also needs an id in its query
   // 'update' also needs an id in its query
-  if (queryType === 'update' || queryType === 'delete') {
-    payload.query.id = resource.id
+  if (queryType === 'update' || queryType === 'deleteOne') {
+    payload.query.id = resource.id;
   }
 
   return payload;

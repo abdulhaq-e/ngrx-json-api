@@ -17,7 +17,6 @@ import 'rxjs/add/observable/throw';
 import {
   Document,
   NgrxJsonApiConfig,
-  Payload,
   ResourceDefinition,
   Query,
   QueryParams,
@@ -84,7 +83,7 @@ export class NgrxJsonApi {
     return `${this.apiUrl}/${resourcePath}`;
   }
 
-  public find(payload: Payload) {
+  public find(query: Query) {
 
     let _generateIncludedQueryParams = generateIncludedQueryParams;
     let _generateFilteringQueryParams = generateFilteringQueryParams;
@@ -112,7 +111,6 @@ export class NgrxJsonApi {
       }
     }
 
-    let query = payload.query;
     let queryParams = '';
     let includedParam = '';
     let filteringParams = '';
@@ -146,77 +144,69 @@ export class NgrxJsonApi {
     };
 
     return this.request(requestOptionsArgs);
-}
-
-  public create(payload: Payload) {
-
-  let query = payload.query;
-  let document = payload.jsonApiData;
-
-  if (typeof query === undefined) {
-    return Observable.throw('Query not found');
   }
 
-  if (typeof document === undefined) {
-    return Observable.throw('Query not found');
+  public create(query: Query, document: Document) {
+
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
+
+    if (typeof document === undefined) {
+      return Observable.throw('Data not found');
+    }
+
+    let requestOptionsArgs = {
+      method: RequestMethod.Post,
+      url: this.urlBuilder(query),
+      body: JSON.stringify({ data: document.data })
+    };
+
+    return this.request(requestOptionsArgs);
   }
 
-  let requestOptionsArgs = {
-    method: RequestMethod.Post,
-    url: this.urlBuilder(query),
-    body: JSON.stringify({ data: document.data })
-  };
+  public update(query: Query, document: Document) {
 
-  return this.request(requestOptionsArgs);
-}
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
 
-  public update(payload: Payload) {
+    if (typeof document === undefined) {
+      return Observable.throw('Data not found');
+    }
+    let requestOptionsArgs = {
+      method: RequestMethod.Patch,
+      url: this.urlBuilder(query),
+      body: JSON.stringify({ data: document.data })
+    };
 
-  let query = payload.query;
-  let document = payload.jsonApiData;
-
-  if (typeof query === undefined) {
-    return Observable.throw('Query not found');
+    return this.request(requestOptionsArgs);
   }
 
-  if (typeof document === undefined) {
-    return Observable.throw('Query not found');
+
+  public delete(query: Query) {
+
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
+
+    let requestOptions = {
+      method: RequestMethod.Delete,
+      url: this.urlBuilder(query)
+    };
+
+    return this.request(requestOptions);
   }
-  let requestOptionsArgs = {
-    method: RequestMethod.Patch,
-    url: this.urlBuilder(query),
-    body: JSON.stringify({ data: document.data })
-  };
-
-  return this.request(requestOptionsArgs);
-}
-
-
-  public delete (payload: Payload) {
-
-  let query = payload.query;
-
-  if (typeof query === undefined) {
-    return Observable.throw('Query not found');
-  }
-
-  let requestOptions = {
-    method: RequestMethod.Delete,
-    url: this.urlBuilder(query)
-  };
-
-  return this.request(requestOptions);
-}
 
 
   private request(requestOptionsArgs) {
 
-  let requestOptions = new RequestOptions(requestOptionsArgs);
+    let requestOptions = new RequestOptions(requestOptionsArgs);
 
-  let request = new Request(requestOptions.merge({
-    headers: this.headers
-  }));
+    let request = new Request(requestOptions.merge({
+      headers: this.headers
+    }));
 
-  return this.http.request(request);
-}
+    return this.http.request(request);
+  }
 }

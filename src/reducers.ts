@@ -39,28 +39,50 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
 
     switch (action.type) {
       case NgrxJsonApiActionTypes.API_CREATE_INIT: {
-        return Object.assign({}, state, { isCreating: state['isCreating'] + 1 });
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
+        if (updatedData !== state.data) {
+          newState = Object.assign({},
+            state, {
+              data: updatedData,
+              isCreating: state.isCreating + 1
+            }
+          );
+          return newState;
+        } else {
+          return state;
+        }
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
-        let query = action.payload.query as Query;
+        let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
           isReading: state.isReading + 1
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.REMOVE_QUERY: {
-        let queryId = action.payload as string;
-        newState = Object.assign({}, state, {
-          queries: removeQuery(state.queries, queryId),
-        });
-        return newState;
-      }
       case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
-        return Object.assign({}, state, { isUpdating: state['isUpdating'] + 1 });
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
+        if (updatedData !== state.data) {
+          newState = Object.assign({},
+            state, {
+              data: updatedData,
+              isUpdating: state.isUpdating + 1
+            }
+          );
+          return newState;
+        } else {
+          return state;
+        }
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
-        return Object.assign({}, state, { isDeleting: state['isDeleting'] + 1 });
+        newState = Object.assign({},
+          state, {
+            data: updateResourceState(
+              state.data, action.payload, ResourceState.DELETED),
+            isDeleting: state.isDeleting + 1
+          }
+        );
+        return newState;
       }
       case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
         newState = Object.assign({},
@@ -132,6 +154,13 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
           isDeleting: state.isDeleting - 1
         }
         );
+        return newState;
+      }
+      case NgrxJsonApiActionTypes.REMOVE_QUERY: {
+        let queryId = action.payload as string;
+        newState = Object.assign({}, state, {
+          queries: removeQuery(state.queries, queryId),
+        });
         return newState;
       }
       case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {

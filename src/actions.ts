@@ -53,7 +53,7 @@ export class ApiApplyFailAction implements Action {
 
 export class ApiCreateInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_CREATE_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Resource) { }
 }
 
 export class ApiCreateSuccessAction implements Action {
@@ -68,7 +68,7 @@ export class ApiCreateFailAction implements Action {
 
 export class ApiDeleteInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_DELETE_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: ResourceIdentifier) { }
 }
 
 export class ApiDeleteSuccessAction implements Action {
@@ -83,7 +83,7 @@ export class ApiDeleteFailAction implements Action {
 
 export class ApiReadInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_READ_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Query) { }
 }
 
 export class ApiReadSuccessAction implements Action {
@@ -103,7 +103,7 @@ export class ApiRollbackAction implements Action {
 
 export class ApiUpdateInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_UPDATE_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Resource) { }
 }
 
 export class ApiUpdateSuccessAction implements Action {

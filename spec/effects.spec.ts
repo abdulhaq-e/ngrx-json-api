@@ -180,7 +180,7 @@ describe('NgrxJsonApiEffects', () => {
 
   it('should respond to successfull READ_INIT action', () => {
     let res;
-    runner.queue(new ApiReadInitAction(successQuery));
+    runner.queue(new ApiReadInitAction(successQuery.query));
     effects.readResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
@@ -194,7 +194,7 @@ describe('NgrxJsonApiEffects', () => {
 
   it('should respond to failed READ_INIT action', () => {
     let res;
-    runner.queue(new ApiReadInitAction(failQuery));
+    runner.queue(new ApiReadInitAction(failQuery.query));
     effects.readResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
@@ -209,7 +209,7 @@ describe('NgrxJsonApiEffects', () => {
     effects.deleteResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiDeleteSuccessAction(successQuery));
+        new ApiDeleteSuccessAction(Object.assign({}, successQuery, { jsonApiData: null }));
     });
     expect(res).toBeDefined();
   });

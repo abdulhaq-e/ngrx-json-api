@@ -37,12 +37,17 @@ import { NgrxJsonApiSelectors } from './selectors';
 import {
   NgrxJsonApiStore,
   Payload,
+  Resource,
   ResourceError,
   ResourceIdentifier,
   Query,
+  QueryType,
   ResourceState,
   StoreResource,
 } from './interfaces';
+import {
+  generatePayload
+} from './utils';
 
 interface TopologySortContext {
   pendingResources: Array<StoreResource>;
@@ -57,9 +62,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() createResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
-    .map<Action, Payload>(toPayload)
+    .map<Action, Resource>(toPayload)
+    .map<Resource, Payload>(it => this.generatePayload(it, 'create'))
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.create(payload)
+      return this.jsonApi.create(payload.query, payload.jsonApiData)
         .mapTo(new ApiCreateSuccessAction(payload))
         .catch(error => Observable.of(
           new ApiCreateFailAction(this.toErrorPayload(payload.query, error))));
@@ -67,9 +73,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() updateResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_UPDATE_INIT)
-    .map<Action, Payload>(toPayload)
+    .map<Action, Resource>(toPayload)
+    .map<Resource, Payload>(it => this.generatePayload(it, 'update'))
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.update(payload)
+      return this.jsonApi.update(payload.query, payload.jsonApiData)
         .mapTo(new ApiUpdateSuccessAction(payload))
         .catch(error => Observable.of(
           new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))));
@@ -77,16 +84,16 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() readResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_READ_INIT)
-    .map<Action, Payload>(toPayload)
-    .mergeMap((payload: Payload) => {
-      return this.jsonApi.find(payload)
+    .map<Action, Query>(toPayload)
+    .mergeMap((query: Query) => {
+      return this.jsonApi.find(query)
         .map(res => res.json())
         .map(data => new ApiReadSuccessAction({
           jsonApiData: data,
-          query: payload.query
+          query: query
         }))
         .catch(error => Observable.of(
-          new ApiReadFailAction(this.toErrorPayload(payload.query, error))));
+          new ApiReadFailAction(this.toErrorPayload(query, error))));
     });
 
   @Effect() queryStore$ = this.actions$
@@ -106,10 +113,15 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() deleteResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
-    .map<Action, Payload>(toPayload)
+    .map<Action, ResourceIdentifier>(toPayload)
+    .map<ResourceIdentifier, Payload>(it => this.generatePayload(it, 'deleteOne'))
     .mergeMap((payload: Payload) => {
-      return this.jsonApi.delete(payload)
-        .mapTo(new ApiDeleteSuccessAction(payload))
+      return this.jsonApi.delete(payload.query)
+        .map(res => res.json())
+        .map(data => new ApiDeleteSuccessAction({
+          jsonApiData: data,
+          query: payload.query
+        }))
         .catch(error => Observable.of(
           new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
     });
@@ -128,43 +140,16 @@ export class NgrxJsonApiEffects implements OnDestroy {
         let actions: Array<Observable<Action>> = [];
         for (let pendingChange of pending) {
           if (pendingChange.state === ResourceState.CREATED) {
-            let payload: Payload = {
-              jsonApiData: {
-                data: {
-                  id: pendingChange.resource.id,
-                  type: pendingChange.resource.type,
-                  attributes: pendingChange.resource.attributes,
-                  relationships: pendingChange.resource.relationships
-                },
-              },
-              query: {
-                queryType: 'create',
-                type: pendingChange.resource.type
-              }
-            };
-            actions.push(this.jsonApi.create(payload)
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'create');
+            actions.push(this.jsonApi.create(payload.query, payload.jsonApiData)
               .mapTo(new ApiCreateSuccessAction(payload))
               .catch(error => Observable.of(
                 new ApiCreateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.UPDATED) {
             // prepare payload, omit links and meta information
-            let payload: Payload = {
-              jsonApiData: {
-                data: {
-                  id: pendingChange.resource.id,
-                  type: pendingChange.resource.type,
-                  attributes: pendingChange.resource.attributes,
-                  relationships: pendingChange.resource.relationships
-                },
-              },
-              query: {
-                queryType: 'update',
-                type: pendingChange.resource.type,
-                id: pendingChange.resource.id
-              }
-            };
-            actions.push(this.jsonApi.update(payload)
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'update');
+            actions.push(this.jsonApi.update(payload.query, payload.jsonApiData)
               .map(res => res.json())
               .map(data => new ApiUpdateSuccessAction({
                 jsonApiData: data,
@@ -174,13 +159,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.DELETED) {
-            let payload: Payload = {
-              query: {
-                queryType: 'deleteOne',
-                type: pendingChange.resource.type,
-                id: pendingChange.resource.id
-              }
-            };
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'deleteOne');
             actions.push(this.jsonApi.delete(payload)
               .map(res => res.json())
               .map(data => new ApiDeleteSuccessAction({
@@ -332,6 +311,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
     };
 
     context.sorted[--context.cursor] = pendingResource;
+  }
+
+  private generatePayload(resource: Resource, queryType: QueryType): Payload {
+    return generatePayload(resource, queryType);
   }
 
 

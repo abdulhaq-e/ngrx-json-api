@@ -1,18 +1,3 @@
-import { Observable } from 'rxjs/Observable';
-// import 'rxjs/add/observable/of';
-// import 'rxjs/add/operator/do';
-// import 'rxjs/add/operator/filter';
-// import 'rxjs/add/operator/let';
-// import 'rxjs/add/operator/map';
-// import 'rxjs/add/operator/mapTo';
-// import 'rxjs/add/operator/merge';
-// import 'rxjs/add/operator/mergeMap';
-// import 'rxjs/add/operator/reduce';
-// import 'rxjs/add/operator/switchMap';
-// import 'rxjs/add/operator/switchMapTo';
-//
-// import '@ngrx/core/add/operator/select';
-//
 import {
   async,
   inject,
@@ -20,23 +5,18 @@ import {
   tick,
   TestBed
 } from '@angular/core/testing';
-//
-// import _ = require('lodash');
-//
-//
+
+import { Observable } from 'rxjs/Observable';
+
 import { NgrxJsonApiSelectors } from '../src/selectors';
-//
 import {
   initialNgrxJsonApiState
 } from '../src/reducers';
-
 import {
   NGRX_JSON_API_CONFIG,
   selectorsFactory
 } from '../src/module';
-
 import { updateStoreDataFromPayload } from '../src/utils';
-
 import {
   testPayload,
   resourceDefinitions
