@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/finally';
@@ -18,6 +19,7 @@ import {
   QueryStoreInitAction,
 } from './actions';
 import {
+  DenormalisedStoreResource,
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   Payload,
@@ -172,16 +174,19 @@ export class NgrxJsonApiService {
   }
 
   public denormalise() {
-    return (StoreResource$: Observable<StoreResource | StoreResource>) => {
-      return StoreResource$
+    return (
+      storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
+    ): Observable<DenormalisedStoreResource> | Observable<DenormalisedStoreResource[]> => {
+      return storeResource$
         .combineLatest(this.store
           .select(this.selectors.storeLocation)
-          .let(this.selectors.getStoreData$()),
-        (
-          StoreResource: StoreResource,
-          storeData: NgrxJsonApiStoreData
-        ) => {
-          return denormaliseStoreResource(StoreResource, storeData);
+          .let(this.selectors.getStoreData$()), (storeResource: StoreResource | StoreResource[],
+            storeData: NgrxJsonApiStoreData) => {
+          if (_.isArray(storeResource)) {
+            return storeResource.map(r => denormaliseStoreResource(r, storeData));
+          } else {
+            return denormaliseStoreResource(storeResource, storeData);
+          }
         });
     };
   }

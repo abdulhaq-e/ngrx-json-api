@@ -185,7 +185,7 @@ describe('NgrxJsonApiService', () => {
   });
 
   describe('denormalise', () => {
-    it('should denormalise a Resource', () => {
+    it('should denormalise a StoreResource', () => {
       let query = {
         id: '1',
         type: 'Article',
@@ -198,5 +198,17 @@ describe('NgrxJsonApiService', () => {
         expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
       });
     });
+
+    it('should denormalise an array of StoreResource', () => {
+      let query = {
+        type: 'Article',
+      }
+      let storeResource = service.findMany(query, false)
+        .let(service.denormalise());
+      storeResource.subscribe(it => {
+        expect(_.get(it[0], 'resource.relationships.author.reference.resource')).toBeDefined();
+      });
+    });
+
   });
 });
