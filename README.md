@@ -42,7 +42,7 @@ Also use `NgrxJsonApiStoreReducer` as a reducer for the JSON API state.
         apiUrl: 'http://localhost.com',
         resourceDefinitions: resourceDefinitions,
         storeLocation: 'api'
-      }),
+      }), // the store location is where in your main store lives NgrxJsonApiStore
       StoreModule.provide({ counter: counterReducer,  api: NgrxJsonApiStoreReducer})
     ],
     declarations: [AppComponent]
@@ -53,6 +53,7 @@ export class AppModule {}
 **4- Inject `NgrxJsonApiService` into the component:**
 ```ts
 import { Component } from '@angular/core';
+import { NgrxJsonApiService } from 'ngrx-json-api';
 
 @Component({
   selector: 'my-component',
@@ -66,6 +67,7 @@ export class MyComponent {
 For example, to read data from the server and display this data in the view:
 ```ts
 import { Component } from '@angular/core';
+import { NgrxJsonApiService } from 'ngrx-json-api';
 
 @Component({
   selector: 'my-component',
@@ -76,7 +78,6 @@ export class MyComponent {
 
   public resourcesQuery = this.ngrxJsonApiService
     .findMany({
-      queryType: 'getMany',
       type: 'Article'
       });
 }
@@ -86,9 +87,9 @@ export class MyComponent {
 
 ### Fetching data
 
-The `NgrxJsonApiService` instance methods `findOne` and `findMany` are the ones used for fetching data either from the server or from the state (offline fetching). Both return a handler with a `results` property that contains an `Observable` of the results. To use both methods, a `ResourceQuery` must be given as an input in addition to an optional boolean for server side or client side fetching. Default is server side fetching.
+The `NgrxJsonApiService` instance methods `findOne` and `findMany` are the ones used for fetching data either from the server or from the state (offline fetching). Both return an observable that should emit the results of the query. To use both methods, a `Query` must be given as an input in addition to an optional boolean to determine server side or client side fetching. Default is server side fetching.
 
-The ResourceQuery must have at least a `type` and `queryId` properties. Other possible properties are `id`, `params` and `queryType`. We will not use the last two now.
+The Query used in `findMany` must have at least a `type`. For `findOne`, in addition to a `type` property, it should have an `id` property. The latter is not strictly correct but we'll go into this later in advanced usage.
 
 Let's jump to examples:
 
@@ -98,7 +99,6 @@ Let's jump to examples:
 let query = {
   type: 'Article',
   id: '1',
-  queryId: '0' // any string is fine, it will be made optional
 }
 // to fetch this 'article' from the server:
 let queryResults = this.ngrxService.findOne(query)
@@ -108,7 +108,7 @@ let queryResults = this.ngrxService.findOne(query)
 To subscribe and obtain the results, we can manually subscribe or use the Async pipe if we're using this in the view.
 ```ts
 let results;
-this.queryResults.results.subscribe(it => results = it);
+this.queryResults.subscribe(it => results = it);
 ```
 
 What if we somehow already have this resource in the state and we want to obtain this article from that state rather than sending a request to the server. Well, we only need to change one thing:
@@ -117,7 +117,7 @@ let queryResults = this.ngrxService.findOne(query, false)
 // false means don't get this resource from the server.
 ```
 
-That was simple! One thing to note before moving to the next example; `findOne` will raise an error if more than one resource was returned whether from the server or from the state.
+That was simple! One thing to note before moving to the next example; `findOne` will raise an error if more than one resource was returned.
 
 #### 2- Fetching multiple resources
 ```ts
