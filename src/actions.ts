@@ -83,7 +83,7 @@ export class ApiDeleteFailAction implements Action {
 
 export class ApiReadInitAction implements Action {
   type = NgrxJsonApiActionTypes.API_READ_INIT;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Query) { }
 }
 
 export class ApiReadSuccessAction implements Action {

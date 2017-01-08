@@ -31,7 +31,6 @@ import {
 } from './interfaces';
 import {
   denormaliseStoreResource,
-  generatePayload,
   uuid
 } from './utils';
 
@@ -72,10 +71,7 @@ export class NgrxJsonApiService {
       query.queryId = this.uuid();
     }
     if (fromServer) {
-      let payload: Payload = {
-        query: query
-      };
-      this.store.dispatch(new ApiReadInitAction(payload));
+      this.store.dispatch(new ApiReadInitAction(query));
     } else {
       this.store.dispatch(new QueryStoreInitAction(query));
     }
@@ -198,8 +194,7 @@ export class NgrxJsonApiService {
    */
   public patchResource(resource: Resource, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = generatePayload(resource, 'update');
-      this.store.dispatch(new ApiUpdateInitAction(payload));
+      this.store.dispatch(new ApiUpdateInitAction(resource));
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource));
     }
@@ -214,8 +209,7 @@ export class NgrxJsonApiService {
    */
   public postResource(resource: Resource, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = generatePayload(resource, 'create');
-      this.store.dispatch(new ApiCreateInitAction(payload));
+      this.store.dispatch(new ApiCreateInitAction(resource));
     } else {
       this.store.dispatch(new PostStoreResourceAction(resource));
     }
@@ -228,8 +222,7 @@ export class NgrxJsonApiService {
    */
   public deleteResource(resourceId: ResourceIdentifier, toRemote = false) {
     if (toRemote) {
-      let payload: Payload = generatePayload(resourceId, 'delete');
-      this.store.dispatch(new ApiDeleteInitAction(payload));
+      this.store.dispatch(new ApiDeleteInitAction(resourceId));
     } else {
       this.store.dispatch(new DeleteStoreResourceAction(resourceId));
     }

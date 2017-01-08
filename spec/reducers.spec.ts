@@ -71,7 +71,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should keep the ResourceState as CREATED if the new data was also not from the server', () => {
-      let action2 =  new ApiUpdateInitAction({
+      let action2 = new ApiUpdateInitAction({
         id: '1',
         type: 'Article',
         attributes: {
@@ -86,11 +86,9 @@ describe('NgrxJsonApiReducer', () => {
 
   describe('API_READ_INIT action', () => {
     let newState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
-      query: {
-        id: '1',
-        type: 'Article',
-        queryId: '111'
-      }
+      id: '1',
+      type: 'Article',
+      queryId: '111'
     }));
 
     it('should change isReading status by adding 1', () => {
@@ -100,20 +98,6 @@ describe('NgrxJsonApiReducer', () => {
     it('should update the storeQueries', () => {
       expect(newState.queries['111'].query.type).toEqual('Article');
       expect(newState.queries['111'].query.id).toEqual('1');
-    });
-  });
-
-  describe('REMOVE_QUERY action', () => {
-    it('should remove query given a queryId', () => {
-      let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
-        query: {
-          id: '1',
-          type: 'Article',
-          queryId: '111'
-        }
-      }));
-      let newState = NgrxJsonApiStoreReducer(tempState, new RemoveQueryAction('111'));
-      expect(newState['111']).not.toBeDefined();
     });
   });
 
@@ -148,7 +132,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should keep the ResourceState as CREATED if the new data was also no from the server', () => {
-      let action2 =  new ApiUpdateInitAction({
+      let action2 = new ApiUpdateInitAction({
         id: '1',
         type: 'Article',
         attributes: {
@@ -186,8 +170,8 @@ describe('NgrxJsonApiReducer', () => {
 
     it('should add StoreResources that are not found and add the errors and NOT_LOADED state', () => {
       let deleteRandomResource = new ApiDeleteInitAction({
-          id: '123',
-          type: 'Article',
+        id: '123',
+        type: 'Article',
       });
       let newState = NgrxJsonApiStoreReducer(state, deleteRandomResource);
       expect(newState.data['Article']['123']).toBeDefined();
@@ -218,10 +202,11 @@ describe('NgrxJsonApiReducer', () => {
       type: 'Article',
       id: '1'
     }
-    let newState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+    let action = new ApiReadSuccessAction({
       jsonApiData: testPayload,
       query: query
-    }));
+    });
+    let newState = NgrxJsonApiStoreReducer(state, action);
     it('should subtract 1 from isReading', () => {
       expect(state.isReading - newState.isReading).toBe(1);
     });
@@ -231,13 +216,8 @@ describe('NgrxJsonApiReducer', () => {
     })
 
     it('should update the query results', () => {
-      let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
-        query: {
-          id: '1',
-          type: 'Article',
-          queryId: '111'
-        }
-      }));
+      let readInitAction = new ApiReadInitAction(query);
+      let tempState = NgrxJsonApiStoreReducer(state, readInitAction);
       let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
         jsonApiData: testPayload,
         query: query
@@ -340,11 +320,9 @@ describe('NgrxJsonApiReducer', () => {
 
   describe('API_READ_FAIL', () => {
     let action0 = new ApiReadInitAction({
-      query: {
         id: '1',
         type: 'Article',
         queryId: '111'
-      }
     });
     let tempState = NgrxJsonApiStoreReducer(state, action0);
     let failAction = new ApiReadFailAction(
@@ -427,13 +405,8 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('QUERY_STORE_SUCCESS action', () => {
-    let query = {
-      queryId: '111',
-      type: 'Article',
-      id: '1'
-    }
-    it('should update the query results', () => {
+  describe('REMOVE_QUERY action', () => {
+    it('should remove query given a queryId', () => {
       let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
         query: {
           id: '1',
@@ -441,6 +414,24 @@ describe('NgrxJsonApiReducer', () => {
           queryId: '111'
         }
       }));
+      let newState = NgrxJsonApiStoreReducer(tempState, new RemoveQueryAction('111'));
+      expect(newState['111']).not.toBeDefined();
+    });
+  });
+
+  describe('QUERY_STORE_SUCCESS action', () => {
+    let query = {
+      queryId: '111',
+      type: 'Article',
+      id: '1'
+    }
+    it('should update the query results', () => {
+      let readInitAction = new ApiReadInitAction({
+          id: '1',
+          type: 'Article',
+          queryId: '111'
+      });
+      let tempState = NgrxJsonApiStoreReducer(state, readInitAction);
       let newState = NgrxJsonApiStoreReducer(tempState, new QueryStoreSuccessAction({
         jsonApiData: testPayload,
         query: query

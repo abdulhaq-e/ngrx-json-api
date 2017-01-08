@@ -121,11 +121,9 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(0);
         });
         jsonapi.find({
-          query: {
-            queryType: 'getOne',
-            type: 'Post',
-            id: 1
-          }
+          queryType: 'getOne',
+          type: 'Post',
+          id: 1
         });
         tick();
       })));
@@ -138,10 +136,8 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(0);
         });
         jsonapi.find({
-          query: {
-            type: 'Post',
-            queryType: 'getMany',
-          }
+          type: 'Post',
+          queryType: 'getMany',
         });
         tick();
       })));
@@ -154,16 +150,14 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(0);
         });
         jsonapi.find({
-          query: {
-            queryType: 'getMany',
-            type: 'Post'
-                            params: {
-              filtering: [
-                { path: 'person__name', value: 'smith' },
-                { path: 'person__age', value: 20 }
-              ],
-              include: ['person', 'comments']
-            }
+          queryType: 'getMany',
+          type: 'Post',
+          params: {
+            filtering: [
+              { path: 'person__name', value: 'smith' },
+              { path: 'person__age', value: 20 }
+            ],
+            include: ['person', 'comments']
           }
         });
         tick();
@@ -180,14 +174,11 @@ describe('ngrx json api', () => {
         expect(c.request.headers.get('Accept')).toBe('application/vnd.api+json');
       });
       jsonapi.create({
-        query: {
-          type: 'Post',
-          queryType: 'create'
-        },
-        jsonApiData: {
+        type: 'Post',
+        queryType: 'create'
+      },{
           data: { title: 'Hello World' }
-        }
-      });
+        });
       tick();
     })));
 
@@ -218,14 +209,11 @@ describe('ngrx json api', () => {
           }));
         });
         jsonapi.create({
-          jsonApiData: {
+          queryType: 'getMany',
+          type: 'Post'
+        }, {
             data: { title: 'Hello', type: 'Post' }
-          },
-          query: {
-            queryType: 'getMany',
-            type: 'Post'
-          }
-        });
+          });
         tick();
       })));
   });
@@ -242,17 +230,13 @@ describe('ngrx json api', () => {
           }));
         });
         jsonapi.update({
-          jsonApiData: {
+          queryType: 'update',
+          type: 'Post',
+          id: '1'
+        }, {
             data: {
               title: 'Hello', id: '1', type: 'Post'
-            }
-          },
-          query: {
-            queryType: 'update',
-            type: 'Post',
-            id: '1'
-          }
-        });
+            });
         tick();
       })));
   });
@@ -266,11 +250,9 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(3);
         });
         jsonapi.delete({
-          query: {
             queryType: 'deleteOne',
             type: 'Post',
             id: '1'
-          }
         });
         tick();
       })));
@@ -336,7 +318,6 @@ describe('ngrx json api with overridden configs', () => {
         expect(c.request.method).toBe(0);
       });
       jsonapi.find({
-        query: {
           queryType: 'getMany',
           type: 'Post',
           params: {
@@ -347,7 +328,6 @@ describe('ngrx json api with overridden configs', () => {
             include: ['person', 'comments'],
             sorting: [{ api: 'person', direction: 'ASC' }],
             fields: ['name']
-          }
         }
       });
       tick();

@@ -53,17 +53,10 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
         }
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
-        let query = action.payload.query as Query;
+        let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
           isReading: state.isReading + 1
-        });
-        return newState;
-      }
-      case NgrxJsonApiActionTypes.REMOVE_QUERY: {
-        let queryId = action.payload as string;
-        newState = Object.assign({}, state, {
-          queries: removeQuery(state.queries, queryId),
         });
         return newState;
       }
@@ -161,6 +154,13 @@ export const NgrxJsonApiStoreReducer: ActionReducer<any> =
           isDeleting: state.isDeleting - 1
         }
         );
+        return newState;
+      }
+      case NgrxJsonApiActionTypes.REMOVE_QUERY: {
+        let queryId = action.payload as string;
+        newState = Object.assign({}, state, {
+          queries: removeQuery(state.queries, queryId),
+        });
         return newState;
       }
       case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {

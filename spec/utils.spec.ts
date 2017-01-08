@@ -939,8 +939,8 @@ describe('generatePayload', () => {
       id: '10',
       type: 'Article'
     }
-    let payload = generatePayload(resource, 'delete');
-    expect(payload.query.queryType).toEqual('delete');
+    let payload = generatePayload(resource, 'deleteOne');
+    expect(payload.query.queryType).toEqual('deleteOne');
     expect(payload.query.id).toEqual('10');
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData).not.toBeDefined();

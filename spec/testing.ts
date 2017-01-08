@@ -15,24 +15,24 @@ import { NgrxJsonApiEffects } from '../src/effects';
 export class JsonApiMock {
   constructor() { }
 
-  create(payload: Payload) {
-    if (payload.jsonApiData.data.type === 'SUCCESS') {
+  create(query, document) {
+    if (document.data.type === 'SUCCESS') {
       return Observable.of('SUCCESS');
-    } else if (payload.jsonApiData.data.type === 'FAIL') {
+    } else if (document.data.type === 'FAIL') {
       return Observable.throw('FAIL');
     }
   }
 
-  update(payload: Payload) {
-    if (payload.jsonApiData.data.type === 'SUCCESS') {
+  update(query, document) {
+    if (document.data.type === 'SUCCESS') {
       return Observable.of('SUCCESS');
-    } else if (payload.jsonApiData.data.type === 'FAIL') {
+    } else if (document.data.type === 'FAIL') {
       return Observable.throw('FAIL');
     }
   }
 
-  find(payload: Payload) {
-    if (payload.query.type === 'SUCCESS') {
+  find(query) {
+    if (query.type === 'SUCCESS') {
       let res = {
         data: {
           type: 'SUCCESS'
@@ -44,16 +44,16 @@ export class JsonApiMock {
           status: 200
         })
       ));
-    } else if (payload.query.type === 'FAIL') {
+    } else if (query.type === 'FAIL') {
       return Observable.throw('FAIL QUERY');
     }
   }
 
-  delete(payload: Payload) {
-    if (payload.query.type === 'SUCCESS') {
+  delete(query) {
+    if (query.type === 'SUCCESS') {
       return Observable.of(new Response(
         new ResponseOptions({})));
-    } else if (payload.query.type === 'FAIL') {
+    } else if (query.type === 'FAIL') {
       return Observable.throw('FAIL QUERY');
     }
   }
@@ -70,7 +70,7 @@ export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
   //   // super()
   // }
 
-  private toErrorPayload(query: Query, response: Response): Payload {
+  private toErrorPayload(query, response) {
     if (response === 'FAIL QUERY') {
       return { query: query };
     } else if (response === 'Unknown query') {
@@ -80,6 +80,10 @@ export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
       query: query,
       jsonApiData: { data: { type: response } }
     });
+  }
+
+  private generatePayload(resource, queryType) {
+    return resource;
   }
 }
 

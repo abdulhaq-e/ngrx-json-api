@@ -16,6 +16,7 @@ import {
   Payload,
   Query,
   QueryParams,
+  QueryType,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
@@ -668,7 +669,7 @@ export const generateQueryParams = (...params: Array<string>) => {
   }
 };
 
-export const generatePayload = (resource, queryType): Payload => {
+export const generatePayload = (resource: Resource, queryType: QueryType): Payload => {
   let payload: Payload = {
     query: {
       type: resource.type,
@@ -692,7 +693,7 @@ export const generatePayload = (resource, queryType): Payload => {
 
   // 'delete' only needs a query and it also needs an id in its query
   // 'update' also needs an id in its query
-  if (queryType === 'update' || queryType === 'delete') {
+  if (queryType === 'update' || queryType === 'deleteOne') {
     payload.query.id = resource.id;
   }
 
