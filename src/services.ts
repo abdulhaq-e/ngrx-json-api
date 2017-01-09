@@ -173,22 +173,26 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  public denormalise() {
-    return (
-      storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
-    ): Observable<DenormalisedStoreResource> | Observable<DenormalisedStoreResource[]> => {
-      return storeResource$
-        .combineLatest(this.store
-          .select(this.selectors.storeLocation)
-          .let(this.selectors.getStoreData$()), (storeResource: StoreResource | StoreResource[],
-            storeData: NgrxJsonApiStoreData) => {
-          if (_.isArray(storeResource)) {
-            return storeResource.map(r => denormaliseStoreResource(r, storeData));
-          } else {
-            return denormaliseStoreResource(storeResource, storeData);
-          }
-        });
-    };
+  public denormaliseOne(storeResource$: Observable<StoreResource>
+  ): Observable<DenormalisedStoreResource> {
+    return this.store
+      .select(this.selectors.storeLocation)
+      .let(this.selectors.getStoreData$())
+      .mergeMap((storeData: NgrxJsonApiStoreData) => storeResource$
+        .map<StoreResource, DenormalisedStoreResource>(
+        it => denormaliseStoreResource(it, storeData))
+      );
+  }
+
+  public denormaliseMany(storeResources$: Observable<StoreResource[]>
+  ): Observable<DenormalisedStoreResource[]> {
+    return this.store
+      .select(this.selectors.storeLocation)
+      .let(this.selectors.getStoreData$())
+      .mergeMap((storeData: NgrxJsonApiStoreData) => storeResources$
+        .map<StoreResource[], DenormalisedStoreResource[]>(
+        it => it.map(r => denormaliseStoreResource(r, storeData))
+        ));
   }
 
   /**

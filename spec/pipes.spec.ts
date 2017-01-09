@@ -16,7 +16,8 @@ import { NgrxJsonApiService } from '../src/services';
 import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
 import {
-  DenormaliseResourcePipe,
+  DenormaliseOneStoreResourcePipe,
+  DenormaliseManyStoreResourcePipe,
   GetResourcePipe,
   SelectResourcePipe,
   SelectStoreResourcePipe,
@@ -80,7 +81,8 @@ describe('NgrxJsonApiService', () => {
             resourceDefinitions: resourceDefinitions
           }
         },
-        DenormaliseResourcePipe,
+        DenormaliseOneStoreResourcePipe,
+        DenormaliseManyStoreResourcePipe,
         GetResourcePipe,
         SelectResourcePipe,
         SelectStoreResourcePipe,
@@ -110,9 +112,9 @@ describe('NgrxJsonApiService', () => {
 
   });
 
-  describe('DenormaliseResourcePipe', () => {
+  describe('DenormaliseOneResourcePipe', () => {
 
-    beforeEach(inject([DenormaliseResourcePipe], (p) => {
+    beforeEach(inject([DenormaliseOneStoreResourcePipe], (p) => {
       pipe = p;
     }));
 
@@ -130,4 +132,23 @@ describe('NgrxJsonApiService', () => {
       });
     });
   });
+
+  describe('DenormaliseManyResourcePipe', () => {
+
+    beforeEach(inject([DenormaliseManyStoreResourcePipe], (p) => {
+      pipe = p;
+    }));
+
+    it('should denormalise multiple StoreResource', () => {
+      let query = {
+        type: 'Article',
+      }
+      let storeResource = pipe.service.findMany(query, false);
+      let denormalised = pipe.transform(storeResource);
+      denormalised.subscribe(it => {
+        expect(_.get(it[0], 'resource.relationships.author.reference')).toBeDefined();
+      });
+    });
+  });
+
 });

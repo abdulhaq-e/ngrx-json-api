@@ -12,7 +12,8 @@ import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiSelectors } from './selectors';
 import { NgrxJsonApiService } from './services';
 import {
-  DenormaliseResourcePipe,
+  DenormaliseOneStoreResourcePipe,
+  DenormaliseManyStoreResourcePipe,
   GetResourcePipe,
   SelectResourcePipe,
   SelectStoreResourcePipe,
@@ -61,7 +62,8 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
 
 @NgModule({
   declarations: [
-    DenormaliseResourcePipe,
+    DenormaliseOneStoreResourcePipe,
+    DenormaliseManyStoreResourcePipe,
     GetResourcePipe,
     SelectResourcePipe,
     SelectStoreResourcePipe,

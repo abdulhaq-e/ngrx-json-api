@@ -5,6 +5,7 @@ import 'rxjs/add/operator/let';
 
 import { NgrxJsonApiService } from './services';
 import {
+  DenormalisedStoreResource,
   Resource,
   ResourceIdentifier,
   StoreResource
@@ -43,14 +44,24 @@ export class SelectStoreResourcePipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'denormaliseResource' })
-export class DenormaliseResourcePipe implements PipeTransform {
+@Pipe({ name: 'denormaliseOneStoreResource' })
+export class DenormaliseOneStoreResourcePipe implements PipeTransform {
 
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(obs: Observable<Resource> | Observable<StoreResource>): Observable<any> {
-    return obs.let<Resource | StoreResource, any>(this.service.denormalise());
+  transform(obs: Observable<StoreResource>): Observable<DenormalisedStoreResource> {
+    return this.service.denormaliseOne(obs);
+  }
+}
+
+@Pipe({ name: 'denormaliseManyStoreResource' })
+export class DenormaliseManyStoreResourcePipe implements PipeTransform {
+
+  constructor(private service: NgrxJsonApiService) {
   }
 
+  transform(obs: Observable<StoreResource[]>): Observable<DenormalisedStoreResource[]> {
+    return this.service.denormaliseMany(obs);
+  }
 }
