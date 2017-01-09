@@ -122,6 +122,19 @@ describe('NgrxJsonApiService', () => {
       expect(Object.keys(service.storeSnapshot.queries).length).toEqual(0)
     });
 
+    it('find a single StoreResource from the state and denormalises it if told to', () => {
+      let query = {
+        id: '1',
+        type: 'Article',
+        queryId: '22'
+      }
+      let res;
+      let storeResource = service.findOne(query, false, true);
+      storeResource.subscribe(it => res = it);
+      service.denormaliseOne(storeResource).subscribe(it => {
+        expect(it).toEqual(res);
+      });
+    });
   });
 
   describe('findMany', () => {
@@ -150,6 +163,21 @@ describe('NgrxJsonApiService', () => {
       subs.unsubscribe();
       expect(service.storeSnapshot.queries['22']).not.toBeDefined()
     });
+
+    it('find multiple StoreResource from the state and denormalises it if told to', () => {
+      let query = {
+        type: 'Article',
+        queryId: '22'
+      }
+      let res;
+      let storeResource = service.findMany(query, false, true);
+      storeResource.subscribe(it => res = it);
+      service.denormaliseMany(storeResource).subscribe(it => {
+        expect(it).toEqual(res);
+      });
+
+    });
+
   });
 
   describe('findInternal', () => {

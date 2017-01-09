@@ -53,14 +53,24 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(query: Query, fromServer = true): Observable<StoreResource> {
+  public findOne(query: Query, fromServer = true,
+    denormalise = false): Observable<StoreResource> | Observable<DenormalisedStoreResource> {
     query.queryType = 'getOne';
-    return this.findInternal(query, fromServer);
+    let obs$ = this.findInternal(query, fromServer);
+    if (denormalise) {
+      return this.denormaliseOne(obs$) as Observable<DenormalisedStoreResource>;
+    }
+    return obs$ as Observable<StoreResource>;
   };
 
-  public findMany(query: Query, fromServer = true): Observable<Array<StoreResource>> {
+  public findMany(query: Query, fromServer = true,
+    denormalise = false): Observable<StoreResource[]> | Observable<DenormalisedStoreResource[]> {
     query.queryType = 'getMany';
-    return this.findInternal(query, fromServer);
+    let obs$ = this.findInternal(query, fromServer);
+    if (denormalise) {
+      return this.denormaliseMany(obs$) as Observable<DenormalisedStoreResource[]>;
+    }
+    return obs$ as Observable<StoreResource[]>;
   };
 
   private removeQuery(queryId: string) {
