@@ -390,7 +390,7 @@ export const updateQueryResults = (storeQueries: NgrxJsonApiStoreQueries,
   if (storeQuery) {
     let data = _.isArray(document.data) ? document.data : [document.data];
     let newQueryStore = Object.assign({}, storeQuery, {
-      resultIds: data.map(it => toResourceIdentifier(it)),
+      resultIds: data.map(it => it ? toResourceIdentifier(it) : []),
       loading: false
     });
 

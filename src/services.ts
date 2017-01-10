@@ -190,7 +190,7 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreData$())
       .mergeMap((storeData: NgrxJsonApiStoreData) => storeResource$
         .map<StoreResource, DenormalisedStoreResource>(
-        it => denormaliseStoreResource(it, storeData))
+        it => it ? denormaliseStoreResource(it, storeData) : undefined)
       );
   }
 
@@ -201,7 +201,7 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreData$())
       .mergeMap((storeData: NgrxJsonApiStoreData) => storeResources$
         .map<StoreResource[], DenormalisedStoreResource[]>(
-        it => it.map(r => denormaliseStoreResource(r, storeData))
+        it => it ? it.map(r => denormaliseStoreResource(r, storeData)) : undefined
         ));
   }
 
