@@ -19,7 +19,6 @@ import {
   QueryStoreInitAction,
 } from './actions';
 import {
-  DenormalisedStoreResource,
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   Payload,
@@ -54,21 +53,21 @@ export class NgrxJsonApiService {
   }
 
   public findOne(query: Query, fromServer = true,
-    denormalise = false): Observable<StoreResource> | Observable<DenormalisedStoreResource> {
+    denormalise = false): Observable<StoreResource> {
     query.queryType = 'getOne';
     let obs$ = this.findInternal(query, fromServer);
     if (denormalise) {
-      return this.denormaliseOne(obs$) as Observable<DenormalisedStoreResource>;
+      return this.denormaliseOne(obs$) as Observable<StoreResource>;
     }
     return obs$ as Observable<StoreResource>;
   };
 
   public findMany(query: Query, fromServer = true,
-    denormalise = false): Observable<StoreResource[]> | Observable<DenormalisedStoreResource[]> {
+    denormalise = false): Observable<StoreResource[]> {
     query.queryType = 'getMany';
     let obs$ = this.findInternal(query, fromServer);
     if (denormalise) {
-      return this.denormaliseMany(obs$) as Observable<DenormalisedStoreResource[]>;
+      return this.denormaliseMany(obs$) as Observable<StoreResource[]>;
     }
     return obs$ as Observable<StoreResource[]>;
   };
@@ -184,23 +183,23 @@ export class NgrxJsonApiService {
   }
 
   public denormaliseOne(storeResource$: Observable<StoreResource>
-  ): Observable<DenormalisedStoreResource> {
+  ): Observable<StoreResource> {
     return this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getStoreData$())
       .mergeMap((storeData: NgrxJsonApiStoreData) => storeResource$
-        .map<StoreResource, DenormalisedStoreResource>(
+        .map<StoreResource, StoreResource>(
         it => it ? denormaliseStoreResource(it, storeData) : undefined)
       );
   }
 
   public denormaliseMany(storeResources$: Observable<StoreResource[]>
-  ): Observable<DenormalisedStoreResource[]> {
+  ): Observable<StoreResource[]> {
     return this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getStoreData$())
       .mergeMap((storeData: NgrxJsonApiStoreData) => storeResources$
-        .map<StoreResource[], DenormalisedStoreResource[]>(
+        .map<StoreResource[], StoreResource[]>(
         it => it ? it.map(r => denormaliseStoreResource(r, storeData)) : undefined
         ));
   }

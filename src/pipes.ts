@@ -5,7 +5,6 @@ import 'rxjs/add/operator/let';
 
 import { NgrxJsonApiService } from './services';
 import {
-  DenormalisedStoreResource,
   Resource,
   ResourceIdentifier,
   StoreResource
@@ -50,7 +49,7 @@ export class DenormaliseOneStoreResourcePipe implements PipeTransform {
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(obs: Observable<StoreResource>): Observable<DenormalisedStoreResource> {
+  transform(obs: Observable<StoreResource>): Observable<StoreResource> {
     return this.service.denormaliseOne(obs);
   }
 }
@@ -61,7 +60,7 @@ export class DenormaliseManyStoreResourcePipe implements PipeTransform {
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(obs: Observable<StoreResource[]>): Observable<DenormalisedStoreResource[]> {
+  transform(obs: Observable<StoreResource[]>): Observable<StoreResource[]> {
     return this.service.denormaliseMany(obs);
   }
 }
