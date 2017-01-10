@@ -131,7 +131,7 @@ describe('NgrxJsonApiService', () => {
       let res;
       let storeResource = service.findOne(query, false, true);
       storeResource.subscribe(it => res = it);
-      service.denormaliseOne(storeResource).subscribe(it => {
+      service.denormalise(storeResource).subscribe(it => {
         expect(it).toEqual(res);
       });
     });
@@ -172,7 +172,7 @@ describe('NgrxJsonApiService', () => {
       let res;
       let storeResource = service.findMany(query, false, true);
       storeResource.subscribe(it => res = it);
-      service.denormaliseMany(storeResource).subscribe(it => {
+      service.denormalise(storeResource).subscribe(it => {
         expect(it).toEqual(res);
       });
 
@@ -212,7 +212,7 @@ describe('NgrxJsonApiService', () => {
 
   });
 
-  describe('denormaliseOne and denormaliseMany', () => {
+  describe('denormalise', () => {
     it('should denormalise a StoreResource', () => {
       let query = {
         id: '1',
@@ -220,7 +220,7 @@ describe('NgrxJsonApiService', () => {
         queryType: 'getOne',
         queryId: '22'
       }
-      let storeResource = service.denormaliseOne(service.findOne(query, false));
+      let storeResource = service.denormalise(service.findOne(query, false));
       storeResource.subscribe(it => {
         expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
       });
@@ -230,7 +230,7 @@ describe('NgrxJsonApiService', () => {
       let query = {
         type: 'Article',
       }
-      let storeResource = service.denormaliseMany(service.findMany(query, false));
+      let storeResource = service.denormalise(service.findMany(query, false));
       storeResource.subscribe(it => {
         expect(_.get(it[0], 'resource.relationships.author.reference.resource')).toBeDefined();
       });

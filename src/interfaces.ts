@@ -6,18 +6,6 @@ export enum Direction {
   DESC
 }
 
-export interface DenormalisedResource extends Resource {
-  relationships?: {[key: string]: DenormalisedResourceRelationship};
-}
-
-export interface DenormalisedResourceRelationship extends ResourceRelationship {
-    reference?: DenormalisedResource;
-}
-
-export interface DenormalisedStoreResource extends StoreResource {
-  resource: DenormalisedResource;
-}
-
 export interface Document {
   data?: any;
   included?: any;
@@ -160,6 +148,7 @@ export interface ResourceIdentifier {
 export interface ResourceRelationship {
   data?: any;
   links?: any;
+  reference?: Resource;
 }
 
 export interface ResourceRelationDefinition {

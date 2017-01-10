@@ -36,7 +36,7 @@ export const denormaliseObject = (resource: Resource,
 
     Object.keys(resource.relationships)
       .forEach(relation => {
-        resource.relationships[relation]['reference'] = {};
+        resource.relationships[relation]['reference'] = {} as Resource;
         let data: ResourceIdentifier | Array<ResourceIdentifier> = resource
           .relationships[relation].data;
         // denormalised relation
