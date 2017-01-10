@@ -43,24 +43,15 @@ export class SelectStoreResourcePipe implements PipeTransform {
   }
 }
 
-@Pipe({ name: 'denormaliseOneStoreResource' })
-export class DenormaliseOneStoreResourcePipe implements PipeTransform {
+
+@Pipe({ name: 'denormalisetoreResource' })
+export class DenormaliseStoreResourcePipe implements PipeTransform {
 
   constructor(private service: NgrxJsonApiService) {
   }
 
-  transform(obs: Observable<StoreResource>): Observable<StoreResource> {
-    return this.service.denormaliseOne(obs);
-  }
-}
-
-@Pipe({ name: 'denormaliseManyStoreResource' })
-export class DenormaliseManyStoreResourcePipe implements PipeTransform {
-
-  constructor(private service: NgrxJsonApiService) {
-  }
-
-  transform(obs: Observable<StoreResource[]>): Observable<StoreResource[]> {
-    return this.service.denormaliseMany(obs);
+  transform(obs: Observable<StoreResource> | Observable<StoreResource[]>
+  ): Observable<StoreResource> | Observable<StoreResource[]> {
+    return this.service.denormalise(obs);
   }
 }

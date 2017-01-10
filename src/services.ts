@@ -57,7 +57,7 @@ export class NgrxJsonApiService {
     query.queryType = 'getOne';
     let obs$ = this.findInternal(query, fromServer);
     if (denormalise) {
-      return this.denormaliseOne(obs$) as Observable<StoreResource>;
+      return this.denormalise(obs$) as Observable<StoreResource>;
     }
     return obs$ as Observable<StoreResource>;
   };
@@ -67,7 +67,7 @@ export class NgrxJsonApiService {
     query.queryType = 'getMany';
     let obs$ = this.findInternal(query, fromServer);
     if (denormalise) {
-      return this.denormaliseMany(obs$) as Observable<StoreResource[]>;
+      return this.denormalise(obs$) as Observable<StoreResource[]>;
     }
     return obs$ as Observable<StoreResource[]>;
   };
@@ -182,26 +182,21 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  public denormaliseOne(storeResource$: Observable<StoreResource>
-  ): Observable<StoreResource> {
-    return this.store
-      .select(this.selectors.storeLocation)
-      .let(this.selectors.getStoreData$())
-      .mergeMap((storeData: NgrxJsonApiStoreData) => storeResource$
-        .map<StoreResource, StoreResource>(
-        it => it ? denormaliseStoreResource(it, storeData) : undefined)
-      );
-  }
-
-  public denormaliseMany(storeResources$: Observable<StoreResource[]>
-  ): Observable<StoreResource[]> {
-    return this.store
-      .select(this.selectors.storeLocation)
-      .let(this.selectors.getStoreData$())
-      .mergeMap((storeData: NgrxJsonApiStoreData) => storeResources$
-        .map<StoreResource[], StoreResource[]>(
-        it => it ? it.map(r => denormaliseStoreResource(r, storeData)) : undefined
-        ));
+  public denormalise(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
+  ): Observable<StoreResource> | Observable<StoreResource[]> {
+    return storeResource$
+      .combineLatest(this.store
+        .select(this.selectors.storeLocation)
+        .let(this.selectors.getStoreData$()), (
+          storeResource: StoreResource | StoreResource[], storeData: NgrxJsonApiStoreData
+        ) => {
+          if (_.isArray(storeResource)) {
+            return storeResource.map(
+              r => denormaliseStoreResource(r, storeData)) as StoreResource[];
+          } else {
+            return denormaliseStoreResource(storeResource, storeData) as StoreResource;
+          }
+        });
   }
 
   /**
