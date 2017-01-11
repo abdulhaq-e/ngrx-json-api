@@ -108,6 +108,10 @@ export interface QueryParams {
   limit?: number;
 }
 
+export class QueryError extends Error{
+  public errors : Array<ResourceError>
+}
+
 export interface Resource extends ResourceIdentifier {
   attributes?: { [key: string]: any };
   relationships?: { [key: string]: ResourceRelationship };

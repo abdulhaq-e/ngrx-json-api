@@ -31,6 +31,7 @@ import {
   ResourceIdentifier,
   Resource,
   Query,
+  QueryError,
   StoreResource,
 } from './interfaces';
 import {
@@ -95,8 +96,17 @@ export class NgrxJsonApiSelectors<T> {
   public getResultIdentifiers$(queryId: string) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getResourceQuery$(queryId))
-        .map(it => it ? it.resultIds : undefined);
+		  .let(this.getResourceQuery$(queryId))
+		  .filter(it => it.resultIds != null || it.errors != null && it.errors.length > 0)
+		  .map(it => {
+            if(it.errors && it.errors.length > 0){
+              let error = new QueryError();
+              error.errors = it.errors;
+              throw error;
+            }else{
+              return it.resultIds;
+            }
+          });
     };
   }
 
