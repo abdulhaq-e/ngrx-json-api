@@ -97,7 +97,6 @@ export interface Query {
   type?: string;
   id?: string;
   params?: QueryParams;
-  queryType?: QueryType;
 }
 
 export interface QueryParams {
@@ -108,13 +107,6 @@ export interface QueryParams {
   offset?: number;
   limit?: number;
 }
-
-export type QueryType
-  = 'getOne'
-  | 'getMany'
-  | 'update'
-  | 'deleteOne'
-  | 'create';
 
 export interface Resource extends ResourceIdentifier {
   attributes?: { [key: string]: any };
