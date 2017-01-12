@@ -613,7 +613,19 @@ describe('updateStoreDataFromResource', () => {
     expect(newState['Article']['3']).toBeDefined();
   });
 });
-//
+
+describe('updateStoreDataFromPayload', () => {
+  it('should update the store data given a JsonApiDocument', () => {
+    let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
+    expect(newState['Article']).toBeDefined();
+    expect(newState['Person']).toBeDefined();
+    expect(newState['Article']['1']).toBeDefined();
+    expect(newState['Article']['2']).toBeDefined();
+    expect(newState['Person']['1']).toBeDefined();
+    expect(newState['Person']['2']).toBeDefined();
+    expect(newState['Article']['2'].attributes.title).toEqual('Untitled');
+  });
+});
 
 describe('updateQueryParams', () => {
   let storeQueries = {
@@ -737,18 +749,6 @@ describe('updateQueryResults', () => {
   })
 });
 
-describe('updateStoreResources', () => {
-  it('should update the store data given a JsonApiDocument', () => {
-    let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
-    expect(newState['Article']).toBeDefined();
-    expect(newState['Person']).toBeDefined();
-    expect(newState['Article']['1']).toBeDefined();
-    expect(newState['Article']['2']).toBeDefined();
-    expect(newState['Person']['1']).toBeDefined();
-    expect(newState['Person']['2']).toBeDefined();
-    expect(newState['Article']['2'].resource.attributes.title).toEqual('Untitled');
-  });
-});
 
 
 describe('filterResources (TODO: test remaining types)', () => {
