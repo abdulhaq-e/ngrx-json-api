@@ -75,7 +75,7 @@ export class NgrxJsonApiSelectors<T> {
           .map(it => it.map(r => r.resource));
       }
       return selected$.distinctUntilChanged();
-    }
+    };
   }
 
   public getStoreQueries$() {
