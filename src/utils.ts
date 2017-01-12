@@ -167,21 +167,19 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
 
   let newStoreResources = Object.assign({}, storeResources);
   if (fromServer) {
-    newStoreResources[resource.id] = {
-      resource: resource,
+    newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: resource,
       state: ResourceState.IN_SYNC,
       errors: [],
       loading: false
-    };
+    });
   } else {
-    newStoreResources[resource.id] = {
-      resource: resource,
+    newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: null,
       state: ResourceState.CREATED,
       errors: [],
       loading: false
-    };
+    });
   }
   return _.isEqual(storeResources, newStoreResources) ? storeResources : newStoreResources;
 };
@@ -233,7 +231,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
 export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
-  let foundResource = state[resource.id].resource;
+  let foundResource = state[resource.id];
   let persistedResource = state[resource.id].persistedResource;
 
   let newResource: Resource;

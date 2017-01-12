@@ -24,6 +24,7 @@ import {
   generatePayload,
   generateSortingQueryParams,
   getResourceFieldValueFromPath,
+  insertStoreResource,
   //     transformStoreData,
   //     transformStoreResources,
   removeQuery,
@@ -303,6 +304,61 @@ describe('updateResourceObject', () => {
       .toEqual('Testing JSON API');
     expect(updateResourceObject(original, source).relationships.author.data)
       .toEqual({ type: 'Person', id: '2' });
+  });
+});
+
+describe('insertStoreResource', () => {
+
+  it('should insert StoreResource with IN_SYNC state if from server', () => {
+
+    let resource: Resource = {
+      type: 'Article',
+      id: '1',
+      attributes: {
+        body: 'Testing JSON API',
+        title: 'JSON API paints my bikeshed!',
+      },
+      relationships: {
+        author: {
+          data: { type: 'Person', id: '1' }
+        }
+      }
+    };
+    deepFreeze(resource)
+    let storeResources = {};
+    let newStoreResources = insertStoreResource(storeResources, resource, true);
+    expect(newStoreResources['1']).toBeDefined();
+    expect(newStoreResources['1']['type']).toEqual('Article');
+    expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
+    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].persistedResource).toEqual(resource);
+    expect(newStoreResources['1'].state).toEqual(ResourceState.IN_SYNC);
+  });
+
+  it('should insert StoreResource with CREATED state if from server', () => {
+
+    let resource: Resource = {
+      type: 'Article',
+      id: '1',
+      attributes: {
+        body: 'Testing JSON API',
+        title: 'JSON API paints my bikeshed!',
+      },
+      relationships: {
+        author: {
+          data: { type: 'Person', id: '1' }
+        }
+      }
+    };
+    deepFreeze(resource)
+    let storeResources = {};
+    let newStoreResources = insertStoreResource(storeResources, resource, false);
+    expect(newStoreResources['1']).toBeDefined();
+    expect(newStoreResources['1']['type']).toEqual('Article');
+    expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
+    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].persistedResource).toBeNull();
+    expect(newStoreResources['1'].state).toEqual(ResourceState.CREATED);
   });
 });
 
