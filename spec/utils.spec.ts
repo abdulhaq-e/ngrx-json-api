@@ -834,8 +834,8 @@ describe('filterResources (TODO: test remaining types)', () => {
     }
     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
     expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('2');
-    expect(filtered[0].resource.type).toBe('Article');
+    expect(filtered[0].id).toBe('2');
+    expect(filtered[0].type).toBe('Article');
   });
 
   it('should filter resources using iexact filter', () => {
@@ -849,8 +849,8 @@ describe('filterResources (TODO: test remaining types)', () => {
     }
     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
     expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('2');
-    expect(filtered[0].resource.type).toBe('Article');
+    expect(filtered[0].id).toBe('2');
+    expect(filtered[0].type).toBe('Article');
   });
 
   it('should filter resources using in filter', () => {
@@ -868,9 +868,9 @@ describe('filterResources (TODO: test remaining types)', () => {
     }
     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
     expect(filtered.length).toBe(2);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
-    expect(filtered[1].resource.id).toBe('2');
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
+    expect(filtered[1].id).toBe('2');
   });
 
   it('should filter based on related resources using iexact filter', () => {
@@ -884,8 +884,8 @@ describe('filterResources (TODO: test remaining types)', () => {
     }
     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
     expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
   });
 
   it('should return no results if the resourceFieldValue is null', () => {
@@ -920,8 +920,8 @@ describe('filterResources (TODO: test remaining types)', () => {
     };
     let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
     expect(filtered.length).toBe(2);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
   });
 
 
