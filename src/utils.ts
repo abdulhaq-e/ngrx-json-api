@@ -491,6 +491,63 @@ export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => 
   return { type: resource.type, id: resource.id };
 };
 
+/**
+ * Get the value for the last field in a given fitering path.
+ *
+ * @param path
+ * @param baseStoreResource
+ * @param storeData
+ * @param resourceDefinitions
+ * @param pathSepartor
+ * @returns the value of the last field in the path.
+ */
+export const getResourceFieldValueFromPath = (path: string,
+  baseStoreResource: StoreResource, storeData: NgrxJsonApiStoreData,
+  resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string) => {
+  if (_.isUndefined(pathSeparator)) {
+    pathSeparator = '.';
+  }
+  let fields: Array<string> = path.split(pathSeparator);
+  let currentStoreResource = baseStoreResource;
+  for (let i = 0; i < fields.length; i++) {
+    let definition = _.find(resourceDefinitions, { type: currentStoreResource.type });
+
+    if (_.isUndefined(definition)) {
+      throw new Error('Definition not found');
+    }
+    // if both attributes and relationships are missing, raise an error
+    if (_.isUndefined(definition.attributes) && _.isUndefined(definition.relationships)) {
+      throw new Error('Attributes or Relationships must be provided');
+    }
+    if (definition.attributes.hasOwnProperty(fields[i])) {
+      return _.get(currentStoreResource, 'attributes.' + fields[i], null);
+    } else if (definition.relationships.hasOwnProperty(fields[i])) {
+      if (i === (fields.length - 1)) {
+        throw new Error('The last field in the filtering path cannot be a relation');
+      }
+      let resourceRelation = definition.relationships[fields[i]];
+      if (resourceRelation.relationType === 'hasMany') {
+        throw new Error('Cannot filter past a hasMany relation');
+      } else {
+        let relation = _.get(currentStoreResource, 'relationships.' + fields[i], null);
+        if (!relation || !relation.data) {
+          return null;
+        } else {
+          let relatedPath = [
+            resourceRelation.type,
+            relation.data.id
+          ];
+          currentStoreResource = <StoreResource>_.get(storeData, relatedPath);
+        }
+      }
+    } else {
+      throw new Error('Cannot find field in attributes or relationships');
+    }
+    if (_.isUndefined(currentStoreResource)) {
+      return null;
+    }
+  }
+};
 
 export const filterResources = (resources: NgrxJsonApiStoreResources,
   storeData: NgrxJsonApiStoreData, query: Query,
@@ -587,63 +644,6 @@ export const filterResources = (resources: NgrxJsonApiStoreResources,
   });
 };
 
-/**
- * Get the value for the last field in a given fitering path.
- *
- * @param path
- * @param baseStoreResource
- * @param storeData
- * @param resourceDefinitions
- * @param pathSepartor
- * @returns the value of the last field in the path.
- */
-export const getResourceFieldValueFromPath = (path: string,
-  baseStoreResource: StoreResource, storeData: NgrxJsonApiStoreData,
-  resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string) => {
-  if (_.isUndefined(pathSeparator)) {
-    pathSeparator = '.';
-  }
-  let fields: Array<string> = path.split(pathSeparator);
-  let currentStoreResource = baseStoreResource;
-  for (let i = 0; i < fields.length; i++) {
-    let definition = _.find(resourceDefinitions, { type: currentStoreResource.resource.type });
-
-    if (_.isUndefined(definition)) {
-      throw new Error('Definition not found');
-    }
-    // if both attributes and relationships are missing, raise an error
-    if (_.isUndefined(definition.attributes) && _.isUndefined(definition.relationships)) {
-      throw new Error('Attributes or Relationships must be provided');
-    }
-    if (definition.attributes.hasOwnProperty(fields[i])) {
-      return _.get(currentStoreResource, 'resource.attributes.' + fields[i], null);
-    } else if (definition.relationships.hasOwnProperty(fields[i])) {
-      if (i === (fields.length - 1)) {
-        throw new Error('The last field in the filtering path cannot be a relation');
-      }
-      let resourceRelation = definition.relationships[fields[i]];
-      if (resourceRelation.relationType === 'hasMany') {
-        throw new Error('Cannot filter past a hasMany relation');
-      } else {
-        let relation = _.get(currentStoreResource, 'resource.relationships.' + fields[i], null);
-        if (!relation || !relation.data) {
-          return null;
-        } else {
-          let relatedPath = [
-            resourceRelation.type,
-            relation.data.id
-          ];
-          currentStoreResource = <StoreResource>_.get(storeData, relatedPath);
-        }
-      }
-    } else {
-      throw new Error('Cannot find field in attributes or relationships');
-    }
-    if (_.isUndefined(currentStoreResource)) {
-      return null;
-    }
-  }
-};
 
 /**
 *
