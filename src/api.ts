@@ -17,10 +17,10 @@ import 'rxjs/add/observable/throw';
 import {
   Document,
   NgrxJsonApiConfig,
+  OperationType,
   ResourceDefinition,
   Query,
   QueryParams,
-  QueryType,
 } from './interfaces';
 import {
   generateIncludedQueryParams,
@@ -45,15 +45,28 @@ export class NgrxJsonApi {
     public config: NgrxJsonApiConfig
   ) { }
 
-  private urlBuilder(query: Query) {
-    switch (query.queryType) {
-      case 'getOne':
-      case 'deleteOne':
-      case 'update':
-        return this.resourceUrlFor(query.type, query.id);
-      case 'getMany':
-      case 'create':
+  private urlBuilder(query: Query, operation: OperationType) {
+    switch (operation) {
+      case 'GET': {
+        if (query.type && query.id) {
+          return this.resourceUrlFor(query.type, query.id);
+        } else if (query.type) {
+          return this.collectionUrlFor(query.type);
+        }
+      }
+      case 'DELETE': {
+        if (query.type && query.id) {
+          return this.resourceUrlFor(query.type, query.id);
+        }
+      }
+      case 'PATCH': {
+        if (query.type && query.id) {
+          return this.resourceUrlFor(query.type, query.id);
+        }
+      }
+      case 'POST': {
         return this.collectionUrlFor(query.type);
+      }
     }
 
   }
@@ -140,7 +153,7 @@ export class NgrxJsonApi {
 
     let requestOptionsArgs = {
       method: RequestMethod.Get,
-      url: this.urlBuilder(query) + queryParams,
+      url: this.urlBuilder(query, 'GET') + queryParams,
     };
 
     return this.request(requestOptionsArgs);
@@ -158,7 +171,7 @@ export class NgrxJsonApi {
 
     let requestOptionsArgs = {
       method: RequestMethod.Post,
-      url: this.urlBuilder(query),
+      url: this.urlBuilder(query, 'POST'),
       body: JSON.stringify({ data: document.data })
     };
 
@@ -176,7 +189,7 @@ export class NgrxJsonApi {
     }
     let requestOptionsArgs = {
       method: RequestMethod.Patch,
-      url: this.urlBuilder(query),
+      url: this.urlBuilder(query, 'PATCH'),
       body: JSON.stringify({ data: document.data })
     };
 
@@ -192,7 +205,7 @@ export class NgrxJsonApi {
 
     let requestOptions = {
       method: RequestMethod.Delete,
-      url: this.urlBuilder(query)
+      url: this.urlBuilder(query, 'DELETE')
     };
 
     return this.request(requestOptions);
