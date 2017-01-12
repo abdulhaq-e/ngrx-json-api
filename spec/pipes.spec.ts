@@ -18,6 +18,7 @@ import { NgrxJsonApiEffects } from '../src/effects';
 import {
   DenormaliseStoreResourcePipe,
   GetResourcePipe,
+  GetDenormalisedValuePipe,
   SelectResourcePipe,
   SelectStoreResourcePipe,
 } from '../src/pipes';
@@ -91,6 +92,13 @@ describe('Pipes', () => {
 
   describe('GetResourcePipe', () => {
     beforeEach(inject([GetResourcePipe], (p) => {
+      pipe = p;
+    }));
+
+  });
+
+  describe('GetDenormalisedValuePipe', () => {
+    beforeEach(inject([GetDenormalisedValuePipe], (p) => {
       pipe = p;
     }));
 

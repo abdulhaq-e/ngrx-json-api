@@ -234,6 +234,13 @@ describe('NgrxJsonApiService', () => {
         expect(_.get(it[0], 'resource.relationships.author.reference.resource')).toBeDefined();
       });
     });
+  });
+
+  describe('getDenormalisedPath', () => {
+
+  });
+
+  describe('getDenormalisedValue', () => {
 
   });
 });

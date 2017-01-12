@@ -31,6 +31,8 @@ import {
 } from './interfaces';
 import {
   denormaliseStoreResource,
+  getDenormalisedPath,
+  getDenormalisedValue,
   uuid
 } from './utils';
 
@@ -191,6 +193,16 @@ export class NgrxJsonApiService {
           return denormaliseStoreResource(storeResource, storeData) as StoreResource;
         }
       });
+  }
+
+  public getDenormalisedPath(path, resourceType): string {
+    return getDenormalisedPath(path, resourceType, this.selectors.config.resourceDefinitions,
+      this.selectors.config.filteringConfig.pathSeparator);
+  }
+
+  public getDenormalisedValue(path, storeResource): any {
+    return getDenormalisedValue(path, storeResource, this.selectors.config.resourceDefinitions,
+      this.selectors.config.filteringConfig.pathSeparator);
   }
 
   /**
