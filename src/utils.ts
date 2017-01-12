@@ -231,8 +231,15 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
 export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
-  let foundResource = state[resource.id];
+  let foundStoreResource = state[resource.id];
   let persistedResource = state[resource.id].persistedResource;
+
+  let foundResource = {
+    attributes: foundStoreResource.attributes,
+    relationships: foundStoreResource.relationships,
+    meta: foundStoreResource.meta,
+    links: foundStoreResource.links
+  };
 
   let newResource: Resource;
   let newResourceState: ResourceState;
@@ -243,7 +250,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     persistedResource = resource;
     newResourceState = ResourceState.IN_SYNC;
   } else {
-    let mergedResource = updateResourceObject(foundResource, resource);
+    let mergedResource = updateResourceObject(foundStoreResource, resource);
     if (_.isEqual(mergedResource, persistedResource)) {
       // no changes anymore, do nothing
       newResource = persistedResource;
@@ -257,13 +264,12 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   }
 
   let newState = Object.assign({}, state);
-  newState[resource.id] = {
-    resource: newResource,
+  newState[resource.id] = Object.assign({}, resource, {
     persistedResource: persistedResource,
     state: newResourceState,
     errors: [],
     loading: false
-  };
+  });
 
   return _.isEqual(newState[resource.id], state[resource.id]) ? state : newState;
 };

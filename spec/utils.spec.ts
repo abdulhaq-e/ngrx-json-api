@@ -362,16 +362,37 @@ describe('insertStoreResource', () => {
   });
 });
 
+describe('updateResourceState', () => {
+  it('should return the state if the resource or its type were not found', () => {
+    let state = {};
+    let newState = updateResourceState(state, { type: 'Article', id: '1' })
+    expect(newState).toEqual({});
+  });
+
+  it('should update the resourceState and loading state', () => {
+    let state = {
+      'Article': {
+        '1': {
+          state: ResourceState.CREATED,
+          loading: true
+        }
+      }
+    };
+    let newState = updateResourceState(state, { type: 'Article', id: '1' },
+      ResourceState.IN_SYNC, false);
+    expect(newState['Article']['1'].state).toEqual(ResourceState.IN_SYNC);
+    expect(newState['Article']['1'].loading).toEqual(false);
+  });
+});
+
 describe('updateStoreResource', () => {
 
   let state = {
     '1': {
-      resource: {
-        type: 'Article',
-        id: '1',
-        attributes: {
-          'title': 'JSON API paints my bikeshed!'
-        }
+      type: 'Article',
+      id: '1',
+      attributes: {
+        'title': 'JSON API paints my bikeshed!'
       },
       persistedResource: {
         type: 'Article',
@@ -382,12 +403,10 @@ describe('updateStoreResource', () => {
       }
     },
     '2': {
-      resource: {
-        type: 'Article',
-        id: '2',
-        attributes: {
-          'title': 'Second article'
-        }
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Second article'
       },
       persistedResource: {
         type: 'Article',
@@ -398,12 +417,10 @@ describe('updateStoreResource', () => {
       }
     },
     '3': {
-      resource: {
-        type: 'Article',
-        id: '2',
-        attributes: {
-          'title': 'Third article'
-        }
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Third article'
       },
       persistedResource: null
     }
@@ -421,7 +438,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, true);
-    expect(newState['1'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['1'].attributes.title).toEqual('Untitled');
     expect(newState['1'].persistedResource.attributes.title).toEqual('Untitled');
   });
 
@@ -435,7 +452,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['1'].resource.attributes.title).toEqual('JSON API paints my bikeshed!');
+    expect(newState['1'].attributes.title).toEqual('JSON API paints my bikeshed!');
     expect(newState['1'].persistedResource.attributes.title).toEqual('JSON API paints my bikeshed!');
   });
 
@@ -449,7 +466,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['2'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['2'].attributes.title).toEqual('Untitled');
     expect(newState['2'].persistedResource.attributes.title).toEqual('Second article');
     expect(newState['2'].state).toEqual(ResourceState.UPDATED);
   });
@@ -464,7 +481,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['3'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['3'].attributes.title).toEqual('Untitled');
     expect(newState['3'].persistedResource).toBeNull();
     expect(newState['3'].state).toEqual(ResourceState.CREATED);
   });
@@ -654,28 +671,6 @@ describe('updateStoreData', () => {
 
 });
 //
-describe('updateResourceState', () => {
-  it('should return the state if the resource or its type were not found', () => {
-    let state = {};
-    let newState = updateResourceState(state, { type: 'Article', id: '1' })
-    expect(newState).toEqual({});
-  });
-
-  it('should update the resourceState and loading state', () => {
-    let state = {
-      'Article': {
-        '1': {
-          state: ResourceState.CREATED,
-          loading: true
-        }
-      }
-    };
-    let newState = updateResourceState(state, { type: 'Article', id: '1' },
-      ResourceState.IN_SYNC, false);
-    expect(newState['Article']['1'].state).toEqual(ResourceState.IN_SYNC);
-    expect(newState['Article']['1'].loading).toEqual(false);
-  });
-});
 
 describe('updateQueryParams', () => {
   let storeQueries = {
