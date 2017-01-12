@@ -847,6 +847,14 @@ describe('getResourceFieldValueFromPath', () => {
 
 });
 
+describe('getDenormalisedPath', () => {
+  it('should get the denormalised path given a human usable path', () => {
+    let path = 'article.title'
+    let resolvedPath = getDenormalisedPath(path, resourceDefinitions);
+    expect(resolvedPath).toEqual('attributes.title');
+  })
+})
+
 describe('generateIncludedQueryParams', () => {
   it('should generate an included query param given an array of resources to be included', () => {
     let params = generateIncludedQueryParams(['comments', 'comments.author'])

@@ -99,6 +99,10 @@ export const getMultipleStoreResource = (resourceIds: Array<ResourceIdentifier>,
   return resourceIds.map(id => getSingleStoreResource(id, resources));
 };
 
+export const getDenormalisedPath(path: string, resourceDefinitions: Array<ResourceDefinition>) {
+
+}
+
 /**
  * Given two objects, it will merge the second in the first.
  *
