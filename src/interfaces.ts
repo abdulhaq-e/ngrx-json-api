@@ -76,10 +76,10 @@ export interface NgrxJsonApiUrlBuilder {
 }
 
 export type OperationType
-  = 'CREATING'
-  | 'UPDATING'
-  | 'DELETING'
-  | 'READING'
+  = 'GET'
+  | 'DELETE'
+  | 'PATCH'
+  | 'POST'
   | false;
 
 export interface OneResourceRelationship {
