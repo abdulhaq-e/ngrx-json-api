@@ -108,7 +108,6 @@ describe('NgrxJsonApiEffects', () => {
       }
     },
     query: {
-      queryType: 'create',
       type: 'SUCCESS'
     }
   };
@@ -119,7 +118,6 @@ describe('NgrxJsonApiEffects', () => {
       }
     },
     query: {
-      queryType: 'create',
       type: 'FAIL'
     }
   };
@@ -230,7 +228,6 @@ describe('NgrxJsonApiEffects', () => {
     let query = {
       type: 'Article',
       id: '1',
-      queryType: 'getOne',
       queryId: '11'
     }
     runner.queue(new QueryStoreInitAction(query));

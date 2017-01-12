@@ -913,8 +913,7 @@ describe('generatePayload', () => {
       id: '10',
       type: 'Article'
     }
-    let payload = generatePayload(resource, 'create');
-    expect(payload.query.queryType).toEqual('create');
+    let payload = generatePayload(resource, 'POST');
     expect(payload.query.id).not.toBeDefined();
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData.data.id).toEqual('10');
@@ -926,8 +925,7 @@ describe('generatePayload', () => {
       id: '10',
       type: 'Article'
     }
-    let payload = generatePayload(resource, 'update');
-    expect(payload.query.queryType).toEqual('update');
+    let payload = generatePayload(resource, 'PATCH');
     expect(payload.query.id).toEqual('10');
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData.data.id).toEqual('10');
@@ -939,8 +937,7 @@ describe('generatePayload', () => {
       id: '10',
       type: 'Article'
     }
-    let payload = generatePayload(resource, 'deleteOne');
-    expect(payload.query.queryType).toEqual('deleteOne');
+    let payload = generatePayload(resource, 'DELETE');
     expect(payload.query.id).toEqual('10');
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData).not.toBeDefined();
