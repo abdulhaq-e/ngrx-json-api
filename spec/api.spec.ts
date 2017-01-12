@@ -77,37 +77,33 @@ describe('ngrx json api', () => {
   describe('urlBuilder', () => {
     it('should build url for getOne queries', () => {
       let query = {
-        queryType: 'getOne',
         type: 'Post',
         id: '1'
       }
-      let url = jsonapi.urlBuilder(query);
+      let url = jsonapi.urlBuilder(query, 'GET');
       expect(url).toEqual('myapi.com/posts/1');
     });
 
-    it('should build url for deleteOne queries', () => {
+    it('should build url for DELETE', () => {
       let query = {
-        queryType: 'deleteOne',
         type: 'Post',
         id: '1'
       }
-      let url = jsonapi.urlBuilder(query);
+      let url = jsonapi.urlBuilder(query, 'DELETE');
       expect(url).toEqual('myapi.com/posts/1');
     });
 
-    it('should build url for getMany queries', () => {
+    it('should build url for GET with type only', () => {
       let url = jsonapi.urlBuilder({
         type: 'Post',
-        queryType: 'getMany'
-      });
+      }, 'GET');
       expect(url).toEqual('myapi.com/posts');
     });
 
-    it('should build url for create queries', () => {
+    it('should build url for POST queries', () => {
       let url = jsonapi.urlBuilder({
         type: 'Post',
-        queryType: 'create'
-      });
+      }, 'POST');
       expect(url).toEqual('myapi.com/posts');
     });
   })
@@ -121,7 +117,6 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(0);
         });
         jsonapi.find({
-          queryType: 'getOne',
           type: 'Post',
           id: 1
         });
@@ -137,7 +132,6 @@ describe('ngrx json api', () => {
         });
         jsonapi.find({
           type: 'Post',
-          queryType: 'getMany',
         });
         tick();
       })));
@@ -150,7 +144,6 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(0);
         });
         jsonapi.find({
-          queryType: 'getMany',
           type: 'Post',
           params: {
             filtering: [
@@ -175,7 +168,6 @@ describe('ngrx json api', () => {
       });
       jsonapi.create({
         type: 'Post',
-        queryType: 'create'
       },{
           data: { title: 'Hello World' }
         });
@@ -209,7 +201,6 @@ describe('ngrx json api', () => {
           }));
         });
         jsonapi.create({
-          queryType: 'getMany',
           type: 'Post'
         }, {
             data: { title: 'Hello', type: 'Post' }
@@ -230,13 +221,12 @@ describe('ngrx json api', () => {
           }));
         });
         jsonapi.update({
-          queryType: 'update',
           type: 'Post',
           id: '1'
         }, {
             data: {
               title: 'Hello', id: '1', type: 'Post'
-            });
+            }});
         tick();
       })));
   });
@@ -250,7 +240,6 @@ describe('ngrx json api', () => {
           expect(c.request.method).toBe(3);
         });
         jsonapi.delete({
-            queryType: 'deleteOne',
             type: 'Post',
             id: '1'
         });
@@ -318,7 +307,6 @@ describe('ngrx json api with overridden configs', () => {
         expect(c.request.method).toBe(0);
       });
       jsonapi.find({
-          queryType: 'getMany',
           type: 'Post',
           params: {
             filtering: [

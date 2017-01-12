@@ -123,14 +123,13 @@ describe('NgrxJsonApiSelectors', () => {
 
   describe('queryStore$', () => {
 
-    it('should return a single resource given a getOne query with id and type', fakeAsync(() => {
+    it('should return a single resource given a query with id and type only', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
         .let(selectors.queryStore$({
           type: 'Article',
           id: '1',
-          queryType: 'getOne'
         }))
         .subscribe(d => res = d);
       obs.select('api').let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
@@ -138,13 +137,12 @@ describe('NgrxJsonApiSelectors', () => {
       tick();
     }));
 
-    it('should return a single resource using filters given a getOne query with type only', fakeAsync(() => {
+    it('should return resources in an Array when using filters and omitting the id', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
         .let(selectors.queryStore$({
           type: 'Article',
-          queryType: 'getOne',
           params: {
             filtering: [
               { path: 'author.profile.id', value: 'firstProfile' }
@@ -153,17 +151,16 @@ describe('NgrxJsonApiSelectors', () => {
         }))
         .subscribe(d => res = d);
       tick();
-      expect(res.id).toEqual('1');
-      expect(res.type).toEqual('Article');
+      expect(res[0].id).toEqual('1');
+      expect(res[0].type).toEqual('Article');
     }));
 
-    it('should return an empty object for getOne queries that are not found', fakeAsync(() => {
+    it('should return an empty array for queries that return nothing', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
         .let(selectors.queryStore$({
           type: 'Article',
-          queryType: 'getOne',
           params: {
             filtering: [
               { path: 'author.profile.id', value: 'blablabla' }
@@ -172,28 +169,15 @@ describe('NgrxJsonApiSelectors', () => {
         }))
         .subscribe(d => res = d);
       tick();
-      expect(res).toEqual({});
+      expect(res).toEqual([]);
     }));
 
-    it('should throw an error for getOne queries that return more than one StoreResource', fakeAsync(() => {
-        let res;
-        let sub = obs
-            .select('api')
-            .let(selectors.queryStore$({
-                type: 'Article',
-                queryType: 'getOne',
-            }))
-            .subscribe(d => res = d);
-        expect(res.error).toEqual('Got more than one resource');
-    }));
-
-    it('should return an array of resources given a getMany query', fakeAsync(() => {
+    it('should return an array of multiple resources using filters', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
         .let(selectors.queryStore$({
           type: 'Article',
-          queryType: 'getMany'
         }))
         .subscribe(d => res = d);
       tick();
@@ -201,52 +185,11 @@ describe('NgrxJsonApiSelectors', () => {
       expect(res.length).toBe(2);
     }));
 
-    it('should return an array of filtered StoreResource given a getMany query', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.queryStore$({
-          type: 'Article',
-          queryType: 'getMany',
-          params: {
-            filtering: [
-              { path: 'author.profile.id', value: 'firstProfile' }
-            ]
-          }
-        }))
-        .subscribe(d => res = d);
-      tick();
-      expect(_.isArray(res)).toBeTruthy();
-      expect(res.length).toBe(1);
-      expect(res[0].type).toEqual('Article');
-      expect(res[0].id).toEqual('1');
-    }));
-
-    it('should return an empty array of filtered StoreResource given a getMany query that return nothing', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.queryStore$({
-          type: 'Article',
-          queryType: 'getMany',
-          params: {
-            filtering: [
-              { path: 'author.profile.id', value: 'blablabla' }
-            ]
-          }
-        }))
-        .subscribe(d => res = d);
-      tick();
-      expect(_.isArray(res)).toBeTruthy();
-      expect(res.length).toBe(0);
-    }));
-
-    it('should throw an error for queries with no queryType', fakeAsync(() => {
+    it('should throw an error for queries with no type', fakeAsync(() => {
         let res;
         let sub = obs
             .select('api')
             .let(selectors.queryStore$({
-                type: 'Article',
             }))
             .subscribe(d => res = d);
         expect(res.error).toEqual('Unknown query');

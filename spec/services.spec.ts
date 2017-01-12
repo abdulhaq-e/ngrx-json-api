@@ -217,7 +217,6 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryType: 'getOne',
         queryId: '22'
       }
       let storeResource = service.denormalise(service.findOne(query, false));

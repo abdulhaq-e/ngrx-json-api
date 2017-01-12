@@ -38,12 +38,12 @@ import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
 import {
   NgrxJsonApiStore,
+  OperationType,
   Payload,
   Resource,
   ResourceError,
   ResourceIdentifier,
   Query,
-  QueryType,
   ResourceState,
   StoreResource,
 } from './interfaces';
@@ -315,8 +315,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
     context.sorted[--context.cursor] = pendingResource;
   }
 
-  private generatePayload(resource: Resource, queryType: QueryType): Payload {
-    return generatePayload(resource, queryType);
+  private generatePayload(resource: Resource, operation: OperationType): Payload {
+    return generatePayload(resource, operation);
   }
 
 

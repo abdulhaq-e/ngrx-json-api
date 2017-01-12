@@ -120,7 +120,6 @@ describe('Pipes', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryType: 'getOne',
         queryId: '22'
       }
       let storeResource = pipe.service.findOne(query, false);

@@ -82,7 +82,7 @@ export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
     });
   }
 
-  private generatePayload(resource, queryType) {
+  private generatePayload(resource, operation) {
     return resource;
   }
 }

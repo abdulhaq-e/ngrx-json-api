@@ -22,7 +22,6 @@ import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   Payload,
-  QueryType,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
@@ -54,8 +53,7 @@ export class NgrxJsonApiService {
 
   public findOne(query: Query, fromServer = true,
     denormalise = false): Observable<StoreResource> {
-    query.queryType = 'getOne';
-    let obs$ = this.findInternal(query, fromServer);
+    let obs$ = this.findInternal(query, fromServer, false);
     if (denormalise) {
       return this.denormalise(obs$) as Observable<StoreResource>;
     }
@@ -64,8 +62,7 @@ export class NgrxJsonApiService {
 
   public findMany(query: Query, fromServer = true,
     denormalise = false): Observable<StoreResource[]> {
-    query.queryType = 'getMany';
-    let obs$ = this.findInternal(query, fromServer);
+    let obs$ = this.findInternal(query, fromServer, true);
     if (denormalise) {
       return this.denormalise(obs$) as Observable<StoreResource[]>;
     }
@@ -77,7 +74,7 @@ export class NgrxJsonApiService {
   }
 
   private findInternal(query: Query,
-    fromServer = true): Observable<StoreResource | StoreResource[]> {
+    fromServer = true, multi = false): Observable<StoreResource | StoreResource[]> {
     if (!query.queryId) {
       query.queryId = this.uuid();
     }
@@ -88,18 +85,15 @@ export class NgrxJsonApiService {
     }
     return this.selectResults(query.queryId)
       .map(it => {
-        switch (query.queryType) {
-          case 'getMany': {
-            return it;
-          }
-          case 'getOne': {
-            if (it.length === 0) {
-              return null;
-            } else if (it.length === 1) {
-              return it[0];
-            } else {
-              throw new Error('Unique result expected');
-            }
+        if (multi) {
+          return it;
+        } else {
+          if (it.length === 0) {
+            return null;
+          } else if (it.length === 1) {
+            return it[0];
+          } else {
+            throw new Error('Unique result expected');
           }
         }
       })
@@ -190,13 +184,13 @@ export class NgrxJsonApiService {
         .let(this.selectors.getStoreData$()), (
           storeResource: StoreResource | StoreResource[], storeData: NgrxJsonApiStoreData
         ) => {
-          if (_.isArray(storeResource)) {
-            return storeResource.map(
-              r => denormaliseStoreResource(r, storeData)) as StoreResource[];
-          } else {
-            return denormaliseStoreResource(storeResource, storeData) as StoreResource;
-          }
-        });
+        if (_.isArray(storeResource)) {
+          return storeResource.map(
+            r => denormaliseStoreResource(r, storeData)) as StoreResource[];
+        } else {
+          return denormaliseStoreResource(storeResource, storeData) as StoreResource;
+        }
+      });
   }
 
   /**

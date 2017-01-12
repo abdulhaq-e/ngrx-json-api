@@ -16,7 +16,6 @@ import {
   Payload,
   Query,
   QueryParams,
-  QueryType,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
@@ -669,18 +668,15 @@ export const generateQueryParams = (...params: Array<string>) => {
   }
 };
 
-export const generatePayload = (resource: Resource, queryType: QueryType): Payload => {
+export const generatePayload = (resource: Resource, operation: OperationType): Payload => {
   let payload: Payload = {
     query: {
       type: resource.type,
     }
   };
 
-  // queryType is common for all payloads
-  payload.query.queryType = queryType;
-
   // the data to be updated or created
-  if (queryType === 'create' || queryType === 'update') {
+  if (operation === 'POST' || operation === 'PATCH') {
     payload.jsonApiData = {
       data: {
         id: resource.id,
@@ -691,9 +687,9 @@ export const generatePayload = (resource: Resource, queryType: QueryType): Paylo
     };
   }
 
-  // 'delete' only needs a query and it also needs an id in its query
-  // 'update' also needs an id in its query
-  if (queryType === 'update' || queryType === 'deleteOne') {
+  // 'DELETE' only needs a query and it also needs an id in its query
+  // 'PATCH' also needs an id in its query
+  if (operation === 'PATCH' || operation === 'DELETE') {
     payload.query.id = resource.id;
   }
 
