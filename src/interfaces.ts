@@ -26,6 +26,11 @@ export interface FilteringOperator {
   comparison: (value: any, resourceFieldValue: any) => boolean;
 }
 
+export interface ManyResourceRelationship {
+  data?: Array<ResourceIdentifier>;
+  reference?: Array<StoreResource>;
+}
+
 export interface NgrxJsonApiConfig {
   apiUrl: string;
   resourceDefinitions: Array<ResourceDefinition>;
@@ -76,6 +81,11 @@ export type OperationType
   | 'DELETING'
   | 'READING'
   | false;
+
+export interface OneResourceRelationship {
+  data?: ResourceIdentifier;
+  reference?: StoreResource;
+}
 
 export interface Payload {
   jsonApiData?: Document;
@@ -148,7 +158,7 @@ export interface ResourceIdentifier {
 export interface ResourceRelationship {
   data?: any;
   links?: any;
-  reference?: Resource;
+  reference?: any;
 }
 
 export interface ResourceRelationDefinition {
