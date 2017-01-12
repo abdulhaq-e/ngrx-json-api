@@ -13,6 +13,8 @@ import {
   denormaliseObject,
   denormaliseStoreResource,
   filterResources,
+  getDenormalisedPath,
+  getDenormalisedValue,
   //     getSingleStoreResource,
   //     getMultipleStoreResource,
   generateFieldsQueryParams,
@@ -160,6 +162,82 @@ describe('denormalise and denormaliseObject', () => {
         'resource', 'relationships', 'author', 'reference', 'resource'
       ]));
   });
+});
+
+describe('getDenormalisedPath', () => {
+  it('should get the denormalised path for a simple', () => {
+    let path = 'title'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual('resource.attributes.title');
+  });
+
+  it('should get the denormalised path for an attribute in a related resource', () => {
+    let path = 'author.firstName'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual(
+      'resource.relationships.author.reference.resource.attributes.firstName'
+    );
+  });
+
+  it('should get the denormalised path for an attribute in a deeply related resource', () => {
+    let path = 'author.profile.id'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual(
+      'resource.relationships.author.reference.resource.relationships.profile.reference.resource.attributes.id'
+    );
+  });
+
+  it('should get the denormalised path for a hasOne related resource', () => {
+    let path = 'author'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual(
+      'resource.relationships.author.reference'
+    );
+  });
+
+  it('should get the denormalised path for a deeply hasOne related resource', () => {
+    let path = 'author.profile'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual(
+      'resource.relationships.author.reference.resource.relationships.profile.reference'
+    );
+  });
+
+  it('should get the denormalised path for a hasMany related resource', () => {
+    let path = 'comments'
+    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    expect(resolvedPath).toEqual(
+      'resource.relationships.comments.reference'
+    );
+  });
+});
+
+describe('getDenormalisedValue', () => {
+  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
+  let denormalisedR = denormaliseStoreResource(storeData['Article']['1'], storeData);
+  it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
+    let value = getDenormalisedValue('title', denormalisedR, resourceDefinitions);
+    expect(value).toEqual('Article 1');
+  });
+
+  it('should get the value from a DenormalisedStoreResource given a simple path: related attribute', () => {
+    let value = getDenormalisedValue('author.name', denormalisedR, resourceDefinitions);
+    expect(value).toEqual('Person 1');
+  });
+
+  it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
+    let relatedR = getDenormalisedValue('author', denormalisedR, resourceDefinitions);
+    expect(relatedR).toBeDefined();
+    expect(relatedR.resource.type).toEqual('Person');
+  });
+
+  it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
+    let relatedR = getDenormalisedValue('comments', denormalisedR, resourceDefinitions);
+    expect(relatedR).toBeDefined();
+    expect(relatedR[0].resource.type).toEqual('Comment');
+    expect(relatedR[0].resource.id).toEqual('1');
+  });
+
 });
 
 describe('deleteStoreResources', () => {
@@ -846,14 +924,6 @@ describe('getResourceFieldValueFromPath', () => {
   });
 
 });
-
-describe('getDenormalisedPath', () => {
-  it('should get the denormalised path given a human usable path', () => {
-    let path = 'article.title'
-    let resolvedPath = getDenormalisedPath(path, resourceDefinitions);
-    expect(resolvedPath).toEqual('attributes.title');
-  })
-})
 
 describe('generateIncludedQueryParams', () => {
   it('should generate an included query param given an array of resources to be included', () => {
