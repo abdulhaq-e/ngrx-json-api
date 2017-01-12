@@ -85,7 +85,7 @@
     "karma-jasmine-diff-reporter": "^0.6.3",
     "karma-mocha-reporter": "^2.1.0",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^1.8.0",
+    "karma-webpack": "^2.0.1",
     "loader-utils": "^0.2.16",
     "lodash": "^4.17.2",
     "lodash-webpack-plugin": "^0.10.0",
