@@ -30,7 +30,10 @@ import {
   serviceFactory,
 } from '../src/module';
 
-import { updateStoreDataFromPayload } from '../src/utils';
+import {
+  denormaliseStoreResource,
+  updateStoreDataFromPayload
+} from '../src/utils';
 
 import {
   testPayload,
@@ -38,7 +41,7 @@ import {
 } from './test_utils';
 
 describe('NgrxJsonApiService', () => {
-  let service;
+  let service: NgrxJsonApiService;
 
   beforeEach(() => {
     let store = {
@@ -234,6 +237,82 @@ describe('NgrxJsonApiService', () => {
         expect(_.get(it[0], 'resource.relationships.author.reference.resource')).toBeDefined();
       });
     });
+  });
 
+  describe('getDenormalisedPath', () => {
+    it('should get the denormalised path for a simple', () => {
+      let path = 'title'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual('resource.attributes.title');
+    });
+
+    it('should get the denormalised path for an attribute in a related resource', () => {
+      let path = 'author.firstName'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual(
+        'resource.relationships.author.reference.resource.attributes.firstName'
+      );
+    });
+
+    it('should get the denormalised path for an attribute in a deeply related resource', () => {
+      let path = 'author.profile.id'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual(
+        'resource.relationships.author.reference.resource.relationships.profile.reference.resource.attributes.id'
+      );
+    });
+
+    it('should get the denormalised path for a hasOne related resource', () => {
+      let path = 'author'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual(
+        'resource.relationships.author.reference'
+      );
+    });
+
+    it('should get the denormalised path for a deeply hasOne related resource', () => {
+      let path = 'author.profile'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual(
+        'resource.relationships.author.reference.resource.relationships.profile.reference'
+      );
+    });
+
+    it('should get the denormalised path for a hasMany related resource', () => {
+      let path = 'comments'
+      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      expect(resolvedPath).toEqual(
+        'resource.relationships.comments.reference'
+      );
+    });
+  });
+
+  describe('getDenormalisedValue', () => {
+    let denormalisedR;
+    beforeEach(() => {
+      denormalisedR = denormaliseStoreResource(service.storeSnapshot.data['Article']['1'], service.storeSnapshot.data);
+    });
+    it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
+      let value = service.getDenormalisedValue('title', denormalisedR);
+      expect(value).toEqual('Article 1');
+    });
+
+    it('should get the value from a DenormalisedStoreResource given a simple path: related attribute', () => {
+      let value = service.getDenormalisedValue('author.name', denormalisedR);
+      expect(value).toEqual('Person 1');
+    });
+
+    it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
+      let relatedR = service.getDenormalisedValue('author', denormalisedR);
+      expect(relatedR).toBeDefined();
+      expect(relatedR.resource.type).toEqual('Person');
+    });
+
+    it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
+      let relatedR = service.getDenormalisedValue('comments', denormalisedR);
+      expect(relatedR).toBeDefined();
+      expect(relatedR[0].resource.type).toEqual('Comment');
+      expect(relatedR[0].resource.id).toEqual('1');
+    });
   });
 });

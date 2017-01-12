@@ -18,6 +18,7 @@ import { NgrxJsonApiEffects } from '../src/effects';
 import {
   DenormaliseStoreResourcePipe,
   GetResourcePipe,
+  GetDenormalisedValuePipe,
   SelectResourcePipe,
   SelectStoreResourcePipe,
 } from '../src/pipes';
@@ -34,7 +35,10 @@ import {
   serviceFactory,
 } from '../src/module';
 
-import { updateStoreDataFromPayload } from '../src/utils';
+import {
+  denormaliseStoreResource,
+  updateStoreDataFromPayload
+} from '../src/utils';
 
 import {
   testPayload,
@@ -82,6 +86,7 @@ describe('Pipes', () => {
         },
         DenormaliseStoreResourcePipe,
         GetResourcePipe,
+        GetDenormalisedValuePipe,
         SelectResourcePipe,
         SelectStoreResourcePipe,
       ],
@@ -93,7 +98,40 @@ describe('Pipes', () => {
     beforeEach(inject([GetResourcePipe], (p) => {
       pipe = p;
     }));
+  });
 
+  describe('GetDenormalisedValuePipe', () => {
+    beforeEach(inject([GetDenormalisedValuePipe], (p) => {
+      pipe = p;
+    }));
+
+    let denormalisedR;
+    beforeEach(() => {
+      denormalisedR = denormaliseStoreResource(pipe.service.storeSnapshot.data['Article']['1'], pipe.service.storeSnapshot.data);
+    });
+    it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
+
+      let value = pipe.transform('title', denormalisedR);
+      expect(value).toEqual('Article 1');
+    });
+
+    it('should get the value from a DenormalisedStoreResource given a simple path: related attribute', () => {
+      let value = pipe.transform('author.name', denormalisedR);
+      expect(value).toEqual('Person 1');
+    });
+
+    it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
+      let relatedR = pipe.transform('author', denormalisedR);
+      expect(relatedR).toBeDefined();
+      expect(relatedR.resource.type).toEqual('Person');
+    });
+
+    it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
+      let relatedR = pipe.transform('comments', denormalisedR);
+      expect(relatedR).toBeDefined();
+      expect(relatedR[0].resource.type).toEqual('Comment');
+      expect(relatedR[0].resource.id).toEqual('1');
+    });
   });
 
   describe('SelectResourcePipe', () => {

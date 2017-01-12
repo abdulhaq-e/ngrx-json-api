@@ -99,6 +99,54 @@ export const getMultipleStoreResource = (resourceIds: Array<ResourceIdentifier>,
   return resourceIds.map(id => getSingleStoreResource(id, resources));
 };
 
+export const getDenormalisedPath = (path: string, baseResourceType: string,
+  resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string): string => {
+  let denormPath: string[] = [];
+  if (_.isUndefined(pathSeparator)) {
+    pathSeparator = '.';
+  }
+  let fields: Array<string> = path.split(pathSeparator);
+  let currentResourceType = baseResourceType;
+  for (let i = 0; i < fields.length; i++) {
+    let definition = _.find(resourceDefinitions, { type: currentResourceType });
+
+    if (_.isUndefined(definition)) {
+      throw new Error('Definition not found');
+    }
+    // if both attributes and relationships are missing, raise an error
+    if (_.isUndefined(definition.attributes) && _.isUndefined(definition.relationships)) {
+      throw new Error('Attributes or Relationships must be provided');
+    }
+
+    if (definition.attributes.hasOwnProperty(fields[i])) {
+      denormPath.push('resource', 'attributes', fields[i]);
+      break;
+    } else if (definition.relationships.hasOwnProperty(fields[i])) {
+      let resourceRelation = definition.relationships[fields[i]];
+      if (resourceRelation.relationType === 'hasMany') {
+        if (i !== fields.length - 1) {
+          throw new Error('Cannot filter past a hasMany relation');
+        } else {
+          denormPath.push('resource', 'relationships', fields[i], 'reference');
+        }
+      } else {
+        currentResourceType = resourceRelation.type;
+        denormPath.push('resource', 'relationships', fields[i], 'reference');
+      }
+    } else {
+      throw new Error('Cannot find field in attributes or relationships');
+    }
+  }
+  return denormPath.join(pathSeparator);
+};
+
+export const getDenormalisedValue = (path: string, storeResource: StoreResource,
+  resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string) => {
+  let denormalisedPath = getDenormalisedPath(path, storeResource.resource.type, resourceDefinitions,
+    pathSeparator);
+  return _.get(storeResource, denormalisedPath);
+};
+
 /**
  * Given two objects, it will merge the second in the first.
  *
@@ -153,21 +201,21 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   if (_.isUndefined(storeData[resourceId.type])
     || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
 
-      if (resourceState === ResourceState.DELETED) {
-        let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
-        newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
-        newState[resourceId.type][resourceId.id] = Object.assign({},
-          newState[resourceId.type][resourceId.id]);
-        newState[resourceId.type][resourceId.id].persistedResource = null;
-        newState[resourceId.type][resourceId.id].resource = {
-          type: resourceId.type,
-          id: resourceId.id
-        };
-        newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
-        return newState;
-      } else {
-        return storeData;
-      }
+    if (resourceState === ResourceState.DELETED) {
+      let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
+      newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
+      newState[resourceId.type][resourceId.id] = Object.assign({},
+        newState[resourceId.type][resourceId.id]);
+      newState[resourceId.type][resourceId.id].persistedResource = null;
+      newState[resourceId.type][resourceId.id].resource = {
+        type: resourceId.type,
+        id: resourceId.id
+      };
+      newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
+      return newState;
+    } else {
+      return storeData;
+    }
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
   newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
