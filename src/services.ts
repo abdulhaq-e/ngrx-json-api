@@ -196,13 +196,15 @@ export class NgrxJsonApiService {
   }
 
   public getDenormalisedPath(path, resourceType): string {
+    let pathSeparator = _.get(this.selectors.config, 'filteringConfig.pathSeparator') as string;
     return getDenormalisedPath(path, resourceType, this.selectors.config.resourceDefinitions,
-      this.selectors.config.filteringConfig.pathSeparator);
+      pathSeparator);
   }
 
   public getDenormalisedValue(path, storeResource): any {
+    let pathSeparator = _.get(this.selectors.config, 'filteringConfig.pathSeparator') as string;
     return getDenormalisedValue(path, storeResource, this.selectors.config.resourceDefinitions,
-      this.selectors.config.filteringConfig.pathSeparator);
+      pathSeparator);
   }
 
   /**
