@@ -65,7 +65,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect() createResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_CREATE_INIT)
     .map<Action, Resource>(toPayload)
-    .map<Resource, Payload>(it => this.generatePayload(it, 'create'))
+    .map<Resource, Payload>(it => this.generatePayload(it, 'POST'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi.create(payload.query, payload.jsonApiData)
         .mapTo(new ApiCreateSuccessAction(payload))
@@ -76,7 +76,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect() updateResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_UPDATE_INIT)
     .map<Action, Resource>(toPayload)
-    .map<Resource, Payload>(it => this.generatePayload(it, 'update'))
+    .map<Resource, Payload>(it => this.generatePayload(it, 'PATCH'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi.update(payload.query, payload.jsonApiData)
         .mapTo(new ApiUpdateSuccessAction(payload))
@@ -116,7 +116,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect() deleteResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
     .map<Action, ResourceIdentifier>(toPayload)
-    .map<ResourceIdentifier, Payload>(it => this.generatePayload(it, 'deleteOne'))
+    .map<ResourceIdentifier, Payload>(it => this.generatePayload(it, 'DELETE'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi.delete(payload.query)
         .map(res => res.json())
@@ -142,7 +142,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         let actions: Array<Observable<Action>> = [];
         for (let pendingChange of pending) {
           if (pendingChange.state === ResourceState.CREATED) {
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'create');
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'POST');
             actions.push(this.jsonApi.create(payload.query, payload.jsonApiData)
               .mapTo(new ApiCreateSuccessAction(payload))
               .catch(error => Observable.of(
@@ -150,7 +150,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             );
           } else if (pendingChange.state === ResourceState.UPDATED) {
             // prepare payload, omit links and meta information
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'update');
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'PATCH');
             actions.push(this.jsonApi.update(payload.query, payload.jsonApiData)
               .map(res => res.json())
               .map(data => new ApiUpdateSuccessAction({
@@ -161,7 +161,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.DELETED) {
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'deleteOne');
+            let payload: Payload = this.generatePayload(pendingChange.resource, 'DELETE');
             actions.push(this.jsonApi.delete(payload)
               .map(res => res.json())
               .map(data => new ApiDeleteSuccessAction({
