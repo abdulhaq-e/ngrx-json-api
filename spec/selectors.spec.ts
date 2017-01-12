@@ -249,16 +249,6 @@ describe('NgrxJsonApiSelectors', () => {
       expect(res[0].type).toEqual('Article');
     }));
 
-    it('should return undefined if the query was not found', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getResultIdentifiers$('10'))
-        .subscribe(d => res = d);
-      tick();
-      expect(res).not.toBeDefined();
-    }));
-
   });
 
   describe('getResults$', () => {
@@ -271,16 +261,6 @@ describe('NgrxJsonApiSelectors', () => {
       tick();
       expect(res[0].resource.id).toEqual('1');
       expect(res[1].resource.id).toEqual('2');
-    }));
-
-    it('should return undefined if the resultIds of the query are undefined', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getResults$('10'))
-        .subscribe(d => res = d);
-      tick();
-      expect(res).not.toBeDefined();
     }));
 
   });
