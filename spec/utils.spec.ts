@@ -241,31 +241,6 @@ describe('getDenormalisedValue', () => {
 
 });
 
-describe('deleteStoreResources', () => {
-  let storeData = {
-    'Article': {
-      '1': {},
-      '2': {}
-    },
-    'Comment': {
-      '1': {},
-      '2': {},
-    }
-  };
-  it('should delete a single resource given a type and id', () => {
-    let newStoreData = deleteStoreResources(storeData, { type: 'Article', id: '1' });
-    expect(newStoreData['Article']['1']).not.toBeDefined();
-    expect(newStoreData['Article']['2']).toBeDefined();
-  });
-
-  it('should delete all resources given a type only', () => {
-    let newStoreData = deleteStoreResources(storeData, { type: 'Article' });
-    expect(newStoreData['Article']).toEqual({});
-  });
-});
-
-
-
 describe('updateResourceObject', () => {
 
   it('should update attributes', () => {
@@ -488,31 +463,6 @@ describe('updateStoreResource', () => {
 
 });
 
-describe('updateQueryErrors', () => {
-  it('should return the state if the queryId is not given or query not found', () => {
-    let queriesStore = {}
-    expect(updateQueryErrors(queriesStore)).toEqual({});
-  });
-
-  it('should add any errors in the JsonApiDocument to the query erros', () => {
-
-    let queriesStore = {
-      '1': {
-        query: {},
-        loading: false,
-        errors: []
-      }
-    };
-    deepFreeze(queriesStore);
-    let document = {
-      errors: ['permission denied', 'i said permission denied']
-    };
-    let newQueriesStore = updateQueryErrors(queriesStore, '1', document);
-    expect(newQueriesStore['1'].errors.length).toEqual(2);
-    expect(newQueriesStore['1'].errors).toEqual(document['errors']);
-  });
-});
-
 describe('updateResourceErrors', () => {
   // it('should throw error if the query type and id is not defined', () => {
   //   expect(updateResourceErrors({}, {}, {})).toThrow('invalid parameters');
@@ -569,7 +519,31 @@ describe('rollbackStoreResources', () => {
   });
 });
 
-describe('updateStoreData', () => {
+describe('deleteStoreResources', () => {
+  let storeData = {
+    'Article': {
+      '1': {},
+      '2': {}
+    },
+    'Comment': {
+      '1': {},
+      '2': {},
+    }
+  };
+  it('should delete a single resource given a type and id', () => {
+    let newStoreData = deleteStoreResources(storeData, { type: 'Article', id: '1' });
+    expect(newStoreData['Article']['1']).not.toBeDefined();
+    expect(newStoreData['Article']['2']).toBeDefined();
+  });
+
+  it('should delete all resources given a type only', () => {
+    let newStoreData = deleteStoreResources(storeData, { type: 'Article' });
+    expect(newStoreData['Article']).toEqual({});
+  });
+});
+
+
+describe('updateStoreDataFromResource', () => {
 
   it(`should insert a resource if it was not found`, () => {
     let state = {
@@ -593,7 +567,7 @@ describe('updateStoreData', () => {
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']['3']).toBeDefined();
-    expect(newState['Article']['3'].resource.id).toEqual('3')
+    expect(newState['Article']['3'].id).toEqual('3')
     expect(newState['Article']['1']).toBeDefined();
   });
 
@@ -623,7 +597,7 @@ describe('updateStoreData', () => {
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']['1']).toBeDefined();
-    expect(newState['Article']['1'].resource.attributes.tag).toEqual('Whatever');
+    expect(newState['Article']['1'].attributes.tag).toEqual('Whatever');
   });
 
   it('should insert resource type and resource if none were found', () => {
@@ -638,37 +612,6 @@ describe('updateStoreData', () => {
     expect(newState['Article']).toBeDefined();
     expect(newState['Article']['3']).toBeDefined();
   });
-
-  //
-  // it(`should insert related resources even if they were not included`, () => {
-  //     let state = {}
-  //     deepFreeze(state);
-  //
-  //     let newResource: Resource = {
-  //         type: 'Article',
-  //         id: '3',
-  //         relationships: {
-  //             author: {
-  //                 data: { type: 'Person', id: '1' }
-  //             },
-  //             comments: {
-  //                 data: [
-  //                     { type: 'Comment', id: '1' },
-  //                     { type: 'Comment', id: '2' }
-  //                 ]
-  //             }
-  //         }
-  //     };
-  //     let newState = updateOrInsertResource(state, newResource);
-  //     expect(newState['Comment']['1']).toBeDefined();
-  //     expect(newState['Comment']['1'].id).toEqual('1');
-  //     expect(newState['Comment']['2']).toBeDefined();
-  //     expect(newState['Comment']['2'].id).toEqual('2');
-  //     expect(newState['Person']['1']).toBeDefined();
-  //     expect(newState['Person']['1'].id).toEqual('1');
-  //     expect(newState['Article']['3']).toBeDefined();
-  // });
-
 });
 //
 
@@ -704,6 +647,31 @@ describe('updateQueryParams', () => {
     let newStoreQueries = updateQueryParams(storeQueries, newQuery);
     expect(newStoreQueries['4']).toBeDefined();
     expect(newStoreQueries['4'].query.type).toEqual('getOne');
+  });
+});
+
+describe('updateQueryErrors', () => {
+  it('should return the state if the queryId is not given or query not found', () => {
+    let queriesStore = {}
+    expect(updateQueryErrors(queriesStore)).toEqual({});
+  });
+
+  it('should add any errors in the JsonApiDocument to the query erros', () => {
+
+    let queriesStore = {
+      '1': {
+        query: {},
+        loading: false,
+        errors: []
+      }
+    };
+    deepFreeze(queriesStore);
+    let document = {
+      errors: ['permission denied', 'i said permission denied']
+    };
+    let newQueriesStore = updateQueryErrors(queriesStore, '1', document);
+    expect(newQueriesStore['1'].errors.length).toEqual(2);
+    expect(newQueriesStore['1'].errors).toEqual(document['errors']);
   });
 });
 
