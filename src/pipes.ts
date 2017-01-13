@@ -10,27 +10,6 @@ import {
   StoreResource
 } from './interfaces';
 
-@Pipe({ name: 'jaGetResource' })
-export class GetResourcePipe implements PipeTransform {
-
-  constructor(private service: NgrxJsonApiService) {
-  }
-
-  transform(id: ResourceIdentifier): Resource {
-    return this.service.getResourceSnapshot(id);
-  }
-}
-
-@Pipe({ name: 'jaSelectResource' })
-export class SelectResourcePipe implements PipeTransform {
-
-  constructor(private service: NgrxJsonApiService) {
-  }
-
-  transform(id: ResourceIdentifier): Observable<Resource> {
-    return this.service.selectResource(id);
-  }
-}
 
 @Pipe({ name: 'jaSelectStoreResource' })
 export class SelectStoreResourcePipe implements PipeTransform {

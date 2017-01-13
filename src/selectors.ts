@@ -72,7 +72,7 @@ export class NgrxJsonApiSelectors<T> {
           .let(this.getStoreResourceOfType$(query.type))
           .combineLatest(state$.let(this.getStoreData$()), (resources: NgrxJsonApiStoreResources,
             storeData: NgrxJsonApiStoreData) => filterResources(resources, storeData, query,
-              this.config.resourceDefinitions, this.config.filteringConfig))
+              this.config.resourceDefinitions, this.config.filteringConfig));
       }
       return selected$.distinctUntilChanged();
     };

@@ -192,7 +192,7 @@ export interface StoreQuery {
 /**
 * Container to hold a Resource in the store with state information.
 */
-export interface StoreResource extends Resource{
+export interface StoreResource extends Resource {
   /**
   * State of the resource to track local changes not yet
   * published to the json api endpoint.

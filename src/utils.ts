@@ -171,14 +171,14 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
       state: ResourceState.IN_SYNC,
       errors: [],
       loading: false
-    });
+    }) as StoreResource;
   } else {
     newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: null,
       state: ResourceState.CREATED,
       errors: [],
       loading: false
-    });
+    }) as StoreResource;
   }
   return _.isEqual(storeResources, newStoreResources) ? storeResources : newStoreResources;
 };
@@ -203,11 +203,11 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
       newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
       newState[resourceId.type][resourceId.id] = Object.assign({},
         newState[resourceId.type][resourceId.id]);
-      newState[resourceId.type][resourceId.id].persistedResource = null;
       newState[resourceId.type][resourceId.id] = {
         type: resourceId.type,
-        id: resourceId.id
-      };
+        id: resourceId.id,
+        persistedResource: null
+      } as StoreResource;
       newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
       return newState;
     } else {
@@ -268,7 +268,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     state: newResourceState,
     errors: [],
     loading: false
-  });
+  }) as StoreResource;
 
   return _.isEqual(newState[resource.id], state[resource.id]) ? state : newState;
 };
