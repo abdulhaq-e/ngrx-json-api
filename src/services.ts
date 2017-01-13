@@ -106,19 +106,6 @@ export class NgrxJsonApiService {
     return uuid();
   }
 
-  /**
-   * Gets the current state of the given resources.
-   * Consider the use of selectResource(...) to get an observable of the resource.
-   *
-   * @param identifier
-   */
-  public getResourceSnapshot(identifier: ResourceIdentifier) {
-    let snapshot = this.storeSnapshot;
-    if (snapshot.data[identifier.type] && snapshot.data[identifier.type][identifier.id]) {
-      return snapshot.data[identifier.type][identifier.id].resource;
-    }
-    return null;
-  }
 
   /**
    * Gets the current persisted state of the given resources.
@@ -158,15 +145,6 @@ export class NgrxJsonApiService {
       .let(this.selectors.getResultIdentifiers$(queryId));
   }
 
-  /**
-   * @param identifier of the resource
-   * @returns observable of the resource
-   */
-  public selectResource(identifier: ResourceIdentifier): Observable<Resource> {
-    return this.store
-      .select(this.selectors.storeLocation)
-      .let(this.selectors.getResource$(identifier));
-  }
 
   /**
    * @param identifier of the resource

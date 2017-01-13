@@ -95,8 +95,8 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findOne(query, false);
       storeResource.subscribe(it => {
-        expect(_.get(it, 'resource.type')).toEqual('Article');
-        expect(_.get(it, 'resource.id')).toEqual('1');
+        expect(_.get(it, 'type')).toEqual('Article');
+        expect(_.get(it, 'id')).toEqual('1');
       });
     });
 
@@ -148,10 +148,10 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findMany(query, false);
       storeResource.subscribe(it => {
-        expect(_.get(it[0], 'resource.type')).toEqual('Article');
-        expect(_.get(it[0], 'resource.id')).toEqual('1');
-        expect(_.get(it[1], 'resource.type')).toEqual('Article');
-        expect(_.get(it[1], 'resource.id')).toEqual('2');
+        expect(_.get(it[0], 'type')).toEqual('Article');
+        expect(_.get(it[0], 'id')).toEqual('1');
+        expect(_.get(it[1], 'type')).toEqual('Article');
+        expect(_.get(it[1], 'id')).toEqual('2');
       });
     });
 
@@ -224,7 +224,7 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.denormalise(service.findOne(query, false));
       storeResource.subscribe(it => {
-        expect(_.get(it, 'resource.relationships.author.reference.resource')).toBeDefined();
+        expect(_.get(it, 'relationships.author.reference')).toBeDefined();
       });
     });
 
@@ -234,7 +234,7 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.denormalise(service.findMany(query, false));
       storeResource.subscribe(it => {
-        expect(_.get(it[0], 'resource.relationships.author.reference.resource')).toBeDefined();
+        expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
       });
     });
   });
@@ -243,14 +243,14 @@ describe('NgrxJsonApiService', () => {
     it('should get the denormalised path for a simple', () => {
       let path = 'title'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
-      expect(resolvedPath).toEqual('resource.attributes.title');
+      expect(resolvedPath).toEqual('attributes.title');
     });
 
     it('should get the denormalised path for an attribute in a related resource', () => {
       let path = 'author.firstName'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
       expect(resolvedPath).toEqual(
-        'resource.relationships.author.reference.resource.attributes.firstName'
+        'relationships.author.reference.attributes.firstName'
       );
     });
 
@@ -258,7 +258,7 @@ describe('NgrxJsonApiService', () => {
       let path = 'author.profile.id'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
       expect(resolvedPath).toEqual(
-        'resource.relationships.author.reference.resource.relationships.profile.reference.resource.attributes.id'
+        'relationships.author.reference.relationships.profile.reference.attributes.id'
       );
     });
 
@@ -266,7 +266,7 @@ describe('NgrxJsonApiService', () => {
       let path = 'author'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
       expect(resolvedPath).toEqual(
-        'resource.relationships.author.reference'
+        'relationships.author.reference'
       );
     });
 
@@ -274,7 +274,7 @@ describe('NgrxJsonApiService', () => {
       let path = 'author.profile'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
       expect(resolvedPath).toEqual(
-        'resource.relationships.author.reference.resource.relationships.profile.reference'
+        'relationships.author.reference.relationships.profile.reference'
       );
     });
 
@@ -282,7 +282,7 @@ describe('NgrxJsonApiService', () => {
       let path = 'comments'
       let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
       expect(resolvedPath).toEqual(
-        'resource.relationships.comments.reference'
+        'relationships.comments.reference'
       );
     });
   });
@@ -305,14 +305,14 @@ describe('NgrxJsonApiService', () => {
     it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
       let relatedR = service.getDenormalisedValue('author', denormalisedR);
       expect(relatedR).toBeDefined();
-      expect(relatedR.resource.type).toEqual('Person');
+      expect(relatedR.type).toEqual('Person');
     });
 
     it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
       let relatedR = service.getDenormalisedValue('comments', denormalisedR);
       expect(relatedR).toBeDefined();
-      expect(relatedR[0].resource.type).toEqual('Comment');
-      expect(relatedR[0].resource.id).toEqual('1');
+      expect(relatedR[0].type).toEqual('Comment');
+      expect(relatedR[0].id).toEqual('1');
     });
   });
 });

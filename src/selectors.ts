@@ -66,14 +66,13 @@ export class NgrxJsonApiSelectors<T> {
         return state$.map(() => Observable.throw('Unknown query'));
       } else if (query.type && query.id) {
         selected$ = state$
-          .let(this.getResource$({ type: query.type, id: query.id }));
+          .let(this.getStoreResource$({ type: query.type, id: query.id }));
       } else {
         selected$ = state$
           .let(this.getStoreResourceOfType$(query.type))
           .combineLatest(state$.let(this.getStoreData$()), (resources: NgrxJsonApiStoreResources,
             storeData: NgrxJsonApiStoreData) => filterResources(resources, storeData, query,
-              this.config.resourceDefinitions, this.config.filteringConfig))
-          .map(it => it.map(r => r.resource));
+              this.config.resourceDefinitions, this.config.filteringConfig));
       }
       return selected$.distinctUntilChanged();
     };
@@ -136,21 +135,6 @@ export class NgrxJsonApiSelectors<T> {
       } else {
         return Observable.of(undefined);
       }
-    };
-  }
-
-  public getResource$(identifier: ResourceIdentifier) {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$
-        .let(this.getStoreResource$(identifier))
-        .map(it => it ? it.resource : undefined);
-    };
-  }
-
-  public getManyResource$(identifiers: Array<ResourceIdentifier>) {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$.let(this.getManyStoreResource$(identifiers))
-        .map(it => it ? it.map(r => r ? r.resource : undefined) : undefined);
     };
   }
 

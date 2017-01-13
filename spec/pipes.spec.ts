@@ -17,9 +17,7 @@ import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
 import {
   DenormaliseStoreResourcePipe,
-  GetResourcePipe,
   GetDenormalisedValuePipe,
-  SelectResourcePipe,
   SelectStoreResourcePipe,
 } from '../src/pipes';
 
@@ -85,20 +83,12 @@ describe('Pipes', () => {
           }
         },
         DenormaliseStoreResourcePipe,
-        GetResourcePipe,
         GetDenormalisedValuePipe,
-        SelectResourcePipe,
         SelectStoreResourcePipe,
       ],
     })
   });
 
-
-  describe('GetResourcePipe', () => {
-    beforeEach(inject([GetResourcePipe], (p) => {
-      pipe = p;
-    }));
-  });
 
   describe('GetDenormalisedValuePipe', () => {
     beforeEach(inject([GetDenormalisedValuePipe], (p) => {
@@ -123,22 +113,15 @@ describe('Pipes', () => {
     it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
       let relatedR = pipe.transform('author', denormalisedR);
       expect(relatedR).toBeDefined();
-      expect(relatedR.resource.type).toEqual('Person');
+      expect(relatedR.type).toEqual('Person');
     });
 
     it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
       let relatedR = pipe.transform('comments', denormalisedR);
       expect(relatedR).toBeDefined();
-      expect(relatedR[0].resource.type).toEqual('Comment');
-      expect(relatedR[0].resource.id).toEqual('1');
+      expect(relatedR[0].type).toEqual('Comment');
+      expect(relatedR[0].id).toEqual('1');
     });
-  });
-
-  describe('SelectResourcePipe', () => {
-    beforeEach(inject([SelectResourcePipe], (p) => {
-      pipe = p;
-    }));
-
   });
 
   describe('SelectStoreResourcePipe', () => {
@@ -163,7 +146,7 @@ describe('Pipes', () => {
       let storeResource = pipe.service.findOne(query, false);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
-        expect(_.get(it, 'resource.relationships.author.reference')).toBeDefined();
+        expect(_.get(it, 'relationships.author.reference')).toBeDefined();
       });
     });
 
@@ -174,7 +157,7 @@ describe('Pipes', () => {
       let storeResource = pipe.service.findMany(query, false);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
-        expect(_.get(it[0], 'resource.relationships.author.reference')).toBeDefined();
+        expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
       });
     });
 

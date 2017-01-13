@@ -92,10 +92,10 @@ describe('NgrxJsonApiSelectors', () => {
       tick();
       expect(res['1']).toBeDefined();
       expect(res['2']).toBeDefined();
-      expect(res['1'].resource.attributes.title).toEqual('Article 1');
-      expect(res['1'].resource.id).toEqual('1');
-      expect(res['2'].resource.attributes.title).toEqual('Article 2');
-      expect(res['2'].resource.id).toEqual('2');
+      expect(res['1'].attributes.title).toEqual('Article 1');
+      expect(res['1'].id).toEqual('1');
+      expect(res['2'].attributes.title).toEqual('Article 2');
+      expect(res['2'].id).toEqual('2');
       expect(res['3']).not.toBeDefined();
     }));
 
@@ -133,7 +133,7 @@ describe('NgrxJsonApiSelectors', () => {
         }))
         .subscribe(d => res = d);
       obs.select('api').let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
-        .subscribe(r => expect(r.resource).toEqual(res));
+        .subscribe(r => expect(r).toEqual(res));
       tick();
     }));
 
@@ -259,8 +259,8 @@ describe('NgrxJsonApiSelectors', () => {
         .let(selectors.getResults$('1'))
         .subscribe(d => res = d);
       tick();
-      expect(res[0].resource.id).toEqual('1');
-      expect(res[1].resource.id).toEqual('2');
+      expect(res[0].id).toEqual('1');
+      expect(res[1].id).toEqual('2');
     }));
 
   });
@@ -273,9 +273,9 @@ describe('NgrxJsonApiSelectors', () => {
         .let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
         .subscribe(d => res = d);
       tick();
-      expect(res.resource.attributes.title).toEqual('Article 1');
-      expect(res.resource.type).toEqual('Article');
-      expect(res.resource.id).toEqual('1');
+      expect(res.attributes.title).toEqual('Article 1');
+      expect(res.type).toEqual('Article');
+      expect(res.id).toEqual('1');
     }));
 
     it('should return undefined if the resources are not found', fakeAsync(() => {
@@ -303,8 +303,8 @@ describe('NgrxJsonApiSelectors', () => {
         ))
         .subscribe(d => res = d);
       tick();
-      expect(res[0].resource.id).toEqual('1');
-      expect(res[1].resource.id).toEqual('2');
+      expect(res[0].id).toEqual('1');
+      expect(res[1].id).toEqual('2');
     }));
 
     it('should return undefined if the resources are not defined', fakeAsync(() => {
@@ -335,58 +335,4 @@ describe('NgrxJsonApiSelectors', () => {
 
   });
 
-  describe('getResource$', () => {
-    it('should get the actual resource given an identifier', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getResource$({ type: 'Article', id: '1' }))
-        .subscribe(d => res = d);
-      tick();
-      expect(res.id).toEqual('1');
-    }));
-
-    it('should return undefined if the StoreResource was undefined', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getResource$({ type: 'Article', id: '19' }))
-        .subscribe(d => res = d);
-      tick();
-      expect(res).toBeUndefined();
-    }));
-
-  });
-
-  describe('getManyResource$', () => {
-    it('should get the actual resource given an identifier', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getManyResource$([
-          { type: 'Article', id: '1' },
-          { type: 'Article', id: '2' }]
-        ))
-        .subscribe(d => res = d);
-      tick();
-      expect(res[0].id).toEqual('1');
-      expect(res[1].id).toEqual('2');
-    }));
-
-    it('should return undefined for StoreResource(s) that are not defined', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getManyResource$([
-          { type: 'Article', id: '19' },
-          { type: 'Article', id: '2' }]
-        ))
-        .subscribe(d => res = d);
-      tick();
-      expect(res[0]).toBeUndefined();
-      expect(res[1].id).toEqual('2');
-    }));
-
-
-  });
 });

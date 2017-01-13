@@ -142,7 +142,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         let actions: Array<Observable<Action>> = [];
         for (let pendingChange of pending) {
           if (pendingChange.state === ResourceState.CREATED) {
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'POST');
+            let payload: Payload = this.generatePayload(pendingChange, 'POST');
             actions.push(this.jsonApi.create(payload.query, payload.jsonApiData)
               .mapTo(new ApiCreateSuccessAction(payload))
               .catch(error => Observable.of(
@@ -150,7 +150,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             );
           } else if (pendingChange.state === ResourceState.UPDATED) {
             // prepare payload, omit links and meta information
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'PATCH');
+            let payload: Payload = this.generatePayload(pendingChange, 'PATCH');
             actions.push(this.jsonApi.update(payload.query, payload.jsonApiData)
               .map(res => res.json())
               .map(data => new ApiUpdateSuccessAction({
@@ -161,7 +161,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 new ApiUpdateFailAction(this.toErrorPayload(payload.query, error))))
             );
           } else if (pendingChange.state === ResourceState.DELETED) {
-            let payload: Payload = this.generatePayload(pendingChange.resource, 'DELETE');
+            let payload: Payload = this.generatePayload(pendingChange, 'DELETE');
             actions.push(this.jsonApi.delete(payload)
               .map(res => res.json())
               .map(data => new ApiDeleteSuccessAction({
@@ -249,14 +249,14 @@ export class NgrxJsonApiEffects implements OnDestroy {
     let dependencies: any = {};
     let pendingMap: any = {};
     for (let pendingResource of pendingResources) {
-      let resource = pendingResource.resource;
+      let resource = pendingResource;
       dependencies[this.toKey(resource)] = [];
       pendingMap[this.toKey(resource)] = pendingResource;
     }
 
     // extract dependencies
     for (let pendingResource of pendingResources) {
-      let resource = pendingResource.resource;
+      let resource = pendingResource;
       let key = this.toKey(resource);
       Object.keys(resource.relationships).forEach(relationshipName => {
         let data = resource.relationships[relationshipName].data;
@@ -294,7 +294,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
 
   private visit(pendingResource: StoreResource, i, predecessors, context: TopologySortContext) {
-    let key = this.toKey(pendingResource.resource);
+    let key = this.toKey(pendingResource);
     if (predecessors.indexOf(key) >= 0) {
       throw new Error('Cyclic dependency: ' + key + ' with ' + JSON.stringify(predecessors));
     }

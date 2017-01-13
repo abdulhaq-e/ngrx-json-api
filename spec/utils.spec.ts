@@ -24,6 +24,7 @@ import {
   generatePayload,
   generateSortingQueryParams,
   getResourceFieldValueFromPath,
+  insertStoreResource,
   //     transformStoreData,
   //     transformStoreResources,
   removeQuery,
@@ -107,59 +108,52 @@ describe('denormalise and denormaliseObject', () => {
 
   it('should do nothing given a resource with attributes only', () => {
     let dR1 = denormaliseStoreResource(storeData['Person']['2'], storeData, {});
-    expect(dR1.resource).toEqual({
-      type: 'Person',
-      id: '2',
-      attributes: {
-        name: 'Person 2'
-      }
-    });
+    expect(dR1.type).toEqual('Person');
+    expect(dR1.attributes.name).toEqual('Person 2');
     let dR2 = denormaliseStoreResource(storeData['Blog']['2'], storeData, {});
-    expect(dR2.resource).toEqual({
-      type: 'Blog',
-      id: '2',
-    });
+    expect(dR2.type).toEqual('Blog');
+    expect(dR2.id).toEqual('2');
   });
 
   it('should denormalise a resource with relations', () => {
     let dR = denormaliseStoreResource(storeData['Blog']['1'], storeData, {});
-    expect(dR.resource.attributes.name).toEqual('Blog 1');
-    expect(dR.resource.id).toEqual('1');
-    expect(dR.resource.relationships.author.reference).toBeDefined();
-    expect(dR.resource.relationships.author.reference.resource.attributes.name).toEqual('Person 2');
+    expect(dR.attributes.name).toEqual('Blog 1');
+    expect(dR.id).toEqual('1');
+    expect(dR.relationships.author.reference).toBeDefined();
+    expect(dR.relationships.author.reference.attributes.name).toEqual('Person 2');
   });
 
   it('should denormalise a resource with deep relations', () => {
     let dR = denormaliseStoreResource(storeData['Person']['1'], storeData, {});
     expect(_.isArray(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference']))).toBeTruthy();
+      ['relationships', 'blogs', 'reference']))).toBeTruthy();
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'type'])).toEqual('Blog');
+      ['relationships', 'blogs', 'reference', '0',
+        'type'])).toEqual('Blog');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'id'])).toEqual('1');
+      ['relationships', 'blogs', 'reference', '0',
+        'id'])).toEqual('1');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'type'])).toEqual('Blog');
+      ['relationships', 'blogs', 'reference', '1',
+       'type'])).toEqual('Blog');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'id'])).toEqual('3');
+      ['relationships', 'blogs', 'reference', '1',
+       'id'])).toEqual('3');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'relationships', 'author', 'reference',
-        'resource', 'attributes', 'name'])).toEqual('Person 2');
+      ['relationships', 'blogs', 'reference', '0',
+       'relationships', 'author', 'reference',
+       'attributes', 'name'])).toEqual('Person 2');
   });
 
   it('should denormalise a resource with very deep relations (circular dependency)', () => {
     let dR = denormaliseStoreResource(storeData['Article']['1'], storeData, {});
     expect(_.get(dR, [
-      'resource', 'relationships', 'author', 'reference', 'resource'
+      'relationships', 'author', 'reference',
     ])).toEqual(
       _.get(dR, [
-        'resource', 'relationships', 'author', 'reference',
-        'resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'relationships', 'author', 'reference', 'resource'
+        'relationships', 'author', 'reference',
+        'relationships', 'blogs', 'reference', '1',
+        'relationships', 'author', 'reference'
       ]));
   });
 });
@@ -168,14 +162,14 @@ describe('getDenormalisedPath', () => {
   it('should get the denormalised path for a simple', () => {
     let path = 'title'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
-    expect(resolvedPath).toEqual('resource.attributes.title');
+    expect(resolvedPath).toEqual('attributes.title');
   });
 
   it('should get the denormalised path for an attribute in a related resource', () => {
     let path = 'author.firstName'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.attributes.firstName'
+      'relationships.author.reference.attributes.firstName'
     );
   });
 
@@ -183,7 +177,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author.profile.id'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.relationships.profile.reference.resource.attributes.id'
+      'relationships.author.reference.relationships.profile.reference.attributes.id'
     );
   });
 
@@ -191,7 +185,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference'
+      'relationships.author.reference'
     );
   });
 
@@ -199,7 +193,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author.profile'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.relationships.profile.reference'
+      'relationships.author.reference.relationships.profile.reference'
     );
   });
 
@@ -207,7 +201,7 @@ describe('getDenormalisedPath', () => {
     let path = 'comments'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.comments.reference'
+      'relationships.comments.reference'
     );
   });
 });
@@ -228,42 +222,17 @@ describe('getDenormalisedValue', () => {
   it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
     let relatedR = getDenormalisedValue('author', denormalisedR, resourceDefinitions);
     expect(relatedR).toBeDefined();
-    expect(relatedR.resource.type).toEqual('Person');
+    expect(relatedR.type).toEqual('Person');
   });
 
   it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
     let relatedR = getDenormalisedValue('comments', denormalisedR, resourceDefinitions);
     expect(relatedR).toBeDefined();
-    expect(relatedR[0].resource.type).toEqual('Comment');
-    expect(relatedR[0].resource.id).toEqual('1');
+    expect(relatedR[0].type).toEqual('Comment');
+    expect(relatedR[0].id).toEqual('1');
   });
 
 });
-
-describe('deleteStoreResources', () => {
-  let storeData = {
-    'Article': {
-      '1': {},
-      '2': {}
-    },
-    'Comment': {
-      '1': {},
-      '2': {},
-    }
-  };
-  it('should delete a single resource given a type and id', () => {
-    let newStoreData = deleteStoreResources(storeData, { type: 'Article', id: '1' });
-    expect(newStoreData['Article']['1']).not.toBeDefined();
-    expect(newStoreData['Article']['2']).toBeDefined();
-  });
-
-  it('should delete all resources given a type only', () => {
-    let newStoreData = deleteStoreResources(storeData, { type: 'Article' });
-    expect(newStoreData['Article']).toEqual({});
-  });
-});
-
-
 
 describe('updateResourceObject', () => {
 
@@ -306,16 +275,92 @@ describe('updateResourceObject', () => {
   });
 });
 
+describe('insertStoreResource', () => {
+
+  it('should insert StoreResource with IN_SYNC state if from server', () => {
+
+    let resource: Resource = {
+      type: 'Article',
+      id: '1',
+      attributes: {
+        body: 'Testing JSON API',
+        title: 'JSON API paints my bikeshed!',
+      },
+      relationships: {
+        author: {
+          data: { type: 'Person', id: '1' }
+        }
+      }
+    };
+    deepFreeze(resource)
+    let storeResources = {};
+    let newStoreResources = insertStoreResource(storeResources, resource, true);
+    expect(newStoreResources['1']).toBeDefined();
+    expect(newStoreResources['1']['type']).toEqual('Article');
+    expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
+    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].persistedResource).toEqual(resource);
+    expect(newStoreResources['1'].state).toEqual(ResourceState.IN_SYNC);
+  });
+
+  it('should insert StoreResource with CREATED state if from server', () => {
+
+    let resource: Resource = {
+      type: 'Article',
+      id: '1',
+      attributes: {
+        body: 'Testing JSON API',
+        title: 'JSON API paints my bikeshed!',
+      },
+      relationships: {
+        author: {
+          data: { type: 'Person', id: '1' }
+        }
+      }
+    };
+    deepFreeze(resource)
+    let storeResources = {};
+    let newStoreResources = insertStoreResource(storeResources, resource, false);
+    expect(newStoreResources['1']).toBeDefined();
+    expect(newStoreResources['1']['type']).toEqual('Article');
+    expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
+    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].persistedResource).toBeNull();
+    expect(newStoreResources['1'].state).toEqual(ResourceState.CREATED);
+  });
+});
+
+describe('updateResourceState', () => {
+  it('should return the state if the resource or its type were not found', () => {
+    let state = {};
+    let newState = updateResourceState(state, { type: 'Article', id: '1' })
+    expect(newState).toEqual({});
+  });
+
+  it('should update the resourceState and loading state', () => {
+    let state = {
+      'Article': {
+        '1': {
+          state: ResourceState.CREATED,
+          loading: true
+        }
+      }
+    };
+    let newState = updateResourceState(state, { type: 'Article', id: '1' },
+      ResourceState.IN_SYNC, false);
+    expect(newState['Article']['1'].state).toEqual(ResourceState.IN_SYNC);
+    expect(newState['Article']['1'].loading).toEqual(false);
+  });
+});
+
 describe('updateStoreResource', () => {
 
   let state = {
     '1': {
-      resource: {
-        type: 'Article',
-        id: '1',
-        attributes: {
-          'title': 'JSON API paints my bikeshed!'
-        }
+      type: 'Article',
+      id: '1',
+      attributes: {
+        'title': 'JSON API paints my bikeshed!'
       },
       persistedResource: {
         type: 'Article',
@@ -326,12 +371,10 @@ describe('updateStoreResource', () => {
       }
     },
     '2': {
-      resource: {
-        type: 'Article',
-        id: '2',
-        attributes: {
-          'title': 'Second article'
-        }
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Second article'
       },
       persistedResource: {
         type: 'Article',
@@ -342,12 +385,10 @@ describe('updateStoreResource', () => {
       }
     },
     '3': {
-      resource: {
-        type: 'Article',
-        id: '2',
-        attributes: {
-          'title': 'Third article'
-        }
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Third article'
       },
       persistedResource: null
     }
@@ -365,7 +406,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, true);
-    expect(newState['1'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['1'].attributes.title).toEqual('Untitled');
     expect(newState['1'].persistedResource.attributes.title).toEqual('Untitled');
   });
 
@@ -379,7 +420,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['1'].resource.attributes.title).toEqual('JSON API paints my bikeshed!');
+    expect(newState['1'].attributes.title).toEqual('JSON API paints my bikeshed!');
     expect(newState['1'].persistedResource.attributes.title).toEqual('JSON API paints my bikeshed!');
   });
 
@@ -393,7 +434,7 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['2'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['2'].attributes.title).toEqual('Untitled');
     expect(newState['2'].persistedResource.attributes.title).toEqual('Second article');
     expect(newState['2'].state).toEqual(ResourceState.UPDATED);
   });
@@ -408,36 +449,11 @@ describe('updateStoreResource', () => {
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['3'].resource.attributes.title).toEqual('Untitled');
+    expect(newState['3'].attributes.title).toEqual('Untitled');
     expect(newState['3'].persistedResource).toBeNull();
     expect(newState['3'].state).toEqual(ResourceState.CREATED);
   });
 
-});
-
-describe('updateQueryErrors', () => {
-  it('should return the state if the queryId is not given or query not found', () => {
-    let queriesStore = {}
-    expect(updateQueryErrors(queriesStore)).toEqual({});
-  });
-
-  it('should add any errors in the JsonApiDocument to the query erros', () => {
-
-    let queriesStore = {
-      '1': {
-        query: {},
-        loading: false,
-        errors: []
-      }
-    };
-    deepFreeze(queriesStore);
-    let document = {
-      errors: ['permission denied', 'i said permission denied']
-    };
-    let newQueriesStore = updateQueryErrors(queriesStore, '1', document);
-    expect(newQueriesStore['1'].errors.length).toEqual(2);
-    expect(newQueriesStore['1'].errors).toEqual(document['errors']);
-  });
 });
 
 describe('updateResourceErrors', () => {
@@ -496,7 +512,31 @@ describe('rollbackStoreResources', () => {
   });
 });
 
-describe('updateStoreData', () => {
+describe('deleteStoreResources', () => {
+  let storeData = {
+    'Article': {
+      '1': {},
+      '2': {}
+    },
+    'Comment': {
+      '1': {},
+      '2': {},
+    }
+  };
+  it('should delete a single resource given a type and id', () => {
+    let newStoreData = deleteStoreResources(storeData, { type: 'Article', id: '1' });
+    expect(newStoreData['Article']['1']).not.toBeDefined();
+    expect(newStoreData['Article']['2']).toBeDefined();
+  });
+
+  it('should delete all resources given a type only', () => {
+    let newStoreData = deleteStoreResources(storeData, { type: 'Article' });
+    expect(newStoreData['Article']).toEqual({});
+  });
+});
+
+
+describe('updateStoreDataFromResource', () => {
 
   it(`should insert a resource if it was not found`, () => {
     let state = {
@@ -520,7 +560,7 @@ describe('updateStoreData', () => {
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']['3']).toBeDefined();
-    expect(newState['Article']['3'].resource.id).toEqual('3')
+    expect(newState['Article']['3'].id).toEqual('3')
     expect(newState['Article']['1']).toBeDefined();
   });
 
@@ -550,7 +590,7 @@ describe('updateStoreData', () => {
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']['1']).toBeDefined();
-    expect(newState['Article']['1'].resource.attributes.tag).toEqual('Whatever');
+    expect(newState['Article']['1'].attributes.tag).toEqual('Whatever');
   });
 
   it('should insert resource type and resource if none were found', () => {
@@ -565,59 +605,18 @@ describe('updateStoreData', () => {
     expect(newState['Article']).toBeDefined();
     expect(newState['Article']['3']).toBeDefined();
   });
-
-  //
-  // it(`should insert related resources even if they were not included`, () => {
-  //     let state = {}
-  //     deepFreeze(state);
-  //
-  //     let newResource: Resource = {
-  //         type: 'Article',
-  //         id: '3',
-  //         relationships: {
-  //             author: {
-  //                 data: { type: 'Person', id: '1' }
-  //             },
-  //             comments: {
-  //                 data: [
-  //                     { type: 'Comment', id: '1' },
-  //                     { type: 'Comment', id: '2' }
-  //                 ]
-  //             }
-  //         }
-  //     };
-  //     let newState = updateOrInsertResource(state, newResource);
-  //     expect(newState['Comment']['1']).toBeDefined();
-  //     expect(newState['Comment']['1'].id).toEqual('1');
-  //     expect(newState['Comment']['2']).toBeDefined();
-  //     expect(newState['Comment']['2'].id).toEqual('2');
-  //     expect(newState['Person']['1']).toBeDefined();
-  //     expect(newState['Person']['1'].id).toEqual('1');
-  //     expect(newState['Article']['3']).toBeDefined();
-  // });
-
 });
-//
-describe('updateResourceState', () => {
-  it('should return the state if the resource or its type were not found', () => {
-    let state = {};
-    let newState = updateResourceState(state, { type: 'Article', id: '1' })
-    expect(newState).toEqual({});
-  });
 
-  it('should update the resourceState and loading state', () => {
-    let state = {
-      'Article': {
-        '1': {
-          state: ResourceState.CREATED,
-          loading: true
-        }
-      }
-    };
-    let newState = updateResourceState(state, { type: 'Article', id: '1' },
-      ResourceState.IN_SYNC, false);
-    expect(newState['Article']['1'].state).toEqual(ResourceState.IN_SYNC);
-    expect(newState['Article']['1'].loading).toEqual(false);
+describe('updateStoreDataFromPayload', () => {
+  it('should update the store data given a JsonApiDocument', () => {
+    let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
+    expect(newState['Article']).toBeDefined();
+    expect(newState['Person']).toBeDefined();
+    expect(newState['Article']['1']).toBeDefined();
+    expect(newState['Article']['2']).toBeDefined();
+    expect(newState['Person']['1']).toBeDefined();
+    expect(newState['Person']['2']).toBeDefined();
+    expect(newState['Article']['2'].attributes.title).toEqual('Untitled');
   });
 });
 
@@ -653,32 +652,6 @@ describe('updateQueryParams', () => {
     let newStoreQueries = updateQueryParams(storeQueries, newQuery);
     expect(newStoreQueries['4']).toBeDefined();
     expect(newStoreQueries['4'].query.type).toEqual('getOne');
-  });
-});
-
-describe('removeQuery', () => {
-  it('should remove a query given its id', () => {
-    let storeQueries = {
-      '1': {},
-      '2': {},
-      '3': {}
-    }
-    let newStoreQueries = removeQuery(storeQueries, '2');
-    expect(newStoreQueries['2']).not.toBeDefined();
-    expect(storeQueries['2']).toBeDefined();
-  });
-});
-
-describe('toResourceIdentifier', () => {
-  it('should map a resource to a resource identifier', () => {
-    let resource = {
-      type: 'Article',
-      id: '1',
-      attributes: {
-        title: 'Untitled'
-      }
-    };
-    expect(toResourceIdentifier(resource)).toEqual({ type: 'Article', id: '1' });
   });
 });
 
@@ -718,140 +691,55 @@ describe('updateQueryResults', () => {
   })
 });
 
-describe('updateStoreResources', () => {
-  it('should update the store data given a JsonApiDocument', () => {
-    let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
-    expect(newState['Article']).toBeDefined();
-    expect(newState['Person']).toBeDefined();
-    expect(newState['Article']['1']).toBeDefined();
-    expect(newState['Article']['2']).toBeDefined();
-    expect(newState['Person']['1']).toBeDefined();
-    expect(newState['Person']['2']).toBeDefined();
-    expect(newState['Article']['2'].resource.attributes.title).toEqual('Untitled');
+describe('updateQueryErrors', () => {
+  it('should return the state if the queryId is not given or query not found', () => {
+    let queriesStore = {}
+    expect(updateQueryErrors(queriesStore)).toEqual({});
+  });
+
+  it('should add any errors in the JsonApiDocument to the query erros', () => {
+
+    let queriesStore = {
+      '1': {
+        query: {},
+        loading: false,
+        errors: []
+      }
+    };
+    deepFreeze(queriesStore);
+    let document = {
+      errors: ['permission denied', 'i said permission denied']
+    };
+    let newQueriesStore = updateQueryErrors(queriesStore, '1', document);
+    expect(newQueriesStore['1'].errors.length).toEqual(2);
+    expect(newQueriesStore['1'].errors).toEqual(document['errors']);
   });
 });
 
-
-describe('filterResources (TODO: test remaining types)', () => {
-
-  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
-
-  let resources = storeData['Article'];
-  it('should filter resources using an iexact filter if no type is given', () => {
-    let query = {
-      type: 'Article',
-      params: {
-        filtering: [{ path: 'title', value: 'article 2' }]
-      }
+describe('removeQuery', () => {
+  it('should remove a query given its id', () => {
+    let storeQueries = {
+      '1': {},
+      '2': {},
+      '3': {}
     }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('2');
-    expect(filtered[0].resource.type).toBe('Article');
+    let newStoreQueries = removeQuery(storeQueries, '2');
+    expect(newStoreQueries['2']).not.toBeDefined();
+    expect(storeQueries['2']).toBeDefined();
   });
+});
 
-  it('should filter resources using iexact filter', () => {
-    let query = {
+describe('toResourceIdentifier', () => {
+  it('should map a resource to a resource identifier', () => {
+    let resource = {
       type: 'Article',
-      params: {
-        filtering: [
-          { path: 'title', value: 'article 2', operator: 'iexact' }
-        ]
+      id: '1',
+      attributes: {
+        title: 'Untitled'
       }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('2');
-    expect(filtered[0].resource.type).toBe('Article');
-  });
-
-  it('should filter resources using in filter', () => {
-    let query = {
-      type: 'Article',
-      params: {
-        filtering: [
-          {
-            path: 'title',
-            value: ['Article 2', 'Article 1'],
-            operator: 'in'
-          }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-    expect(filtered.length).toBe(2);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
-    expect(filtered[1].resource.id).toBe('2');
-  });
-
-  it('should filter based on related resources using iexact filter', () => {
-    let query = {
-      type: 'Article',
-      params: {
-        filtering: [
-          { path: 'author.name', value: 'person 1', operator: 'iexact', }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
-  });
-
-  it('should return no results if the resourceFieldValue is null', () => {
-    let query = {
-      type: 'Article',
-      params: {
-        filtering: [
-          { path: 'body', value: 'person 1', operator: 'iexact', }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-    expect(filtered.length).toBe(0);
-  });
-
-  it('should correctly use custom filter operators', () => {
-    let query = {
-      type: 'Article',
-      params: {
-        filtering: [
-          { path: 'title', value: 'Article', operator: 'firstLetterEqual', }
-        ]
-      }
-    }
-    let filteringConfig = {
-      filteringOperators: [
-        {
-          name: 'firstLetterEqual',
-          comparison: (value, fieldValue) => value[0] == fieldValue[0]
-        }
-      ]
     };
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
-    expect(filtered.length).toBe(2);
-    expect(filtered[0].resource.id).toBe('1');
-    expect(filtered[0].resource.type).toBe('Article');
+    expect(toResourceIdentifier(resource)).toEqual({ type: 'Article', id: '1' });
   });
-
-
-  // it('should filter hasMany related resources using iexact filter', () => {
-  //     let query = {
-  //         type: 'Article',
-  //         params: {
-  //             filtering: [
-  //                 { path: 'text', value: 'uncommented', type: 'iexact', path: 'comments' }
-  //             ]
-  //         }
-  //     }
-  //     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
-  //     expect(filtered.length).toBe(1);
-  //     expect(filtered[0].resource.id).toBe('1');
-  //     expect(filtered[0].resource.type).toBe('Article');
-  // });
-
 });
 
 describe('getResourceFieldValueFromPath', () => {
@@ -922,6 +810,128 @@ describe('getResourceFieldValueFromPath', () => {
     let value = getResourceFieldValueFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
     expect(value).toEqual('firstProfile');
   });
+
+});
+
+describe('filterResources (TODO: test remaining types)', () => {
+
+  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
+
+  let resources = storeData['Article'];
+  it('should filter resources using an iexact filter if no type is given', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [{ path: 'title', value: 'article 2' }]
+      }
+    }
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].id).toBe('2');
+    expect(filtered[0].type).toBe('Article');
+  });
+
+  it('should filter resources using iexact filter', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [
+          { path: 'title', value: 'article 2', operator: 'iexact' }
+        ]
+      }
+    }
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].id).toBe('2');
+    expect(filtered[0].type).toBe('Article');
+  });
+
+  it('should filter resources using in filter', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [
+          {
+            path: 'title',
+            value: ['Article 2', 'Article 1'],
+            operator: 'in'
+          }
+        ]
+      }
+    }
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+    expect(filtered.length).toBe(2);
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
+    expect(filtered[1].id).toBe('2');
+  });
+
+  it('should filter based on related resources using iexact filter', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [
+          { path: 'author.name', value: 'person 1', operator: 'iexact', }
+        ]
+      }
+    }
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
+  });
+
+  it('should return no results if the resourceFieldValue is null', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [
+          { path: 'body', value: 'person 1', operator: 'iexact', }
+        ]
+      }
+    }
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+    expect(filtered.length).toBe(0);
+  });
+
+  it('should correctly use custom filter operators', () => {
+    let query = {
+      type: 'Article',
+      params: {
+        filtering: [
+          { path: 'title', value: 'Article', operator: 'firstLetterEqual', }
+        ]
+      }
+    }
+    let filteringConfig = {
+      filteringOperators: [
+        {
+          name: 'firstLetterEqual',
+          comparison: (value, fieldValue) => value[0] == fieldValue[0]
+        }
+      ]
+    };
+    let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
+    expect(filtered.length).toBe(2);
+    expect(filtered[0].id).toBe('1');
+    expect(filtered[0].type).toBe('Article');
+  });
+
+
+  // it('should filter hasMany related resources using iexact filter', () => {
+  //     let query = {
+  //         type: 'Article',
+  //         params: {
+  //             filtering: [
+  //                 { path: 'text', value: 'uncommented', type: 'iexact', path: 'comments' }
+  //             ]
+  //         }
+  //     }
+  //     let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+  //     expect(filtered.length).toBe(1);
+  //     expect(filtered[0].resource.id).toBe('1');
+  //     expect(filtered[0].resource.type).toBe('Article');
+  // });
 
 });
 
