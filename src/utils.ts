@@ -73,19 +73,18 @@ export const denormaliseStoreResource = (item: StoreResource, storeData: NgrxJso
     return null;
   }
   let storeResource = _.cloneDeep(<StoreResource>item);
-  let resource = storeResource.resource;
 
-  if (_.isUndefined(bag[resource.type])) {
-    bag[resource.type] = {};
+  if (_.isUndefined(bag[storeResource.type])) {
+    bag[storeResource.type] = {};
   }
-  if (_.isUndefined(bag[resource.type][resource.id])) {
-    bag[resource.type][resource.id] = storeResource;
-    storeResource.resource = denormaliseObject(storeResource.resource, storeData, bag);
+  if (_.isUndefined(bag[storeResource.type][storeResource.id])) {
+    bag[storeResource.type][storeResource.id] = storeResource;
+    storeResource = denormaliseObject(storeResource, storeData, bag);
     storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
       storeData, bag);
   }
 
-  return bag[resource.type][resource.id];
+  return bag[storeResource.type][storeResource.id];
 
 };
 
@@ -119,7 +118,7 @@ export const getDenormalisedPath = (path: string, baseResourceType: string,
     }
 
     if (definition.attributes.hasOwnProperty(fields[i])) {
-      denormPath.push('resource', 'attributes', fields[i]);
+      denormPath.push('attributes', fields[i]);
       break;
     } else if (definition.relationships.hasOwnProperty(fields[i])) {
       let resourceRelation = definition.relationships[fields[i]];
@@ -127,11 +126,11 @@ export const getDenormalisedPath = (path: string, baseResourceType: string,
         if (i !== fields.length - 1) {
           throw new Error('Cannot filter past a hasMany relation');
         } else {
-          denormPath.push('resource', 'relationships', fields[i], 'reference');
+          denormPath.push('relationships', fields[i], 'reference');
         }
       } else {
         currentResourceType = resourceRelation.type;
-        denormPath.push('resource', 'relationships', fields[i], 'reference');
+        denormPath.push('relationships', fields[i], 'reference');
       }
     } else {
       throw new Error('Cannot find field in attributes or relationships');
@@ -142,7 +141,7 @@ export const getDenormalisedPath = (path: string, baseResourceType: string,
 
 export const getDenormalisedValue = (path: string, storeResource: StoreResource,
   resourceDefinitions: Array<ResourceDefinition>, pathSeparator?: string) => {
-  let denormalisedPath = getDenormalisedPath(path, storeResource.resource.type, resourceDefinitions,
+  let denormalisedPath = getDenormalisedPath(path, storeResource.type, resourceDefinitions,
     pathSeparator);
   return _.get(storeResource, denormalisedPath);
 };

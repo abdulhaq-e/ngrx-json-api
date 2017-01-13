@@ -108,59 +108,52 @@ describe('denormalise and denormaliseObject', () => {
 
   it('should do nothing given a resource with attributes only', () => {
     let dR1 = denormaliseStoreResource(storeData['Person']['2'], storeData, {});
-    expect(dR1.resource).toEqual({
-      type: 'Person',
-      id: '2',
-      attributes: {
-        name: 'Person 2'
-      }
-    });
+    expect(dR1.type).toEqual('Person');
+    expect(dR1.attributes.name).toEqual('Person 2');
     let dR2 = denormaliseStoreResource(storeData['Blog']['2'], storeData, {});
-    expect(dR2.resource).toEqual({
-      type: 'Blog',
-      id: '2',
-    });
+    expect(dR2.type).toEqual('Blog');
+    expect(dR2.id).toEqual('2');
   });
 
   it('should denormalise a resource with relations', () => {
     let dR = denormaliseStoreResource(storeData['Blog']['1'], storeData, {});
-    expect(dR.resource.attributes.name).toEqual('Blog 1');
-    expect(dR.resource.id).toEqual('1');
-    expect(dR.resource.relationships.author.reference).toBeDefined();
-    expect(dR.resource.relationships.author.reference.resource.attributes.name).toEqual('Person 2');
+    expect(dR.attributes.name).toEqual('Blog 1');
+    expect(dR.id).toEqual('1');
+    expect(dR.relationships.author.reference).toBeDefined();
+    expect(dR.relationships.author.reference.attributes.name).toEqual('Person 2');
   });
 
   it('should denormalise a resource with deep relations', () => {
     let dR = denormaliseStoreResource(storeData['Person']['1'], storeData, {});
     expect(_.isArray(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference']))).toBeTruthy();
+      ['relationships', 'blogs', 'reference']))).toBeTruthy();
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'type'])).toEqual('Blog');
+      ['relationships', 'blogs', 'reference', '0',
+        'type'])).toEqual('Blog');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'id'])).toEqual('1');
+      ['relationships', 'blogs', 'reference', '0',
+        'id'])).toEqual('1');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'type'])).toEqual('Blog');
+      ['relationships', 'blogs', 'reference', '1',
+       'type'])).toEqual('Blog');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'id'])).toEqual('3');
+      ['relationships', 'blogs', 'reference', '1',
+       'id'])).toEqual('3');
     expect(_.get(dR,
-      ['resource', 'relationships', 'blogs', 'reference', '0',
-        'resource', 'relationships', 'author', 'reference',
-        'resource', 'attributes', 'name'])).toEqual('Person 2');
+      ['relationships', 'blogs', 'reference', '0',
+       'relationships', 'author', 'reference',
+       'attributes', 'name'])).toEqual('Person 2');
   });
 
   it('should denormalise a resource with very deep relations (circular dependency)', () => {
     let dR = denormaliseStoreResource(storeData['Article']['1'], storeData, {});
     expect(_.get(dR, [
-      'resource', 'relationships', 'author', 'reference', 'resource'
+      'relationships', 'author', 'reference',
     ])).toEqual(
       _.get(dR, [
-        'resource', 'relationships', 'author', 'reference',
-        'resource', 'relationships', 'blogs', 'reference', '1',
-        'resource', 'relationships', 'author', 'reference', 'resource'
+        'relationships', 'author', 'reference',
+        'relationships', 'blogs', 'reference', '1',
+        'relationships', 'author', 'reference'
       ]));
   });
 });
@@ -169,14 +162,14 @@ describe('getDenormalisedPath', () => {
   it('should get the denormalised path for a simple', () => {
     let path = 'title'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
-    expect(resolvedPath).toEqual('resource.attributes.title');
+    expect(resolvedPath).toEqual('attributes.title');
   });
 
   it('should get the denormalised path for an attribute in a related resource', () => {
     let path = 'author.firstName'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.attributes.firstName'
+      'relationships.author.reference.attributes.firstName'
     );
   });
 
@@ -184,7 +177,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author.profile.id'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.relationships.profile.reference.resource.attributes.id'
+      'relationships.author.reference.relationships.profile.reference.attributes.id'
     );
   });
 
@@ -192,7 +185,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference'
+      'relationships.author.reference'
     );
   });
 
@@ -200,7 +193,7 @@ describe('getDenormalisedPath', () => {
     let path = 'author.profile'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.author.reference.resource.relationships.profile.reference'
+      'relationships.author.reference.relationships.profile.reference'
     );
   });
 
@@ -208,7 +201,7 @@ describe('getDenormalisedPath', () => {
     let path = 'comments'
     let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
     expect(resolvedPath).toEqual(
-      'resource.relationships.comments.reference'
+      'relationships.comments.reference'
     );
   });
 });
@@ -229,14 +222,14 @@ describe('getDenormalisedValue', () => {
   it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
     let relatedR = getDenormalisedValue('author', denormalisedR, resourceDefinitions);
     expect(relatedR).toBeDefined();
-    expect(relatedR.resource.type).toEqual('Person');
+    expect(relatedR.type).toEqual('Person');
   });
 
   it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
     let relatedR = getDenormalisedValue('comments', denormalisedR, resourceDefinitions);
     expect(relatedR).toBeDefined();
-    expect(relatedR[0].resource.type).toEqual('Comment');
-    expect(relatedR[0].resource.id).toEqual('1');
+    expect(relatedR[0].type).toEqual('Comment');
+    expect(relatedR[0].id).toEqual('1');
   });
 
 });
