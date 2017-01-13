@@ -5,7 +5,7 @@ const ngtools = require('@ngtools/webpack');
 const reporters = ['progress', 'jasmine-diff', 'mocha', 'karma-remap-istanbul'];
 
 if (process.env['CI']) {
-  reporters.push('coverall');
+  reporters.push('coverage', 'coveralls');
 }
 
 module.exports = function(karma) {
