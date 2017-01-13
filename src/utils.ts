@@ -233,13 +233,6 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   let foundStoreResource = state[resource.id];
   let persistedResource = state[resource.id].persistedResource;
 
-  let foundResource = {
-    attributes: foundStoreResource.attributes,
-    relationships: foundStoreResource.relationships,
-    meta: foundStoreResource.meta,
-    links: foundStoreResource.links
-  };
-
   let newResource: Resource;
   let newResourceState: ResourceState;
   if (fromServer) {
@@ -263,7 +256,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   }
 
   let newState = Object.assign({}, state);
-  newState[resource.id] = Object.assign({}, resource, {
+  newState[resource.id] = Object.assign({}, newResource, {
     persistedResource: persistedResource,
     state: newResourceState,
     errors: [],

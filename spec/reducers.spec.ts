@@ -476,20 +476,19 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState2 === newState).toBeTruthy();
     });
 
-    // FIXME: FAILING TEST
-    // it('should not update state on second partial patch', () => {
-    //   let newState = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
-    //     { type: 'Article', id: '1', attributes: { title: 'sample title', description: 'sample description' } }
-    //   ));
-    //   let newState2 = NgrxJsonApiStoreReducer(newState, new PatchStoreResourceAction(
-    //     { type: 'Article', id: '1', attributes: { title: 'sample title' } }
-    //   ));
-    //   expect(newState.data['Article']['1'].attributes.title).toEqual("sample title");
-    //   expect(newState.data['Article']['1'].attributes.description).toEqual("sample description");
-    //   expect(newState2.data['Article']['1'].attributes.title).toEqual("sample title");
-    //   expect(newState2.data['Article']['1'].attributes.description).toEqual("sample description");
-    //   expect(newState2 === newState).toBeTruthy();
-    // });
+    it('should not update state on second partial patch', () => {
+       let newState = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
+         { type: 'Article', id: '1', attributes: { title: 'sample title', description: 'sample description' } }
+       ));
+       let newState2 = NgrxJsonApiStoreReducer(newState, new PatchStoreResourceAction(
+         { type: 'Article', id: '1', attributes: { title: 'sample title' } }
+       ));
+       expect(newState.data['Article']['1'].attributes.title).toEqual("sample title");
+       expect(newState.data['Article']['1'].attributes.description).toEqual("sample description");
+       expect(newState2.data['Article']['1'].attributes.title).toEqual("sample title");
+       expect(newState2.data['Article']['1'].attributes.description).toEqual("sample description");
+       expect(newState2 === newState).toBeTruthy();
+    });
   });
 
   describe('API_APPLY_INIT action', () => {
