@@ -205,7 +205,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
       newState[resourceId.type][resourceId.id] = Object.assign({},
         newState[resourceId.type][resourceId.id]);
       newState[resourceId.type][resourceId.id].persistedResource = null;
-      newState[resourceId.type][resourceId.id].resource = {
+      newState[resourceId.type][resourceId.id] = {
         type: resourceId.type,
         id: resourceId.id
       };
