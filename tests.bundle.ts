@@ -8,30 +8,27 @@ import 'zone.js/dist/sync-test';
 import 'zone.js/dist/proxy';
 import 'zone.js/dist/jasmine-patch';
 
-// import ()
+import { getTestBed } from '@angular/core/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
 declare var __karma__: any;
-declare var System: any;
+declare var require: any;
 
 // Prevent Karma from running prematurely.
 __karma__.loaded = function () {};
 
-
-Promise.all([
-  System.import('@angular/core/testing'),
-  System.import('@angular/platform-browser-dynamic/testing')
-])
 // First, initialize the Angular testing environment.
-.then(([testing, testingBrowser]: any) => {
-  testing.getTestBed().initTestEnvironment(
-    testingBrowser.BrowserDynamicTestingModule,
-    testingBrowser.platformBrowserDynamicTesting()
-  );
-})
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting()
+);
 // Then we find all the tests.
-.then<any>((): any => (<any>require).context('./spec', true, /\.spec\.ts/))
+let context = require.context('./', true, /\.spec\.ts$/);
 // And load the modules.
-.then((context: any) => context.keys().map(context))
+context.keys().map(context);
 // Finally, start Karma to run the tests.
-.then(__karma__.start, __karma__.error);
+__karma__.start();
