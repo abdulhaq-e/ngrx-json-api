@@ -16,7 +16,7 @@
     "clean:pre": "rimraf release",
     "clean:post": "rimraf \"src/**/*.ngfactory.ts\"",
     "copy": "cpy package.json README.md release",
-    "coveralls": "./node_modules/coveralls/bin/coveralls.js coverage/coverage.lcov",
+    "coveralls": "cat coverage/coverage.lcov | ./node_modules/coveralls/bin/coveralls.js",
     "build": "npm run build:js && npm run build:umd && npm run build:uglify",
     "karma": "karma start",
     "karma:watch": "karma start --no-single-run",
