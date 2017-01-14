@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/abdulhaq-e/ngrx-json-api.svg?style=shield&circle-token=:af0b4d120bc34d24279b9d3266d0db5fe0293d3b)](https://circleci.com/gh/abdulhaq-e/ngrx-json-api)
 [![npm version](https://badge.fury.io/js/ngrx-json-api.svg)](https://badge.fury.io/js/ngrx-json-api)
-[![Coverage Status](https://coveralls.io/repos/github/abdulhaq-e/ngrx-json-api/badge.svg?branch=master)](https://coveralls.io/github/abdulhaq-e/ngrx-json-api?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/abdulhaq-e/ngrx-json-api/badge.svg?branch=development)](https://coveralls.io/github/abdulhaq-e/ngrx-json-api?branch=development)
 
 **A JSON API client library for ngrx.**
 
