@@ -23,7 +23,7 @@
     "lint": "npm run lint:lib && npm run lint:spec",
     "lint:lib": "tslint src/**.ts",
     "lint:spec": "tslint spec/**.ts",
-    "prebuild": "npm run test && npm run clean:pre && npm run lint:lib",
+    "prebuild": "npm run test:unit && npm run clean:pre && npm run lint:lib",
     "postbuild": "npm run clean:post && npm run copy",
     "test:unit": "npm run karma",
     "test:unit:watch": "npm run karma:watch",
