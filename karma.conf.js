@@ -2,7 +2,11 @@ const path = require('path');
 const webpack = require('webpack');
 const ngtools = require('@ngtools/webpack');
 
-const reporters = ['progress', 'jasmine-diff', 'mocha', 'karma-remap-istanbul'];
+const reporters = ['progress', 'jasmine-diff', 'mocha'];
+
+if (process.env['CI']) {
+  reporters.push('karma-remap-istanbul');
+}
 
 module.exports = function(karma) {
   'use strict';
