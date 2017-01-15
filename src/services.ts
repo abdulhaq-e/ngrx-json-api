@@ -77,15 +77,19 @@ export class NgrxJsonApiService {
 
   private findInternal(query: Query,
     fromServer = true, multi = false): Observable<StoreResource | StoreResource[]> {
+    let newQuery;
     if (!query.queryId) {
-      query.queryId = this.uuid();
-    }
-    if (fromServer) {
-      this.store.dispatch(new ApiReadInitAction(query));
+      newQuery = Object.assign({}, query, { queryId: this.uuid() });
     } else {
-      this.store.dispatch(new QueryStoreInitAction(query));
+      newQuery = query;
     }
-    return this.selectResults(query.queryId)
+
+    if (fromServer) {
+      this.store.dispatch(new ApiReadInitAction(newQuery));
+    } else {
+      this.store.dispatch(new QueryStoreInitAction(newQuery));
+    }
+    return this.selectResults(newQuery.queryId)
       .map(it => {
         if (multi) {
           return it;
@@ -99,7 +103,7 @@ export class NgrxJsonApiService {
           }
         }
       })
-      .finally(() => this.removeQuery(query.queryId));
+      .finally(() => this.removeQuery(newQuery.queryId));
   }
 
   private uuid() {
