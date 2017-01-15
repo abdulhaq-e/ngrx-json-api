@@ -57,9 +57,16 @@ describe('NgrxJsonApiSelectors', () => {
     '2': {
       query: {
         queryId: '2',
-        resultIds: [{ type: 'Blog', id: '1' }]
-      }
+      },
+      resultIds: [{ type: 'Blog', id: '1' }]
+    },
+    '55': {
+      query: {
+        queryId: '55',
+      },
+      resultIds: []
     }
+
   }
   let store = {
     api: Object.assign({}, initialNgrxJsonApiState, {
@@ -262,6 +269,17 @@ describe('NgrxJsonApiSelectors', () => {
       expect(res[0].id).toEqual('1');
       expect(res[1].id).toEqual('2');
     }));
+
+    it('should get return an empty array if there are no results', fakeAsync(() => {
+      let res;
+      let sub = obs
+        .select('api')
+        .let(selectors.getResults$('55'))
+        .subscribe(d => res = d);
+      tick();
+      expect(res).toEqual([]);
+    }));
+
 
   });
 

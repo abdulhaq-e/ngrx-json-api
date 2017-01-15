@@ -1,6 +1,3 @@
-// import * as _.find from 'lodash/map';
-// import * as _.includes from 'lodash/includes';
-// import * as _.reduce from 'lodash/reduce';
 import * as _ from 'lodash';
 
 
@@ -114,8 +111,8 @@ export class NgrxJsonApiSelectors<T> {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
         .let(this.getResultIdentifiers$(queryId))
-        .mergeMap(ids => ids ? state$.let(
-          this.getManyStoreResource$(ids)) : Observable.of(undefined));
+        .mergeMap(ids => ids.length > 0 ? state$.let(
+          this.getManyStoreResource$(ids)) : Observable.of(new Array<StoreResource>()));
     };
   }
 
