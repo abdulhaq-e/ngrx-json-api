@@ -183,6 +183,42 @@ describe('NgrxJsonApiService', () => {
 
   });
 
+
+  describe('putQuery', () => {
+    it('putQuery adds query to store', () => {
+      let query = {
+        type: 'Article',
+        queryId: '22'
+      }
+      service.putQuery(query, false);
+
+      expect(service.storeSnapshot.queries['22']).toBeDefined()
+      expect(service.storeSnapshot.queries['22'].query.type).toBe("Article")
+    });
+
+    it('putQuery should replace existing query', () => {
+      let query1 = {
+        type: 'Article',
+        queryId: '22',
+        params:{
+          limit: 4
+        }
+      }
+      let query2 = {
+        type: 'Article',
+        queryId: '22',
+        params:{
+          limit: 5
+        }
+      }
+      service.putQuery(query1, false);
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(4)
+      service.putQuery(query2, false);
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(5)
+    });
+
+  });
+
   describe('findInternal', () => {
 
   });

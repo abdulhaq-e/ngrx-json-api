@@ -71,6 +71,24 @@ export class NgrxJsonApiService {
     return obs$ as Observable<StoreResource[]>;
   };
 
+  /**
+   * Adds the given query to the store. Any existing query with the same queryId is replaced.
+   * Make use of selectResults(...) to fetch the results.
+   
+   * @param query
+   * @param fromServer
+   */
+  public putQuery(query: Query, fromServer = true){
+  	if(!query.queryId){
+  		throw new Error("to query must have a queryId");
+  	}
+    if (fromServer) {
+      this.store.dispatch(new ApiReadInitAction(query));
+    } else {
+      this.store.dispatch(new QueryStoreInitAction(query));
+    }
+  }
+
   private removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
@@ -84,11 +102,8 @@ export class NgrxJsonApiService {
       newQuery = query;
     }
 
-    if (fromServer) {
-      this.store.dispatch(new ApiReadInitAction(newQuery));
-    } else {
-      this.store.dispatch(new QueryStoreInitAction(newQuery));
-    }
+    this.putQuery(newQuery, fromServer);
+
     return this.selectResults(newQuery.queryId)
       .map(it => {
         if (multi) {
