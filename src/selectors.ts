@@ -30,6 +30,8 @@ import {
   Query,
   QueryError,
   StoreResource,
+  ManyQueryResult,
+  StoreQuery
 } from './interfaces';
 import {
   filterResources
@@ -89,30 +91,37 @@ export class NgrxJsonApiSelectors<T> {
     };
   }
 
+  private throwErrorOnQueryErrors$() {
+    return (state$: Observable<StoreQuery>) => {
+      return state$
+		  .map(it => {
+            if (it && it.errors && it.errors.length > 0) {
+              let error = new QueryError();
+              error.errors = it.errors;
+              throw error;
+            } else {
+              return it;
+            }
+          });;
+    };
+  }
+
   public getResultIdentifiers$(queryId: string) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
         .let(this.getResourceQuery$(queryId))
-        .filter(it => it.resultIds != null || it.errors != null && it.errors.length > 0)
-        .map(it => {
-          if (it.errors && it.errors.length > 0) {
-            let error = new QueryError();
-            error.errors = it.errors;
-            throw error;
-          } else {
-            return it.resultIds;
-          }
-        });
+        .let(this.throwErrorOnQueryErrors$())
+        .filter(it => it.resultIds != null)
+        .map(it => it.resultIds);
     };
   }
 
   public getResults$(queryId: string) {
-
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getResultIdentifiers$(queryId))
-        .mergeMap(ids => ids.length > 0 ? state$.let(
-          this.getManyStoreResource$(ids)) : Observable.of(new Array<StoreResource>()));
+        .let(this.getResourceQuery$(queryId))
+        .let(this.throwErrorOnQueryErrors$())
+		.mergeMap(query => state$.let(this.getManyQueryResult$(query)));
     };
   }
 
@@ -124,11 +133,25 @@ export class NgrxJsonApiSelectors<T> {
     };
   }
 
-  public getManyStoreResource$(identifiers: Array<ResourceIdentifier>) {
+  public getManyQueryResult$(query: StoreQuery) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      if (identifiers) {
-        let obs = identifiers.map(id => id ? state$.let(this.getStoreResource$(id)) : undefined);
-        return Observable.zip(...obs);
+      if (query && query.resultIds.length == 0) {
+        let queryResult: ManyQueryResult = {
+          data : [],
+          links : query.resultLinks,
+          meta : query.resultMeta
+        };
+        return Observable.of(queryResult);
+      }else if (query && query.resultIds) {
+        let obs = query.resultIds.map(id => id ? state$.let(this.getStoreResource$(id)) : undefined);
+        return Observable.zip(...obs).map(results => {
+          let queryResult: ManyQueryResult = {
+            data : results as Array<StoreResource>,
+            links : query.resultLinks,
+            meta : query.resultMeta
+          };
+          return queryResult;
+        });
       } else {
         return Observable.of(undefined);
       }

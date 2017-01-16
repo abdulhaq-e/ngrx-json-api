@@ -21,12 +21,12 @@ import {
 import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
-  Payload,
   Resource,
-  ResourceDefinition,
   ResourceIdentifier,
   Query,
-  ResourceRelationship,
+  QueryResult,
+  OneQueryResult,
+  ManyQueryResult,
   StoreResource,
 } from './interfaces';
 import {
@@ -53,22 +53,21 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(query: Query, fromServer = true,
-    denormalise = false): Observable<StoreResource> {
+  public findOne(query: Query, fromServer = true, denormalise = false): Observable<OneQueryResult> {
     let obs$ = this.findInternal(query, fromServer, false);
     if (denormalise) {
-      return this.denormalise(obs$) as Observable<StoreResource>;
+      return this.denormaliseQueryResult(obs$) as Observable<OneQueryResult>;
     }
-    return obs$ as Observable<StoreResource>;
+    return obs$ as Observable<OneQueryResult>;
   };
 
   public findMany(query: Query, fromServer = true,
-    denormalise = false): Observable<StoreResource[]> {
+    denormalise = false): Observable<ManyQueryResult> {
     let obs$ = this.findInternal(query, fromServer, true);
     if (denormalise) {
-      return this.denormalise(obs$) as Observable<StoreResource[]>;
+      return this.denormaliseQueryResult(obs$) as Observable<ManyQueryResult>;
     }
-    return obs$ as Observable<StoreResource[]>;
+    return obs$ as Observable<ManyQueryResult>;
   };
 
   /**
@@ -94,7 +93,7 @@ export class NgrxJsonApiService {
   }
 
   private findInternal(query: Query,
-    fromServer = true, multi = false): Observable<StoreResource | StoreResource[]> {
+    fromServer = true, multi = false): Observable<QueryResult> {
     let newQuery;
     if (!query.queryId) {
       newQuery = Object.assign({}, query, { queryId: this.uuid() });
@@ -109,12 +108,22 @@ export class NgrxJsonApiService {
         if (multi) {
           return it;
         } else {
-          if (it.length === 0) {
-            return null;
-          } else if (it.length === 1) {
-            return it[0];
+          if (it.data.length === 0) {
+            let oneQueryResult : OneQueryResult = {
+              data : null,
+              meta : it.meta,
+              links : it.links
+            };
+            return oneQueryResult;
+          } else if (it.data.length === 1) {
+            let oneQueryResult : OneQueryResult = {
+              data : it.data[0],
+              meta : it.meta,
+              links : it.links
+            };
+            return oneQueryResult;
           } else {
-            throw new Error('Unique result expected');
+            throw new Error('Unique data expected');
           }
         }
       })
@@ -146,14 +155,14 @@ export class NgrxJsonApiService {
    * @param queryId
    * @returns observable holding the results as array of resources.
    */
-  public selectResults(queryId: string): Observable<Array<StoreResource>> {
+  public selectResults(queryId: string): Observable<ManyQueryResult> {
     return this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getResults$(queryId));
   }
 
   /**
-   * Selects the result identifiers of the given query.
+   * Selects the data identifiers of the given query.
    *
    * @param queryId
    * @returns {any}
@@ -175,7 +184,29 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  public denormalise(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
+  public denormaliseQueryResult(queryResult$: Observable<QueryResult>): Observable<QueryResult> {
+    return queryResult$
+		.combineLatest(this.store
+			.select(this.selectors.storeLocation)
+			.let(this.selectors.getStoreData$()), (
+            queryResult: QueryResult, storeData: NgrxJsonApiStoreData
+        ) => {
+		  let result;
+          if (_.isArray(queryResult.data)) {
+            result = queryResult.data.map(r => denormaliseStoreResource(r, storeData)) as StoreResource[];
+          } else {
+            result = denormaliseStoreResource(queryResult.data, storeData) as StoreResource;
+          }
+          let denormalizedQueryResult : QueryResult = {
+            data : result,
+            meta: queryResult.meta,
+            links: queryResult.links
+          };
+          return denormalizedQueryResult;
+        });
+  }
+
+  public denormaliseResource(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
   ): Observable<StoreResource> | Observable<StoreResource[]> {
     return storeResource$
       .combineLatest(this.store

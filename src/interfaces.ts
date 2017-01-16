@@ -99,6 +99,20 @@ export interface Query {
   params?: QueryParams;
 }
 
+export interface QueryResult {
+  meta?: any;
+  links?: any;
+  data?: StoreResource | Array<StoreResource>;
+}
+
+export interface ManyQueryResult extends QueryResult {
+  data?: Array<StoreResource>;
+}
+
+export interface OneQueryResult extends QueryResult {
+  data?: StoreResource;
+}
+
 export interface QueryParams {
   filtering?: Array<FilteringParam>;
   sorting?: Array<SortingParam>;
@@ -183,6 +197,9 @@ export interface StoreQuery {
   query: Query;
   loading: Boolean;
   resultIds: Array<ResourceIdentifier>;
+  resultMeta: any;
+  resultLinks: any;
+
   /**
    * Errors received from the server after attempting to perform a GET request.
    */

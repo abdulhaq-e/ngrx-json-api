@@ -223,6 +223,8 @@ describe('NgrxJsonApiReducer', () => {
       }));
       expect(newState.queries['111'].resultIds.length).toEqual(11);
       expect(newState.queries['111'].resultIds[8]).toEqual({ type: 'Blog', id: '3' });
+      expect(newState.queries['111'].resultLinks['someLink']).toEqual('someLinkValue');
+      expect(newState.queries['111'].resultMeta['someMeta']).toEqual('someMetaValue');
     });
   });
 

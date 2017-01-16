@@ -143,7 +143,7 @@ describe('Pipes', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = pipe.service.findOne(query, false);
+      let storeResource = pipe.service.findOne(query, false).map(it => it.data);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it, 'relationships.author.reference')).toBeDefined();
@@ -154,7 +154,7 @@ describe('Pipes', () => {
       let query = {
         type: 'Article',
       }
-      let storeResource = pipe.service.findMany(query, false);
+      let storeResource = pipe.service.findMany(query, false).map(it => it.data);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
