@@ -121,7 +121,7 @@ export class NgrxJsonApiSelectors<T> {
       return state$
         .let(this.getResourceQuery$(queryId))
         .let(this.throwErrorOnQueryErrors$())
-		.mergeMap(query => state$.let(this.getManyQueryResult$(query)))
+		.switchMap(query => state$.let(this.getManyQueryResult$(query)))
   	    .filter(it => !_.isUndefined(it));
     };
   }
