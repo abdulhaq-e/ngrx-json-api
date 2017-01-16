@@ -121,7 +121,8 @@ export class NgrxJsonApiSelectors<T> {
       return state$
         .let(this.getResourceQuery$(queryId))
         .let(this.throwErrorOnQueryErrors$())
-		.mergeMap(query => state$.let(this.getManyQueryResult$(query)));
+		.mergeMap(query => state$.let(this.getManyQueryResult$(query)))
+  	    .filter(it => !_.isUndefined(it));
     };
   }
 
@@ -135,7 +136,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public getManyQueryResult$(query: StoreQuery) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      if (query && query.resultIds.length == 0) {
+      if (query && query.resultIds && query.resultIds.length == 0) {
         let queryResult: ManyQueryResult = {
           data : [],
           links : query.resultLinks,
