@@ -94,15 +94,15 @@ export class NgrxJsonApiSelectors<T> {
   private throwErrorOnQueryErrors$() {
     return (state$: Observable<StoreQuery>) => {
       return state$
-		  .map(it => {
-            if (it && it.errors && it.errors.length > 0) {
-              let error = new QueryError();
-              error.errors = it.errors;
-              throw error;
-            } else {
-              return it;
-            }
-          });;
+        .map(it => {
+          if (it && it.errors && it.errors.length > 0) {
+            let error = new QueryError();
+            error.errors = it.errors;
+            throw error;
+          } else {
+            return it;
+          }
+        });
     };
   }
 
@@ -121,8 +121,8 @@ export class NgrxJsonApiSelectors<T> {
       return state$
         .let(this.getResourceQuery$(queryId))
         .let(this.throwErrorOnQueryErrors$())
-		.switchMap(query => state$.let(this.getManyQueryResult$(query)))
-  	    .filter(it => !_.isUndefined(it));
+        .switchMap(query => state$.let(this.getManyQueryResult$(query)))
+        .filter(it => !_.isUndefined(it));
     };
   }
 
@@ -136,20 +136,21 @@ export class NgrxJsonApiSelectors<T> {
 
   public getManyQueryResult$(query: StoreQuery) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      if (query && query.resultIds && query.resultIds.length == 0) {
+      if (query && query.resultIds && query.resultIds.length === 0) {
         let queryResult: ManyQueryResult = {
-          data : [],
-          links : query.resultLinks,
-          meta : query.resultMeta
+          data: [],
+          links: query.resultLinks,
+          meta: query.resultMeta
         };
         return Observable.of(queryResult);
-      }else if (query && query.resultIds) {
-        let obs = query.resultIds.map(id => id ? state$.let(this.getStoreResource$(id)) : undefined);
+      } else if (query && query.resultIds) {
+        let obs = query.resultIds.map(id =>
+          id ? state$.let(this.getStoreResource$(id)) : undefined);
         return Observable.zip(...obs).map(results => {
           let queryResult: ManyQueryResult = {
-            data : results as Array<StoreResource>,
-            links : query.resultLinks,
-            meta : query.resultMeta
+            data: results as Array<StoreResource>,
+            links: query.resultLinks,
+            meta: query.resultMeta
           };
           return queryResult;
         });
