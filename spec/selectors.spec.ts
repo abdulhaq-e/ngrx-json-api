@@ -266,8 +266,8 @@ describe('NgrxJsonApiSelectors', () => {
         .let(selectors.getResults$('1'))
         .subscribe(d => res = d);
       tick();
-      expect(res[0].id).toEqual('1');
-      expect(res[1].id).toEqual('2');
+      expect(res.data[0].id).toEqual('1');
+      expect(res.data[1].id).toEqual('2');
     }));
 
     it('should get return an empty array if there are no results', fakeAsync(() => {
@@ -277,7 +277,7 @@ describe('NgrxJsonApiSelectors', () => {
         .let(selectors.getResults$('55'))
         .subscribe(d => res = d);
       tick();
-      expect(res).toEqual([]);
+      expect(res.data).toEqual([]);
     }));
 
 
@@ -308,47 +308,70 @@ describe('NgrxJsonApiSelectors', () => {
 
   });
 
-  describe('getManyStoreResource$', () => {
+  describe('getManyQueryResult$', () => {
     it('should get multiple StoreResource given an array of ids', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
-        .let(selectors.getManyStoreResource$(
-          [
-            { type: 'Article', id: '1' },
-            { type: 'Article', id: '2' }
-          ]
+        .let(selectors.getManyQueryResult$(
+            {
+              resultIds :  [
+                { type: 'Article', id: '1' },
+                { type: 'Article', id: '2' }
+              ],
+
+            }
         ))
         .subscribe(d => res = d);
       tick();
-      expect(res[0].id).toEqual('1');
-      expect(res[1].id).toEqual('2');
+      expect(res.data[0].id).toEqual('1');
+      expect(res.data[1].id).toEqual('2');
     }));
 
     it('should return undefined if the resources are not defined', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
-        .let(selectors.getManyStoreResource$(
-          [
-            { type: 'Article', id: '10' },
-            { type: 'Article', id: '20' }
-          ]
+        .let(selectors.getManyQueryResult$(
+            {
+              resultIds: [
+                {type: 'Article', id: '10'},
+                {type: 'Article', id: '20'}
+              ]
+            }
         ))
         .subscribe(d => res = d);
       tick();
-      expect(res[0]).toBeUndefined();
-      expect(res[1]).toBeUndefined();
+      expect(res.data[0]).toBeUndefined();
+      expect(res.data[1]).toBeUndefined();
     }));
 
     it('should return undefined if the ids are not defined', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
-        .let(selectors.getManyStoreResource$())
+        .let(selectors.getManyQueryResult$())
         .subscribe(d => res = d);
       tick();
       expect(res).toBeUndefined();
+    }));
+
+    it('should return empty array if the ids array is empty', fakeAsync(() => {
+      let res;
+      let sub = obs
+		  .select('api')
+		  .let(selectors.getManyQueryResult$(
+              {
+                resultIds: [],
+                resultMeta: 'someMeta',
+                resultLinks: 'someLinks'
+              }
+          ))
+		  .subscribe(d => res = d);
+      tick();
+      expect(res.data.length).toBe(0);
+      expect(res.meta).toBe('someMeta');
+      expect(res.links).toBe('someLinks');
     }));
 
   });

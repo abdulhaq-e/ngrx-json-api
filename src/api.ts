@@ -129,6 +129,8 @@ export class NgrxJsonApi {
     let filteringParams = '';
     let sortingParams = '';
     let fieldsParams = '';
+    let offsetParams = '';
+    let limitParams = '';
 
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
@@ -147,9 +149,15 @@ export class NgrxJsonApi {
       if (_.hasIn(query.params, 'fields')) {
         fieldsParams = _generateFieldsQueryParams(query.params.fields);
       }
+      if (_.hasIn(query.params, 'limit')) {
+        limitParams = 'page[limit]=' + query.params.limit;
+      }
+      if (_.hasIn(query.params, 'offset')) {
+        offsetParams = 'page[offset]=' + query.params.offset;
+      }
     }
     queryParams = _generateQueryParams(includedParam, filteringParams, sortingParams,
-      fieldsParams);
+        fieldsParams, offsetParams, limitParams);
 
     let requestOptionsArgs = {
       method: RequestMethod.Get,

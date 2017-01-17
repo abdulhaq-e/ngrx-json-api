@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 
 import { Http, HttpModule } from '@angular/http';
 
+import { Observable } from 'rxjs/Observable';
 import { Store, StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
@@ -36,9 +37,15 @@ import {
 } from '../src/utils';
 
 import {
+  StoreResource
+} from '../src/interfaces';
+
+import {
   testPayload,
   resourceDefinitions
 } from './test_utils';
+
+
 
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
@@ -95,8 +102,8 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findOne(query, false);
       storeResource.subscribe(it => {
-        expect(_.get(it, 'type')).toEqual('Article');
-        expect(_.get(it, 'id')).toEqual('1');
+        expect(_.get(it.data, 'type')).toEqual('Article');
+        expect(_.get(it.data, 'id')).toEqual('1');
       });
     });
 
@@ -132,9 +139,9 @@ describe('NgrxJsonApiService', () => {
         queryId: '22'
       }
       let res;
-      let storeResource = service.findOne(query, false, true);
+      let storeResource = service.findOne(query, false, true).map(it => it.data);
       storeResource.subscribe(it => res = it);
-      service.denormalise(storeResource).subscribe(it => {
+      service.denormaliseResource(storeResource).subscribe(it => {
         expect(it).toEqual(res);
       });
     });
@@ -148,10 +155,10 @@ describe('NgrxJsonApiService', () => {
       }
       let storeResource = service.findMany(query, false);
       storeResource.subscribe(it => {
-        expect(_.get(it[0], 'type')).toEqual('Article');
-        expect(_.get(it[0], 'id')).toEqual('1');
-        expect(_.get(it[1], 'type')).toEqual('Article');
-        expect(_.get(it[1], 'id')).toEqual('2');
+        expect(_.get(it.data[0], 'type')).toEqual('Article');
+        expect(_.get(it.data[0], 'id')).toEqual('1');
+        expect(_.get(it.data[1], 'type')).toEqual('Article');
+        expect(_.get(it.data[1], 'id')).toEqual('2');
       });
     });
 
@@ -172,13 +179,49 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let res;
-      let storeResource = service.findMany(query, false, true);
-      storeResource.subscribe(it => res = it);
-      service.denormalise(storeResource).subscribe(it => {
+      let res : Array<StoreResource>;
+      let storeResources : Observable<Array<StoreResource>> = service.findMany(query, false, true).map(it => it.data);
+      storeResources.subscribe(it => res = it);
+      service.denormaliseResource(storeResources).subscribe(it => {
         expect(it).toEqual(res);
       });
 
+    });
+
+  });
+
+
+  describe('putQuery', () => {
+    it('putQuery adds query to store', () => {
+      let query = {
+        type: 'Article',
+        queryId: '22'
+      }
+      service.putQuery(query, false);
+
+      expect(service.storeSnapshot.queries['22']).toBeDefined()
+      expect(service.storeSnapshot.queries['22'].query.type).toBe("Article")
+    });
+
+    it('putQuery should replace existing query', () => {
+      let query1 = {
+        type: 'Article',
+        queryId: '22',
+        params:{
+          limit: 4
+        }
+      }
+      let query2 = {
+        type: 'Article',
+        queryId: '22',
+        params:{
+          limit: 5
+        }
+      }
+      service.putQuery(query1, false);
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(4)
+      service.putQuery(query2, false);
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(5)
     });
 
   });
@@ -215,16 +258,16 @@ describe('NgrxJsonApiService', () => {
 
   });
 
-  describe('denormalise', () => {
+  describe('denormaliseQueryResult', () => {
     it('should denormalise a StoreResource', () => {
       let query = {
         id: '1',
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.denormalise(service.findOne(query, false));
+      let storeResource = service.denormaliseQueryResult(service.findOne(query, false));
       storeResource.subscribe(it => {
-        expect(_.get(it, 'relationships.author.reference')).toBeDefined();
+        expect(_.get(it.data, 'relationships.author.reference')).toBeDefined();
       });
     });
 
@@ -232,9 +275,9 @@ describe('NgrxJsonApiService', () => {
       let query = {
         type: 'Article',
       }
-      let storeResource = service.denormalise(service.findMany(query, false));
+      let storeResource = service.denormaliseQueryResult(service.findMany(query, false));
       storeResource.subscribe(it => {
-        expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
+        expect(_.get(it.data[0], 'relationships.author.reference')).toBeDefined();
       });
     });
   });

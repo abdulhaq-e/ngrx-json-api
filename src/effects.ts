@@ -209,7 +209,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   private toErrorPayload(query: Query, response: Response): Payload {
 
-    let contentType = _.get(response, 'headers.Content-Type');
+    let contentType = null;
+    if (response && response.headers) {
+      contentType = response.headers.get('Content-Type');
+    }
     let document = null;
     if (contentType === 'application/vnd.api+json') {
       document = response.json();

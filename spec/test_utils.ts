@@ -96,6 +96,12 @@ export const documentPayload = {
 };
 
 export const testPayload = {
+  links: {
+    someLink: 'someLinkValue'
+  },
+  meta: {
+    someMeta: 'someMetaValue'
+  },
   data: [
     {
       type: "Article",

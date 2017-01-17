@@ -31,7 +31,7 @@ export class DenormaliseStoreResourcePipe implements PipeTransform {
 
   transform(obs: Observable<StoreResource> | Observable<StoreResource[]>
   ): Observable<StoreResource> | Observable<StoreResource[]> {
-    return this.service.denormalise(obs);
+    return this.service.denormaliseResource(obs);
   }
 }
 
