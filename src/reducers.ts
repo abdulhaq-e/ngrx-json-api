@@ -31,7 +31,8 @@ export const initialNgrxJsonApiState: NgrxJsonApiStore = {
   queries: {}
 };
 
-export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJsonApiState, action: Action){
+export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJsonApiState,
+  action: Action) {
     let newState;
 
     switch (action.type) {
