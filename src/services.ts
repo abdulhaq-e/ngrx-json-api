@@ -17,6 +17,8 @@ import {
   PostStoreResourceAction,
   RemoveQueryAction,
   QueryStoreInitAction,
+  ClearStoreAction,
+  CompactStoreAction,
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -283,5 +285,19 @@ export class NgrxJsonApiService {
    */
   public apply() {
     this.store.dispatch(new ApiApplyInitAction());
+  }
+
+  /**
+   * Clear all the contents from the store.
+   */
+  public clear() {
+    this.store.dispatch(new ClearStoreAction());
+  }
+
+  /**
+   * Compacts the store by removing unreferences and unchanges resources.
+   */
+  public compact() {
+    this.store.dispatch(new CompactStoreAction());
   }
 }

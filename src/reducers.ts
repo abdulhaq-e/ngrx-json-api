@@ -19,6 +19,7 @@ import {
   removeQuery,
   rollbackStoreResources,
   updateResourceErrors,
+  compactStore
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -76,7 +77,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({},
           state, {
             data: updateResourceState(
-              state.data, action.payload, "DELETED"),
+              state.data, action.payload, 'DELETED'),
             isDeleting: state.isDeleting + 1
           }
         );
@@ -207,7 +208,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({},
           state, {
             data: updateResourceState(
-              state.data, action.payload, "DELETED")
+              state.data, action.payload, 'DELETED')
           }
         );
         return newState;
@@ -234,6 +235,12 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           }
         );
         return newState;
+      }
+      case NgrxJsonApiActionTypes.CLEAR_STORE: {
+        return initialNgrxJsonApiState;
+      }
+      case NgrxJsonApiActionTypes.COMPACT_STORE: {
+        return compactStore(state);
       }
       default:
         return state;

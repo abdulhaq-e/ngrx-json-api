@@ -181,10 +181,10 @@ export type ResourceRelationType
   | 'hasMany';
 
 export type ResourceState =
-  'IN_SYNC',
-  'CREATED',
-  'UPDATED',
-  'DELETED',
+  'IN_SYNC' |
+  'CREATED' |
+  'UPDATED' |
+  'DELETED' |
   'NOT_LOADED';
 
 export interface SortingParam {

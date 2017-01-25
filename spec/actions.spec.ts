@@ -29,6 +29,8 @@ import {
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
+  ClearStoreAction,
+  CompactStoreAction,
 } from '../src/actions';
 
 describe('Json Api Actions', () => {
@@ -36,7 +38,7 @@ describe('Json Api Actions', () => {
   let actions;
 
   it('should have a fixed number of actions', () => {
-    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(23);
+    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(25);
   });
 
   it('should have an api create init action', () => {
@@ -145,7 +147,7 @@ describe('Json Api Actions', () => {
   });
 
   it('should generate an api create init action using apiCreateInit', () => {
-    let action = new ApiCreateInitAction({})
+    let action = new ApiCreateInitAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_CREATE_INIT);
     expect(action.payload).toEqual({});
   });
@@ -158,13 +160,13 @@ describe('Json Api Actions', () => {
 
   it('should generate an api create fail action using apiCreateFail', () => {
     let action = new ApiCreateFailAction({});
-    expect(action.type).toEqual(NgrxJsonApiActionTypes.API_CREATE_FAIL)
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.API_CREATE_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api read init action using apiReadInit', () => {
     let action = new ApiReadInitAction({});
-    expect(action.type).toEqual(NgrxJsonApiActionTypes.API_READ_INIT)
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.API_READ_INIT);
     expect(action.payload).toEqual({});
   });
 
@@ -272,6 +274,18 @@ describe('Json Api Actions', () => {
   it('should generate a delete store resource action using RemoveQueryAction', () => {
     let action = new RemoveQueryAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.REMOVE_QUERY);
+    expect(action.payload).toEqual({});
+  });
+
+  it('should generate a compact store resource action using CompactStoreAction', () => {
+    let action = new CompactStoreAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.COMPACT_STORE);
+    expect(action.payload).toEqual({});
+  });
+
+  it('should generate a clear store resource action using ClearStoreAction', () => {
+    let action = new ClearStoreAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.CLEAR_STORE);
     expect(action.payload).toEqual({});
   });
 });
