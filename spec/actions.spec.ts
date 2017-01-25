@@ -280,12 +280,10 @@ describe('Json Api Actions', () => {
   it('should generate a compact store resource action using CompactStoreAction', () => {
     let action = new CompactStoreAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.COMPACT_STORE);
-    expect(action.payload).toEqual({});
   });
 
   it('should generate a clear store resource action using ClearStoreAction', () => {
     let action = new ClearStoreAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.CLEAR_STORE);
-    expect(action.payload).toEqual({});
   });
 });
