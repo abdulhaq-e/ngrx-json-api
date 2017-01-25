@@ -35,6 +35,8 @@ export const NgrxJsonApiActionTypes = {
   PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
   POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
   REMOVE_QUERY: type('REMOVE_QUERY'),
+  COMPACT_STORE: type('COMPACT_STORE'),
+  CLEAR_STORE: type('CLEAR_STORE'),
 };
 
 export class ApiApplyInitAction implements Action {
@@ -151,6 +153,16 @@ export class QueryStoreFailAction implements Action {
   constructor(public payload: Payload) { }
 }
 
+export class CompactStoreAction implements Action {
+  type = NgrxJsonApiActionTypes.COMPACT_STORE;
+  constructor() { }
+}
+
+export class ClearStoreAction implements Action {
+  type = NgrxJsonApiActionTypes.CLEAR_STORE;
+  constructor() { }
+}
+
 export type NgrxJsonApiActions
   = ApiApplyInitAction
   | ApiApplySuccessAction
@@ -174,4 +186,6 @@ export type NgrxJsonApiActions
   | RemoveQueryAction
   | QueryStoreInitAction
   | QueryStoreSuccessAction
-  | QueryStoreFailAction;
+  | QueryStoreFailAction
+  | CompactStoreAction
+  | ClearStoreAction;

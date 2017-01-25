@@ -180,13 +180,12 @@ export type ResourceRelationType
   = 'hasOne'
   | 'hasMany';
 
-export enum ResourceState {
-  IN_SYNC,
-  CREATED,
-  UPDATED,
-  DELETED,
-  NOT_LOADED
-}
+export type ResourceState =
+  'IN_SYNC' |
+  'CREATED' |
+  'UPDATED' |
+  'DELETED' |
+  'NOT_LOADED';
 
 export interface SortingParam {
   api: string;

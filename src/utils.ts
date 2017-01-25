@@ -15,11 +15,9 @@ import {
   OperationType,
   Payload,
   Query,
-  QueryParams,
   Resource,
   ResourceDefinition,
   ResourceIdentifier,
-  ResourceRelationDefinition,
   ResourceState,
   StoreQuery,
   SortingParam,
@@ -45,11 +43,11 @@ export const denormaliseObject = (resource: Resource,
 
           relationDenorm = data;
 
-        } else if (_.isPlainObject(data)) {
+        }else if (_.isPlainObject(data)) {
           // hasOne relation
           let relatedRS = getSingleStoreResource(<ResourceIdentifier>data, storeData);
           relationDenorm = denormaliseStoreResource(relatedRS, storeData, bag);
-        } else if (_.isArray(data)) {
+        }else if (_.isArray(data)) {
           // hasMany relation
           let relatedRSs: Array<StoreResource> = getMultipleStoreResource(data, storeData);
           relationDenorm = relatedRSs.map(r => denormaliseStoreResource(r, storeData, bag));
@@ -107,7 +105,7 @@ export const getDenormalisedPath = (path: string, baseResourceType: string,
   let fields: Array<string> = path.split(pathSeparator);
   let currentResourceType = baseResourceType;
   for (let i = 0; i < fields.length; i++) {
-    let definition = _.find(resourceDefinitions, { type: currentResourceType });
+    let definition = _.find(resourceDefinitions, {type: currentResourceType});
 
     if (_.isUndefined(definition)) {
       throw new Error('Definition not found');
@@ -168,14 +166,14 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
   if (fromServer) {
     newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: resource,
-      state: ResourceState.IN_SYNC,
+      state: 'IN_SYNC',
       errors: [],
       loading: false
     }) as StoreResource;
   } else {
     newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: null,
-      state: ResourceState.CREATED,
+      state: 'CREATED',
       errors: [],
       loading: false
     }) as StoreResource;
@@ -198,7 +196,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   if (_.isUndefined(storeData[resourceId.type])
     || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
 
-    if (resourceState === ResourceState.DELETED) {
+    if (resourceState === 'DELETED') {
       let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
       newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
       newState[resourceId.type][resourceId.id] = Object.assign({},
@@ -208,7 +206,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
         id: resourceId.id,
         persistedResource: null
       } as StoreResource;
-      newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
+      newState[resourceId.type][resourceId.id].state = 'NOT_LOADED';
       return newState;
     } else {
       return storeData;
@@ -240,18 +238,18 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     // TODO need to handle check and keep local updates?
     newResource = resource;
     persistedResource = resource;
-    newResourceState = ResourceState.IN_SYNC;
+    newResourceState = 'IN_SYNC';
   } else {
     let mergedResource = updateResourceObject(foundStoreResource, resource);
     if (_.isEqual(mergedResource, persistedResource)) {
       // no changes anymore, do nothing
       newResource = persistedResource;
-      newResourceState = ResourceState.IN_SYNC;
+      newResourceState = 'IN_SYNC';
     } else {
       // merge changes and mark as CREATED or UPDATED depending on whether
       // an original version is available
       newResource = mergedResource;
-      newResourceState = persistedResource === null ? ResourceState.CREATED : ResourceState.UPDATED;
+      newResourceState = persistedResource === null ? 'CREATED' : 'UPDATED';
     }
   }
 
@@ -294,9 +292,9 @@ export const rollbackStoreResources = (storeData: NgrxJsonApiStoreData): NgrxJso
       let storeResource = newState[type][id];
       if (!storeResource.persistedResource) {
         delete newState[type][id];
-      } else if (storeResource.state !== ResourceState.IN_SYNC) {
+      } else if (storeResource.state !== 'IN_SYNC') {
         newState[type][id] = Object.assign({}, newState[type][id], {
-          state: ResourceState.IN_SYNC,
+          state: 'IN_SYNC',
           resource: newState[type][id].persistedResource
         });
       }
@@ -471,8 +469,9 @@ export const updateQueryErrors = (storeQueries: NgrxJsonApiStoreQueries,
 /**
  * Removes a query given its queryId from the NgrxJsonApiStoreQueries.
  */
-export const removeQuery = (storeQueries: NgrxJsonApiStoreQueries, queryId: string
-): NgrxJsonApiStoreQueries => {
+export const removeQuery = (storeQueries: NgrxJsonApiStoreQueries,
+  queryId: string): NgrxJsonApiStoreQueries => {
+
   let newState: NgrxJsonApiStoreQueries = Object.assign({}, storeQueries);
   delete newState[queryId];
   return newState;
@@ -482,7 +481,7 @@ export const removeQuery = (storeQueries: NgrxJsonApiStoreQueries, queryId: stri
  * Given a resource, it will return an object containing the resource id and type.
  */
 export const toResourceIdentifier = (resource: Resource): ResourceIdentifier => {
-  return { type: resource.type, id: resource.id };
+  return {type: resource.type, id: resource.id};
 };
 
 /**
@@ -504,7 +503,7 @@ export const getResourceFieldValueFromPath = (path: string,
   let fields: Array<string> = path.split(pathSeparator);
   let currentStoreResource = baseStoreResource;
   for (let i = 0; i < fields.length; i++) {
-    let definition = _.find(resourceDefinitions, { type: currentStoreResource.type });
+    let definition = _.find(resourceDefinitions, {type: currentStoreResource.type});
 
     if (_.isUndefined(definition)) {
       throw new Error('Definition not found');
@@ -570,7 +569,7 @@ export const filterResources = (resources: NgrxJsonApiStoreResources,
           return false;
         }
 
-        let operator = <FilteringOperator>_.find(filteringOperators, { name: element.operator });
+        let operator = <FilteringOperator>_.find(filteringOperators, {name: element.operator});
 
         if (operator) {
           return operator.comparison(element.value, resourceFieldValue);
@@ -640,11 +639,11 @@ export const filterResources = (resources: NgrxJsonApiStoreResources,
 
 
 /**
-*
-* Copied as it is from @ngrx/example-app
-* I'm sure the guys at @ngrx won't mind :>
-*
-*/
+ *
+ * Copied as it is from @ngrx/example-app
+ * I'm sure the guys at @ngrx won't mind :>
+ *
+ */
 /**
  * This function coerces a string into a string literal type.
  * Using tagged union types in TypeScript 2.0, this enables
@@ -744,7 +743,10 @@ export const generatePayload = (resource: Resource, operation: OperationType): P
 
 /* tslint:disable */
 export const uuid = () => {
-  let lut = []; for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
+  let lut = [];
+  for (let i = 0; i < 256; i++) {
+    lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
+  }
   let d0 = Math.random() * 0xffffffff | 0;
   let d1 = Math.random() * 0xffffffff | 0;
   let d2 = Math.random() * 0xffffffff | 0;
@@ -755,3 +757,125 @@ export const uuid = () => {
     lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
 };
 /* tslint:enable */
+
+
+const toKey = (id: ResourceIdentifier) => {
+  return id.id + '@' + id.type;
+};
+
+
+const collectQueryResults = (state: NgrxJsonApiStore, usedResources: any) => {
+  for (let queryName in state.queries) {
+    if (state.queries.hasOwnProperty(queryName)) {
+      let query = state.queries[queryName];
+      if (query.resultIds) {
+        for (let resultId of query.resultIds) {
+          usedResources[toKey(resultId)] = true;
+        }
+      }
+    }
+  }
+};
+
+const collectPendingChanges = (state: NgrxJsonApiStore, usedResources: any) => {
+  for (let type in state.data) {
+    if (state.data.hasOwnProperty(type)) {
+      let resources = state.data[type];
+      for (let id in resources) {
+        if (resources.hasOwnProperty(id)) {
+          let resource = resources[id];
+          if (resource.state !== 'IN_SYNC') {
+            usedResources[toKey(resource)] = true;
+          }
+        }
+      }
+    }
+  }
+};
+
+const collectReferencesForResource = (state: NgrxJsonApiStore, usedResources: any,
+    resource: Resource) => {
+  let hasChanges: boolean;
+  for (let relationshipName in resource.relationships) {
+    if (resource.relationships.hasOwnProperty(relationshipName)) {
+      let data = resource.relationships[relationshipName].data;
+      if (data) {
+        let dependencyIds: Array<ResourceIdentifier> = data instanceof Array ? data : [data];
+        for (let dependencyId of dependencyIds) {
+          let dependencyKey = toKey(dependencyId);
+          if (!usedResources[dependencyKey]) {
+            // change found, an other iteration will be necssary to detect
+            // transitive dependencies
+            hasChanges = true;
+            usedResources[dependencyKey] = true;
+          }
+        }
+      }
+    }
+  }
+  return hasChanges;
+};
+
+const collectReferences = (state: NgrxJsonApiStore, usedResources: any) => {
+  while (true) {
+    let hasChanges = false;
+    for (let type in state.data) {
+      if (state.data.hasOwnProperty(type)) {
+        let resources = state.data[type];
+        for (let id in resources) {
+          if (resources.hasOwnProperty(id)) {
+            let resource = resources[id];
+            if (usedResources[toKey(resource)]) {
+              // in use, do not collect its relations
+              hasChanges = hasChanges
+                || collectReferencesForResource(state, usedResources, resource);
+            }
+          }
+        }
+      }
+    }
+    if (!hasChanges) {
+      break;
+    }
+  }
+};
+
+const sweepUnusedResources = (state: NgrxJsonApiStore, usedResources: any) => {
+  let hasDeletions = false;
+  let newState = _.cloneDeep(state);
+  for (let type in newState.data) {
+    if (newState.data.hasOwnProperty(type)) {
+      let resources = newState.data[type];
+      for (let id in resources) {
+        if (resources.hasOwnProperty(id)) {
+          let resource = resources[id];
+          if (!usedResources[toKey(resource)]) {
+            hasDeletions = true;
+            delete resources[id];
+          }
+        }
+      }
+
+      if (_.isEmpty(resources)) {
+        delete newState.data[type];
+      }
+    }
+  }
+  return hasDeletions ? newState : state;
+};
+
+export const compactStore = (state: NgrxJsonApiStore) => {
+  let usedResources = {};
+
+  // query results can not be collected
+  collectQueryResults(state, usedResources);
+
+  // pending changes cannot be collected
+  collectPendingChanges(state, usedResources);
+
+  // references from non-collected objects cannot be collected as well
+  collectReferences(state, usedResources);
+
+  // remove everything that is not collected
+  return sweepUnusedResources(state, usedResources);
+};
