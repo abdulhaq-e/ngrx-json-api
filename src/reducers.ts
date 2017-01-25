@@ -76,7 +76,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({},
           state, {
             data: updateResourceState(
-              state.data, action.payload, ResourceState.DELETED),
+              state.data, action.payload, "DELETED"),
             isDeleting: state.isDeleting + 1
           }
         );
@@ -207,7 +207,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({},
           state, {
             data: updateResourceState(
-              state.data, action.payload, ResourceState.DELETED)
+              state.data, action.payload, "DELETED")
           }
         );
         return newState;

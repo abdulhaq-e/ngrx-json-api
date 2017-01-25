@@ -66,7 +66,7 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.data['Article']['1']).toBeDefined();
       expect(newState.data['Article']['1'].persistedResource).toBeDefined();
       expect(newState.data['Article']['1'].persistedResource).toBeNull();
-      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+      expect(newState.data['Article']['1'].state).toEqual("CREATED");
     });
 
     it('should keep the ResourceState as CREATED if the new data was also not from the server', () => {
@@ -78,7 +78,7 @@ describe('NgrxJsonApiReducer', () => {
         }
       });
       let newState2 = NgrxJsonApiStoreReducer(state, action2);
-      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+      expect(newState.data['Article']['1'].state).toEqual("CREATED");
       expect(newState2.data['Article']['1'].persistedResource).toBeNull();
     });
   });
@@ -127,7 +127,7 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.data['Article']['1']).toBeDefined();
       expect(newState.data['Article']['1'].persistedResource).toBeDefined();
       expect(newState.data['Article']['1'].persistedResource).toBeNull();
-      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+      expect(newState.data['Article']['1'].state).toEqual("CREATED");
     });
 
     it('should keep the ResourceState as CREATED if the new data was also no from the server', () => {
@@ -139,7 +139,7 @@ describe('NgrxJsonApiReducer', () => {
         }
       });
       let newState2 = NgrxJsonApiStoreReducer(state, action2);
-      expect(newState.data['Article']['1'].state).toEqual(ResourceState.CREATED);
+      expect(newState.data['Article']['1'].state).toEqual("CREATED");
       expect(newState2.data['Article']['1'].persistedResource).toBeNull();
     });
   });
@@ -164,7 +164,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should mark the StoreResource for deletion', () => {
-      expect(newState.data['Article']['1'].state).toEqual(ResourceState.DELETED);
+      expect(newState.data['Article']['1'].state).toEqual("DELETED");
     });
 
     it('should add StoreResources that are not found and add the errors and NOT_LOADED state', () => {
@@ -176,7 +176,7 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.data['Article']['123']).toBeDefined();
       expect(newState.data['Article']['123'].type).toEqual('Article');
       expect(newState.data['Article']['123'].id).toEqual('123');
-      expect(newState.data['Article']['123'].state).toEqual(ResourceState.NOT_LOADED);
+      expect(newState.data['Article']['123'].state).toEqual("NOT_LOADED");
     });
 
   });

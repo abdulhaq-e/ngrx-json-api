@@ -168,14 +168,14 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
   if (fromServer) {
     newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: resource,
-      state: ResourceState.IN_SYNC,
+      state: "IN_SYNC",
       errors: [],
       loading: false
     }) as StoreResource;
   } else {
     newStoreResources[resource.id] = Object.assign({}, resource, {
       persistedResource: null,
-      state: ResourceState.CREATED,
+      state: "CREATED",
       errors: [],
       loading: false
     }) as StoreResource;
@@ -198,7 +198,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   if (_.isUndefined(storeData[resourceId.type])
     || _.isUndefined(storeData[resourceId.type][resourceId.id])) {
 
-    if (resourceState === ResourceState.DELETED) {
+    if (resourceState == "DELETED") {
       let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
       newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
       newState[resourceId.type][resourceId.id] = Object.assign({},
@@ -208,7 +208,7 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
         id: resourceId.id,
         persistedResource: null
       } as StoreResource;
-      newState[resourceId.type][resourceId.id].state = ResourceState.NOT_LOADED;
+      newState[resourceId.type][resourceId.id].state = "NOT_LOADED";
       return newState;
     } else {
       return storeData;
@@ -240,18 +240,18 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     // TODO need to handle check and keep local updates?
     newResource = resource;
     persistedResource = resource;
-    newResourceState = ResourceState.IN_SYNC;
+    newResourceState = "IN_SYNC";
   } else {
     let mergedResource = updateResourceObject(foundStoreResource, resource);
     if (_.isEqual(mergedResource, persistedResource)) {
       // no changes anymore, do nothing
       newResource = persistedResource;
-      newResourceState = ResourceState.IN_SYNC;
+      newResourceState = "IN_SYNC";
     } else {
       // merge changes and mark as CREATED or UPDATED depending on whether
       // an original version is available
       newResource = mergedResource;
-      newResourceState = persistedResource === null ? ResourceState.CREATED : ResourceState.UPDATED;
+      newResourceState = persistedResource === null ? "CREATED" : "UPDATED";
     }
   }
 
@@ -294,9 +294,9 @@ export const rollbackStoreResources = (storeData: NgrxJsonApiStoreData): NgrxJso
       let storeResource = newState[type][id];
       if (!storeResource.persistedResource) {
         delete newState[type][id];
-      } else if (storeResource.state !== ResourceState.IN_SYNC) {
+      } else if (storeResource.state != "IN_SYNC") {
         newState[type][id] = Object.assign({}, newState[type][id], {
-          state: ResourceState.IN_SYNC,
+          state: "IN_SYNC",
           resource: newState[type][id].persistedResource
         });
       }

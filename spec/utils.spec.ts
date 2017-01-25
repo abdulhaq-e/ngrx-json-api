@@ -300,7 +300,7 @@ describe('insertStoreResource', () => {
     expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
     expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
     expect(newStoreResources['1'].persistedResource).toEqual(resource);
-    expect(newStoreResources['1'].state).toEqual(ResourceState.IN_SYNC);
+    expect(newStoreResources['1'].state).toEqual("IN_SYNC");
   });
 
   it('should insert StoreResource with CREATED state if from server', () => {
@@ -326,7 +326,7 @@ describe('insertStoreResource', () => {
     expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
     expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
     expect(newStoreResources['1'].persistedResource).toBeNull();
-    expect(newStoreResources['1'].state).toEqual(ResourceState.CREATED);
+    expect(newStoreResources['1'].state).toEqual("CREATED");
   });
 });
 
@@ -341,14 +341,14 @@ describe('updateResourceState', () => {
     let state = {
       'Article': {
         '1': {
-          state: ResourceState.CREATED,
+          state: "CREATED",
           loading: true
         }
       }
     };
     let newState = updateResourceState(state, { type: 'Article', id: '1' },
-      ResourceState.IN_SYNC, false);
-    expect(newState['Article']['1'].state).toEqual(ResourceState.IN_SYNC);
+      "IN_SYNC", false);
+    expect(newState['Article']['1'].state).toEqual("IN_SYNC");
     expect(newState['Article']['1'].loading).toEqual(false);
   });
 });
@@ -436,7 +436,7 @@ describe('updateStoreResource', () => {
     let newState = updateStoreResource(state, resource, false);
     expect(newState['2'].attributes.title).toEqual('Untitled');
     expect(newState['2'].persistedResource.attributes.title).toEqual('Second article');
-    expect(newState['2'].state).toEqual(ResourceState.UPDATED);
+    expect(newState['2'].state).toEqual("UPDATED");
   });
 
   it('should merge a new resource not from server and add CREATED state if a persistedResource does not exists', () => {
@@ -451,7 +451,7 @@ describe('updateStoreResource', () => {
     let newState = updateStoreResource(state, resource, false);
     expect(newState['3'].attributes.title).toEqual('Untitled');
     expect(newState['3'].persistedResource).toBeNull();
-    expect(newState['3'].state).toEqual(ResourceState.CREATED);
+    expect(newState['3'].state).toEqual("CREATED");
   });
 
 });
@@ -491,13 +491,13 @@ describe('rollbackStoreResources', () => {
     'Article': {
       '1': {
         resource: { type: 'Article', id: '1' },
-        state: ResourceState.CREATED
+        state: "CREATED"
       },
     },
     'Comment': {
       '1': {
         resource: { type: 'Comment', id: '1', attributes: { title: 'C1' } },
-        state: ResourceState.UPDATED,
+        state: "UPDATED",
         persistedResource: { type: 'Comment', id: '1', attributes: { title: 'C11' } },
       }
     }
@@ -508,7 +508,7 @@ describe('rollbackStoreResources', () => {
     expect(newState['Article']['1']).not.toBeDefined();
     expect(newState['Comment']['1']).toBeDefined();
     expect(newState['Comment']['1'].resource.attributes.title).toEqual('C11');
-    expect(newState['Comment']['1'].state).toEqual(ResourceState.IN_SYNC);
+    expect(newState['Comment']['1'].state).toEqual("IN_SYNC");
   });
 });
 
