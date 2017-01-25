@@ -155,12 +155,12 @@ export class QueryStoreFailAction implements Action {
 
 export class CompactStoreAction implements Action {
   type = NgrxJsonApiActionTypes.COMPACT_STORE;
-  constructor(public payload: Payload) { }
+  constructor() { }
 }
 
 export class ClearStoreAction implements Action {
   type = NgrxJsonApiActionTypes.CLEAR_STORE;
-  constructor(public payload: Payload) { }
+  constructor() { }
 }
 
 export type NgrxJsonApiActions
