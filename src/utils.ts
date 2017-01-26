@@ -309,7 +309,7 @@ export const deleteStoreResources = (storeData: NgrxJsonApiStoreData, query: Que
   if (typeof query.id === 'undefined') {
     newState[query.type] = {};
   } else {
-    delete newState[query.type][query.id];
+    newState[query.type] = _.omit(newState[query.type], [query.id]) as NgrxJsonApiStoreResources;
   }
   return newState;
 };
