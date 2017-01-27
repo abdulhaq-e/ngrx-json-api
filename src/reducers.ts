@@ -10,6 +10,7 @@ import {
 } from './interfaces';
 import {
   deleteStoreResources,
+  clearQueryResult,
   updateQueryParams,
   updateQueryResults,
   updateQueryErrors,
@@ -19,6 +20,7 @@ import {
   removeQuery,
   rollbackStoreResources,
   updateResourceErrors,
+  updateQueriesForDeletedResource,
   compactStore
 } from './utils';
 
@@ -120,8 +122,18 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({}, state,
           {
             data: deleteStoreResources(state.data, action.payload.query),
+            queries: updateQueriesForDeletedResource(state.queries,
+              {id: action.payload.query.id, type: action.payload.query.type}
+            ),
             isDeleting: state.isDeleting - 1
           });
+        return newState;
+      }
+      case NgrxJsonApiActionTypes.QUERY_REFRESH: {
+        // clear result ids and wait until new data is fetched (triggered by effect)
+        newState = Object.assign({}, state, {
+            queries: clearQueryResult(state.queries, action.payload)
+        });
         return newState;
       }
       case NgrxJsonApiActionTypes.API_CREATE_FAIL: {

@@ -656,7 +656,7 @@ describe('updateQueryParams', () => {
 });
 
 describe('updateQueryResults', () => {
-  it('should update the query results given a storeQueries and a queryId', () => {
+  it('should update the query data given a storeQueries and a queryId', () => {
     let storeQueries = {
       'a1': {
         query: {
@@ -881,7 +881,7 @@ describe('filterResources (TODO: test remaining types)', () => {
     expect(filtered[0].type).toBe('Article');
   });
 
-  it('should return no results if the resourceFieldValue is null', () => {
+  it('should return no data if the resourceFieldValue is null', () => {
     let query = {
       type: 'Article',
       params: {

@@ -19,6 +19,7 @@ import {
   QueryStoreInitAction,
   ClearStoreAction,
   CompactStoreAction,
+  QueryRefreshAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -66,7 +67,7 @@ export class NgrxJsonApiService {
 
   /**
    * Adds the given query to the store. Any existing query with the same queryId is replaced.
-   * Make use of selectResults(...) to fetch the results.
+   * Make use of selectResults(...) to fetch the data.
 
    * @param query
    * @param fromServer
@@ -85,6 +86,10 @@ export class NgrxJsonApiService {
     } else {
       this.store.dispatch(new QueryStoreInitAction(query));
     }
+  }
+
+  public refreshQuery(queryId: string) {
+    this.store.dispatch(new QueryRefreshAction(queryId));
   }
 
   private removeQuery(queryId: string) {
@@ -107,45 +112,14 @@ export class NgrxJsonApiService {
 
     this.putQuery({ query: newQuery, fromServer });
 
-    let results$ = this.selectResults(newQuery.queryId)
-      .map(it => {
-        if (multi) {
-          return it;
-        } else {
-          if (it.data.length === 0) {
-            let oneQueryResult: OneQueryResult = {
-              data: null,
-              meta: it.meta,
-              links: it.links
-            };
-            return oneQueryResult;
-          } else if (it.data.length === 1) {
-            let oneQueryResult: OneQueryResult = {
-              data: it.data[0],
-              meta: it.meta,
-              links: it.links
-            };
-            return oneQueryResult;
-          } else {
-            throw new Error('Unique data expected');
-          }
-        }
-      })
-      .finally(() => this.removeQuery(newQuery.queryId));
+    let queryResult$;
+    if (multi) {
+      queryResult$ = this.selectManyResults(newQuery.queryId, denormalise);
+    } else {
+      queryResult$ = this.selectOneResults(newQuery.queryId, denormalise);
+    }
 
-      if (denormalise) {
-        if (multi) {
-          return this.denormaliseQueryResult(results$) as Observable<OneQueryResult>;
-        } else {
-          return this.denormaliseQueryResult(results$) as Observable<ManyQueryResult>;
-        }
-      } else {
-        if (multi) {
-          return results$ as Observable<OneQueryResult>;
-        } else {
-          return results$ as Observable<ManyQueryResult>;
-        }
-      }
+    return queryResult$.finally(() => this.removeQuery(newQuery.queryId));
   }
 
   private uuid() {
@@ -168,29 +142,38 @@ export class NgrxJsonApiService {
   }
 
   /**
-   * Selects the results of the given query.
+   * Selects the data of the given query.
    *
    * @param queryId
-   * @returns observable holding the results as array of resources.
+   * @returns observable holding the data as array of resources.
    */
-  public selectResults(queryId: string): Observable<ManyQueryResult> {
-    return this.store
+  public selectManyResults(queryId: string,
+      denormalize = false) {
+    let queryResult$ = this.store
       .select(this.selectors.storeLocation)
-      .let(this.selectors.getResults$(queryId));
+      .let(this.selectors.getManyResults$(queryId));
+    if (denormalize) {
+      return this.denormaliseQueryResult(queryResult$) as Observable<ManyQueryResult>;
+    }
+    return queryResult$;
   }
 
   /**
-   * Selects the data identifiers of the given query.
+   * Selects the data of the given query.
    *
    * @param queryId
-   * @returns {any}
+   * @returns observable holding the data as array of resources.
    */
-  public selectResultIdentifiers(queryId: string): Observable<Array<ResourceIdentifier>> {
-    return this.store
+  public selectOneResults(queryId: string,
+      denormalize = false) {
+    let queryResult$ = this.store
       .select(this.selectors.storeLocation)
-      .let(this.selectors.getResultIdentifiers$(queryId));
+      .let(this.selectors.getOneResult$(queryId));
+    if (denormalize) {
+      return this.denormaliseQueryResult(queryResult$) as Observable<OneQueryResult>;
+    }
+    return queryResult$;
   }
-
 
   /**
    * @param identifier of the resource
@@ -209,18 +192,18 @@ export class NgrxJsonApiService {
         .let(this.selectors.getStoreData$()), (
           queryResult: QueryResult, storeData: NgrxJsonApiStoreData
         ) => {
-        let result;
-        if (_.isArray(queryResult.data)) {
-          result = queryResult.data.map(r =>
+        let results;
+        if (!queryResult.data) {
+          return queryResult;
+        } if (_.isArray(queryResult.data)) {
+          results = queryResult.data.map(r =>
             denormaliseStoreResource(r, storeData)) as StoreResource[];
         } else {
-          result = denormaliseStoreResource(queryResult.data, storeData) as StoreResource;
+          results = denormaliseStoreResource(queryResult.data, storeData) as StoreResource;
         }
-        let denormalizedQueryResult: QueryResult = {
-          data: result,
-          meta: queryResult.meta,
-          links: queryResult.links
-        };
+        let denormalizedQueryResult = Object.assign({}, queryResult, {
+          data: results,
+        });
         return denormalizedQueryResult;
       });
   }

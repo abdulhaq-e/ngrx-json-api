@@ -33,6 +33,7 @@ import {
   NgrxJsonApiActionTypes,
   PatchStoreResourceAction,
   PostStoreResourceAction,
+  QueryRefreshAction,
   RemoveQueryAction,
   QueryStoreSuccessAction,
 } from '../src/actions';
@@ -214,7 +215,7 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.data['Article']['1']).toBeDefined();
     })
 
-    it('should update the query results', () => {
+    it('should update the query data', () => {
       let readInitAction = new ApiReadInitAction(query);
       let tempState = NgrxJsonApiStoreReducer(state, readInitAction);
       let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
@@ -223,8 +224,8 @@ describe('NgrxJsonApiReducer', () => {
       }));
       expect(newState.queries['111'].resultIds.length).toEqual(11);
       expect(newState.queries['111'].resultIds[8]).toEqual({ type: 'Blog', id: '3' });
-      expect(newState.queries['111'].resultLinks['someLink']).toEqual('someLinkValue');
-      expect(newState.queries['111'].resultMeta['someMeta']).toEqual('someMetaValue');
+      expect(newState.queries['111'].links['someLink']).toEqual('someLinkValue');
+      expect(newState.queries['111'].meta['someMeta']).toEqual('someMetaValue');
     });
   });
 
@@ -261,6 +262,34 @@ describe('NgrxJsonApiReducer', () => {
     it('should add data to the store', () => {
       expect(newState.data['Article']['1'].attributes.title).toEqual('bla bla bla');
     })
+  });
+
+  describe('QUERY_REFRESH action', () => {
+
+    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+      id: '1',
+      type: 'Article',
+      queryId: '111'
+    }));
+    tempState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
+      jsonApiData: testPayload,
+      query: {
+        id: '1',
+        type: 'Article',
+        queryId: '111'
+      }
+    }));
+
+    it('refresh should clear current result until new one is available', () => {
+      expect(tempState.queries['111'].resultIds).toBeDefined();
+      expect(tempState.queries['111'].meta).toBeDefined();
+      expect(tempState.queries['111'].links).toBeDefined();
+      let newState = NgrxJsonApiStoreReducer(tempState, new QueryRefreshAction('111'));
+      expect(newState.queries['111'].resultIds).toBeUndefined();
+      expect(newState.queries['111'].meta).toBeUndefined();
+      expect(newState.queries['111'].links).toBeUndefined();
+    });
+
   });
 
   describe('API_DELETE_SUCCESS', () => {
@@ -426,7 +455,7 @@ describe('NgrxJsonApiReducer', () => {
       type: 'Article',
       id: '1'
     }
-    it('should update the query results', () => {
+    it('should update the query data', () => {
       let readInitAction = new ApiReadInitAction({
           id: '1',
           type: 'Article',

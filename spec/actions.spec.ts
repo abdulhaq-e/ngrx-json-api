@@ -31,6 +31,7 @@ import {
   RemoveQueryAction,
   ClearStoreAction,
   CompactStoreAction,
+  QueryRefreshAction
 } from '../src/actions';
 
 describe('Json Api Actions', () => {
@@ -38,7 +39,7 @@ describe('Json Api Actions', () => {
   let actions;
 
   it('should have a fixed number of actions', () => {
-    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(25);
+    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(26);
   });
 
   it('should have an api create init action', () => {
@@ -144,6 +145,21 @@ describe('Json Api Actions', () => {
   it('should have a remove query action', () => {
     expect(NgrxJsonApiActionTypes.REMOVE_QUERY).toBeDefined();
     expect(NgrxJsonApiActionTypes.REMOVE_QUERY).toBe('REMOVE_QUERY');
+  });
+
+  it('should have a compact store action', () => {
+    expect(NgrxJsonApiActionTypes.COMPACT_STORE).toBeDefined();
+    expect(NgrxJsonApiActionTypes.COMPACT_STORE).toBe('COMPACT_STORE');
+  });
+
+  it('should have a clear store action', () => {
+    expect(NgrxJsonApiActionTypes.CLEAR_STORE).toBeDefined();
+    expect(NgrxJsonApiActionTypes.CLEAR_STORE).toBe('CLEAR_STORE');
+  });
+
+  it('should have a query refresh action', () => {
+    expect(NgrxJsonApiActionTypes.QUERY_REFRESH).toBeDefined();
+    expect(NgrxJsonApiActionTypes.QUERY_REFRESH).toBe('QUERY_REFRESH');
   });
 
   it('should generate an api create init action using apiCreateInit', () => {
@@ -285,5 +301,10 @@ describe('Json Api Actions', () => {
   it('should generate a clear store resource action using ClearStoreAction', () => {
     let action = new ClearStoreAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.CLEAR_STORE);
+  });
+
+  it('should generate a refresh query action using QueryRefreshAction', () => {
+    let action = new QueryRefreshAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.QUERY_REFRESH);
   });
 });

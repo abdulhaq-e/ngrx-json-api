@@ -17,9 +17,11 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/switchMapTo';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/toArray';
+import 'rxjs/add/operator/withLatestFrom';
 
 
 import {
+  ApiReadInitAction,
   ApiApplyFailAction,
   ApiApplySuccessAction,
   ApiCreateFailAction,
@@ -33,6 +35,7 @@ import {
   NgrxJsonApiActionTypes,
   QueryStoreSuccessAction,
   QueryStoreFailAction,
+  QueryRefreshAction
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
@@ -106,7 +109,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .select(this.selectors.storeLocation)
         .let(this.selectors.queryStore$(query))
         .map(results => new QueryStoreSuccessAction({
-          jsonApiData: { data: results },
+          jsonApiData: {data: results},
           query: query
         }))
         .catch(error => Observable.of(
@@ -127,6 +130,54 @@ export class NgrxJsonApiEffects implements OnDestroy {
         .catch(error => Observable.of(
           new ApiDeleteFailAction(this.toErrorPayload(payload.query, error))));
     });
+
+  @Effect() triggerReadOnQueryRefresh$ = this.actions$
+    .ofType(NgrxJsonApiActionTypes.QUERY_REFRESH)
+    .withLatestFrom(this.store, (action, store) => {
+      let queryId = action.payload;
+      let state = store[this.selectors.storeLocation] as NgrxJsonApiStore;
+      let query = state.queries[queryId].query;
+      return new ApiReadInitAction(query);
+    });
+
+  @Effect() refreshQueriesOnDelete$ = this.actions$
+    .ofType(NgrxJsonApiActionTypes.API_DELETE_SUCCESS)
+    .withLatestFrom(this.store, (action, store) => {
+      let id = {id: action.payload.query.id, type: action.payload.query.type};
+      if (!id.id || !id.type) {
+        throw new Error('API_DELETE_SUCCESS did not carry resource id and type information');
+      }
+
+      let state = store[this.selectors.storeLocation] as NgrxJsonApiStore;
+
+      let actions = [];
+      for (let queryId in state.queries) {
+        if (state.queries.hasOwnProperty(queryId)) {
+          let query = state.queries[queryId];
+          if (query.resultIds) {
+            let needsRefresh = _.findIndex(query.resultIds,
+                function (o) {
+                  return _.isEqual(id, o);
+                }
+              ) !== -1;
+
+            let sameIdRequested = query.query.id === id.id && query.query.type === id.type;
+            if (sameIdRequested && (needsRefresh || _.isEmpty(query.errors))) {
+              throw new Error('store is in invalid state, queries for deleted'
+                + ' resource should have been emptied and marked with 404 error');
+            }
+
+            if (needsRefresh) {
+              actions.push(new QueryRefreshAction(queryId));
+            }
+          }
+        }
+      }
+      return actions;
+    })
+    .flatMap(actions => Observable.of(...actions))
+    ;
+
 
   @Effect() applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
@@ -185,12 +236,11 @@ export class NgrxJsonApiEffects implements OnDestroy {
       }
     });
 
-  constructor(
-    private actions$: Actions,
+  constructor(private actions$: Actions,
     private jsonApi: NgrxJsonApi,
     private store: Store<any>,
-    private selectors: NgrxJsonApiSelectors<any>,
-  ) { }
+    private selectors: NgrxJsonApiSelectors<any>) {
+  }
 
   ngOnDestroy() {
 
@@ -315,7 +365,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
     let preds = predecessors.concat(key);
     for (let child of outgoing) {
       this.visit(child, context.pendingResources.indexOf(child), preds, context);
-    };
+    }
+    ;
 
     context.sorted[--context.cursor] = pendingResource;
   }
