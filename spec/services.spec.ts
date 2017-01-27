@@ -147,6 +147,8 @@ describe('NgrxJsonApiService', () => {
     });
   });
 
+
+
   describe('findMany', () => {
     it('find multiple StoreResources from the state', () => {
       let query = {

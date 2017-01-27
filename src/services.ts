@@ -19,6 +19,7 @@ import {
   QueryStoreInitAction,
   ClearStoreAction,
   CompactStoreAction,
+  QueryRefreshAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -88,6 +89,10 @@ export class NgrxJsonApiService {
     } else {
       this.store.dispatch(new QueryStoreInitAction(query));
     }
+  }
+
+  public refreshQuery(queryId: string) {
+    this.store.dispatch(new QueryRefreshAction(queryId));
   }
 
   private removeQuery(queryId: string) {

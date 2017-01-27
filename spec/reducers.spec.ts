@@ -33,6 +33,7 @@ import {
   NgrxJsonApiActionTypes,
   PatchStoreResourceAction,
   PostStoreResourceAction,
+  QueryRefreshAction,
   RemoveQueryAction,
   QueryStoreSuccessAction,
 } from '../src/actions';
@@ -261,6 +262,34 @@ describe('NgrxJsonApiReducer', () => {
     it('should add data to the store', () => {
       expect(newState.data['Article']['1'].attributes.title).toEqual('bla bla bla');
     })
+  });
+
+  describe('QUERY_REFRESH action', () => {
+
+    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+      id: '1',
+      type: 'Article',
+      queryId: '111'
+    }));
+    tempState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
+      jsonApiData: testPayload,
+      query: {
+        id: '1',
+        type: 'Article',
+        queryId: '111'
+      }
+    }));
+
+    it('refresh should clear current result until new one is available', () => {
+      expect(tempState.queries['111'].resultIds).toBeDefined();
+      expect(tempState.queries['111'].resultMeta).toBeDefined();
+      expect(tempState.queries['111'].resultLinks).toBeDefined();
+      let newState = NgrxJsonApiStoreReducer(tempState, new QueryRefreshAction('111'));
+      expect(newState.queries['111'].resultIds).toBeUndefined();
+      expect(newState.queries['111'].resultMeta).toBeUndefined();
+      expect(newState.queries['111'].resultLinks).toBeUndefined();
+    });
+
   });
 
   describe('API_DELETE_SUCCESS', () => {

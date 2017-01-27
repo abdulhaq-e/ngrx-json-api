@@ -28,6 +28,7 @@ export const NgrxJsonApiActionTypes = {
   API_APPLY_SUCCESS: type('API_APPLY_SUCCESS'),
   API_APPLY_FAIL: type('API_APPLY_FAIL'),
   API_ROLLBACK: type('API_ROLLBACK'),
+  QUERY_REFRESH: type('QUERY_REFRESH'),
   QUERY_STORE_INIT: type('QUERY_STORE_INIT'),
   QUERY_STORE_SUCCESS: type('QUERY_STORE_SUCCESS'),
   QUERY_STORE_FAIL: type('QUERY_STORE_FAIL'),
@@ -163,6 +164,16 @@ export class ClearStoreAction implements Action {
   constructor() { }
 }
 
+export class QueryRefreshAction implements Action {
+  type = NgrxJsonApiActionTypes.QUERY_REFRESH
+  constructor(public payload: string) {
+    if(!payload){
+      throw new Error("no query id provided for QueryRefreshAction");
+    }
+  }
+}
+
+
 export type NgrxJsonApiActions
   = ApiApplyInitAction
   | ApiApplySuccessAction
@@ -184,6 +195,7 @@ export type NgrxJsonApiActions
   | PatchStoreResourceAction
   | PostStoreResourceAction
   | RemoveQueryAction
+  | QueryRefreshAction
   | QueryStoreInitAction
   | QueryStoreSuccessAction
   | QueryStoreFailAction
