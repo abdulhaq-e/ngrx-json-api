@@ -165,14 +165,14 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
 
   let newStoreResources = Object.assign({}, storeResources);
   if (fromServer) {
-    newStoreResources[resource.id] = Object.assign({}, resource, {
+    newStoreResources[resource.id] = Object.assign(<StoreResource>{}, resource, {
       persistedResource: resource,
       state: 'IN_SYNC',
       errors: [],
       loading: false
     }) as StoreResource;
   } else {
-    newStoreResources[resource.id] = Object.assign({}, resource, {
+    newStoreResources[resource.id] = Object.assign(<StoreResource>{}, resource, {
       persistedResource: null,
       state: 'CREATED',
       errors: [],
