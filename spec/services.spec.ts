@@ -45,8 +45,6 @@ import {
   resourceDefinitions
 } from './test_utils';
 
-
-
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
 
@@ -100,7 +98,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.findOne(query, false);
+      let storeResource = service.findOne({query, fromServer: false});
       storeResource.subscribe(it => {
         expect(_.get(it.data, 'type')).toEqual('Article');
         expect(_.get(it.data, 'id')).toEqual('1');
@@ -113,7 +111,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.findOne(query, false);
+      let storeResource = service.findOne({query, fromServer: false});
       let subs = storeResource.subscribe();
       expect(service.storeSnapshot.queries['22']).toBeDefined()
       subs.unsubscribe();
@@ -125,7 +123,7 @@ describe('NgrxJsonApiService', () => {
         id: '1',
         type: 'Article',
       }
-      let storeResource = service.findOne(query, false);
+      let storeResource = service.findOne({query, fromServer: false});
       let subs = storeResource.subscribe();
       expect(Object.keys(service.storeSnapshot.queries).length).toEqual(1)
       subs.unsubscribe();
@@ -139,7 +137,7 @@ describe('NgrxJsonApiService', () => {
         queryId: '22'
       }
       let res;
-      let storeResource = service.findOne(query, false, true).map(it => it.data);
+      let storeResource = service.findOne({query, fromServer: false, denormalise: true}).map(it => it.data);
       storeResource.subscribe(it => res = it);
       service.denormaliseResource(storeResource).subscribe(it => {
         expect(it).toEqual(res);
@@ -153,7 +151,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.findMany(query, false);
+      let storeResource = service.findMany({query, fromServer: false});
       storeResource.subscribe(it => {
         expect(_.get(it.data[0], 'type')).toEqual('Article');
         expect(_.get(it.data[0], 'id')).toEqual('1');
@@ -167,7 +165,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.findMany(query, false, true);
+      let storeResource = service.findMany({query, fromServer: false, denormalise: true});
       let subs = storeResource.subscribe();
       expect(service.storeSnapshot.queries['22']).toBeDefined()
       subs.unsubscribe();
@@ -180,7 +178,7 @@ describe('NgrxJsonApiService', () => {
         queryId: '22'
       }
       let res : Array<StoreResource>;
-      let storeResources : Observable<Array<StoreResource>> = service.findMany(query, false, true).map(it => it.data);
+      let storeResources : Observable<Array<StoreResource>> = service.findMany({query, fromServer: false, denormalise: true}).map(it => it.data);
       storeResources.subscribe(it => res = it);
       service.denormaliseResource(storeResources).subscribe(it => {
         expect(it).toEqual(res);
@@ -197,7 +195,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      service.putQuery(query, false);
+      service.putQuery({query, fromServer: false});
 
       expect(service.storeSnapshot.queries['22']).toBeDefined()
       expect(service.storeSnapshot.queries['22'].query.type).toBe("Article")
@@ -218,9 +216,9 @@ describe('NgrxJsonApiService', () => {
           limit: 5
         }
       }
-      service.putQuery(query1, false);
+      service.putQuery({query: query1, fromServer: false});
       expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(4)
-      service.putQuery(query2, false);
+      service.putQuery({query: query2, fromServer: false});
       expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(5)
     });
 
@@ -265,7 +263,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      let storeResource = service.denormaliseQueryResult(service.findOne(query, false));
+      let storeResource = service.denormaliseQueryResult(service.findOne({query, fromServer: false}));
       storeResource.subscribe(it => {
         expect(_.get(it.data, 'relationships.author.reference')).toBeDefined();
       });
@@ -275,7 +273,7 @@ describe('NgrxJsonApiService', () => {
       let query = {
         type: 'Article',
       }
-      let storeResource = service.denormaliseQueryResult(service.findMany(query, false));
+      let storeResource = service.denormaliseQueryResult(service.findMany({query, fromServer: false}));
       storeResource.subscribe(it => {
         expect(_.get(it.data[0], 'relationships.author.reference')).toBeDefined();
       });
@@ -366,7 +364,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      service.findOne(query, false);
+      service.findOne({query, fromServer: false});
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
 
@@ -389,7 +387,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Comment',
         queryId: '22'
       }
-      service.findOne(query, false);
+      service.findOne({query, fromServer: false});
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.data['Blog'])).toBe(false);
@@ -413,7 +411,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Comment',
         queryId: '22'
       }
-      service.findOne(query, false);
+      service.findOne({query, fromServer: false});
 
       let state0 = service.storeSnapshot;
       service.compact();
@@ -452,7 +450,7 @@ describe('NgrxJsonApiService', () => {
         type: 'Article',
         queryId: '22'
       }
-      service.findOne(query, false);
+      service.findOne({query, fromServer: false});
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.data['Article']['1'])).toBe(false);

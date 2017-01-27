@@ -23,6 +23,7 @@ import {
 import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
+  Options,
   Resource,
   ResourceIdentifier,
   Query,
@@ -55,21 +56,12 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(query: Query, fromServer = true, denormalise = false): Observable<OneQueryResult> {
-    let obs$ = this.findInternal(query, fromServer, false);
-    if (denormalise) {
-      return this.denormaliseQueryResult(obs$) as Observable<OneQueryResult>;
-    }
-    return obs$ as Observable<OneQueryResult>;
+  public findOne(options: Options): Observable<OneQueryResult> {
+    return this.findInternal(Object.assign({}, options, { multi: false }));
   };
 
-  public findMany(query: Query, fromServer = true,
-    denormalise = false): Observable<ManyQueryResult> {
-    let obs$ = this.findInternal(query, fromServer, true);
-    if (denormalise) {
-      return this.denormaliseQueryResult(obs$) as Observable<ManyQueryResult>;
-    }
-    return obs$ as Observable<ManyQueryResult>;
+  public findMany(options: Options): Observable<ManyQueryResult> {
+    return this.findInternal(Object.assign({}, options, { multi: true }));
   };
 
   /**
@@ -79,10 +71,15 @@ export class NgrxJsonApiService {
    * @param query
    * @param fromServer
    */
-  public putQuery(query: Query, fromServer = true) {
+  public putQuery(options: Options) {
+
+    let query = options.query;
+    let fromServer = _.isUndefined(options.fromServer) ? true : options.fromServer;
+
     if (!query.queryId) {
       throw new Error('to query must have a queryId');
     }
+
     if (fromServer) {
       this.store.dispatch(new ApiReadInitAction(query));
     } else {
@@ -94,8 +91,13 @@ export class NgrxJsonApiService {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(query: Query,
-    fromServer = true, multi = false): Observable<QueryResult> {
+  private findInternal(options: Options): Observable<QueryResult> {
+
+    let query = options.query;
+    let fromServer = _.isUndefined(options.fromServer) ? true : options.fromServer;
+    let multi = _.isUndefined(options.multi) ? false : options.multi;
+    let denormalise = _.isUndefined(options.denormalise) ? false : options.denormalise;
+
     let newQuery;
     if (!query.queryId) {
       newQuery = Object.assign({}, query, { queryId: this.uuid() });
@@ -103,9 +105,9 @@ export class NgrxJsonApiService {
       newQuery = query;
     }
 
-    this.putQuery(newQuery, fromServer);
+    this.putQuery({ query: newQuery, fromServer });
 
-    return this.selectResults(newQuery.queryId)
+    let results$ = this.selectResults(newQuery.queryId)
       .map(it => {
         if (multi) {
           return it;
@@ -130,6 +132,20 @@ export class NgrxJsonApiService {
         }
       })
       .finally(() => this.removeQuery(newQuery.queryId));
+
+      if (denormalise) {
+        if (multi) {
+          return this.denormaliseQueryResult(results$) as Observable<OneQueryResult>;
+        } else {
+          return this.denormaliseQueryResult(results$) as Observable<ManyQueryResult>;
+        }
+      } else {
+        if (multi) {
+          return results$ as Observable<OneQueryResult>;
+        } else {
+          return results$ as Observable<ManyQueryResult>;
+        }
+      }
   }
 
   private uuid() {
@@ -244,7 +260,10 @@ export class NgrxJsonApiService {
    *
    * @param resource
    */
-  public patchResource(resource: Resource, toRemote = false) {
+  public patchResource(options: Options) {
+    let resource = options.resource;
+    let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
+
     if (toRemote) {
       this.store.dispatch(new ApiUpdateInitAction(resource));
     } else {
@@ -259,7 +278,11 @@ export class NgrxJsonApiService {
    *
    * @param resource
    */
-  public postResource(resource: Resource, toRemote = false) {
+  public postResource(options: Options) {
+
+    let resource = options.resource;
+    let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
+
     if (toRemote) {
       this.store.dispatch(new ApiCreateInitAction(resource));
     } else {
@@ -272,7 +295,10 @@ export class NgrxJsonApiService {
    *
    * @param resourceId
    */
-  public deleteResource(resourceId: ResourceIdentifier, toRemote = false) {
+  public deleteResource(options: Options) {
+    let resourceId = options.resourceId;
+    let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
+
     if (toRemote) {
       this.store.dispatch(new ApiDeleteInitAction(resourceId));
     } else {
