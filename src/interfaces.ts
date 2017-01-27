@@ -109,20 +109,6 @@ export interface Query {
   params?: QueryParams;
 }
 
-export interface QueryResult {
-  meta?: any;
-  links?: any;
-  data?: StoreResource | Array<StoreResource>;
-}
-
-export interface ManyQueryResult extends QueryResult {
-  data?: Array<StoreResource>;
-}
-
-export interface OneQueryResult extends QueryResult {
-  data?: StoreResource;
-}
-
 export interface QueryParams {
   filtering?: Array<FilteringParam>;
   sorting?: Array<SortingParam>;
@@ -130,10 +116,6 @@ export interface QueryParams {
   fields?: Array<string>;
   offset?: number;
   limit?: number;
-}
-
-export class QueryError extends Error {
-  public errors: Array<ResourceError>;
 }
 
 export interface Resource extends ResourceIdentifier {
@@ -202,12 +184,25 @@ export interface SortingParam {
   direction: Direction;
 }
 
+
+export interface QueryResult extends StoreQuery {
+  data?: StoreResource | Array<StoreResource>;
+}
+
+export interface ManyQueryResult extends QueryResult {
+  data?: Array<StoreResource>;
+}
+
+export interface OneQueryResult extends QueryResult {
+  data?: StoreResource;
+}
+
 export interface StoreQuery {
   query: Query;
   loading: Boolean;
   resultIds: Array<ResourceIdentifier>;
-  resultMeta: any;
-  resultLinks: any;
+  meta: any;
+  links: any;
 
   /**
    * Errors received from the server after attempting to perform a GET request.

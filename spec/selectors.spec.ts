@@ -243,44 +243,62 @@ describe('NgrxJsonApiSelectors', () => {
 
   });
 
-
-  describe('getResultIdentifiers$', () => {
-    it('should get the resultIds of a query given a queryId', fakeAsync(() => {
+  describe('getManyResults$', () => {
+    it('should get the StoreResource(s) that are the data of a query', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
-        .let(selectors.getResultIdentifiers$('1'))
-        .subscribe(d => res = d);
-      tick();
-      expect(res.length).toEqual(2);
-      expect(res[0].type).toEqual('Article');
-    }));
-
-  });
-
-  describe('getResults$', () => {
-    it('should get the StoreResource(s) that are the results of a query', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getResults$('1'))
+        .let(selectors.getManyResults$('1'))
         .subscribe(d => res = d);
       tick();
       expect(res.data[0].id).toEqual('1');
       expect(res.data[1].id).toEqual('2');
     }));
 
-    it('should get return an empty array if there are no results', fakeAsync(() => {
+    it('should get return an empty array if there are no data', fakeAsync(() => {
       let res;
       let sub = obs
         .select('api')
-        .let(selectors.getResults$('55'))
+        .let(selectors.getManyResults$('55'))
         .subscribe(d => res = d);
       tick();
       expect(res.data).toEqual([]);
     }));
+  });
 
+  describe('getOneResults$', () => {
+    it('should get the StoreResource that are the data of a query', fakeAsync(() => {
+      let res;
+      let sub = obs
+        .select('api')
+        .let(selectors.getOneResult$('2'))
+        .subscribe(d => res = d);
+      tick();
+      expect(res.data.id).toEqual('1');
+    }));
 
+    it('should throw error if not a unique result is returned', fakeAsync(() => {
+      let res;
+      let err;
+      let sub = obs
+        .select('api')
+        .let(selectors.getOneResult$('1'))
+        .subscribe(d => res = d, e => err = e);
+      tick();
+      expect(res).toBeUndefined();
+      expect(err).toBeDefined();
+      expect(err.message).toBe('expected single result for query 1');
+    }));
+
+    it('should return null for no query result', fakeAsync(() => {
+      let res;
+      let sub = obs
+        .select('api')
+        .let(selectors.getOneResult$('55'))
+        .subscribe(d => res = d);
+      tick();
+      expect(res.data).toBeNull();
+    }));
   });
 
   describe('getStoreResource$', () => {
@@ -363,8 +381,8 @@ describe('NgrxJsonApiSelectors', () => {
 		  .let(selectors.getManyQueryResult$(
               {
                 resultIds: [],
-                resultMeta: 'someMeta',
-                resultLinks: 'someLinks'
+                meta: 'someMeta',
+                links: 'someLinks'
               }
           ))
 		  .subscribe(d => res = d);

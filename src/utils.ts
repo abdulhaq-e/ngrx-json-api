@@ -268,13 +268,13 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
 export const updateQueriesForDeletedResource = (state: NgrxJsonApiStoreQueries,
   deletedId: ResourceIdentifier): NgrxJsonApiStoreQueries => {
   let newState: NgrxJsonApiStoreQueries = state;
-  for(let queryId in state){
-    if(state.hasOwnProperty(queryId)){
+  for (let queryId in state) {
+    if (state.hasOwnProperty(queryId)) {
       let queryState = state[queryId];
-      if(queryState.query.id == deletedId.id && queryState.query.type == deletedId.type){
+      if (queryState.query.id === deletedId.id && queryState.query.type === deletedId.type) {
         // found a query for a resource that was deleted => modify to 404
         newState = clearQueryResult(newState, queryState.query.queryId);
-        let notFoundError : ResourceError = {code: '404', status: "Not Found"};
+        let notFoundError: ResourceError = {code: '404', status: 'Not Found'};
         newState[queryState.query.queryId].errors = [notFoundError];
       }
     }
@@ -337,8 +337,8 @@ export const clearQueryResult = (storeData: NgrxJsonApiStoreQueries, queryId: st
   let newQuery = Object.assign({}, storeData[queryId]);
   delete newQuery.resultIds;
   delete newQuery.errors;
-  delete newQuery.resultMeta;
-  delete newQuery.resultLinks;
+  delete newQuery.meta;
+  delete newQuery.links;
 
   let newState = Object.assign({}, storeData);
   newState[queryId] = newQuery;
@@ -465,8 +465,8 @@ export const updateQueryResults = (storeQueries: NgrxJsonApiStoreQueries,
     let data = _.isArray(document.data) ? document.data : [document.data];
     let newQueryStore = Object.assign({}, storeQuery, {
       resultIds: data.map(it => it ? toResourceIdentifier(it) : []),
-      resultMeta: document.meta,
-      resultLinks: document.links,
+      meta: document.meta,
+      links: document.links,
       loading: false
     });
 

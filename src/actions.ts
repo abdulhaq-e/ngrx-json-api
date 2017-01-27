@@ -165,10 +165,10 @@ export class ClearStoreAction implements Action {
 }
 
 export class QueryRefreshAction implements Action {
-  type = NgrxJsonApiActionTypes.QUERY_REFRESH
+  type = NgrxJsonApiActionTypes.QUERY_REFRESH;
   constructor(public payload: string) {
-    if(!payload){
-      throw new Error("no query id provided for QueryRefreshAction");
+    if (!payload) {
+      throw new Error('no query id provided for QueryRefreshAction');
     }
   }
 }

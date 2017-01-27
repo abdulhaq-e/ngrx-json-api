@@ -122,7 +122,9 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         newState = Object.assign({}, state,
           {
             data: deleteStoreResources(state.data, action.payload.query),
-            queries: updateQueriesForDeletedResource(state.queries, {id: action.payload.query.id, type: action.payload.query.type}),
+            queries: updateQueriesForDeletedResource(state.queries,
+              {id: action.payload.query.id, type: action.payload.query.type}
+            ),
             isDeleting: state.isDeleting - 1
           });
         return newState;
