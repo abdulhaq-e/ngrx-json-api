@@ -767,7 +767,8 @@ export const generatePayload = (resource: Resource, operation: OperationType): P
 
   // 'DELETE' only needs a query and it also needs an id in its query
   // 'PATCH' also needs an id in its query
-  if (operation === 'PATCH' || operation === 'DELETE') {
+  // 'POST' needed locally to allow to write back errors to store if id is available
+  if (operation === 'PATCH' || operation === 'DELETE' || operation === 'POST') {
     payload.query.id = resource.id;
   }
 

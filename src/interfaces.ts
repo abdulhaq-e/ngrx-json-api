@@ -222,7 +222,7 @@ export interface StoreResource extends Resource {
   /**
   * The original resource obtained from the server.
   */
-  persistedResource: Resource;
+  persistedResource?: Resource;
   /**
   * One of the operation types: reading, creating, updating or deleting.
   */
@@ -230,5 +230,5 @@ export interface StoreResource extends Resource {
   /**
   * Errors received from the server after attempting to store the resource.
   */
-  errors: Array<ResourceError>;
+  errors?: Array<ResourceError>;
 }

@@ -148,7 +148,7 @@ export class NgrxJsonApiService {
    * @returns observable holding the data as array of resources.
    */
   public selectManyResults(queryId: string,
-      denormalize = false) {
+      denormalize = false): Observable<ManyQueryResult> {
     let queryResult$ = this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getManyResults$(queryId));
@@ -165,7 +165,7 @@ export class NgrxJsonApiService {
    * @returns observable holding the data as array of resources.
    */
   public selectOneResults(queryId: string,
-      denormalize = false) {
+      denormalize = false): Observable<OneQueryResult> {
     let queryResult$ = this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getOneResult$(queryId));
