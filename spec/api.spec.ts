@@ -71,7 +71,7 @@ describe('ngrx json api', () => {
   }));
 
   it('should have the api url', () => {
-    expect(jsonapi.apiUrl).toEqual('myapi.com');
+    expect(jsonapi.config.apiUrl).toEqual('myapi.com');
   });
 
   describe('urlBuilder', () => {

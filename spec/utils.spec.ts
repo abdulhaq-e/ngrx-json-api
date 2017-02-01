@@ -1002,7 +1002,6 @@ describe('generatePayload', () => {
       type: 'Article'
     }
     let payload = generatePayload(resource, 'POST');
-    expect(payload.query.id).not.toBeDefined();
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData.data.id).toEqual('10');
     expect(payload.jsonApiData.data.type).toEqual('Article');

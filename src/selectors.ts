@@ -25,7 +25,6 @@ import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   NgrxJsonApiStoreResources,
-  Resource,
   ResourceIdentifier,
   Query,
   StoreResource,

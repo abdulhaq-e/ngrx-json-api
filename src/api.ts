@@ -37,7 +37,6 @@ export class NgrxJsonApi {
     'Accept': 'application/vnd.api+json'
   });
   public requestUrl: string;
-  public apiUrl = this.config.apiUrl;
   public definitions = this.config.resourceDefinitions;
 
   constructor(
@@ -83,7 +82,7 @@ export class NgrxJsonApi {
 
   private collectionUrlFor(type: string) {
     let collectionPath = this.collectionPathFor(type);
-    return `${this.apiUrl}/${collectionPath}`;
+    return `${this.config.apiUrl}/${collectionPath}`;
   }
 
   private resourcePathFor(type: string, id: string) {
@@ -93,7 +92,7 @@ export class NgrxJsonApi {
 
   private resourceUrlFor(type: string, id: string) {
     let resourcePath = this.resourcePathFor(type, id);
-    return `${this.apiUrl}/${resourcePath}`;
+    return `${this.config.apiUrl}/${resourcePath}`;
   }
 
   public find(query: Query) {
