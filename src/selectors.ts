@@ -145,7 +145,7 @@ export class NgrxJsonApiSelectors<T> {
       }
 
       if (_.isEmpty(storeQuery.resultIds)) {
-        let queryResult: ManyQueryResult = Object.assign({}, storeQuery, {
+        let queryResult: OneQueryResult = Object.assign({}, storeQuery, {
           data: _.isUndefined(storeQuery.resultIds) ? undefined : null
         });
         return Observable.of(queryResult);
