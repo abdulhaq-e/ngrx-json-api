@@ -63,7 +63,7 @@
     "@types/source-map": "^0.1.26",
     "@types/uglify-js": "^2.0.27",
     "@types/webpack": "^1.12.29",
-    "awesome-typescript-loader": "^2.2.4",
+    "awesome-typescript-loader": "^3.0.3",
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-lodash": "^3.2.8",
