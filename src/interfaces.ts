@@ -82,15 +82,6 @@ export type OperationType
   | 'POST'
   | false;
 
-export interface Options {
-    query?: Query;
-    resource?: Resource;
-    resourceId?: ResourceIdentifier;
-    fromServer?: boolean;
-    denormalise?: boolean;
-    multi?: boolean;
-    toRemote?: boolean;
-  }
 
 export interface OneResourceRelationship {
   data?: ResourceIdentifier;
