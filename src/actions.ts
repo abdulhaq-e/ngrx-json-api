@@ -7,6 +7,7 @@ import {
   Resource,
   ResourceIdentifier,
   Query,
+  ModifyStoreResourceErrorsPayload
 } from './interfaces';
 import { type } from './utils';
 
@@ -35,6 +36,7 @@ export const NgrxJsonApiActionTypes = {
   DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE'),
   PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
   POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
+  MODIFY_STORE_RESOURCE_ERRORS: type('MODIFY_STORE_RESOURCE_ERRORS'),
   REMOVE_QUERY: type('REMOVE_QUERY'),
   COMPACT_STORE: type('COMPACT_STORE'),
   CLEAR_STORE: type('CLEAR_STORE'),
@@ -173,6 +175,10 @@ export class ApiQueryRefreshAction implements Action {
   }
 }
 
+export class ModifyStoreResourceErrorsAction implements Action {
+  type = NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS;
+  constructor(public payload: ModifyStoreResourceErrorsPayload) { }
+}
 
 export type NgrxJsonApiActions
   = ApiApplyInitAction
@@ -199,5 +205,6 @@ export type NgrxJsonApiActions
   | LocalQueryInitAction
   | LocalQuerySuccessAction
   | LocalQueryFailAction
+  | ModifyStoreResourceErrorsAction
   | CompactStoreAction
   | ClearStoreAction;

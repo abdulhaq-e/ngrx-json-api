@@ -23,6 +23,7 @@ import {
   StoreQuery,
   SortingParam,
   StoreResource,
+  ErrorModificationType
 } from './interfaces';
 
 export const denormaliseObject = (resource: Resource,
@@ -282,23 +283,51 @@ export const updateQueriesForDeletedResource = (state: NgrxJsonApiStoreQueries,
   return newState;
 };
 
-export const updateResourceErrors = (storeData: NgrxJsonApiStoreData,
-  query: Query, document: Document): NgrxJsonApiStoreData => {
+export const updateResourceErrorsForQuery = (storeData: NgrxJsonApiStoreData,
+                       query: Query, document: Document): NgrxJsonApiStoreData => {
   if (!query.type || !query.id || document.data instanceof Array) {
-    // TODO: Why does document.data has to be an Array?
     throw new Error('invalid parameters');
   }
-  if (!storeData[query.type] || !storeData[query.type][query.id]) {
+  return updateResourceErrors(storeData, {id: query.id, type: query.type}, document.errors, 'SET');
+};
+
+export const updateResourceErrors = (storeData: NgrxJsonApiStoreData,
+         id: ResourceIdentifier, errors: Array<ResourceError>,
+         modificationType: ErrorModificationType): NgrxJsonApiStoreData => {
+  if (!storeData[id.type] || !storeData[id.type][id.id]) {
     return storeData;
   }
   let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
-  newState[query.type] = Object.assign({}, newState[query.type]);
-  let storeResource = Object.assign({}, newState[query.type][query.id]);
-  storeResource.errors = [];
-  if (document.errors) {
-    storeResource.errors.push(...document.errors);
+  newState[id.type] = Object.assign({}, newState[id.type]);
+  let storeResource = Object.assign({}, newState[id.type][id.id]);
+
+  if (modificationType === 'SET') {
+    storeResource.errors = [];
+    if (errors) {
+      storeResource.errors.push(...errors);
+    }
+  } else if (modificationType === 'ADD') {
+    let currentErrors = storeResource.errors;
+    storeResource.errors = [];
+    if (currentErrors) {
+      storeResource.errors.push(...currentErrors);
+    }
+    if (errors) {
+      storeResource.errors.push(...errors);
+    }
+  } else {
+    let currentErrors = storeResource.errors;
+    storeResource.errors = [];
+    if (currentErrors) {
+      for (let currentError of currentErrors) {
+        let remove = errors && errors.filter(it => _.isEqual(it, currentError)).length > 0;
+        if (!remove) {
+          storeResource.errors.push(currentError);
+        }
+      }
+    }
   }
-  newState[query.type][query.id] = storeResource;
+  newState[id.type][id.id] = storeResource;
   return newState;
 };
 

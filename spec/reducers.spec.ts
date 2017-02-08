@@ -35,6 +35,7 @@ import {
   PostStoreResourceAction,
   ApiQueryRefreshAction,
   RemoveQueryAction,
+  ModifyStoreResourceErrorsAction,
   LocalQuerySuccessAction,
 } from '../src/actions';
 import {
@@ -434,6 +435,24 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.data['Article']['1'].errors[0]).toEqual('permission denied');
     });
   });
+
+  describe('ModifyStoreResourceErrorsAction action', () => {
+    let newState0 = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
+      { type: 'Article', id: '1' }
+    ));
+
+    let newState = NgrxJsonApiStoreReducer(newState0, new ModifyStoreResourceErrorsAction({
+      resourceId: {type: 'Article', id: '1'},
+      modificationType: 'SET',
+      errors: [{code: '0'}]
+    }));
+
+    it('should add error to resource', () => {
+      expect(newState.data['Article']['1'].errors.length).toBe(1);
+      expect(newState.data['Article']['1'].errors[0].code).toBe('0');
+    });
+  });
+
 
   describe('REMOVE_QUERY action', () => {
     it('should remove query given a queryId', () => {

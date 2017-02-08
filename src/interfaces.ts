@@ -88,6 +88,14 @@ export interface OneResourceRelationship {
   reference?: StoreResource;
 }
 
+export type ErrorModificationType = 'ADD' | 'REMOVE' | 'SET';
+
+export interface ModifyStoreResourceErrorsPayload {
+  resourceId: ResourceIdentifier;
+  errors: Array<ResourceError>;
+  modificationType: ErrorModificationType;
+}
+
 export interface Payload {
   jsonApiData?: Document;
   query: Query;

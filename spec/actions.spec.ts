@@ -31,7 +31,9 @@ import {
   RemoveQueryAction,
   ClearStoreAction,
   CompactStoreAction,
-  ApiQueryRefreshAction
+  ApiQueryRefreshAction,
+  ModifyStoreResourceErrorsAction
+
 } from '../src/actions';
 
 describe('Json Api Actions', () => {
@@ -39,7 +41,7 @@ describe('Json Api Actions', () => {
   let actions;
 
   it('should have a fixed number of actions', () => {
-    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(26);
+    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(27);
   });
 
   it('should have an api create init action', () => {
@@ -160,6 +162,11 @@ describe('Json Api Actions', () => {
   it('should have a query refresh action', () => {
     expect(NgrxJsonApiActionTypes.API_QUERY_REFRESH).toBeDefined();
     expect(NgrxJsonApiActionTypes.API_QUERY_REFRESH).toBe('API_QUERY_REFRESH');
+  });
+
+  it('should have a set errors action', () => {
+    expect(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS).toBeDefined();
+    expect(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS).toBe('MODIFY_STORE_RESOURCE_ERRORS');
   });
 
   it('should generate an api create init action using apiCreateInit', () => {
@@ -291,6 +298,16 @@ describe('Json Api Actions', () => {
     let action = new RemoveQueryAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.REMOVE_QUERY);
     expect(action.payload).toEqual({});
+  });
+
+  it('should generate a modify errors action using ModifyStoreResourceErrorsAction', () => {
+    let action = new ModifyStoreResourceErrorsAction({
+      resourceId: null,
+      errors: [],
+      modificationType: 'SET'
+    });
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS);
+    expect(action.payload.modificationType).toEqual('SET');
   });
 
   it('should generate a compact store resource action using CompactStoreAction', () => {

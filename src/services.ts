@@ -19,7 +19,8 @@ import {
   LocalQueryInitAction,
   ClearStoreAction,
   CompactStoreAction,
-  ApiQueryRefreshAction
+  ApiQueryRefreshAction,
+  ModifyStoreResourceErrorsAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -32,6 +33,7 @@ import {
   OneQueryResult,
   ManyQueryResult,
   StoreResource,
+  ResourceError
 } from './interfaces';
 import {
   denormaliseStoreResource,
@@ -350,5 +352,44 @@ export class NgrxJsonApiService {
    */
   public compact() {
     this.store.dispatch(new CompactStoreAction());
+  }
+
+  /**
+   * Adds the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public addResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'ADD'
+    }));
+  }
+
+  /**
+   * Removes the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public removeResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'REMOVE'
+    }));
+  }
+
+  /**
+   * Sets the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public setResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'SET'
+    }));
   }
 }
