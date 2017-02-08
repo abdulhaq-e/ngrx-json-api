@@ -6,7 +6,7 @@ import {
 import {
   Query,
   ResourceState,
-  NgrxJsonApiStore
+  NgrxJsonApiStore, ModifyStoreResourceErrorsPayload
 } from './interfaces';
 import {
   deleteStoreResources,
@@ -19,9 +19,10 @@ import {
   updateResourceState,
   removeQuery,
   rollbackStoreResources,
-  updateResourceErrors,
+  updateResourceErrorsForQuery,
   updateQueriesForDeletedResource,
-  compactStore
+  compactStore,
+  updateResourceErrors
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -129,7 +130,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_REFRESH: {
+      case NgrxJsonApiActionTypes.API_QUERY_REFRESH: {
         // clear result ids and wait until new data is fetched (triggered by effect)
         newState = Object.assign({}, state, {
             queries: clearQueryResult(state.queries, action.payload)
@@ -138,7 +139,8 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_CREATE_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isCreating: state.isCreating - 1
         });
         return newState;
@@ -153,7 +155,8 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_UPDATE_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isUpdating: state.isUpdating - 1
         }
         );
@@ -161,7 +164,8 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_DELETE_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isDeleting: state.isDeleting - 1
         }
         );
@@ -174,14 +178,24 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_INIT: {
         let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
+      case NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS: {
+        let payload = action.payload as ModifyStoreResourceErrorsPayload;
+        newState = Object.assign({}, state, {
+            data: updateResourceErrors(state.data, payload.resourceId,
+              payload.errors, payload.modificationType),
+          }
+        );
+        return newState;
+
+      }
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS: {
         newState = Object.assign({}, state, {
           queries: updateQueryResults(
             state.queries,

@@ -33,9 +33,9 @@ import {
   ApiUpdateFailAction,
   ApiUpdateSuccessAction,
   NgrxJsonApiActionTypes,
-  QueryStoreSuccessAction,
-  QueryStoreFailAction,
-  QueryRefreshAction
+  LocalQuerySuccessAction,
+  LocalQueryFailAction,
+  ApiQueryRefreshAction
 } from './actions';
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiSelectors } from './selectors';
@@ -102,18 +102,18 @@ export class NgrxJsonApiEffects implements OnDestroy {
     });
 
   @Effect() queryStore$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.QUERY_STORE_INIT)
+    .ofType(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
     .map<Action, Query>(toPayload)
     .mergeMap((query: Query) => {
       return this.store
         .select(this.selectors.storeLocation)
         .let(this.selectors.queryStore$(query))
-        .map(results => new QueryStoreSuccessAction({
+        .map(results => new LocalQuerySuccessAction({
           jsonApiData: {data: results},
           query: query
         }))
         .catch(error => Observable.of(
-          new QueryStoreFailAction(this.toErrorPayload(query, error))));
+          new LocalQueryFailAction(this.toErrorPayload(query, error))));
     });
 
   @Effect() deleteResource$ = this.actions$
@@ -132,7 +132,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     });
 
   @Effect() triggerReadOnQueryRefresh$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.QUERY_REFRESH)
+    .ofType(NgrxJsonApiActionTypes.API_QUERY_REFRESH)
     .withLatestFrom(this.store, (action, store) => {
       let queryId = action.payload;
       let state = store[this.selectors.storeLocation] as NgrxJsonApiStore;
@@ -168,7 +168,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             }
 
             if (needsRefresh) {
-              actions.push(new QueryRefreshAction(queryId));
+              actions.push(new ApiQueryRefreshAction(queryId));
             }
           }
         }

@@ -187,7 +187,6 @@ describe('NgrxJsonApiService', () => {
       });
 
     });
-
   });
 
 
@@ -257,6 +256,33 @@ describe('NgrxJsonApiService', () => {
   describe('selectStoreResource', () => {
 
   });
+
+
+  describe('modifyResourceErrors', () => {
+    it('add/modify/removeResourceError should update StoreResource accordingly', () => {
+      service.postResource({
+        resource: {
+          type: 'Article',
+          id: '1'
+        }
+      });
+
+      service.addResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
+      expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(1);
+      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe('0');
+
+      service.removeResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
+      expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(0);
+
+      service.setResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
+      expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(1);
+      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe('0');
+    });
+  });
+
 
   describe('denormaliseQueryResult', () => {
     it('should denormalise a StoreResource', () => {

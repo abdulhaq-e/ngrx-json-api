@@ -42,9 +42,9 @@ import {
   ApiDeleteInitAction,
   ApiDeleteSuccessAction,
   ApiDeleteFailAction,
-  QueryStoreInitAction,
-  QueryStoreSuccessAction,
-  QueryStoreFailAction
+  LocalQueryInitAction,
+  LocalQuerySuccessAction,
+  LocalQueryFailAction
 } from '../src/actions';
 
 import {
@@ -223,18 +223,18 @@ describe('NgrxJsonApiEffects', () => {
     expect(res).toBeDefined();
   });
 
-  it('should respond to successfull QUERY_STORE_INIT action', () => {
+  it('should respond to successfull LOCAL_QUERY_INIT action', () => {
     let res;
     let query = {
       type: 'Article',
       id: '1',
       queryId: '11'
     }
-    runner.queue(new QueryStoreInitAction(query));
+    runner.queue(new LocalQueryInitAction(query));
     effects.queryStore$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new QueryStoreSuccessAction({
+        new LocalQuerySuccessAction({
           jsonApiData: { data: result.payload.jsonApiData.data },
           query: query,
         }));
@@ -242,13 +242,13 @@ describe('NgrxJsonApiEffects', () => {
     expect(res).toBeDefined();
   });
 
-  // it('should respond to failed QUERY_STORE_INIT action', () => {
+  // it('should respond to failed LOCAL_QUERY_INIT action', () => {
   //   let res;
-  //   runner.queue(new QueryStoreInitAction(failQuery));
+  //   runner.queue(new LocalQueryInitAction(failQuery));
   //   effects.queryStore$.subscribe(result => {
   //     res = result;
   //     expect(result).toEqual(
-  //       new QueryStoreFailAction(failQuery));
+  //       new LocalQueryFailAction(failQuery));
   //   });
   //   expect(res).toBeDefined();
   // });

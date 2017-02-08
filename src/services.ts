@@ -16,10 +16,11 @@ import {
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
-  QueryStoreInitAction,
+  LocalQueryInitAction,
   ClearStoreAction,
   CompactStoreAction,
-  QueryRefreshAction
+  ApiQueryRefreshAction,
+  ModifyStoreResourceErrorsAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -32,6 +33,7 @@ import {
   OneQueryResult,
   ManyQueryResult,
   StoreResource,
+  ResourceError
 } from './interfaces';
 import {
   denormaliseStoreResource,
@@ -40,9 +42,50 @@ import {
   uuid
 } from './utils';
 
+
+export interface FindOptions {
+  query: Query;
+  fromServer?: boolean;
+  denormalise?: boolean;
+}
+
+export interface PutQueryOptions {
+  query: Query;
+  fromServer?: boolean;
+}
+
+export interface PostResourceOptions {
+  resource: Resource;
+  toRemote?: boolean;
+}
+
+export interface PatchResourceOptions {
+  resource: Resource;
+  toRemote?: boolean;
+}
+
+export interface DeleteResourceOptions {
+  resourceId: ResourceIdentifier;
+  toRemote?: boolean;
+}
+
+/**
+ * This internface is deprecated, do no longer use.
+ */
+export interface Options extends FindOptions, PutQueryOptions,
+    PostResourceOptions, PatchResourceOptions, DeleteResourceOptions {
+  query?: Query;
+  denormalise?: boolean;
+  fromServer?: boolean;
+  resource?: Resource;
+  toRemote?: boolean;
+  resourceId?: ResourceIdentifier;
+}
+
+
 export class NgrxJsonApiService {
 
-  private test: boolean = true;
+  private test = true;
 
   /**
    * Keeps current snapshot of the store to allow fast access to resources.
@@ -57,12 +100,12 @@ export class NgrxJsonApiService {
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
-  public findOne(options: Options): Observable<OneQueryResult> {
-    return this.findInternal(Object.assign({}, options, { multi: false }));
+  public findOne(options: FindOptions): Observable<OneQueryResult> {
+    return this.findInternal(options, false);
   };
 
-  public findMany(options: Options): Observable<ManyQueryResult> {
-    return this.findInternal(Object.assign({}, options, { multi: true }));
+  public findMany(options: FindOptions): Observable<ManyQueryResult> {
+    return this.findInternal(options, true);
   };
 
   /**
@@ -72,7 +115,7 @@ export class NgrxJsonApiService {
    * @param query
    * @param fromServer
    */
-  public putQuery(options: Options) {
+  public putQuery(options: PutQueryOptions) {
 
     let query = options.query;
     let fromServer = _.isUndefined(options.fromServer) ? true : options.fromServer;
@@ -84,23 +127,22 @@ export class NgrxJsonApiService {
     if (fromServer) {
       this.store.dispatch(new ApiReadInitAction(query));
     } else {
-      this.store.dispatch(new QueryStoreInitAction(query));
+      this.store.dispatch(new LocalQueryInitAction(query));
     }
   }
 
   public refreshQuery(queryId: string) {
-    this.store.dispatch(new QueryRefreshAction(queryId));
+    this.store.dispatch(new ApiQueryRefreshAction(queryId));
   }
 
   private removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
-  private findInternal(options: Options): Observable<QueryResult> {
+  private findInternal(options: FindOptions, multi: boolean): Observable<QueryResult> {
 
     let query = options.query;
     let fromServer = _.isUndefined(options.fromServer) ? true : options.fromServer;
-    let multi = _.isUndefined(options.multi) ? false : options.multi;
     let denormalise = _.isUndefined(options.denormalise) ? false : options.denormalise;
 
     let newQuery;
@@ -196,10 +238,11 @@ export class NgrxJsonApiService {
         if (!queryResult.data) {
           return queryResult;
         } if (_.isArray(queryResult.data)) {
-          results = queryResult.data.map(r =>
+          results = (queryResult.data as Array<StoreResource>).map(r =>
             denormaliseStoreResource(r, storeData)) as StoreResource[];
         } else {
-          results = denormaliseStoreResource(queryResult.data, storeData) as StoreResource;
+          let resource = queryResult.data as StoreResource;
+          results = denormaliseStoreResource(resource, storeData) as StoreResource;
         }
         let denormalizedQueryResult = Object.assign({}, queryResult, {
           data: results,
@@ -217,10 +260,11 @@ export class NgrxJsonApiService {
           storeResource: StoreResource | StoreResource[], storeData: NgrxJsonApiStoreData
         ) => {
         if (_.isArray(storeResource)) {
-          return storeResource.map(
+          return (storeResource as Array<StoreResource>).map(
             r => denormaliseStoreResource(r, storeData)) as StoreResource[];
         } else {
-          return denormaliseStoreResource(storeResource, storeData) as StoreResource;
+          let resource = storeResource as StoreResource;
+          return denormaliseStoreResource(resource, storeData) as StoreResource;
         }
       });
   }
@@ -243,7 +287,7 @@ export class NgrxJsonApiService {
    *
    * @param resource
    */
-  public patchResource(options: Options) {
+  public patchResource(options: PatchResourceOptions) {
     let resource = options.resource;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
@@ -261,7 +305,7 @@ export class NgrxJsonApiService {
    *
    * @param resource
    */
-  public postResource(options: Options) {
+  public postResource(options: PostResourceOptions) {
 
     let resource = options.resource;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
@@ -278,7 +322,7 @@ export class NgrxJsonApiService {
    *
    * @param resourceId
    */
-  public deleteResource(options: Options) {
+  public deleteResource(options: DeleteResourceOptions) {
     let resourceId = options.resourceId;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
@@ -308,5 +352,44 @@ export class NgrxJsonApiService {
    */
   public compact() {
     this.store.dispatch(new CompactStoreAction());
+  }
+
+  /**
+   * Adds the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public addResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'ADD'
+    }));
+  }
+
+  /**
+   * Removes the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public removeResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'REMOVE'
+    }));
+  }
+
+  /**
+   * Sets the given errors to the resource with the given id.
+   * @param id
+   * @param errors
+   */
+  public setResourceErrors(id: ResourceIdentifier, errors: Array<ResourceError>) {
+    this.store.dispatch(new ModifyStoreResourceErrorsAction({
+      resourceId: id,
+      errors: errors,
+      modificationType: 'SET'
+    }));
   }
 }

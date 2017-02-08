@@ -23,15 +23,17 @@ import {
   ApiApplySuccessAction,
   ApiApplyFailAction,
   ApiRollbackAction,
-  QueryStoreInitAction,
-  QueryStoreSuccessAction,
+  LocalQueryInitAction,
+  LocalQuerySuccessAction,
   DeleteStoreResourceAction,
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
   ClearStoreAction,
   CompactStoreAction,
-  QueryRefreshAction
+  ApiQueryRefreshAction,
+  ModifyStoreResourceErrorsAction
+
 } from '../src/actions';
 
 describe('Json Api Actions', () => {
@@ -39,7 +41,7 @@ describe('Json Api Actions', () => {
   let actions;
 
   it('should have a fixed number of actions', () => {
-    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(26);
+    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(27);
   });
 
   it('should have an api create init action', () => {
@@ -118,13 +120,13 @@ describe('Json Api Actions', () => {
   });
 
   it('should have a query store init action', () => {
-    expect(NgrxJsonApiActionTypes.QUERY_STORE_INIT).toBeDefined();
-    expect(NgrxJsonApiActionTypes.QUERY_STORE_INIT).toBe('QUERY_STORE_INIT');
+    expect(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT).toBeDefined();
+    expect(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT).toBe('LOCAL_QUERY_INIT');
   });
 
   it('should have a query store success action', () => {
-    expect(NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS).toBeDefined();
-    expect(NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS).toBe('QUERY_STORE_SUCCESS');
+    expect(NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS).toBeDefined();
+    expect(NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS).toBe('LOCAL_QUERY_SUCCESS');
   });
 
   it('should have a delete store resource action', () => {
@@ -158,8 +160,13 @@ describe('Json Api Actions', () => {
   });
 
   it('should have a query refresh action', () => {
-    expect(NgrxJsonApiActionTypes.QUERY_REFRESH).toBeDefined();
-    expect(NgrxJsonApiActionTypes.QUERY_REFRESH).toBe('QUERY_REFRESH');
+    expect(NgrxJsonApiActionTypes.API_QUERY_REFRESH).toBeDefined();
+    expect(NgrxJsonApiActionTypes.API_QUERY_REFRESH).toBe('API_QUERY_REFRESH');
+  });
+
+  it('should have a set errors action', () => {
+    expect(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS).toBeDefined();
+    expect(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS).toBe('MODIFY_STORE_RESOURCE_ERRORS');
   });
 
   it('should generate an api create init action using apiCreateInit', () => {
@@ -257,15 +264,15 @@ describe('Json Api Actions', () => {
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_ROLLBACK);
   });
 
-  it('should generate a query store init action using QueryStoreInitAction', () => {
-    let action = new QueryStoreInitAction({});
-    expect(action.type).toEqual(NgrxJsonApiActionTypes.QUERY_STORE_INIT);
+  it('should generate a query store init action using LocalQueryInitAction', () => {
+    let action = new LocalQueryInitAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT);
     expect(action.payload).toEqual({});
   });
 
-  it('should generate a query store success action using QueryStoreSuccessAction', () => {
-    let action = new QueryStoreSuccessAction({});
-    expect(action.type).toEqual(NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS);
+  it('should generate a query store success action using LocalQuerySuccessAction', () => {
+    let action = new LocalQuerySuccessAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
@@ -293,6 +300,16 @@ describe('Json Api Actions', () => {
     expect(action.payload).toEqual({});
   });
 
+  it('should generate a modify errors action using ModifyStoreResourceErrorsAction', () => {
+    let action = new ModifyStoreResourceErrorsAction({
+      resourceId: null,
+      errors: [],
+      modificationType: 'SET'
+    });
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS);
+    expect(action.payload.modificationType).toEqual('SET');
+  });
+
   it('should generate a compact store resource action using CompactStoreAction', () => {
     let action = new CompactStoreAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.COMPACT_STORE);
@@ -303,8 +320,8 @@ describe('Json Api Actions', () => {
     expect(action.type).toEqual(NgrxJsonApiActionTypes.CLEAR_STORE);
   });
 
-  it('should generate a refresh query action using QueryRefreshAction', () => {
-    let action = new QueryRefreshAction({});
-    expect(action.type).toEqual(NgrxJsonApiActionTypes.QUERY_REFRESH);
+  it('should generate a refresh query action using ApiQueryRefreshAction', () => {
+    let action = new ApiQueryRefreshAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.API_QUERY_REFRESH);
   });
 });
