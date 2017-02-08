@@ -16,10 +16,10 @@ import {
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
-  QueryStoreInitAction,
+  LocalQueryInitAction,
   ClearStoreAction,
   CompactStoreAction,
-  QueryRefreshAction
+  ApiQueryRefreshAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -84,12 +84,12 @@ export class NgrxJsonApiService {
     if (fromServer) {
       this.store.dispatch(new ApiReadInitAction(query));
     } else {
-      this.store.dispatch(new QueryStoreInitAction(query));
+      this.store.dispatch(new LocalQueryInitAction(query));
     }
   }
 
   public refreshQuery(queryId: string) {
-    this.store.dispatch(new QueryRefreshAction(queryId));
+    this.store.dispatch(new ApiQueryRefreshAction(queryId));
   }
 
   private removeQuery(queryId: string) {

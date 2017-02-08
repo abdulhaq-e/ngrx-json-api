@@ -28,10 +28,10 @@ export const NgrxJsonApiActionTypes = {
   API_APPLY_SUCCESS: type('API_APPLY_SUCCESS'),
   API_APPLY_FAIL: type('API_APPLY_FAIL'),
   API_ROLLBACK: type('API_ROLLBACK'),
-  QUERY_REFRESH: type('QUERY_REFRESH'),
-  QUERY_STORE_INIT: type('QUERY_STORE_INIT'),
-  QUERY_STORE_SUCCESS: type('QUERY_STORE_SUCCESS'),
-  QUERY_STORE_FAIL: type('QUERY_STORE_FAIL'),
+  API_QUERY_REFRESH: type('API_QUERY_REFRESH'),
+  LOCAL_QUERY_INIT: type('LOCAL_QUERY_INIT'),
+  LOCAL_QUERY_SUCCESS: type('LOCAL_QUERY_SUCCESS'),
+  LOCAL_QUERY_FAIL: type('LOCAL_QUERY_FAIL'),
   DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE'),
   PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
   POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
@@ -139,18 +139,18 @@ export class RemoveQueryAction implements Action {
   constructor(public payload: string) { }
 }
 
-export class QueryStoreInitAction implements Action {
-  type = NgrxJsonApiActionTypes.QUERY_STORE_INIT;
+export class LocalQueryInitAction implements Action {
+  type = NgrxJsonApiActionTypes.LOCAL_QUERY_INIT;
   constructor(public payload: Query) { }
 }
 
-export class QueryStoreSuccessAction implements Action {
-  type = NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS;
+export class LocalQuerySuccessAction implements Action {
+  type = NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS;
   constructor(public payload: Payload) { }
 }
 
-export class QueryStoreFailAction implements Action {
-  type = NgrxJsonApiActionTypes.QUERY_STORE_FAIL;
+export class LocalQueryFailAction implements Action {
+  type = NgrxJsonApiActionTypes.LOCAL_QUERY_FAIL;
   constructor(public payload: Payload) { }
 }
 
@@ -164,11 +164,11 @@ export class ClearStoreAction implements Action {
   constructor() { }
 }
 
-export class QueryRefreshAction implements Action {
-  type = NgrxJsonApiActionTypes.QUERY_REFRESH;
+export class ApiQueryRefreshAction implements Action {
+  type = NgrxJsonApiActionTypes.API_QUERY_REFRESH;
   constructor(public payload: string) {
     if (!payload) {
-      throw new Error('no query id provided for QueryRefreshAction');
+      throw new Error('no query id provided for ApiQueryRefreshAction');
     }
   }
 }
@@ -195,9 +195,9 @@ export type NgrxJsonApiActions
   | PatchStoreResourceAction
   | PostStoreResourceAction
   | RemoveQueryAction
-  | QueryRefreshAction
-  | QueryStoreInitAction
-  | QueryStoreSuccessAction
-  | QueryStoreFailAction
+  | ApiQueryRefreshAction
+  | LocalQueryInitAction
+  | LocalQuerySuccessAction
+  | LocalQueryFailAction
   | CompactStoreAction
   | ClearStoreAction;

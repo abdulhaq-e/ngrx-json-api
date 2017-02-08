@@ -129,7 +129,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_REFRESH: {
+      case NgrxJsonApiActionTypes.API_QUERY_REFRESH: {
         // clear result ids and wait until new data is fetched (triggered by effect)
         newState = Object.assign({}, state, {
             queries: clearQueryResult(state.queries, action.payload)
@@ -174,14 +174,14 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_INIT: {
         let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS: {
         newState = Object.assign({}, state, {
           queries: updateQueryResults(
             state.queries,
