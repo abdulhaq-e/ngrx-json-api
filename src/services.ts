@@ -37,6 +37,7 @@ import {
 } from './interfaces';
 import {
   denormaliseStoreResource,
+  denormaliseStoreResources,
   getDenormalisedPath,
   getDenormalisedValue,
   uuid
@@ -190,13 +191,10 @@ export class NgrxJsonApiService {
    * @returns observable holding the data as array of resources.
    */
   public selectManyResults(queryId: string,
-      denormalize = false): Observable<ManyQueryResult> {
+                           denormalize = false): Observable<ManyQueryResult> {
     let queryResult$ = this.store
       .select(this.selectors.storeLocation)
-      .let(this.selectors.getManyResults$(queryId));
-    if (denormalize) {
-      return this.denormaliseQueryResult(queryResult$) as Observable<ManyQueryResult>;
-    }
+      .let(this.selectors.getManyResults$(queryId, denormalize));
     return queryResult$;
   }
 
@@ -207,13 +205,10 @@ export class NgrxJsonApiService {
    * @returns observable holding the data as array of resources.
    */
   public selectOneResults(queryId: string,
-      denormalize = false): Observable<OneQueryResult> {
+                          denormalize = false): Observable<OneQueryResult> {
     let queryResult$ = this.store
       .select(this.selectors.storeLocation)
-      .let(this.selectors.getOneResult$(queryId));
-    if (denormalize) {
-      return this.denormaliseQueryResult(queryResult$) as Observable<OneQueryResult>;
-    }
+      .let(this.selectors.getOneResult$(queryId, denormalize));
     return queryResult$;
   }
 
@@ -227,32 +222,9 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  public denormaliseQueryResult(queryResult$: Observable<QueryResult>): Observable<QueryResult> {
-    return queryResult$
-      .combineLatest(this.store
-        .select(this.selectors.storeLocation)
-        .let(this.selectors.getStoreData$()), (
-          queryResult: QueryResult, storeData: NgrxJsonApiStoreData
-        ) => {
-        let results;
-        if (!queryResult.data) {
-          return queryResult;
-        } if (_.isArray(queryResult.data)) {
-          results = (queryResult.data as Array<StoreResource>).map(r =>
-            denormaliseStoreResource(r, storeData)) as StoreResource[];
-        } else {
-          let resource = queryResult.data as StoreResource;
-          results = denormaliseStoreResource(resource, storeData) as StoreResource;
-        }
-        let denormalizedQueryResult = Object.assign({}, queryResult, {
-          data: results,
-        });
-        return denormalizedQueryResult;
-      });
-  }
-
-  public denormaliseResource(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
-  ): Observable<StoreResource> | Observable<StoreResource[]> {
+  private denormaliseResource
+  (storeResource$: Observable<StoreResource> | Observable<StoreResource[]>):
+    Observable<StoreResource> | Observable<StoreResource[]> {
     return storeResource$
       .combineLatest(this.store
         .select(this.selectors.storeLocation)
@@ -260,8 +232,7 @@ export class NgrxJsonApiService {
           storeResource: StoreResource | StoreResource[], storeData: NgrxJsonApiStoreData
         ) => {
         if (_.isArray(storeResource)) {
-          return (storeResource as Array<StoreResource>).map(
-            r => denormaliseStoreResource(r, storeData)) as StoreResource[];
+          return denormaliseStoreResources(storeResource as Array<StoreResource>, storeData);
         } else {
           let resource = storeResource as StoreResource;
           return denormaliseStoreResource(resource, storeData) as StoreResource;

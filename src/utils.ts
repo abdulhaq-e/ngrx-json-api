@@ -66,6 +66,16 @@ export const denormaliseObject = (resource: Resource,
   return denormalised;
 };
 
+export const denormaliseStoreResources = (items: Array<StoreResource>,
+                                          storeData: NgrxJsonApiStoreData,
+                                          bag: any = {}): Array<StoreResource> => {
+  let results: Array<StoreResource> = [];
+  for (let item of items) {
+    results.push(denormaliseStoreResource(item, storeData, bag));
+  }
+  return results;
+};
+
 export const denormaliseStoreResource = (item: StoreResource, storeData: NgrxJsonApiStoreData,
   bag: any = {}): any => {
 
