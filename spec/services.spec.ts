@@ -283,31 +283,6 @@ describe('NgrxJsonApiService', () => {
     });
   });
 
-
-  describe('denormaliseQueryResult', () => {
-    it('should denormalise a StoreResource', () => {
-      let query = {
-        id: '1',
-        type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.denormaliseQueryResult(service.findOne({query, fromServer: false}));
-      storeResource.subscribe(it => {
-        expect(_.get(it.data, 'relationships.author.reference')).toBeDefined();
-      });
-    });
-
-    it('should denormalise an array of StoreResource', () => {
-      let query = {
-        type: 'Article',
-      }
-      let storeResource = service.denormaliseQueryResult(service.findMany({query, fromServer: false}));
-      storeResource.subscribe(it => {
-        expect(_.get(it.data[0], 'relationships.author.reference')).toBeDefined();
-      });
-    });
-  });
-
   describe('getDenormalisedPath', () => {
     it('should get the denormalised path for a simple', () => {
       let path = 'title'
