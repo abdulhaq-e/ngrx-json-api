@@ -162,36 +162,6 @@ export class NgrxJsonApiSelectors<T> {
     };
   }
 
-  public getOneQueryResult$(queryId: string, denormalize: boolean) {
-    return (state$: Observable<NgrxJsonApiStore>) => {
-      let storeQuery = store.queries[queryId];
-      if (!storeQuery) {
-        return Observable.of(undefined);
-      }
-
-      if (_.isEmpty(storeQuery.resultIds)) {
-        let queryResult: OneQueryResult = Object.assign({}, storeQuery, {
-          data: _.isUndefined(storeQuery.resultIds) ? undefined : null
-        });
-        return Observable.of(queryResult);
-      } else {
-        if (storeQuery.resultIds.length >= 2) {
-          throw new Error('expected single result for query ' + storeQuery.query.queryId);
-        }
-        let id = storeQuery.resultIds[0];
-        return state$.let(this.getStoreResource$(id))
-          .map(result => denormalize ? denormaliseStoreResource(result, store.data) : result)
-          .map(result => {
-            let queryResult: OneQueryResult = Object.assign({}, storeQuery, {
-              data: result
-            });
-            return queryResult;
-          });
-      }
-    };
-  }
-
-
   public getPersistedResource$(store: Store<T>, identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
