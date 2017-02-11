@@ -25,7 +25,6 @@ import {
 import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
-  Options,
   Resource,
   ResourceIdentifier,
   Query,
@@ -73,8 +72,7 @@ export interface DeleteResourceOptions {
 /**
  * This internface is deprecated, do no longer use.
  */
-export interface Options extends FindOptions, PutQueryOptions,
-    PostResourceOptions, PatchResourceOptions, DeleteResourceOptions {
+export interface Options {
   query?: Query;
   denormalise?: boolean;
   fromServer?: boolean;
@@ -209,7 +207,7 @@ export class NgrxJsonApiService {
     let queryResult$ = this.store
       .select(this.selectors.storeLocation)
       .let(this.selectors.getOneResult$(queryId, denormalize));
-    return queryResult$;
+    return queryResult$ as Observable<OneQueryResult>;
   }
 
   /**
@@ -222,7 +220,7 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  private denormaliseResource
+  public denormaliseResource
   (storeResource$: Observable<StoreResource> | Observable<StoreResource[]>):
     Observable<StoreResource> | Observable<StoreResource[]> {
     return storeResource$
