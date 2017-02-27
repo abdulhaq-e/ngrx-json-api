@@ -8,9 +8,9 @@ import { Store } from '@ngrx/store';
 import { NgrxJsonApiSelectors } from './selectors';
 import {
   ApiApplyInitAction,
-  ApiCreateInitAction,
-  ApiReadInitAction,
-  ApiUpdateInitAction,
+  ApiPostInitAction,
+  ApiGetInitAction,
+  ApiPatchInitAction,
   ApiDeleteInitAction,
   DeleteStoreResourceAction,
   PatchStoreResourceAction,
@@ -124,7 +124,7 @@ export class NgrxJsonApiService {
     }
 
     if (fromServer) {
-      this.store.dispatch(new ApiReadInitAction(query));
+      this.store.dispatch(new ApiGetInitAction(query));
     } else {
       this.store.dispatch(new LocalQueryInitAction(query));
     }
@@ -261,7 +261,7 @@ export class NgrxJsonApiService {
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
     if (toRemote) {
-      this.store.dispatch(new ApiUpdateInitAction(resource));
+      this.store.dispatch(new ApiPatchInitAction(resource));
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource));
     }
@@ -280,7 +280,7 @@ export class NgrxJsonApiService {
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
     if (toRemote) {
-      this.store.dispatch(new ApiCreateInitAction(resource));
+      this.store.dispatch(new ApiPostInitAction(resource));
     } else {
       this.store.dispatch(new PostStoreResourceAction(resource));
     }
