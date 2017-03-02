@@ -30,21 +30,21 @@ import {
 } from '../src/reducers';
 
 import {
-  ApiCreateInitAction,
-  ApiCreateSuccessAction,
-  ApiCreateFailAction,
-  ApiUpdateInitAction,
-  ApiUpdateSuccessAction,
-  ApiUpdateFailAction,
-  ApiReadInitAction,
-  ApiReadSuccessAction,
-  ApiReadFailAction,
+  ApiPostInitAction,
+  ApiPostSuccessAction,
+  ApiPostFailAction,
+  ApiPatchInitAction,
+  ApiPatchSuccessAction,
+  ApiPatchFailAction,
+  ApiGetInitAction,
+  ApiGetSuccessAction,
+  ApiGetFailAction,
   ApiDeleteInitAction,
   ApiDeleteSuccessAction,
   ApiDeleteFailAction,
-  QueryStoreInitAction,
-  QueryStoreSuccessAction,
-  QueryStoreFailAction
+  LocalQueryInitAction,
+  LocalQuerySuccessAction,
+  LocalQueryFailAction
 } from '../src/actions';
 
 import {
@@ -134,55 +134,55 @@ describe('NgrxJsonApiEffects', () => {
 
   it('should respond to successfull CREATE_INIT action', () => {
     let res;
-    runner.queue(new ApiCreateInitAction(successPayload));
+    runner.queue(new ApiPostInitAction(successPayload));
     effects.createResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiCreateSuccessAction(successPayload));
+        new ApiPostSuccessAction(successPayload));
     });
     expect(res).toBeDefined();
   });
 
   it('should respond to failed CREATE_INIT action', () => {
     let res;
-    runner.queue(new ApiCreateInitAction(failPayload));
+    runner.queue(new ApiPostInitAction(failPayload));
     effects.createResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiCreateFailAction(failPayload));
+        new ApiPostFailAction(failPayload));
     });
     expect(res).toBeDefined();
   });
 
   it('should respond to successfull UPDATE_INIT action', () => {
     let res;
-    runner.queue(new ApiUpdateInitAction(successPayload));
+    runner.queue(new ApiPatchInitAction(successPayload));
     effects.updateResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiUpdateSuccessAction(successPayload));
+        new ApiPatchSuccessAction(successPayload));
     });
     expect(res).toBeDefined();
   });
 
   it('should respond to failed UPDATE_INIT action', () => {
     let res;
-    runner.queue(new ApiUpdateInitAction(failPayload));
+    runner.queue(new ApiPatchInitAction(failPayload));
     effects.updateResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiUpdateFailAction(failPayload));
+        new ApiPatchFailAction(failPayload));
     });
     expect(res).toBeDefined();
   });
 
   it('should respond to successfull READ_INIT action', () => {
     let res;
-    runner.queue(new ApiReadInitAction(successQuery.query));
+    runner.queue(new ApiGetInitAction(successQuery.query));
     effects.readResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiReadSuccessAction({
+        new ApiGetSuccessAction({
           jsonApiData: result.payload.jsonApiData,
           query: successQuery.query
         }));
@@ -192,11 +192,11 @@ describe('NgrxJsonApiEffects', () => {
 
   it('should respond to failed READ_INIT action', () => {
     let res;
-    runner.queue(new ApiReadInitAction(failQuery.query));
+    runner.queue(new ApiGetInitAction(failQuery.query));
     effects.readResource$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new ApiReadFailAction(failQuery));
+        new ApiGetFailAction(failQuery));
     });
     expect(res).toBeDefined();
   });
@@ -223,18 +223,18 @@ describe('NgrxJsonApiEffects', () => {
     expect(res).toBeDefined();
   });
 
-  it('should respond to successfull QUERY_STORE_INIT action', () => {
+  it('should respond to successfull LOCAL_QUERY_INIT action', () => {
     let res;
     let query = {
       type: 'Article',
       id: '1',
       queryId: '11'
     }
-    runner.queue(new QueryStoreInitAction(query));
+    runner.queue(new LocalQueryInitAction(query));
     effects.queryStore$.subscribe(result => {
       res = result;
       expect(result).toEqual(
-        new QueryStoreSuccessAction({
+        new LocalQuerySuccessAction({
           jsonApiData: { data: result.payload.jsonApiData.data },
           query: query,
         }));
@@ -242,13 +242,13 @@ describe('NgrxJsonApiEffects', () => {
     expect(res).toBeDefined();
   });
 
-  // it('should respond to failed QUERY_STORE_INIT action', () => {
+  // it('should respond to failed LOCAL_QUERY_INIT action', () => {
   //   let res;
-  //   runner.queue(new QueryStoreInitAction(failQuery));
+  //   runner.queue(new LocalQueryInitAction(failQuery));
   //   effects.queryStore$.subscribe(result => {
   //     res = result;
   //     expect(result).toEqual(
-  //       new QueryStoreFailAction(failQuery));
+  //       new LocalQueryFailAction(failQuery));
   //   });
   //   expect(res).toBeDefined();
   // });

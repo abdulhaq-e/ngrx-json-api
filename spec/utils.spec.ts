@@ -39,6 +39,7 @@ import {
   updateStoreDataFromPayload,
   updateResourceState,
   updateResourceErrors,
+  updateResourceErrorsForQuery,
 } from '../src/utils';
 //
 import {
@@ -456,9 +457,9 @@ describe('updateStoreResource', () => {
 
 });
 
-describe('updateResourceErrors', () => {
+describe('updateResourceErrorsForQuery', () => {
   // it('should throw error if the query type and id is not defined', () => {
-  //   expect(updateResourceErrors({}, {}, {})).toThrow('invalid parameters');
+  //   expect(updateResourceErrorsForQuery({}, {}, {})).toThrow('invalid parameters');
   // });
 
   it('should update resource errors given a query and a JsonApiDocument', () => {
@@ -481,10 +482,110 @@ describe('updateResourceErrors', () => {
     let document = {
       errors: ['permission denied', 'i said permission denied']
     };
-    let newStoreData = updateResourceErrors(storeData, query, document);
+    let newStoreData = updateResourceErrorsForQuery(storeData, query, document);
     expect(newStoreData['Article']['1']['errors']).toEqual(document['errors']);
   });
 });
+
+
+
+describe('updateResourceErrors', () => {
+  it('should add resource errors', () => {
+    let storeData = {
+      'Article': {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1'
+          },
+          errors: [{code: '0'}]
+        }
+      }
+    };
+    deepFreeze(storeData);
+
+    let newErrors = [{code: '1'}, {code: '2'}];
+    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'ADD');
+    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '0'}, {code: '1'}, {code: '2'}]);
+  });
+
+  it('should set resource errors', () => {
+    let storeData = {
+      'Article': {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1'
+          },
+          errors: [{code: '0'}]
+        }
+      }
+    };
+    deepFreeze(storeData);
+
+    let newErrors = [{code: '1'}, {code: '2'}];
+    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
+    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '1'}, {code: '2'}]);
+  });
+
+  it('should empty resource errors on set with no errors', () => {
+    let storeData = {
+      'Article': {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1'
+          },
+          errors: [{code: '0'}]
+        }
+      }
+    };
+    deepFreeze(storeData);
+
+    let newErrors = [];
+    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
+    expect(newStoreData['Article']['1']['errors']).toEqual([]);
+  });
+
+  it('should empty resource errors on set with undefined errors', () => {
+    let storeData = {
+      'Article': {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1'
+          },
+          errors: [{code: '0'}]
+        }
+      }
+    };
+    deepFreeze(storeData);
+
+    let newErrors = undefined;
+    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
+    expect(newStoreData['Article']['1']['errors']).toEqual([]);
+  });
+
+  it('should remove resource errors', () => {
+    let storeData = {
+      'Article': {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1'
+          },
+          errors: [{code: '0'}, {code: '2'}]
+        }
+      }
+    };
+    deepFreeze(storeData);
+
+    let removedErrors = [{code: '0'}, {code: '1'}];
+    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, removedErrors, 'REMOVE');
+    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '2'}]);
+  });
+});
+
 
 describe('rollbackStoreResources', () => {
   let storeData = {

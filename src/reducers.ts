@@ -6,7 +6,7 @@ import {
 import {
   Query,
   ResourceState,
-  NgrxJsonApiStore
+  NgrxJsonApiStore, ModifyStoreResourceErrorsPayload
 } from './interfaces';
 import {
   deleteStoreResources,
@@ -19,9 +19,10 @@ import {
   updateResourceState,
   removeQuery,
   rollbackStoreResources,
-  updateResourceErrors,
+  updateResourceErrorsForQuery,
   updateQueriesForDeletedResource,
-  compactStore
+  compactStore,
+  updateResourceErrors
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -39,7 +40,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
     let newState;
 
     switch (action.type) {
-      case NgrxJsonApiActionTypes.API_CREATE_INIT: {
+      case NgrxJsonApiActionTypes.API_POST_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         if (updatedData !== state.data) {
           newState = Object.assign({},
@@ -53,7 +54,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           return state;
         }
       }
-      case NgrxJsonApiActionTypes.API_READ_INIT: {
+      case NgrxJsonApiActionTypes.API_GET_INIT: {
         let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
@@ -61,7 +62,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
+      case NgrxJsonApiActionTypes.API_PATCH_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
         if (updatedData !== state.data) {
           newState = Object.assign({},
@@ -85,7 +86,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_POST_SUCCESS: {
         newState = Object.assign({},
           state, {
             data: updateStoreDataFromPayload(
@@ -95,7 +96,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_READ_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_GET_SUCCESS: {
         newState = Object.assign({},
           state, {
             data: updateStoreDataFromPayload(
@@ -107,7 +108,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_PATCH_SUCCESS: {
         newState = Object.assign(
           {},
           state, {
@@ -129,21 +130,22 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_REFRESH: {
+      case NgrxJsonApiActionTypes.API_QUERY_REFRESH: {
         // clear result ids and wait until new data is fetched (triggered by effect)
         newState = Object.assign({}, state, {
             queries: clearQueryResult(state.queries, action.payload)
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_CREATE_FAIL: {
+      case NgrxJsonApiActionTypes.API_POST_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isCreating: state.isCreating - 1
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_READ_FAIL: {
+      case NgrxJsonApiActionTypes.API_GET_FAIL: {
         newState = Object.assign({}, state, {
           queries: updateQueryErrors(state.queries, action.payload.query.queryId,
             action.payload.jsonApiData),
@@ -151,9 +153,10 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_FAIL: {
+      case NgrxJsonApiActionTypes.API_PATCH_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isUpdating: state.isUpdating - 1
         }
         );
@@ -161,7 +164,8 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_DELETE_FAIL: {
         newState = Object.assign({}, state, {
-          data: updateResourceErrors(state.data, action.payload.query, action.payload.jsonApiData),
+          data: updateResourceErrorsForQuery(state.data,
+            action.payload.query, action.payload.jsonApiData),
           isDeleting: state.isDeleting - 1
         }
         );
@@ -174,14 +178,24 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_INIT: {
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_INIT: {
         let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.QUERY_STORE_SUCCESS: {
+      case NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS: {
+        let payload = action.payload as ModifyStoreResourceErrorsPayload;
+        newState = Object.assign({}, state, {
+            data: updateResourceErrors(state.data, payload.resourceId,
+              payload.errors, payload.modificationType),
+          }
+        );
+        return newState;
+
+      }
+      case NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS: {
         newState = Object.assign({}, state, {
           queries: updateQueryResults(
             state.queries,
