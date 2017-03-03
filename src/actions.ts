@@ -13,15 +13,15 @@ import { type } from './utils';
 
 
 export const NgrxJsonApiActionTypes = {
-  API_CREATE_INIT: type('API_CREATE_INIT'),
-  API_CREATE_SUCCESS: type('API_CREATE_SUCCESS'),
-  API_CREATE_FAIL: type('API_CREATE_FAIL'),
-  API_READ_INIT: type('API_READ_INIT'),
-  API_READ_SUCCESS: type('API_READ_SUCCESS'),
-  API_READ_FAIL: type('API_READ_FAIL'),
-  API_UPDATE_INIT: type('API_UPDATE_INIT'),
-  API_UPDATE_SUCCESS: type('API_UPDATE_SUCCESS'),
-  API_UPDATE_FAIL: type('API_UPDATE_FAIL'),
+  API_POST_INIT: type('API_POST_INIT'),
+  API_POST_SUCCESS: type('API_POST_SUCCESS'),
+  API_POST_FAIL: type('API_POST_FAIL'),
+  API_GET_INIT: type('API_GET_INIT'),
+  API_GET_SUCCESS: type('API_GET_SUCCESS'),
+  API_GET_FAIL: type('API_GET_FAIL'),
+  API_PATCH_INIT: type('API_PATCH_INIT'),
+  API_PATCH_SUCCESS: type('API_PATCH_SUCCESS'),
+  API_PATCH_FAIL: type('API_PATCH_FAIL'),
   API_DELETE_INIT: type('API_DELETE_INIT'),
   API_DELETE_SUCCESS: type('API_DELETE_SUCCESS'),
   API_DELETE_FAIL: type('API_DELETE_FAIL'),
@@ -56,18 +56,18 @@ export class ApiApplyFailAction implements Action {
   constructor(public payload: Array<Action>) { }
 }
 
-export class ApiCreateInitAction implements Action {
-  type = NgrxJsonApiActionTypes.API_CREATE_INIT;
+export class ApiPostInitAction implements Action {
+  type = NgrxJsonApiActionTypes.API_POST_INIT;
   constructor(public payload: Resource) { }
 }
 
-export class ApiCreateSuccessAction implements Action {
-  type = NgrxJsonApiActionTypes.API_CREATE_SUCCESS;
+export class ApiPostSuccessAction implements Action {
+  type = NgrxJsonApiActionTypes.API_POST_SUCCESS;
   constructor(public payload: Payload) { }
 }
 
-export class ApiCreateFailAction implements Action {
-  type = NgrxJsonApiActionTypes.API_CREATE_FAIL;
+export class ApiPostFailAction implements Action {
+  type = NgrxJsonApiActionTypes.API_POST_FAIL;
   constructor(public payload: Payload) { }
 }
 
@@ -86,18 +86,18 @@ export class ApiDeleteFailAction implements Action {
   constructor(public payload: Payload) { }
 }
 
-export class ApiReadInitAction implements Action {
-  type = NgrxJsonApiActionTypes.API_READ_INIT;
+export class ApiGetInitAction implements Action {
+  type = NgrxJsonApiActionTypes.API_GET_INIT;
   constructor(public payload: Query) { }
 }
 
-export class ApiReadSuccessAction implements Action {
-  type = NgrxJsonApiActionTypes.API_READ_SUCCESS;
+export class ApiGetSuccessAction implements Action {
+  type = NgrxJsonApiActionTypes.API_GET_SUCCESS;
   constructor(public payload: Payload) { }
 }
 
-export class ApiReadFailAction implements Action {
-  type = NgrxJsonApiActionTypes.API_READ_FAIL;
+export class ApiGetFailAction implements Action {
+  type = NgrxJsonApiActionTypes.API_GET_FAIL;
   constructor(public payload: Payload) { }
 }
 
@@ -106,18 +106,18 @@ export class ApiRollbackAction implements Action {
   constructor() { }
 }
 
-export class ApiUpdateInitAction implements Action {
-  type = NgrxJsonApiActionTypes.API_UPDATE_INIT;
+export class ApiPatchInitAction implements Action {
+  type = NgrxJsonApiActionTypes.API_PATCH_INIT;
   constructor(public payload: Resource) { }
 }
 
-export class ApiUpdateSuccessAction implements Action {
-  type = NgrxJsonApiActionTypes.API_UPDATE_SUCCESS;
+export class ApiPatchSuccessAction implements Action {
+  type = NgrxJsonApiActionTypes.API_PATCH_SUCCESS;
   constructor(public payload: Payload) { }
 }
 
-export class ApiUpdateFailAction implements Action {
-  type = NgrxJsonApiActionTypes.API_UPDATE_FAIL;
+export class ApiPatchFailAction implements Action {
+  type = NgrxJsonApiActionTypes.API_PATCH_FAIL;
   constructor(public payload: Payload) { }
 }
 
@@ -184,19 +184,19 @@ export type NgrxJsonApiActions
   = ApiApplyInitAction
   | ApiApplySuccessAction
   | ApiApplyFailAction
-  | ApiCreateInitAction
-  | ApiCreateSuccessAction
-  | ApiCreateFailAction
+  | ApiPostInitAction
+  | ApiPostSuccessAction
+  | ApiPostFailAction
   | ApiDeleteInitAction
   | ApiDeleteSuccessAction
   | ApiDeleteFailAction
-  | ApiReadInitAction
-  | ApiReadSuccessAction
-  | ApiReadFailAction
+  | ApiGetInitAction
+  | ApiGetSuccessAction
+  | ApiGetFailAction
   | ApiRollbackAction
-  | ApiUpdateInitAction
-  | ApiUpdateSuccessAction
-  | ApiUpdateFailAction
+  | ApiPatchInitAction
+  | ApiPatchSuccessAction
+  | ApiPatchFailAction
   | DeleteStoreResourceAction
   | PatchStoreResourceAction
   | PostStoreResourceAction

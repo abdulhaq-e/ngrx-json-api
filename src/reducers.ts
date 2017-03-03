@@ -40,7 +40,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
     let newState;
 
     switch (action.type) {
-      case NgrxJsonApiActionTypes.API_CREATE_INIT: {
+      case NgrxJsonApiActionTypes.API_POST_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         if (updatedData !== state.data) {
           newState = Object.assign({},
@@ -59,7 +59,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           return newState;
         }
       }
-      case NgrxJsonApiActionTypes.API_READ_INIT: {
+      case NgrxJsonApiActionTypes.API_GET_INIT: {
         let query = action.payload as Query;
         newState = Object.assign({}, state, {
           queries: updateQueryParams(state.queries, query),
@@ -67,7 +67,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_INIT: {
+      case NgrxJsonApiActionTypes.API_PATCH_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
         if (updatedData !== state.data) {
           newState = Object.assign({},
@@ -96,7 +96,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_CREATE_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_POST_SUCCESS: {
         newState = Object.assign({},
           state, {
             data: updateStoreDataFromPayload(
@@ -106,7 +106,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_READ_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_GET_SUCCESS: {
         newState = Object.assign({},
           state, {
             data: updateStoreDataFromPayload(
@@ -118,7 +118,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         );
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_SUCCESS: {
+      case NgrxJsonApiActionTypes.API_PATCH_SUCCESS: {
         newState = Object.assign(
           {},
           state, {
@@ -147,7 +147,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_CREATE_FAIL: {
+      case NgrxJsonApiActionTypes.API_POST_FAIL: {
         newState = Object.assign({}, state, {
           data: updateResourceErrorsForQuery(state.data,
             action.payload.query, action.payload.jsonApiData),
@@ -155,7 +155,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_READ_FAIL: {
+      case NgrxJsonApiActionTypes.API_GET_FAIL: {
         newState = Object.assign({}, state, {
           queries: updateQueryErrors(state.queries, action.payload.query.queryId,
             action.payload.jsonApiData),
@@ -163,7 +163,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         });
         return newState;
       }
-      case NgrxJsonApiActionTypes.API_UPDATE_FAIL: {
+      case NgrxJsonApiActionTypes.API_PATCH_FAIL: {
         newState = Object.assign({}, state, {
           data: updateResourceErrorsForQuery(state.data,
             action.payload.query, action.payload.jsonApiData),

@@ -17,15 +17,15 @@ import {
   ApiApplyInitAction,
   ApiApplySuccessAction,
   ApiApplyFailAction,
-  ApiCreateInitAction,
-  ApiCreateSuccessAction,
-  ApiCreateFailAction,
-  ApiUpdateInitAction,
-  ApiUpdateSuccessAction,
-  ApiUpdateFailAction,
-  ApiReadInitAction,
-  ApiReadSuccessAction,
-  ApiReadFailAction,
+  ApiPostInitAction,
+  ApiPostSuccessAction,
+  ApiPostFailAction,
+  ApiPatchInitAction,
+  ApiPatchSuccessAction,
+  ApiPatchFailAction,
+  ApiGetInitAction,
+  ApiGetSuccessAction,
+  ApiGetFailAction,
   ApiDeleteInitAction,
   ApiDeleteSuccessAction,
   ApiDeleteFailAction,
@@ -50,8 +50,8 @@ describe('NgrxJsonApiReducer', () => {
   let state = initialNgrxJsonApiState;
   deepFreeze(state);
 
-  describe('API_CREATE_INIT action', () => {
-    let action = new ApiCreateInitAction({
+  describe('API_POST_INIT action', () => {
+    let action = new ApiPostInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -72,7 +72,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should keep the ResourceState as CREATED if the new data was also not from the server', () => {
-      let action2 = new ApiUpdateInitAction({
+      let action2 = new ApiPatchInitAction({
         id: '1',
         type: 'Article',
         attributes: {
@@ -85,8 +85,8 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('API_READ_INIT action', () => {
-    let newState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+  describe('API_GET_INIT action', () => {
+    let newState = NgrxJsonApiStoreReducer(state, new ApiGetInitAction({
       id: '1',
       type: 'Article',
       queryId: '111'
@@ -102,8 +102,8 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('API_UPDATE_INIT action', () => {
-    let action0 = new ApiCreateInitAction({
+  describe('API_PATCH_INIT action', () => {
+    let action0 = new ApiPostInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -112,7 +112,7 @@ describe('NgrxJsonApiReducer', () => {
     });
     let newState0 = NgrxJsonApiStoreReducer(state, action0);
 
-    let action = new ApiUpdateInitAction({
+    let action = new ApiPatchInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -133,7 +133,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should keep the ResourceState as CREATED if the new data was also no from the server', () => {
-      let action2 = new ApiUpdateInitAction({
+      let action2 = new ApiPatchInitAction({
         id: '1',
         type: 'Article',
         attributes: {
@@ -147,7 +147,7 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_DELETE_INIT action', () => {
-    let action0 = new ApiCreateInitAction({
+    let action0 = new ApiPostInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -183,27 +183,27 @@ describe('NgrxJsonApiReducer', () => {
 
   });
 
-  describe('API_CREATE_SUCCESS action', () => {
+  describe('API_POST_SUCCESS action', () => {
     it('should subtract 1 from isCreating', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({}));
+      let newState = NgrxJsonApiStoreReducer(state, new ApiPostSuccessAction({}));
       expect(state.isCreating - newState.isCreating).toBe(1);
     });
 
     it('should add data to the store', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiCreateSuccessAction({
+      let newState = NgrxJsonApiStoreReducer(state, new ApiPostSuccessAction({
         jsonApiData: testPayload
       }));
       expect(newState.data['Article']['1']).toBeDefined();
     })
   });
 
-  describe('API_READ_SUCCESS action', () => {
+  describe('API_GET_SUCCESS action', () => {
     let query = {
       queryId: '111',
       type: 'Article',
       id: '1'
     }
-    let action = new ApiReadSuccessAction({
+    let action = new ApiGetSuccessAction({
       jsonApiData: testPayload,
       query: query
     });
@@ -217,9 +217,9 @@ describe('NgrxJsonApiReducer', () => {
     })
 
     it('should update the query data', () => {
-      let readInitAction = new ApiReadInitAction(query);
+      let readInitAction = new ApiGetInitAction(query);
       let tempState = NgrxJsonApiStoreReducer(state, readInitAction);
-      let newState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
+      let newState = NgrxJsonApiStoreReducer(tempState, new ApiGetSuccessAction({
         jsonApiData: testPayload,
         query: query
       }));
@@ -230,13 +230,13 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('API_UPDATE_SUCCESS action', () => {
+  describe('API_PATCH_SUCCESS action', () => {
     let query = {
       queryId: '111',
       type: 'Article',
       id: '1'
     }
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+    let tempState = NgrxJsonApiStoreReducer(state, new ApiGetSuccessAction({
       jsonApiData: testPayload,
       query: {
         id: '1',
@@ -244,7 +244,7 @@ describe('NgrxJsonApiReducer', () => {
         queryId: '111'
       }
     }));
-    let newState = NgrxJsonApiStoreReducer(tempState, new ApiUpdateSuccessAction({
+    let newState = NgrxJsonApiStoreReducer(tempState, new ApiPatchSuccessAction({
       jsonApiData: {
         data: {
           type: 'Article',
@@ -267,12 +267,12 @@ describe('NgrxJsonApiReducer', () => {
 
   describe('API_QUERY_REFRESH action', () => {
 
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+    let tempState = NgrxJsonApiStoreReducer(state, new ApiGetInitAction({
       id: '1',
       type: 'Article',
       queryId: '111'
     }));
-    tempState = NgrxJsonApiStoreReducer(tempState, new ApiReadSuccessAction({
+    tempState = NgrxJsonApiStoreReducer(tempState, new ApiGetSuccessAction({
       jsonApiData: testPayload,
       query: {
         id: '1',
@@ -295,7 +295,7 @@ describe('NgrxJsonApiReducer', () => {
 
   describe('API_DELETE_SUCCESS', () => {
 
-    let tempState = NgrxJsonApiStoreReducer(state, new ApiReadSuccessAction({
+    let tempState = NgrxJsonApiStoreReducer(state, new ApiGetSuccessAction({
       jsonApiData: testPayload,
       query: {
         id: '1',
@@ -318,8 +318,8 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('API_CREATE_FAIL', () => {
-    let action0 = new ApiCreateInitAction({
+  describe('API_POST_FAIL', () => {
+    let action0 = new ApiPostInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -327,7 +327,7 @@ describe('NgrxJsonApiReducer', () => {
       }
     });
     let newState0 = NgrxJsonApiStoreReducer(state, action0);
-    let createFailAction = new ApiCreateFailAction({
+    let createFailAction = new ApiPostFailAction({
       jsonApiData: {
         errors: [
           'permission denied'
@@ -349,14 +349,14 @@ describe('NgrxJsonApiReducer', () => {
 
   });
 
-  describe('API_READ_FAIL', () => {
-    let action0 = new ApiReadInitAction({
+  describe('API_GET_FAIL', () => {
+    let action0 = new ApiGetInitAction({
         id: '1',
         type: 'Article',
         queryId: '111'
     });
     let tempState = NgrxJsonApiStoreReducer(state, action0);
-    let failAction = new ApiReadFailAction(
+    let failAction = new ApiGetFailAction(
       {
         jsonApiData: {
           errors: ['permission denied']
@@ -379,8 +379,8 @@ describe('NgrxJsonApiReducer', () => {
 
   });
 
-  describe('API_UPDATE_FAIL action', () => {
-    let action = new ApiUpdateInitAction({
+  describe('API_PATCH_FAIL action', () => {
+    let action = new ApiPatchInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -388,7 +388,7 @@ describe('NgrxJsonApiReducer', () => {
       }
     });
     let tempState = NgrxJsonApiStoreReducer(state, action);
-    let updateFailAction = new ApiUpdateFailAction({
+    let updateFailAction = new ApiPatchFailAction({
       jsonApiData: {
         errors: ['permission denied']
       },
@@ -409,7 +409,7 @@ describe('NgrxJsonApiReducer', () => {
   });
 
   describe('API_DELETE_FAIL action', () => {
-    let action0 = new ApiCreateInitAction({
+    let action0 = new ApiPostInitAction({
       id: '1',
       type: 'Article',
       attributes: {
@@ -456,7 +456,7 @@ describe('NgrxJsonApiReducer', () => {
 
   describe('REMOVE_QUERY action', () => {
     it('should remove query given a queryId', () => {
-      let tempState = NgrxJsonApiStoreReducer(state, new ApiReadInitAction({
+      let tempState = NgrxJsonApiStoreReducer(state, new ApiGetInitAction({
         query: {
           id: '1',
           type: 'Article',
@@ -475,7 +475,7 @@ describe('NgrxJsonApiReducer', () => {
       id: '1'
     }
     it('should update the query data', () => {
-      let readInitAction = new ApiReadInitAction({
+      let readInitAction = new ApiGetInitAction({
           id: '1',
           type: 'Article',
           queryId: '111'
