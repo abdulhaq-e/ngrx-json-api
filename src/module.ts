@@ -21,6 +21,8 @@ import { NgrxJsonApiConfig } from './interfaces';
 
 export const NGRX_JSON_API_CONFIG = new OpaqueToken('NGRX_JSON_API_CONFIG');
 
+export const NGRX_JSON_API_HTTP = new OpaqueToken('NGRX_JSON_API_HTTP');
+
 export function apiFactory(http: Http, config: NgrxJsonApiConfig) {
   return new NgrxJsonApi(http, config);
 };
@@ -39,7 +41,7 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
     {
       provide: NgrxJsonApi,
       useFactory: apiFactory,
-      deps: [Http, NGRX_JSON_API_CONFIG]
+      deps: [NGRX_JSON_API_HTTP, NGRX_JSON_API_CONFIG]
     },
     {
       provide: NgrxJsonApiSelectors,
@@ -55,6 +57,10 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
       provide: NGRX_JSON_API_CONFIG,
       useValue: config
     },
+    {
+      provide: NGRX_JSON_API_HTTP,
+      useExisting: Http
+    }
   ];
 };
 
