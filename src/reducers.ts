@@ -51,7 +51,12 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           );
           return newState;
         } else {
-          return state;
+          newState = Object.assign({},
+            state, {
+              isUpdating: state.isUpdating + 1
+            }
+          );
+          return newState;
         }
       }
       case NgrxJsonApiActionTypes.API_READ_INIT: {
@@ -73,7 +78,12 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           );
           return newState;
         } else {
-          return state;
+          newState = Object.assign({},
+            state, {
+              isUpdating: state.isUpdating + 1
+            }
+          );
+          return newState;
         }
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
