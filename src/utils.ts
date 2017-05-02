@@ -163,7 +163,14 @@ export const getDenormalisedValue = (path: string, storeResource: StoreResource,
 export const updateResourceObject = (original: Resource,
   source: Resource): Resource => {
 
-  return _.merge({}, original, source);
+  // by default arrays would make use of concat.
+  function customizer(objValue, srcValue) {
+    if (_.isArray(objValue)) {
+      return srcValue;
+    }
+  };
+
+  return _.mergeWith({}, original, source, customizer);
 
 };
 
@@ -237,6 +244,31 @@ export const updateResourceState = (storeData: NgrxJsonApiStoreData,
   return newState;
 };
 
+
+/**
+ * Check equality of resource and ignore additional contents used by the
+ * store (state, persistedResource, etc.)
+ * @param resource0
+ * @param resource1
+ * @returns {boolean}
+ */
+export const isEqualResource = (resource0: Resource, resource1: Resource): boolean => {
+  if (resource0 === resource1) {
+    return true;
+  }
+  if ((resource0 !== null) !== (resource1 !== null)) {
+    return false;
+  }
+
+  return _.isEqual(resource0.id, resource1.id)
+    && _.isEqual(resource0.type, resource1.type)
+    && _.isEqual(resource0.attributes, resource1.attributes)
+    && _.isEqual(resource0.meta, resource1.meta)
+    && _.isEqual(resource0.links, resource1.links)
+    && _.isEqual(resource0.relationships, resource1.relationships);
+};
+
+
 export const updateStoreResource = (state: NgrxJsonApiStoreResources,
   resource: Resource, fromServer: boolean): NgrxJsonApiStoreResources => {
 
@@ -253,7 +285,7 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
     newResourceState = 'IN_SYNC';
   } else {
     let mergedResource = updateResourceObject(foundStoreResource, resource);
-    if (_.isEqual(mergedResource, persistedResource)) {
+    if (isEqualResource(mergedResource, persistedResource)) {
       // no changes anymore, do nothing
       newResource = persistedResource;
       newResourceState = 'IN_SYNC';
@@ -951,4 +983,90 @@ export const compactStore = (state: NgrxJsonApiStore) => {
 
   // remove everything that is not collected
   return sweepUnusedResources(state, usedResources);
+};
+
+
+
+interface TopologySortContext {
+  pendingResources: Array<StoreResource>;
+  cursor: number;
+  sorted: Array<StoreResource>;
+  visited: Array<boolean>;
+  dependencies: { [id: string]: Array<StoreResource> };
+}
+
+
+export const sortPendingChanges =
+    (pendingResources: Array<StoreResource>): Array<StoreResource> => {
+  // allocate dependency
+  let dependencies: any = {};
+  let pendingMap: any = {};
+  for (let pendingResource of pendingResources) {
+    let resource = pendingResource;
+    let key = toKey(resource);
+    dependencies[key] = [];
+    pendingMap[key] = pendingResource;
+  }
+
+  // extract dependencies
+  for (let pendingResource of pendingResources) {
+    let resource = pendingResource;
+    if (resource.relationships) {
+      let key = toKey(resource);
+      Object.keys(resource.relationships).forEach(relationshipName => {
+        let data = resource.relationships[relationshipName].data;
+        if (data) {
+          let dependencyIds: Array<ResourceIdentifier> = data instanceof Array ? data : [data];
+          for (let dependencyId of dependencyIds) {
+            let dependencyKey = toKey(dependencyId);
+            if (pendingMap[dependencyKey] && pendingMap[dependencyKey].state === 'CREATED') {
+              // we have a dependency between two unsaved objects
+              dependencies[key].push(pendingMap[dependencyKey]);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // order
+  let context = {
+    pendingResources: pendingResources,
+    cursor: pendingResources.length,
+    sorted: new Array(pendingResources.length),
+    dependencies: dependencies,
+    visited: []
+  };
+
+  let i = context.cursor;
+  while (i--) {
+    if (!context.visited[i]) {
+      visitPending(pendingResources[i], i, [], context);
+    }
+  }
+
+  return context.sorted;
+};
+
+const visitPending =
+    (pendingResource: StoreResource, i, predecessors, context: TopologySortContext) => {
+  let key = toKey(pendingResource);
+  if (predecessors.indexOf(key) >= 0) {
+    throw new Error('Cyclic dependency: ' + key + ' with ' + JSON.stringify(predecessors));
+  }
+
+  if (context.visited[i]) {
+    return;
+  }
+  context.visited[i] = true;
+
+  // outgoing edges
+  let outgoing: Array<StoreResource> = context.dependencies[key];
+
+  let preds = predecessors.concat(key);
+  for (let child of outgoing) {
+    visitPending(child, context.pendingResources.indexOf(child), preds, context);
+  }
+
+  context.sorted[--context.cursor] = pendingResource;
 };
