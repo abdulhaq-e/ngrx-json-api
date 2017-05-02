@@ -103,7 +103,7 @@
     "typescript": "2.3.2",
     "webpack": "2.2.0",
     "webpack-bundle-size-analyzer": "^2.0.2",
-    "zone.js": "0.7.6"
+    "zone.js": "0.8.9"
   },
   "engines": {
     "node": ">= 4.2.1",
