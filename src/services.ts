@@ -134,7 +134,7 @@ export class NgrxJsonApiService {
     this.store.dispatch(new ApiQueryRefreshAction(queryId));
   }
 
-  private removeQuery(queryId: string) {
+  public removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
@@ -178,6 +178,20 @@ export class NgrxJsonApiService {
     let snapshot = this.storeSnapshot;
     if (snapshot.data[identifier.type] && snapshot.data[identifier.type][identifier.id]) {
       return snapshot.data[identifier.type][identifier.id].persistedResource;
+    }
+    return null;
+  }
+
+  /**
+   * Gets the current state of the given resources in the store.
+   * Consider the use of selectResource(...) to get an observable of the resource.
+   *
+   * @param identifier
+   */
+  public getResourceSnapshot(identifier: ResourceIdentifier) {
+    let snapshot = this.storeSnapshot;
+    if (snapshot.data[identifier.type] && snapshot.data[identifier.type][identifier.id]) {
+      return snapshot.data[identifier.type][identifier.id];
     }
     return null;
   }
