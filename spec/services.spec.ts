@@ -241,6 +241,10 @@ describe('NgrxJsonApiService', () => {
 
   });
 
+  describe('getResourceSnapshot', () => {
+
+  });
+
   describe('selectResults', () => {
 
   });

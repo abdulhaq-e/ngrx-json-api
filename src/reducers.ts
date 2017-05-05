@@ -6,7 +6,7 @@ import {
 import {
   Query,
   ResourceState,
-  NgrxJsonApiStore, ModifyStoreResourceErrorsPayload
+  NgrxJsonApiStore, ModifyStoreResourceErrorsPayload, ResourceIdentifier
 } from './interfaces';
 import {
   deleteStoreResources,
@@ -22,7 +22,7 @@ import {
   updateResourceErrorsForQuery,
   updateQueriesForDeletedResource,
   compactStore,
-  updateResourceErrors
+  updateResourceErrors, removeStoreResource
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -240,14 +240,41 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
           return state;
         }
       }
+      case NgrxJsonApiActionTypes.NEW_STORE_RESOURCE: {
+        let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
+        updatedData = updateResourceState(updatedData, action.payload, 'NEW');
+        if (updatedData !== state.data) {
+          newState = Object.assign({}, state, {data: updatedData});
+          return newState;
+        } else {
+          return state;
+        }
+      }
       case NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE: {
-        newState = Object.assign({},
-          state, {
-            data: updateResourceState(
-              state.data, action.payload, 'DELETED')
+        let resourceId = action.payload as ResourceIdentifier;
+        if (state.data[resourceId.type] && state.data[resourceId.type][resourceId.id]) {
+          let resource = state.data[resourceId.type][resourceId.id];
+
+          if (resource.state === 'NEW' || resource.state === 'CREATED') {
+            // not yet stored on server-side, just delete
+            newState = Object.assign({},
+              state, {
+                data: removeStoreResource(state.data, resourceId)
+              }
+            );
+            return newState;
+          } else {
+            // stored on server, mark for deletion
+            newState = Object.assign({},
+              state, {
+                data: updateResourceState(
+                  state.data, action.payload, 'DELETED')
+              }
+            );
+            return newState;
           }
-        );
-        return newState;
+        }
+        return state;
       }
       case NgrxJsonApiActionTypes.API_APPLY_INIT: {
         newState = Object.assign({}, state, { isApplying: state.isApplying + 1 });

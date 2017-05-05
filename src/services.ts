@@ -20,7 +20,7 @@ import {
   ClearStoreAction,
   CompactStoreAction,
   ApiQueryRefreshAction,
-  ModifyStoreResourceErrorsAction
+  ModifyStoreResourceErrorsAction, NewStoreResourceAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -62,6 +62,10 @@ export interface PostResourceOptions {
 export interface PatchResourceOptions {
   resource: Resource;
   toRemote?: boolean;
+}
+
+export interface NewResourceOptions {
+  resource: Resource;
 }
 
 export interface DeleteResourceOptions {
@@ -134,7 +138,7 @@ export class NgrxJsonApiService {
     this.store.dispatch(new ApiQueryRefreshAction(queryId));
   }
 
-  private removeQuery(queryId: string) {
+  public removeQuery(queryId: string) {
     this.store.dispatch(new RemoveQueryAction(queryId));
   }
 
@@ -178,6 +182,20 @@ export class NgrxJsonApiService {
     let snapshot = this.storeSnapshot;
     if (snapshot.data[identifier.type] && snapshot.data[identifier.type][identifier.id]) {
       return snapshot.data[identifier.type][identifier.id].persistedResource;
+    }
+    return null;
+  }
+
+  /**
+   * Gets the current state of the given resources in the store.
+   * Consider the use of selectResource(...) to get an observable of the resource.
+   *
+   * @param identifier
+   */
+  public getResourceSnapshot(identifier: ResourceIdentifier) {
+    let snapshot = this.storeSnapshot;
+    if (snapshot.data[identifier.type] && snapshot.data[identifier.type][identifier.id]) {
+      return snapshot.data[identifier.type][identifier.id];
     }
     return null;
   }
@@ -265,6 +283,17 @@ export class NgrxJsonApiService {
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource));
     }
+  }
+
+  /**
+   * Creates a new resources that is hold locally in the store
+   * and my later be posted.
+   *
+   * @param resource
+   */
+  public newResource(options: NewResourceOptions) {
+    let resource = options.resource;
+    this.store.dispatch(new NewStoreResourceAction(resource));
   }
 
   /**

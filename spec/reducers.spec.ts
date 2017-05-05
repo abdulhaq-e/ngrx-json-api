@@ -31,8 +31,10 @@ import {
   ApiDeleteFailAction,
   ApiRollbackAction,
   NgrxJsonApiActionTypes,
+  NewStoreResourceAction,
   PatchStoreResourceAction,
   PostStoreResourceAction,
+  DeleteStoreResourceAction,
   ApiQueryRefreshAction,
   RemoveQueryAction,
   ModifyStoreResourceErrorsAction,
@@ -501,6 +503,39 @@ describe('NgrxJsonApiReducer', () => {
       ));
       expect(newState.data['Article']['1']).toBeDefined();
       expect(newState2.data['Article']['1']).toBeDefined();
+    });
+
+    it('should create new resource', () => {
+      let newState = NgrxJsonApiStoreReducer(state, new NewStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      expect(newState.data['Article']['1']).toBeDefined();
+      expect(newState.data['Article']['1'].state).toEqual('NEW');
+    });
+
+    it('should delete new resource', () => {
+      let newState1 = NgrxJsonApiStoreReducer(state, new NewStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      expect(newState1.data['Article']['1']).toBeDefined();
+      expect(newState1.data['Article']['1'].state).toEqual('NEW');
+      let newState2 = NgrxJsonApiStoreReducer(newState1, new DeleteStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      expect(newState2.data['Article']['1']).toBeUndefined();
+    });
+
+    it('patch should maintain NEW state', () => {
+      let newState1 = NgrxJsonApiStoreReducer(state, new NewStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      expect(newState1.data['Article']['1']).toBeDefined();
+      expect(newState1.data['Article']['1'].state).toEqual('NEW');
+      let newState2 = NgrxJsonApiStoreReducer(newState1, new PatchStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      expect(newState2.data['Article']['1']).toBeDefined();
+      expect(newState2.data['Article']['1'].state).toEqual('NEW');
     });
 
     it('should not update state on second identical post', () => {

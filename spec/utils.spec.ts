@@ -40,6 +40,8 @@ import {
   updateResourceState,
   updateResourceErrors,
   updateResourceErrorsForQuery,
+  sortPendingChanges,
+  isEqualResource
 } from '../src/utils';
 //
 import {
@@ -51,6 +53,7 @@ import {
   Resource,
   ResourceDefinition,
   ResourceState,
+  StoreResource,
 } from '../src/interfaces';
 
 import {
@@ -440,6 +443,31 @@ describe('updateStoreResource', () => {
     expect(newState['2'].state).toEqual("UPDATED");
   });
 
+  it('should not concat arrays when merging resource', () => {
+    let resource1: Resource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      }
+    };
+    let resource2: Resource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['b', 'c']
+      }
+    };
+    deepFreeze(resource1);
+    deepFreeze(resource2);
+    let newState1 = updateStoreResource(state, resource1, false);
+    let newState2 = updateStoreResource(newState1, resource2, false);
+    expect(newState2['2'].attributes['keywords']).toEqual(['b', 'c']);
+    expect(newState2['2'].state).toEqual("UPDATED");
+  });
+
   it('should merge a new resource not from server and add CREATED state if a persistedResource does not exists', () => {
     let resource: Resource = {
       type: 'Article',
@@ -456,6 +484,160 @@ describe('updateStoreResource', () => {
   });
 
 });
+
+
+describe('isEqualResource', () => {
+  it('should ignore different states', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+      state: 'CREATED'
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+      state: 'IN_SYNC'
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeTruthy();
+  });
+
+  it('should be equal for same contents', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      }
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeTruthy();
+  });
+
+  it('should not be equal for different id', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '1',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      }
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeFalsy();
+  });
+
+  it('should not be equal for different type', () => {
+    let resource1: StoreResource = {
+      type: 'different',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      }
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeFalsy();
+  });
+
+  it('should not be equal for different attributes', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'different',
+        'keywords': ['a', 'b']
+      },
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      }
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeFalsy();
+  });
+
+  it('should not be equal for different relationships', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+    };
+    let resource2: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+      relationships:{
+        test:{
+          data: {
+            type: 'test',
+            id: '1'
+          }
+        }
+      }
+    };
+    let equal = isEqualResource(resource1, resource2);
+    expect(equal).toBeFalsy();
+  });
+
+  it('should be equal for same object', () => {
+    let resource1: StoreResource = {
+      type: 'Article',
+      id: '2',
+      attributes: {
+        'title': 'Untitled',
+        'keywords': ['a', 'b']
+      },
+      state: 'CREATED'
+    };
+    let equal = isEqualResource(resource1, resource1);
+    expect(equal).toBeTruthy();
+  });
+});
+
 
 describe('updateResourceErrorsForQuery', () => {
   // it('should throw error if the query type and id is not defined', () => {
@@ -484,6 +666,43 @@ describe('updateResourceErrorsForQuery', () => {
     };
     let newStoreData = updateResourceErrorsForQuery(storeData, query, document);
     expect(newStoreData['Article']['1']['errors']).toEqual(document['errors']);
+  });
+});
+
+
+
+
+describe('sortPendingChanges', () => {
+
+  it('should POST resource before updating a reference to it', () => {
+
+    let resource1: StoreResource =  {
+      type: 'Article',
+      id: '1',
+      state: 'UPDATED',
+      relationships: {
+        previous: {
+          data: {
+            type: 'Article',
+            id: '2',
+          }
+        }
+      }
+    };
+
+    let resource2: StoreResource =  {
+      type: 'Article',
+      id: '2',
+      state: 'CREATED',
+    };
+
+    let order = sortPendingChanges([resource1, resource2]);
+    expect(order[0].id).toEqual('1');
+    expect(order[1].id).toEqual('2');
+
+    order = sortPendingChanges([resource2, resource1]);
+    expect(order[0].id).toEqual('1');
+    expect(order[1].id).toEqual('2');
   });
 });
 
