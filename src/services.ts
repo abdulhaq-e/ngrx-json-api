@@ -20,7 +20,7 @@ import {
   ClearStoreAction,
   CompactStoreAction,
   ApiQueryRefreshAction,
-  ModifyStoreResourceErrorsAction
+  ModifyStoreResourceErrorsAction, NewStoreResourceAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -62,6 +62,10 @@ export interface PostResourceOptions {
 export interface PatchResourceOptions {
   resource: Resource;
   toRemote?: boolean;
+}
+
+export interface NewResourceOptions {
+  resource: Resource;
 }
 
 export interface DeleteResourceOptions {
@@ -279,6 +283,17 @@ export class NgrxJsonApiService {
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource));
     }
+  }
+
+  /**
+   * Creates a new resources that is hold locally in the store
+   * and my later be posted.
+   *
+   * @param resource
+   */
+  public newResource(options: NewResourceOptions) {
+    let resource = options.resource;
+    this.store.dispatch(new NewStoreResourceAction(resource));
   }
 
   /**

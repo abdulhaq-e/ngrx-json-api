@@ -90,8 +90,10 @@ export const denormaliseStoreResource = (item: StoreResource, storeData: NgrxJso
   if (_.isUndefined(bag[storeResource.type][storeResource.id])) {
     bag[storeResource.type][storeResource.id] = storeResource;
     storeResource = denormaliseObject(storeResource, storeData, bag);
-    storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
-      storeData, bag);
+    if (storeResource.persistedResource) {
+       storeResource.persistedResource = denormaliseObject(storeResource.persistedResource,
+          storeData, bag);
+    }
   }
 
   return bag[storeResource.type][storeResource.id];
@@ -200,6 +202,23 @@ export const insertStoreResource = (storeResources: NgrxJsonApiStoreResources,
   return _.isEqual(storeResources, newStoreResources) ? storeResources : newStoreResources;
 };
 
+
+/**
+ * Removes a StoreResource given the Resource and the StoreResources
+ *
+ */
+export const removeStoreResource = (storeData: NgrxJsonApiStoreData,
+  resourceId: ResourceIdentifier): NgrxJsonApiStoreData => {
+
+  if (storeData[resourceId.type][resourceId.id]) {
+    let newState: NgrxJsonApiStoreData = Object.assign({}, storeData);
+    newState[resourceId.type] = Object.assign({}, newState[resourceId.type]);
+    delete newState[resourceId.type][resourceId.id];
+    return newState;
+  }
+  return storeData;
+};
+
 /**
  * Updates the state of a StoreResource in the store.
  *
@@ -293,7 +312,13 @@ export const updateStoreResource = (state: NgrxJsonApiStoreResources,
       // merge changes and mark as CREATED or UPDATED depending on whether
       // an original version is available
       newResource = mergedResource;
-      newResourceState = persistedResource === null ? 'CREATED' : 'UPDATED';
+      if (persistedResource !== null) {
+        newResourceState = 'UPDATED';
+      } else if (foundStoreResource.state === 'NEW') {
+        newResourceState = 'NEW';
+      } else {
+        newResourceState = 'CREATED';
+      }
     }
   }
 

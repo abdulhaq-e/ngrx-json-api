@@ -26,6 +26,7 @@ import {
   LocalQueryInitAction,
   LocalQuerySuccessAction,
   DeleteStoreResourceAction,
+  NewStoreResourceAction,
   PatchStoreResourceAction,
   PostStoreResourceAction,
   RemoveQueryAction,
@@ -41,7 +42,7 @@ describe('Json Api Actions', () => {
   let actions;
 
   it('should have a fixed number of actions', () => {
-    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(27);
+    expect(Object.keys(NgrxJsonApiActionTypes).length).toEqual(28);
   });
 
   it('should have an api create init action', () => {
@@ -285,6 +286,12 @@ describe('Json Api Actions', () => {
   it('should generate a patch store resource action using PatchStoreResourceAction', () => {
     let action = new PatchStoreResourceAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE);
+    expect(action.payload).toEqual({});
+  });
+
+  it('should generate a new store resource action using NewStoreResourceAction', () => {
+    let action = new NewStoreResourceAction({});
+    expect(action.type).toEqual(NgrxJsonApiActionTypes.NEW_STORE_RESOURCE);
     expect(action.payload).toEqual({});
   });
 

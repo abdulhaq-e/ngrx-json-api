@@ -35,6 +35,7 @@ export const NgrxJsonApiActionTypes = {
   LOCAL_QUERY_FAIL: type('LOCAL_QUERY_FAIL'),
   DELETE_STORE_RESOURCE: type('DELETE_STORE_RESOURCE'),
   PATCH_STORE_RESOURCE: type('PATCH_STORE_RESOURCE'),
+  NEW_STORE_RESOURCE: type('NEW_STORE_RESOURCE'),
   POST_STORE_RESOURCE: type('POST_STORE_RESOURCE'),
   MODIFY_STORE_RESOURCE_ERRORS: type('MODIFY_STORE_RESOURCE_ERRORS'),
   REMOVE_QUERY: type('REMOVE_QUERY'),
@@ -131,6 +132,11 @@ export class PatchStoreResourceAction implements Action {
   constructor(public payload: Resource) { }
 }
 
+export class NewStoreResourceAction implements Action {
+  type = NgrxJsonApiActionTypes.NEW_STORE_RESOURCE;
+  constructor(public payload: Resource) { }
+}
+
 export class PostStoreResourceAction implements Action {
   type = NgrxJsonApiActionTypes.POST_STORE_RESOURCE;
   constructor(public payload: Resource) { }
@@ -200,6 +206,7 @@ export type NgrxJsonApiActions
   | DeleteStoreResourceAction
   | PatchStoreResourceAction
   | PostStoreResourceAction
+  | NewStoreResourceAction
   | RemoveQueryAction
   | ApiQueryRefreshAction
   | LocalQueryInitAction

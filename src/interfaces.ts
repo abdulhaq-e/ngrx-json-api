@@ -172,6 +172,7 @@ export type ResourceRelationType
   | 'hasMany';
 
 export type ResourceState =
+  'NEW' |
   'IN_SYNC' |
   'CREATED' |
   'UPDATED' |

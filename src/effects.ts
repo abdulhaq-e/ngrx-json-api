@@ -293,7 +293,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     Object.keys(state.data).forEach(type => {
       Object.keys(state.data[type]).forEach(id => {
         let storeResource = state.data[type][id];
-        if (storeResource.state !== 'IN_SYNC') {
+        if (storeResource.state !== 'IN_SYNC' && storeResource.state !== 'NEW') {
           pending.push(storeResource);
         }
       });
