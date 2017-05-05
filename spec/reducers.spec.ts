@@ -576,10 +576,50 @@ describe('NgrxJsonApiReducer', () => {
     });
   });
 
-  describe('API_APPLY_INIT action', () => {
+  describe('API_APPLY_INIT action for POST', () => {
     it('should add 1 to isApplying', () => {
-      let newState = NgrxJsonApiStoreReducer(state, new ApiApplyInitAction());
-      expect(newState.isApplying - state.isApplying).toBe(1);
+      let action = new PatchStoreResourceAction(
+        { type: 'Article', id: '1', attributes: { title: 'sample title', description: 'test description' } }
+      );
+      let newState1 = NgrxJsonApiStoreReducer(state, action);
+      let newState2 = NgrxJsonApiStoreReducer(newState1, new ApiApplyInitAction());
+      expect(newState2.isApplying - newState1.isApplying).toBe(1);
+      expect(newState2.isCreating - newState1.isCreating).toBe(1);
+      expect(newState2.isUpdating - newState1.isUpdating).toBe(0);
+      expect(newState2.isDeleting - newState1.isDeleting).toBe(0);
+    });
+  });
+
+  describe('API_APPLY_INIT action for PATCH', () => {
+    it('should add 1 to isApplying', () => {
+      let action = new PatchStoreResourceAction(
+        { type: 'Article', id: '1', attributes: { title: 'new title', description: 'sample description' } }
+      );
+      let newState1 = NgrxJsonApiStoreReducer(state, action);
+      newState1.data['Article']['1'].state = 'UPDATED';
+      let newState2 = NgrxJsonApiStoreReducer(newState1, new ApiApplyInitAction());
+      expect(newState2.isApplying - newState1.isApplying).toBe(1);
+      expect(newState2.isCreating - newState1.isCreating).toBe(0);
+      expect(newState2.isUpdating - newState1.isUpdating).toBe(1);
+      expect(newState2.isDeleting - newState1.isDeleting).toBe(0);
+    });
+  });
+
+  describe('API_APPLY_INIT action for DELETE', () => {
+    it('should add 1 to isApplying', () => {
+      let newState1 = NgrxJsonApiStoreReducer(state, new PatchStoreResourceAction(
+        { type: 'Article', id: '1', attributes: { title: 'new title', description: 'sample description' } }
+      ));
+      newState1.data['Article']['1'].state = 'IN_SYNC';
+
+      let newState2 = NgrxJsonApiStoreReducer(newState1, new DeleteStoreResourceAction(
+        { type: 'Article', id: '1' }
+      ));
+      let newState3 = NgrxJsonApiStoreReducer(newState2, new ApiApplyInitAction());
+      expect(newState3.isApplying - newState2.isApplying).toBe(1);
+      expect(newState3.isCreating - newState2.isCreating).toBe(0);
+      expect(newState3.isUpdating - newState2.isUpdating).toBe(0);
+      expect(newState3.isDeleting - newState2.isDeleting).toBe(1);
     });
   });
 
