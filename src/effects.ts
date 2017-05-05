@@ -52,7 +52,8 @@ import {
 } from './interfaces';
 import {
   sortPendingChanges,
-  generatePayload
+  generatePayload,
+  getPendingChanges
 } from './utils';
 
 @Injectable()
@@ -177,7 +178,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap(() => this.store.select(this.selectors.storeLocation).take(1))
     .mergeMap((ngrxstore: NgrxJsonApiStore) => {
 
-      let pending: Array<StoreResource> = this.getPendingChanges(ngrxstore);
+      let pending: Array<StoreResource> = getPendingChanges(ngrxstore);
       if (pending.length > 0) {
         pending = sortPendingChanges(pending);
 
@@ -286,19 +287,4 @@ export class NgrxJsonApiEffects implements OnDestroy {
   private generatePayload(resource: Resource, operation: OperationType): Payload {
     return generatePayload(resource, operation);
   }
-
-
-  private getPendingChanges(state: NgrxJsonApiStore): Array<StoreResource> {
-    let pending: Array<StoreResource> = [];
-    Object.keys(state.data).forEach(type => {
-      Object.keys(state.data[type]).forEach(id => {
-        let storeResource = state.data[type][id];
-        if (storeResource.state !== 'IN_SYNC' && storeResource.state !== 'NEW') {
-          pending.push(storeResource);
-        }
-      });
-    });
-    return pending;
-  }
-
 }

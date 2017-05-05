@@ -1095,3 +1095,17 @@ const visitPending =
 
   context.sorted[--context.cursor] = pendingResource;
 };
+
+
+export function getPendingChanges(state: NgrxJsonApiStore): Array<StoreResource> {
+  let pending: Array<StoreResource> = [];
+  Object.keys(state.data).forEach(type => {
+    Object.keys(state.data[type]).forEach(id => {
+      let storeResource = state.data[type][id];
+      if (storeResource.state !== 'IN_SYNC' && storeResource.state !== 'NEW') {
+        pending.push(storeResource);
+      }
+    });
+  });
+  return pending;
+}

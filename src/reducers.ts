@@ -5,7 +5,7 @@ import {
 } from './actions';
 import {
   Query,
-  ResourceState,
+  ResourceState, StoreResource,
   NgrxJsonApiStore, ModifyStoreResourceErrorsPayload, ResourceIdentifier
 } from './interfaces';
 import {
@@ -22,7 +22,8 @@ import {
   updateResourceErrorsForQuery,
   updateQueriesForDeletedResource,
   compactStore,
-  updateResourceErrors, removeStoreResource
+  updateResourceErrors, removeStoreResource,
+  getPendingChanges
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -277,7 +278,19 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         return state;
       }
       case NgrxJsonApiActionTypes.API_APPLY_INIT: {
-        newState = Object.assign({}, state, { isApplying: state.isApplying + 1 });
+        let pending: Array<StoreResource> = getPendingChanges(state);
+        newState = Object.assign({}, state, {isApplying: state.isApplying + 1});
+        for (let pendingChange of pending) {
+          if (pendingChange.state === 'CREATED') {
+            newState.isCreating++;
+          } else if (pendingChange.state === 'UPDATED') {
+            newState.isUpdating++;
+          } else if (pendingChange.state === 'DELETED') {
+            newState.isDeleting++;
+          } else {
+            throw new Error('unknown state ' + pendingChange.state);
+          }
+        }
         return newState;
       }
       case NgrxJsonApiActionTypes.API_APPLY_SUCCESS:
