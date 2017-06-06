@@ -31,6 +31,25 @@ export interface ManyResourceRelationship {
   reference?: Array<StoreResource>;
 }
 
+/**
+ * Used by code generators to navigate relationships in a type-safe manner.
+ * See crnk.io for a first such generator.
+ */
+export interface TypedManyResourceRelationship<T extends StoreResource>
+    extends ManyResourceRelationship {
+  reference?: Array<T>;
+}
+
+/**
+ * Used by code generators to navigate relationships in a type-safe manner.
+ * See crnk.io for a first such generator.
+ */
+export interface TypedOneResourceRelationship<T extends StoreResource>
+    extends OneResourceRelationship {
+  reference?: T;
+}
+
+
 export interface NgrxJsonApiConfig {
   apiUrl: string;
   resourceDefinitions: Array<ResourceDefinition>;
