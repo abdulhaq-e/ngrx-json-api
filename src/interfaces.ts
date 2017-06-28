@@ -219,9 +219,9 @@ export interface OneQueryResult extends QueryResult {
 export interface StoreQuery {
   query: Query;
   loading: Boolean;
-  resultIds: Array<ResourceIdentifier>;
-  meta: any;
-  links: any;
+  resultIds?: Array<ResourceIdentifier>;
+  meta?: any;
+  links?: any;
 
   /**
    * Errors received from the server after attempting to perform a GET request.
