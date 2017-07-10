@@ -261,6 +261,16 @@ describe('NgrxJsonApiSelectors', () => {
       expect(res.data[1].id).toEqual('2');
     }));
 
+    it('should get undefined for non-existing query', fakeAsync(() => {
+      let res;
+      let sub = obs
+        .select('api')
+        .let(selectors.getManyResults$('doesNotExist'))
+        .subscribe(d => res = d);
+      tick();
+      expect(res).toBeUndefined();
+    }));
+
     it('should get return an empty array if there are no data', fakeAsync(() => {
       let res;
       let sub = obs
@@ -294,6 +304,16 @@ describe('NgrxJsonApiSelectors', () => {
         .subscribe(d => res = d);
       tick();
       expect(res.data.id).toEqual('1');
+    }));
+
+    it('should get undefined for non-existing query', fakeAsync(() => {
+      let res;
+      let sub = obs
+        .select('api')
+        .let(selectors.getOneResult$('doesNotExist'))
+        .subscribe(d => res = d);
+      tick();
+      expect(res).toBeUndefined();
     }));
 
     it('should throw error if not a unique result is returned', fakeAsync(() => {

@@ -106,7 +106,7 @@ export class NgrxJsonApiSelectors<T> {
         return state$.map(state => {
             let storeQuery = state.queries[queryId];
             if (!storeQuery) {
-              return Observable.of(undefined);
+              return undefined;
             }
 
             if (_.isEmpty(storeQuery.resultIds)) {
@@ -135,7 +135,7 @@ export class NgrxJsonApiSelectors<T> {
       return state$.map(state => {
         let storeQuery = state.queries[queryId];
         if (!storeQuery) {
-          return Observable.of(undefined);
+          return undefined;
         }
 
         if (_.isEmpty(storeQuery.resultIds)) {
