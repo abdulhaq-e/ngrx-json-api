@@ -63,7 +63,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.API_POST_INIT)
     .map<Action, Resource>(toPayload)
     .map<Resource, Payload>(it => this.generatePayload(it, 'POST'))
-    .switchMap((payload: Payload) => {
+    .mergeMap((payload: Payload) => {
       return this.jsonApi.create(payload.query, payload.jsonApiData)
         .mapTo(new ApiPostSuccessAction(payload))
         .catch(error => Observable.of(
@@ -74,7 +74,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.API_PATCH_INIT)
     .map<Action, Resource>(toPayload)
     .map<Resource, Payload>(it => this.generatePayload(it, 'PATCH'))
-    .switchMap((payload: Payload) => {
+    .mergeMap((payload: Payload) => {
       return this.jsonApi.update(payload.query, payload.jsonApiData)
         .mapTo(new ApiPatchSuccessAction(payload))
         .catch(error => Observable.of(
@@ -84,7 +84,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect() readResource$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_GET_INIT)
     .map<Action, Query>(toPayload)
-    .switchMap((query: Query) => {
+    .mergeMap((query: Query) => {
       return this.jsonApi.find(query)
         .map(res => res.json())
         .map(data => new ApiGetSuccessAction({
@@ -98,7 +98,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect() queryStore$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
     .map<Action, Query>(toPayload)
-    .switchMap((query: Query) => {
+    .mergeMap((query: Query) => {
       return this.store
         .select(this.selectors.storeLocation)
         .let(this.selectors.queryStore$(query))
@@ -114,7 +114,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
     .map<Action, ResourceIdentifier>(toPayload)
     .map<ResourceIdentifier, Payload>(it => this.generatePayload(it, 'DELETE'))
-    .switchMap((payload: Payload) => {
+    .mergeMap((payload: Payload) => {
       return this.jsonApi.delete(payload.query)
         .map(res => res.json())
         .map(data => new ApiDeleteSuccessAction({
