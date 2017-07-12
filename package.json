@@ -27,7 +27,8 @@
     "postbuild": "npm run clean:post && npm run copy",
     "test:unit": "npm run karma",
     "test:unit:watch": "npm run karma:watch",
-    "test": "npm run test:unit && npm run lint:lib && npm run coveralls"
+    "test": "npm run test:unit && npm run lint:lib && npm run coveralls",
+    "publish": "npm publish"
   },
   "authors": [
     "Abdulhaq Emhemmed"
@@ -78,6 +79,7 @@
     "coveralls": "^2.11.15",
     "cpy-cli": "^1.0.1",
     "deep-freeze": "^0.0.1",
+    "expand-range": "^2.0.1",
     "filename-regex": "^2.0.1",
     "istanbul-instrumenter-loader": "^1.0.0",
     "jasmine-core": "^2.4.1",
