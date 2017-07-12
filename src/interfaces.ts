@@ -252,9 +252,11 @@ export interface StoreResource extends Resource {
   errors?: Array<ResourceError>;
 
   /**
-   * new resources may only obtain an id when posted to the server. Till that point a StoreResource can assign
-   * make use of a temporary id and signal this by setting this flag to true. The id will not be transmitted to the
-   * server and the resource is removed from its temporary location (given by its id) as soon as it is posted to the server.
+   * new resources may only obtain an id when posted to the server. Till that point
+   * a StoreResource can assign make use of a temporary id and signal this by setting
+   * this flag to true. The id will not be transmitted to the server and the resource
+   * is removed from its temporary location (given by its id) as soon as it is posted
+   * to the server.
    */
   hasTemporaryId?: boolean;
 }

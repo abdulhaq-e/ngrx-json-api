@@ -861,7 +861,7 @@ export const generatePayload = (resource: Resource, operation: OperationType): P
     };
   }
 
-  if (operation === 'POST' && resource['hasTemporaryId']){
+  if (operation === 'POST' && resource['hasTemporaryId']) {
     delete payload.jsonApiData.data.id;
   }
 
