@@ -861,6 +861,10 @@ export const generatePayload = (resource: Resource, operation: OperationType): P
     };
   }
 
+  if (operation === 'POST' && resource['hasTemporaryId']) {
+    delete payload.jsonApiData.data.id;
+  }
+
   // 'DELETE' only needs a query and it also needs an id in its query
   // 'PATCH' also needs an id in its query
   // 'POST' needed locally to allow to write back errors to store if id is available
