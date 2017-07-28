@@ -37,7 +37,7 @@ import {
 
 } from '../src/actions';
 
-fdescribe('Json Api Actions', () => {
+describe('Json Api Actions', () => {
 
   let actions;
 

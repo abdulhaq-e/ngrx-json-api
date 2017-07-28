@@ -18,6 +18,7 @@ import { NgrxJsonApi } from '../src/api';
 import { NgrxJsonApiService } from '../src/services';
 import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
+import { NgrxJsonApiModule } from '../src/module';
 
 import {
   initialNgrxJsonApiState,
@@ -58,7 +59,7 @@ describe('NgrxJsonApiService', () => {
       imports: [
         HttpModule,
         EffectsModule.run(NgrxJsonApiEffects),
-        StoreModule.provideStore({ api: NgrxJsonApiStoreReducer }, store),
+        StoreModule.forFeature({ api: NgrxJsonApiStoreReducer }, store),
       ],
       providers: [
         {

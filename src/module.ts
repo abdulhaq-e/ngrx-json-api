@@ -70,7 +70,7 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
     EffectsModule.forFeature([
       NgrxJsonApiEffects
     ]),
-    StoreModule.forFeature('NgrxJsonApi', reducer, { })
+    StoreModule.forFeature('NgrxJsonApi', reducer, {})
   ],
   exports: [
     DenormaliseStoreResourcePipe,

@@ -8,13 +8,17 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
+import { Store, StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+
 import { NgrxJsonApiSelectors } from '../src/selectors';
 import {
-  initialNgrxJsonApiState
+  initialNgrxJsonApiState, reducer
 } from '../src/reducers';
 import {
   NGRX_JSON_API_CONFIG,
-  selectorsFactory
+  selectorsFactory,
+  NgrxJsonApiModule
 } from '../src/module';
 import { updateStoreDataFromPayload } from '../src/utils';
 import {
@@ -22,31 +26,9 @@ import {
   resourceDefinitions
 } from './test_utils';
 
-describe('NgrxJsonApiSelectors', () => {
+fdescribe('NgrxJsonApiSelectors', () => {
   let selectors;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: NgrxJsonApiSelectors,
-          useFactory: selectorsFactory,
-          deps: [NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NGRX_JSON_API_CONFIG,
-          useValue: {
-            storeLocation: 'api',
-            resourceDefinitions: resourceDefinitions
-          }
-        },
-      ]
-    })
-  });
-
-  beforeEach(inject([NgrxJsonApiSelectors], (s) => {
-    selectors = s;
-  }));
+  let store;
   let queries = {
     '1': {
       query: {
@@ -72,34 +54,50 @@ describe('NgrxJsonApiSelectors', () => {
       },
       resultIds: [{ type: 'Article', id: '10' }, { type: 'Article', id: '20' }]
     },
-
-  }
-  let store = {
-    api: Object.assign({}, initialNgrxJsonApiState, {
-      data: updateStoreDataFromPayload({}, testPayload),
-      queries: queries
-    }, )
   };
-  let obs = Observable.of(store);
 
-  describe('getStoreData$', () => {
-    it('should get the store data given a store observable', fakeAsync(() => {
-      let res;
-      let sub = obs
-        .select('api')
-        .let(selectors.getStoreData$())
-        .subscribe(d => res = d);
-      tick();
-      expect(res['Article']).toBeDefined();
-      expect(res['Person']).toBeDefined();
-    }));
+  let initialState = {
+    NgrxJsonApi: {
+      api: {
+      ...{}, ...initialNgrxJsonApiState, ...{
+        data: updateStoreDataFromPayload({}, testPayload),
+        queries: queries
+      }
+    }
+  }};
+
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    imports: [
+      StoreModule.forRoot({}, {initialState: initialState}),
+      EffectsModule.forRoot([]),
+      NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'test' }),
+      // StoreModule.forFeature('NgrxJsonApi', reducer, { initialState: initialState }),
+    ],
   })
+});
+
+beforeEach(inject([NgrxJsonApiSelectors, Store], (s, st) => {
+  selectors = s;
+  store = st;
+}));
+
+describe('getStoreData$', () => {
+  it('should get the store data', fakeAsync(() => {
+    let res;
+    let sub = store
+      .let(selectors.getStoreData$())
+      .subscribe(d => res = d);
+    tick();
+    expect(res['Article']).toBeDefined();
+    expect(res['Person']).toBeDefined();
+  }));
+})
 
   describe('getStoreResourceOfType$', () => {
     it('should get all resources of a given type', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreResourceOfType$('Article'))
         .subscribe(d => res = d);
       tick();
@@ -114,8 +112,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return undefined if the resource type is not given', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreResourceOfType$({}))
         .subscribe(d => res = d);
       tick();
@@ -124,36 +121,32 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return undefined if the resource type is not found', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreResourceOfType$('random'))
         .subscribe(d => res = d);
       tick();
       expect(res).not.toBeDefined();
     }));
-
   });
 
   describe('queryStore$', () => {
 
     it('should return a single resource given a query with id and type only', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.queryStore$({
           type: 'Article',
           id: '1',
         }))
         .subscribe(d => res = d);
-      obs.select('api').let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
+      store.let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
         .subscribe(r => expect(r).toEqual(res));
       tick();
     }));
 
     it('should return resources in an Array when using filters and omitting the id', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.queryStore$({
           type: 'Article',
           params: {
@@ -170,8 +163,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return an empty array for queries that return nothing', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.queryStore$({
           type: 'Article',
           params: {
@@ -187,8 +179,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return an array of multiple resources using filters', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.queryStore$({
           type: 'Article',
         }))
@@ -200,8 +191,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should throw an error for queries with no type', fakeAsync(() => {
         let res;
-        let sub = obs
-            .select('api')
+        let sub = store
             .let(selectors.queryStore$({
             }))
             .subscribe(d => res = d);
@@ -211,10 +201,9 @@ describe('NgrxJsonApiSelectors', () => {
   });
 
   describe('getStoreQueries$', () => {
-    it('should get the store queries given a store observable', fakeAsync(() => {
+    it('should get the store queries', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreQueries$())
         .subscribe(d => res = d);
       tick();
@@ -227,8 +216,7 @@ describe('NgrxJsonApiSelectors', () => {
   describe('getResourceQuery$', () => {
     it('should get the a single query given a queryId', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getResourceQuery$('1'))
         .subscribe(d => res = d);
       tick();
@@ -239,8 +227,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return undefined for unavailable queries', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getResourceQuery$('10'))
         .subscribe(d => res = d);
       tick();
@@ -252,8 +239,7 @@ describe('NgrxJsonApiSelectors', () => {
   describe('getManyResults$', () => {
     it('should get the StoreResource(s) that are the data of a query', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getManyResults$('1'))
         .subscribe(d => res = d);
       tick();
@@ -263,8 +249,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should get undefined for non-existing query', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getManyResults$('doesNotExist'))
         .subscribe(d => res = d);
       tick();
@@ -273,8 +258,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should get return an empty array if there are no data', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getManyResults$('55'))
         .subscribe(d => res = d);
       tick();
@@ -284,22 +268,19 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return undefined if the resources are not defined', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getManyResults$('56'))
         .subscribe(d => res = d);
       tick();
       expect(res.data[0]).toBeUndefined();
       expect(res.data[1]).toBeUndefined();
     }));
-
   });
 
   describe('getOneResults$', () => {
     it('should get the StoreResource that are the data of a query', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getOneResult$('2'))
         .subscribe(d => res = d);
       tick();
@@ -308,8 +289,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should get undefined for non-existing query', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getOneResult$('doesNotExist'))
         .subscribe(d => res = d);
       tick();
@@ -319,8 +299,7 @@ describe('NgrxJsonApiSelectors', () => {
     it('should throw error if not a unique result is returned', fakeAsync(() => {
       let res;
       let err;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getOneResult$('1'))
         .subscribe(d => res = d, e => err = e);
       tick();
@@ -331,8 +310,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return null for no query result', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getOneResult$('55'))
         .subscribe(d => res = d);
       tick();
@@ -343,8 +321,7 @@ describe('NgrxJsonApiSelectors', () => {
   describe('getStoreResource$', () => {
     it('should get a single resource given a type and id', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreResource$({ type: 'Article', id: '1' }))
         .subscribe(d => res = d);
       tick();
@@ -355,8 +332,7 @@ describe('NgrxJsonApiSelectors', () => {
 
     it('should return undefined if the resources are not found', fakeAsync(() => {
       let res;
-      let sub = obs
-        .select('api')
+      let sub = store
         .let(selectors.getStoreResource$({ type: 'Article', id: '100' }))
         .subscribe(d => res = d);
       tick();
