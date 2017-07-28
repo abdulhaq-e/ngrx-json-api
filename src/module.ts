@@ -66,7 +66,9 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
   ],
   imports: [
     HttpModule,
-    EffectsModule.run(NgrxJsonApiEffects)
+    EffectsModule.forFeature([
+      NgrxJsonApiEffects
+    ])
   ],
   exports: [
     DenormaliseStoreResourcePipe,
