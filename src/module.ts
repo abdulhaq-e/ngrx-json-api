@@ -4,13 +4,14 @@ import {
   Http, HttpModule
 } from '@angular/http';
 
-import { Store } from '@ngrx/store';
+import { Store, StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
 import { NgrxJsonApi } from './api';
 import { NgrxJsonApiEffects } from './effects';
 import { NgrxJsonApiSelectors } from './selectors';
 import { NgrxJsonApiService } from './services';
+import { reducer } from './reducers';
 import {
   DenormaliseStoreResourcePipe,
   GetDenormalisedValuePipe,
@@ -68,7 +69,8 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
     HttpModule,
     EffectsModule.forFeature([
       NgrxJsonApiEffects
-    ])
+    ]),
+    StoreModule.forFeature('NgrxJsonApi', reducer, { })
   ],
   exports: [
     DenormaliseStoreResourcePipe,

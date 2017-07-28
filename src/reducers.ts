@@ -1,7 +1,8 @@
-import { Action, ActionReducer } from '@ngrx/store';
+import { Action, ActionReducer, ActionReducerMap } from '@ngrx/store';
 
 import {
-  NgrxJsonApiActionTypes
+  NgrxJsonApiActionTypes,
+  NgrxJsonApiActions
 } from './actions';
 import {
   Query,
@@ -37,7 +38,7 @@ export const initialNgrxJsonApiState: NgrxJsonApiStore = {
 };
 
 export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJsonApiState,
-  action: Action) {
+  action: NgrxJsonApiActions) {
     let newState;
 
     switch (action.type) {
@@ -322,3 +323,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         return state;
     }
   };
+
+export const reducer: ActionReducerMap<any> = {
+  api: NgrxJsonApiStoreReducer
+};
