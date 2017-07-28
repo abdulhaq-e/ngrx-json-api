@@ -8,71 +8,19 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 
-import { Store, StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 
 import { NgrxJsonApiSelectors } from '../src/selectors';
-import {
-  initialNgrxJsonApiState, reducer
-} from '../src/reducers';
-import {
-  NGRX_JSON_API_CONFIG,
-  selectorsFactory,
-  NgrxJsonApiModule
-} from '../src/module';
-import { updateStoreDataFromPayload } from '../src/utils';
-import {
-  testPayload,
-  resourceDefinitions
-} from './test_utils';
+import { TestingModule } from './testing.module';
 
 fdescribe('NgrxJsonApiSelectors', () => {
   let selectors;
   let store;
-  let queries = {
-    '1': {
-      query: {
-        queryId: '1',
-      },
-      resultIds: [{ type: 'Article', id: '1' }, { type: 'Article', id: '2' }]
-    },
-    '2': {
-      query: {
-        queryId: '2',
-      },
-      resultIds: [{ type: 'Blog', id: '1' }]
-    },
-    '55': {
-      query: {
-        queryId: '55',
-      },
-      resultIds: []
-    },
-    '56': {
-      query: {
-        queryId: '1',
-      },
-      resultIds: [{ type: 'Article', id: '10' }, { type: 'Article', id: '20' }]
-    },
-  };
-
-  let initialState = {
-    NgrxJsonApi: {
-      api: {
-      ...{}, ...initialNgrxJsonApiState, ...{
-        data: updateStoreDataFromPayload({}, testPayload),
-        queries: queries
-      }
-    }
-  }};
 
 beforeEach(() => {
   TestBed.configureTestingModule({
     imports: [
-      StoreModule.forRoot({}, {initialState: initialState}),
-      EffectsModule.forRoot([]),
-      NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'test' }),
-      // StoreModule.forFeature('NgrxJsonApi', reducer, { initialState: initialState }),
+      TestingModule
     ],
   })
 });

@@ -1,8 +1,21 @@
+import { NgModule } from '@angular/core';
+
 import { Response, ResponseOptions } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
+
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+
+import { initialNgrxJsonApiState } from '../src/reducers';
+import { NgrxJsonApiModule } from '../src/module';
+import { updateStoreDataFromPayload } from '../src/utils';
+import {
+  testPayload,
+  resourceDefinitions
+} from './test_utils';
 
 import { NgrxJsonApi } from '../src/api';
 import {
@@ -10,6 +23,56 @@ import {
   Query,
 } from '../src/interfaces';
 import { NgrxJsonApiEffects } from '../src/effects';
+
+
+let queries = {
+  '1': {
+    query: {
+      queryId: '1',
+    },
+    resultIds: [{ type: 'Article', id: '1' }, { type: 'Article', id: '2' }]
+  },
+  '2': {
+    query: {
+      queryId: '2',
+    },
+    resultIds: [{ type: 'Blog', id: '1' }]
+  },
+  '55': {
+    query: {
+      queryId: '55',
+    },
+    resultIds: []
+  },
+  '56': {
+    query: {
+      queryId: '1',
+    },
+    resultIds: [{ type: 'Article', id: '10' }, { type: 'Article', id: '20' }]
+  },
+};
+
+let initialState = {
+  NgrxJsonApi: {
+    api: {
+    ...{}, ...initialNgrxJsonApiState, ...{
+      data: updateStoreDataFromPayload({}, testPayload),
+      queries: queries
+    }
+  }
+}};
+
+
+@NgModule({
+  imports: [
+    StoreModule.forRoot({}, {initialState: initialState}),
+    EffectsModule.forRoot([]),
+    NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'test' }),
+  ]
+})
+export class TestingModule {
+
+}
 
 
 export class JsonApiMock {
