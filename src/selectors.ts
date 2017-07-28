@@ -15,9 +15,6 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/zip';
 
-import '@ngrx/core/add/operator/select';
-
-import { compose } from '@ngrx/core/compose';
 import { Store } from '@ngrx/store';
 
 import {

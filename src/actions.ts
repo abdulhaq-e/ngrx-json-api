@@ -1,4 +1,4 @@
-'[NgrxJsonApi] import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 import { Action } from '@ngrx/store';
 
@@ -9,6 +9,8 @@ import {
   Query,
   ModifyStoreResourceErrorsPayload
 } from './interfaces';
+import { type } from './utils';
+
 
 export const NgrxJsonApiActionTypes = {
   API_POST_INIT: '[NgrxJsonApi] API_POST_INIT',
