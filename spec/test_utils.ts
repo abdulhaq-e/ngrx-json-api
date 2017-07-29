@@ -57,7 +57,11 @@ export const resourceDefinitions = [
     attributes: {
       name: {}
     }
-  }
+  },
+  {
+      type: 'Post',
+      collectionPath: 'posts',
+  },
 ];
 
 export const documentPayload = {

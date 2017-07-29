@@ -60,7 +60,7 @@ import {
   MOCK_NGRX_EFFECTS_PROVIDERS
 } from './testing.module';
 
-describe('NgrxJsonApiEffects', () => {
+xdescribe('NgrxJsonApiEffects', () => {
   let runner: EffectsRunner;
   let effects;
 

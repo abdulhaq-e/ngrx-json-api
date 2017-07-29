@@ -7,62 +7,21 @@ import {
 } from '@angular/core/testing';
 
 import { MockBackend } from '@angular/http/testing';
-import {
-  Http,
-  ConnectionBackend,
-  BaseRequestOptions,
-  Response,
-  ResponseOptions
-} from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
 
 import { NgrxJsonApi } from '../src/api';
-import {
-  NGRX_JSON_API_CONFIG,
-  apiFactory,
-} from '../src/module';
-import {
-  NgrxJsonApiConfig,
-  ResourceDefinition
-} from '../src/interfaces';
+
+import { TestingModule, AlternativeTestingModule } from './testing.module';
 
 describe('ngrx json api', () => {
   let jsonapi;
-  let resourcesDefinitions: Array<ResourceDefinition> = [
-    {
-      type: 'Post',
-      collectionPath: 'posts',
-    },
-    {
-      type: 'Person',
-      collectionPath: 'people',
-    }
-  ];
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        BaseRequestOptions,
-        MockBackend,
-        {
-          provide: Http, useFactory: (backend: ConnectionBackend,
-            defaultOptions: BaseRequestOptions) => {
-            return new Http(backend, defaultOptions);
-          }, deps: [MockBackend, BaseRequestOptions]
-        },
-        {
-          provide: NgrxJsonApi,
-          useFactory: apiFactory,
-          deps: [Http, NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NGRX_JSON_API_CONFIG,
-          useValue: {
-            apiUrl: 'myapi.com',
-            resourceDefinitions: resourcesDefinitions
-          }
-        },
-      ]
+      imports: [
+        TestingModule
+      ],
     });
   });
   //
@@ -263,34 +222,8 @@ describe('ngrx json api with overridden configs', () => {
   ];
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        BaseRequestOptions,
-        MockBackend,
-        {
-          provide: Http, useFactory: (backend: ConnectionBackend,
-            defaultOptions: BaseRequestOptions) => {
-            return new Http(backend, defaultOptions);
-          }, deps: [MockBackend, BaseRequestOptions]
-        },
-        {
-          provide: NgrxJsonApi,
-          useFactory: apiFactory,
-          deps: [Http, NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NGRX_JSON_API_CONFIG,
-          useValue: {
-            apiUrl: 'myapi.com',
-            resourceDefinitions: resourcesDefinitions,
-            urlBuilder: {
-              generateIncludedQueryParams: (params) => 'helloIncluded',
-              generateFilteringQueryParams: (params) => 'helloFiltering',
-              generateFieldsQueryParams: (params) => 'helloFields',
-              generateSortingQueryParams: (params) => 'helloSorting'
-              // generateQueryParams: (params) => 'helloGenerator'
-            }
-          }
-        },
+      imports: [
+        AlternativeTestingModule
       ]
     });
   });

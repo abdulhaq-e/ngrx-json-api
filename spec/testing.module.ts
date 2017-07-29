@@ -2,6 +2,15 @@ import { NgModule } from '@angular/core';
 
 import { Response, ResponseOptions } from '@angular/http';
 
+import { MockBackend } from '@angular/http/testing';
+import {
+  Http,
+  ConnectionBackend,
+  BaseRequestOptions,
+  Response,
+  ResponseOptions
+} from '@angular/http';
+
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -9,20 +18,21 @@ import 'rxjs/add/observable/throw';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
+import { NgrxJsonApi } from '../src/api';
 import { initialNgrxJsonApiState } from '../src/reducers';
 import { NgrxJsonApiModule } from '../src/module';
 import { updateStoreDataFromPayload } from '../src/utils';
-import {
-  testPayload,
-  resourceDefinitions
-} from './test_utils';
-
-import { NgrxJsonApi } from '../src/api';
 import {
   Payload,
   Query,
 } from '../src/interfaces';
 import { NgrxJsonApiEffects } from '../src/effects';
+
+import {
+  testPayload,
+  resourceDefinitions
+} from './test_utils';
+
 
 
 let queries = {
@@ -55,22 +65,63 @@ let queries = {
 let initialState = {
   NgrxJsonApi: {
     api: {
-    ...{}, ...initialNgrxJsonApiState, ...{
-      data: updateStoreDataFromPayload({}, testPayload),
-      queries: queries
-    }
+    ...{ }, ...initialNgrxJsonApiState, ...{
+  data: updateStoreDataFromPayload({}, testPayload),
+    queries: queries
+}
   }
 }};
 
 
 @NgModule({
   imports: [
-    StoreModule.forRoot({}, {initialState: initialState}),
+    StoreModule.forRoot({}, { initialState: initialState }),
     EffectsModule.forRoot([]),
-    NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'test' }),
+    NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com' }),
+  ],
+  providers: [
+    BaseRequestOptions,
+    MockBackend,
+    {
+      provide: Http, useFactory: (backend: ConnectionBackend,
+        defaultOptions: BaseRequestOptions) => {
+        return new Http(backend, defaultOptions);
+      }, deps: [MockBackend, BaseRequestOptions]
+    },
   ]
 })
 export class TestingModule {
+
+}
+
+
+@NgModule({
+  imports: [
+    StoreModule.forRoot({}, { initialState: initialState }),
+    EffectsModule.forRoot([]),
+    NgrxJsonApiModule.configure({
+      resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com',
+      urlBuilder: {
+        generateIncludedQueryParams: (params) => 'helloIncluded',
+        generateFilteringQueryParams: (params) => 'helloFiltering',
+        generateFieldsQueryParams: (params) => 'helloFields',
+        generateSortingQueryParams: (params) => 'helloSorting'
+        // generateQueryParams: (params) => 'helloGenerator'
+      }
+    }),
+  ],
+  providers: [
+    BaseRequestOptions,
+    MockBackend,
+    {
+      provide: Http, useFactory: (backend: ConnectionBackend,
+        defaultOptions: BaseRequestOptions) => {
+        return new Http(backend, defaultOptions);
+      }, deps: [MockBackend, BaseRequestOptions]
+    },
+  ]
+})
+export class AlternativeTestingModule {
 
 }
 
