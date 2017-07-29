@@ -40,54 +40,25 @@ import {
   updateStoreDataFromPayload
 } from '../src/utils';
 
+import { TestingModule } from './testing.module';
 import {
   testPayload,
   resourceDefinitions
 } from './test_utils';
 
-describe('Pipes', () => {
+fdescribe('Pipes', () => {
   let pipe;
 
   beforeEach(() => {
-    let store = {
-      api: Object.assign({}, initialNgrxJsonApiState, {
-        data: updateStoreDataFromPayload({}, testPayload),
-      }, )
-    };
     TestBed.configureTestingModule({
       imports: [
-        HttpModule,
-        EffectsModule.run(NgrxJsonApiEffects),
-        // EffectsModule.run(NgrxJsonApiEffects),
-        StoreModule.provideStore({ api: NgrxJsonApiStoreReducer }, store),
+        TestingModule
       ],
       providers: [
-        {
-          provide: NgrxJsonApi,
-          useFactory: apiFactory,
-          deps: [Http, NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NgrxJsonApiService,
-          useFactory: serviceFactory,
-          deps: [Store, NgrxJsonApiSelectors]
-        },
-        {
-          provide: NgrxJsonApiSelectors,
-          useFactory: selectorsFactory,
-          deps: [NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NGRX_JSON_API_CONFIG,
-          useValue: {
-            storeLocation: 'api',
-            resourceDefinitions: resourceDefinitions
-          }
-        },
         DenormaliseStoreResourcePipe,
         GetDenormalisedValuePipe,
         SelectStoreResourcePipe,
-      ],
+      ]
     })
   });
 
