@@ -6,12 +6,10 @@ import {
   TestBed
 } from '@angular/core/testing';
 
-import { Store, StoreModule } from '@ngrx/store';
+import { hot, cold } from 'jasmine-marbles';
 
-import {
-  EffectsTestingModule,
-  EffectsRunner
-} from '@ngrx/effects/testing';
+import { Store, StoreModule } from '@ngrx/store';
+import { provideMockActions } from '@ngrx/effects/testing';
 
 import { NgrxJsonApi } from '../src/api';
 import { NgrxJsonApiService } from '../src/services';
@@ -57,46 +55,29 @@ import { updateStoreDataFromPayload } from '../src/utils';
 
 import {
   MOCK_JSON_API_PROVIDERS,
-  MOCK_NGRX_EFFECTS_PROVIDERS
+  MOCK_NGRX_EFFECTS_PROVIDERS,
+  TestingModule
 } from './testing.module';
 
 xdescribe('NgrxJsonApiEffects', () => {
-  let runner: EffectsRunner;
   let effects;
+  let actions;
 
   beforeEach(() => {
-    let store = {
-      api: Object.assign({}, initialNgrxJsonApiState, {
-        data: updateStoreDataFromPayload({}, testPayload),
-      }, )
-    };
     TestBed.configureTestingModule({
       imports: [
-        EffectsTestingModule,
-        StoreModule.provideStore({ api: NgrxJsonApiStoreReducer }, store),
+        TestingModule,
       ],
       providers: [
         ...MOCK_JSON_API_PROVIDERS,
         ...MOCK_NGRX_EFFECTS_PROVIDERS,
-        {
-          provide: NgrxJsonApiSelectors,
-          useFactory: selectorsFactory,
-          deps: [NGRX_JSON_API_CONFIG]
-        },
-        {
-          provide: NGRX_JSON_API_CONFIG,
-          useValue: {
-            storeLocation: 'api',
-            resourceDefinitions: resourceDefinitions
-          }
-        }
+        provideMockActions(() => actions),
       ]
     })
   });
 
-  beforeEach(inject([EffectsRunner, NgrxJsonApiEffects],
-    (_runner, _effects) => {
-      runner = _runner;
+  beforeEach(inject([NgrxJsonApiEffects],
+    (_effects) => {
       effects = _effects;
     }
   ));
