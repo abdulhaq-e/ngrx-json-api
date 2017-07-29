@@ -30,6 +30,10 @@ beforeEach(inject([NgrxJsonApiSelectors, Store], (s, st) => {
   store = st;
 }));
 
+beforeEach(() => {
+  store = store.let(selectors.getNgrxJsonApiStore$())
+})
+
 describe('getStoreData$', () => {
   it('should get the store data', fakeAsync(() => {
     let res;

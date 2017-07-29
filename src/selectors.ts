@@ -50,7 +50,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public getStoreData$() {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$.let(this.getNgrxJsonApiStore$()).select('data');
+      return state$.select('data');
     };
   }
 
@@ -82,7 +82,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public getStoreQueries$() {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$.let(this.getNgrxJsonApiStore$()).select('queries');
+      return state$.select('queries');
     };
   }
 
@@ -104,7 +104,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public getManyResults$(queryId: string, denormalize: boolean) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-        return state$.let(this.getNgrxJsonApiStore$()).map(state => {
+        return state$.map(state => {
             let storeQuery = state.queries[queryId];
             if (!storeQuery) {
               return undefined;
@@ -133,7 +133,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public getOneResult$(queryId: string, denormalize: boolean) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$.let(this.getNgrxJsonApiStore$()).map(state => {
+      return state$.map(state => {
         let storeQuery = state.queries[queryId];
         if (!storeQuery) {
           return undefined;
