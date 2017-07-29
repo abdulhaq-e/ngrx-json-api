@@ -13,7 +13,7 @@ import { Store } from '@ngrx/store';
 import { NgrxJsonApiSelectors } from '../src/selectors';
 import { TestingModule } from './testing.module';
 
-fdescribe('NgrxJsonApiSelectors', () => {
+describe('NgrxJsonApiSelectors', () => {
   let selectors;
   let store;
 

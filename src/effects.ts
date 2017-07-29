@@ -100,7 +100,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .map<Action, Query>(toPayload)
     .mergeMap((query: Query) => {
       return this.store
-        .select(this.selectors.storeLocation)
+        .let(this.selectors.getNgrxJsonApiStore$())
         .let(this.selectors.queryStore$(query))
         .map(results => new LocalQuerySuccessAction({
           jsonApiData: {data: results},

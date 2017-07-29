@@ -20,7 +20,8 @@ import {
   ClearStoreAction,
   CompactStoreAction,
   ApiQueryRefreshAction,
-  ModifyStoreResourceErrorsAction, NewStoreResourceAction
+  ModifyStoreResourceErrorsAction,
+  NewStoreResourceAction
 } from './actions';
 import {
   NgrxJsonApiStore,
@@ -99,7 +100,7 @@ export class NgrxJsonApiService {
     private store: Store<any>,
     private selectors: NgrxJsonApiSelectors<any>,
   ) {
-    this.store.select(selectors.storeLocation)
+    this.store.let(this.selectors.getNgrxJsonApiStore$())
       .subscribe(it => this.storeSnapshot = it as NgrxJsonApiStore);
   }
 
@@ -209,7 +210,7 @@ export class NgrxJsonApiService {
   public selectManyResults(queryId: string,
                            denormalize = false): Observable<ManyQueryResult> {
     let queryResult$ = this.store
-      .select(this.selectors.storeLocation)
+      .let(this.selectors.getNgrxJsonApiStore$())
       .let(this.selectors.getManyResults$(queryId, denormalize));
     return queryResult$;
   }
@@ -223,7 +224,7 @@ export class NgrxJsonApiService {
   public selectOneResults(queryId: string,
                           denormalize = false): Observable<OneQueryResult> {
     let queryResult$ = this.store
-      .select(this.selectors.storeLocation)
+      .let(this.selectors.getNgrxJsonApiStore$())
       .let(this.selectors.getOneResult$(queryId, denormalize));
     return queryResult$ as Observable<OneQueryResult>;
   }
@@ -234,7 +235,6 @@ export class NgrxJsonApiService {
    */
   public selectStoreResource(identifier: ResourceIdentifier): Observable<StoreResource> {
     return this.store
-      .select(this.selectors.storeLocation)
       .let(this.selectors.getStoreResource$(identifier));
   }
 
@@ -243,7 +243,7 @@ export class NgrxJsonApiService {
     Observable<StoreResource> | Observable<StoreResource[]> {
     return storeResource$
       .combineLatest(this.store
-        .select(this.selectors.storeLocation)
+        .let(this.selectors.getNgrxJsonApiStore$())
         .let(this.selectors.getStoreData$()), (
           storeResource: StoreResource | StoreResource[], storeData: NgrxJsonApiStoreData
         ) => {

@@ -43,7 +43,7 @@ export class NgrxJsonApiSelectors<T> {
   }
 
   public getNgrxJsonApiStore$() {
-    return (state$: Observable<NgrxJsonApiStore>) => {
+    return (state$: Observable<any>) => {
       return state$.select('NgrxJsonApi').select('api');
     };
   }
