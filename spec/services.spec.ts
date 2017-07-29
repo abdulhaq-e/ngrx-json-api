@@ -46,7 +46,7 @@ import {
   resourceDefinitions
 } from './test_utils';
 
-fdescribe('NgrxJsonApiService', () => {
+describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
 
   beforeEach(() => {

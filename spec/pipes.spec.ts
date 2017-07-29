@@ -46,7 +46,7 @@ import {
   resourceDefinitions
 } from './test_utils';
 
-fdescribe('Pipes', () => {
+describe('Pipes', () => {
   let pipe;
 
   beforeEach(() => {
