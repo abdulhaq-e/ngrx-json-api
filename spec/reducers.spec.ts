@@ -506,6 +506,7 @@ describe('NgrxJsonApiReducer', () => {
     });
 
     it('should create new resource', () => {
+      console.log(state.data)
       let newState = NgrxJsonApiStoreReducer(state, new NewStoreResourceAction(
         { type: 'Article', id: '1' }
       ));

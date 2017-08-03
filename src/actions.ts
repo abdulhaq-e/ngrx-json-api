@@ -9,7 +9,6 @@ import {
   Query,
   ModifyStoreResourceErrorsPayload
 } from './interfaces';
-import { type } from './utils';
 
 
 export const NgrxJsonApiActionTypes = {
