@@ -1,15 +1,11 @@
 import { NgModule } from '@angular/core';
 
-import { Response, ResponseOptions } from '@angular/http';
-
-import { MockBackend } from '@angular/http/testing';
 import {
-  Http,
-  ConnectionBackend,
-  BaseRequestOptions,
-  Response,
-  ResponseOptions
-} from '@angular/http';
+  HttpClient, HttpClientModule
+} from '@angular/common/http';
+import {
+  HttpClientTestingModule
+} from '@angular/common/http/testing';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
@@ -77,18 +73,11 @@ let initialState = {
   imports: [
     StoreModule.forRoot({}, { initialState: initialState }),
     EffectsModule.forRoot([]),
+    HttpClientTestingModule,
+    HttpClientModule,
     NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com' }),
   ],
-  providers: [
-    BaseRequestOptions,
-    MockBackend,
-    {
-      provide: Http, useFactory: (backend: ConnectionBackend,
-        defaultOptions: BaseRequestOptions) => {
-        return new Http(backend, defaultOptions);
-      }, deps: [MockBackend, BaseRequestOptions]
-    },
-  ]
+  providers: []
 })
 export class TestingModule {
 
@@ -99,6 +88,8 @@ export class TestingModule {
   imports: [
     StoreModule.forRoot({}, { initialState: initialState }),
     EffectsModule.forRoot([]),
+    HttpClientModule,
+    HttpClientTestingModule,
     NgrxJsonApiModule.configure({
       resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com',
       urlBuilder: {
@@ -110,98 +101,89 @@ export class TestingModule {
       }
     }),
   ],
-  providers: [
-    BaseRequestOptions,
-    MockBackend,
-    {
-      provide: Http, useFactory: (backend: ConnectionBackend,
-        defaultOptions: BaseRequestOptions) => {
-        return new Http(backend, defaultOptions);
-      }, deps: [MockBackend, BaseRequestOptions]
-    },
-  ]
+  providers: []
 })
 export class AlternativeTestingModule {
 
 }
 
 
-export class JsonApiMock {
-  constructor() { }
-
-  create(query, document) {
-    if (document.data.type === 'SUCCESS') {
-      return Observable.of('SUCCESS');
-    } else if (document.data.type === 'FAIL') {
-      return Observable.throw('FAIL');
-    }
-  }
-
-  update(query, document) {
-    if (document.data.type === 'SUCCESS') {
-      return Observable.of('SUCCESS');
-    } else if (document.data.type === 'FAIL') {
-      return Observable.throw('FAIL');
-    }
-  }
-
-  find(query) {
-    if (query.type === 'SUCCESS') {
-      let res = {
-        data: {
-          type: 'SUCCESS'
-        }
-      };
-      return Observable.of(new Response(
-        new ResponseOptions({
-          body: JSON.stringify(res),
-          status: 200
-        })
-      ));
-    } else if (query.type === 'FAIL') {
-      return Observable.throw('FAIL QUERY');
-    }
-  }
-
-  delete(query) {
-    if (query.type === 'SUCCESS') {
-      return Observable.of(new Response(
-        new ResponseOptions({})));
-    } else if (query.type === 'FAIL') {
-      return Observable.throw('FAIL QUERY');
-    }
-  }
-}
-
-export const MOCK_JSON_API_PROVIDERS = [
-  { provide: JsonApiMock, useClass: JsonApiMock },
-  { provide: NgrxJsonApi, useExisting: JsonApiMock }
-];
-
-
-export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
-  // constructor() {
-  //   // super()
-  // }
-
-  private toErrorPayload(query, response) {
-    if (response === 'FAIL QUERY') {
-      return { query: query };
-    } else if (response === 'Unknown query') {
-      return query;
-    }
-    return ({
-      query: query,
-      jsonApiData: { data: { type: response } }
-    });
-  }
-
-  private generatePayload(resource, operation) {
-    return resource;
-  }
-}
-
-export const MOCK_NGRX_EFFECTS_PROVIDERS = [
-  { provide: NgrxJsonApiMockEffects, useClass: NgrxJsonApiMockEffects },
-  { provide: NgrxJsonApiEffects, useExisting: NgrxJsonApiMockEffects }
-];
+// export class JsonApiMock {
+//   constructor() { }
+//
+//   create(query, document) {
+//     if (document.data.type === 'SUCCESS') {
+//       return Observable.of('SUCCESS');
+//     } else if (document.data.type === 'FAIL') {
+//       return Observable.throw('FAIL');
+//     }
+//   }
+//
+//   update(query, document) {
+//     if (document.data.type === 'SUCCESS') {
+//       return Observable.of('SUCCESS');
+//     } else if (document.data.type === 'FAIL') {
+//       return Observable.throw('FAIL');
+//     }
+//   }
+//
+//   find(query) {
+//     if (query.type === 'SUCCESS') {
+//       let res = {
+//         data: {
+//           type: 'SUCCESS'
+//         }
+//       };
+//       return Observable.of(new Response(
+//         new ResponseOptions({
+//           body: JSON.stringify(res),
+//           status: 200
+//         })
+//       ));
+//     } else if (query.type === 'FAIL') {
+//       return Observable.throw('FAIL QUERY');
+//     }
+//   }
+//
+//   delete(query) {
+//     if (query.type === 'SUCCESS') {
+//       return Observable.of(new Response(
+//         new ResponseOptions({})));
+//     } else if (query.type === 'FAIL') {
+//       return Observable.throw('FAIL QUERY');
+//     }
+//   }
+// }
+//
+// export const MOCK_JSON_API_PROVIDERS = [
+//   { provide: JsonApiMock, useClass: JsonApiMock },
+//   { provide: NgrxJsonApi, useExisting: JsonApiMock }
+// ];
+//
+//
+// export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
+//   // constructor() {
+//   //   // super()
+//   // }
+//
+//   private toErrorPayload(query, response) {
+//     if (response === 'FAIL QUERY') {
+//       return { query: query };
+//     } else if (response === 'Unknown query') {
+//       return query;
+//     }
+//     return ({
+//       query: query,
+//       jsonApiData: { data: { type: response } }
+//     });
+//   }
+//
+//   private generatePayload(resource, operation) {
+//     return resource;
+//   }
+// }
+//
+// export const MOCK_NGRX_EFFECTS_PROVIDERS = [
+//   { provide: NgrxJsonApiMockEffects, useClass: NgrxJsonApiMockEffects },
+//   { provide: NgrxJsonApiEffects, useExisting: NgrxJsonApiMockEffects }
+// ];

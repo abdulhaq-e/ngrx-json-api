@@ -6,7 +6,8 @@ import {
   TestBed
 } from '@angular/core/testing';
 
-import { MockBackend } from '@angular/http/testing';
+import { HttpTestingController } from '@angular/common/http/testing';
+import { HttpRequest } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -14,8 +15,15 @@ import { NgrxJsonApi } from '../src/api';
 
 import { TestingModule, AlternativeTestingModule } from './testing.module';
 
+
 describe('ngrx json api', () => {
-  let jsonapi;
+  let jsonapi: NgrxJsonApi;
+  let httpMock: HttpTestingController;
+  let req;
+
+  const getRequest = () => {
+    req = httpMock.expectOne((r) => r.url.slice(0, 5) == 'myapi');
+  }
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -25,9 +33,14 @@ describe('ngrx json api', () => {
     });
   });
   //
-  beforeEach(inject([NgrxJsonApi], (api) => {
-    jsonapi = api;
+  beforeEach(inject([NgrxJsonApi, HttpTestingController], (_api, _http) => {
+    jsonapi = _api;
+    httpMock = _http;
   }));
+
+  afterEach(() => {
+    httpMock.verify()
+  })
 
   it('should have the api url', () => {
     expect(jsonapi.config.apiUrl).toEqual('myapi.com');
@@ -69,39 +82,28 @@ describe('ngrx json api', () => {
 
   describe('find', () => {
     it('should find a single model using find with getOne',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts/1');
-          expect(c.request.method).toBe(0);
-        });
+      () => {
         jsonapi.find({
           type: 'Post',
           id: 1
-        });
-        tick();
-      })));
+        }).subscribe();
+        getRequest()
+        expect(req.request.url).toBe('myapi.com/posts/1');
+        expect(req.request.method).toEqual('GET');
+      });
 
     it('should find multiple models using find with getMany',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts');
-          expect(c.request.method).toBe(0);
-        });
+      () => {
         jsonapi.find({
           type: 'Post',
-        });
-        tick();
-      })));
+        }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe('myapi.com/posts');
+        expect(req.request.method).toBe('GET');
+      });
 
     it('should find resources with queryParams',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          expect(c.request.url).toBe(
-            'myapi.com/posts?include=person,comments&filter[person__name]=smith&filter[person__age]=20');
-          expect(c.request.method).toBe(0);
-        });
+      () => {
         jsonapi.find({
           type: 'Post',
           params: {
@@ -111,115 +113,101 @@ describe('ngrx json api', () => {
             ],
             include: ['person', 'comments']
           }
-        });
-        tick();
-      })));
+        }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe(
+          'myapi.com/posts?include=person,comments&filter[person__name]=smith&filter[person__age]=20');
+        expect(req.request.method).toBe('GET');
+      });
   });
 
   it('should have the appropriate json api headers attached in the request',
-    fakeAsync(inject([MockBackend], (mockBackend) => {
-      mockBackend.connections.subscribe(c => {
-        // console.log(c.request);
-        expect(c.request.headers.has('Content-Type')).toBeTruthy();
-        expect(c.request.headers.has('Accept')).toBeTruthy();
-        expect(c.request.headers.get('Content-Type')).toBe('application/vnd.api+json');
-        expect(c.request.headers.get('Accept')).toBe('application/vnd.api+json');
-      });
+    () => {
       jsonapi.create({
-        type: 'Post',
-      },{
+        type: 'Post'
+      }, {
           data: { title: 'Hello World' }
-        });
-      tick();
-    })));
+        }).subscribe();
+      getRequest();
+      expect(req.request.headers.has('Content-Type')).toBeTruthy();
+      expect(req.request.headers.has('Accept')).toBeTruthy();
+      expect(req.request.headers.get('Content-Type')).toBe('application/vnd.api+json');
+      expect(req.request.headers.get('Accept')).toBe('application/vnd.api+json');
+    });
 
   describe('request', () => {
     it('should make handle requests using request!',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts/1');
-          expect(c.request.method).toBe(0);
-        });
-        jsonapi.request({ url: 'myapi.com/posts/1', method: 'GET' });
-        tick();
-      })));
+      () => {
+        jsonapi.request({ url: 'myapi.com/posts/1', method: 'GET' }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe('myapi.com/posts/1');
+        expect(req.request.method).toBe('GET');
+      });
   });
 
   describe('create', () => {
     it('should should create a model using create',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts');
-          expect(c.request.method).toBe(1);
-          expect(c.request._body).toBe(JSON.stringify({
-            data: {
-              title: 'Hello', type: 'Post'
-            }
-          }));
-        });
+      () => {
         jsonapi.create({
           type: 'Post'
         }, {
             data: { title: 'Hello', type: 'Post' }
-          });
-        tick();
-      })));
+          }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe('myapi.com/posts');
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toBe(JSON.stringify({
+          data: {
+            title: 'Hello', type: 'Post'
+          }
+        }));
+      });
   });
 
   describe('update', () => {
     it('should update a model using update!',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts/1');
-          expect(c.request.method).toBe(6);
-          expect(c.request._body).toBe(JSON.stringify({
-            data: { title: 'Hello', id: '1', type: 'Post' }
-          }));
-        });
+      () => {
         jsonapi.update({
           type: 'Post',
           id: '1'
         }, {
             data: {
               title: 'Hello', id: '1', type: 'Post'
-            }});
-        tick();
-      })));
+            }
+          }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe('myapi.com/posts/1');
+        expect(req.request.method).toBe('PATCH');
+        expect(req.request.body).toBe(JSON.stringify({
+          data: { title: 'Hello', id: '1', type: 'Post' }
+        }));
+      });
   });
 
   describe('delete', () => {
     it('should delete a model using delete!',
-      fakeAsync(inject([MockBackend], (mockBackend) => {
-        mockBackend.connections.subscribe(c => {
-          // console.log(c.request);
-          expect(c.request.url).toBe('myapi.com/posts/1');
-          expect(c.request.method).toBe(3);
-        });
+      () => {
         jsonapi.delete({
-            type: 'Post',
-            id: '1'
-        });
-        tick();
-      })));
+          type: 'Post',
+          id: '1'
+        }).subscribe();
+        getRequest();
+        expect(req.request.url).toBe('myapi.com/posts/1');
+        expect(req.request.method).toBe('DELETE');
+      });
   });
 
 });
 
 describe('ngrx json api with overridden configs', () => {
-  let jsonapi;
-  let resourcesDefinitions: Array<ResourceDefinition> = [
-    {
-      type: 'Post',
-      collectionPath: 'posts',
-    },
-    {
-      type: 'Person',
-      collectionPath: 'people',
-    }
-  ];
+  let jsonapi: NgrxJsonApi;
+  let httpMock: HttpTestingController;
+  let req;
+
+  const getRequest = () => {
+    req = httpMock.expectOne((r) => r.url.slice(0, 5) == 'myapi');
+  }
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -227,30 +215,33 @@ describe('ngrx json api with overridden configs', () => {
       ]
     });
   });
-  //
-  beforeEach(inject([NgrxJsonApi], (api) => {
-    jsonapi = api;
+
+  beforeEach(inject([NgrxJsonApi, HttpTestingController], (_api, _http) => {
+    jsonapi = _api;
+    httpMock = _http;
   }));
 
+  afterEach(() => {
+    httpMock.verify()
+  })
+
   it('should find resources with queryParams',
-    fakeAsync(inject([MockBackend], (mockBackend) => {
-      mockBackend.connections.subscribe(c => {
-        expect(c.request.url).toBe(
-          'myapi.com/posts?helloIncluded&helloFiltering&helloSorting&helloFields');
-        expect(c.request.method).toBe(0);
-      });
+    () => {
       jsonapi.find({
-          type: 'Post',
-          params: {
-            filtering: [
-              { path: 'person__name', value: 'smith' },
-              { path: 'person__age', value: 20 }
-            ],
-            include: ['person', 'comments'],
-            sorting: [{ api: 'person', direction: 'ASC' }],
-            fields: ['name']
+        type: 'Post',
+        params: {
+          filtering: [
+            { path: 'person__name', value: 'smith' },
+            { path: 'person__age', value: 20 }
+          ],
+          include: ['person', 'comments'],
+          sorting: [{ api: 'person', direction: 'ASC' }],
+          fields: ['name']
         }
-      });
-      tick();
-    })));
+      }).subscribe();
+      getRequest();
+      expect(req.request.url).toBe(
+        'myapi.com/posts?helloIncluded&helloFiltering&helloSorting&helloFields');
+      expect(req.request.method).toBe('GET');
+    });
 });

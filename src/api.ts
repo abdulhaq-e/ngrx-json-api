@@ -1,14 +1,10 @@
 import * as _ from 'lodash';
 
 import {
-  Headers,
-  Http,
-  Request,
-  RequestOptions,
-  Response,
-  RequestMethod,
-  URLSearchParams
-} from '@angular/http';
+  HttpHeaders,
+  HttpClient,
+  HttpRequest,
+} from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -32,7 +28,7 @@ import {
 
 export class NgrxJsonApi {
 
-  public headers: Headers = new Headers({
+  public headers: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/vnd.api+json',
     'Accept': 'application/vnd.api+json'
   });
@@ -40,7 +36,7 @@ export class NgrxJsonApi {
   public definitions = this.config.resourceDefinitions;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     public config: NgrxJsonApiConfig
   ) { }
 
@@ -158,12 +154,12 @@ export class NgrxJsonApi {
     queryParams = _generateQueryParams(includedParam, filteringParams, sortingParams,
         fieldsParams, offsetParams, limitParams);
 
-    let requestOptionsArgs = {
-      method: RequestMethod.Get,
+    let requestOptions = {
+      method: 'GET',
       url: this.urlBuilder(query, 'GET') + queryParams,
     };
 
-    return this.request(requestOptionsArgs);
+    return this.request(requestOptions);
   }
 
   public create(query: Query, document: Document) {
@@ -176,13 +172,13 @@ export class NgrxJsonApi {
       return Observable.throw('Data not found');
     }
 
-    let requestOptionsArgs = {
-      method: RequestMethod.Post,
+    let requestOptions = {
+      method: 'POST',
       url: this.urlBuilder(query, 'POST'),
       body: JSON.stringify({ data: document.data })
     };
 
-    return this.request(requestOptionsArgs);
+    return this.request(requestOptions);
   }
 
   public update(query: Query, document: Document) {
@@ -194,13 +190,13 @@ export class NgrxJsonApi {
     if (typeof document === undefined) {
       return Observable.throw('Data not found');
     }
-    let requestOptionsArgs = {
-      method: RequestMethod.Patch,
+    let requestOptions = {
+      method: 'PATCH',
       url: this.urlBuilder(query, 'PATCH'),
       body: JSON.stringify({ data: document.data })
     };
 
-    return this.request(requestOptionsArgs);
+    return this.request(requestOptions);
   }
 
 
@@ -211,7 +207,7 @@ export class NgrxJsonApi {
     }
 
     let requestOptions = {
-      method: RequestMethod.Delete,
+      method: 'DELETE',
       url: this.urlBuilder(query, 'DELETE')
     };
 
@@ -219,14 +215,23 @@ export class NgrxJsonApi {
   }
 
 
-  private request(requestOptionsArgs) {
+  private request(requestOptions) {
+    let request: HttpRequest;
+    let requestOptions = {...requestOptions, headers: this.headers}
 
-    let requestOptions = new RequestOptions(requestOptionsArgs);
-
-    let request = new Request(requestOptions.merge({
-      headers: this.headers
-    }));
-
+    if (requestOptions.method === 'GET') {
+      let { method, url, ...init} = requestOptions;
+      request = new HttpRequest(method, url, init)
+    } else if (requestOptions.method === 'POST') {
+      let { method, url, body, ...init} = requestOptions;
+      request = new HttpRequest(method, url, body, init)
+    } else if (requestOptions.method === 'PATCH') {
+      let { method, url, body, ...init} = requestOptions;
+      request = new HttpRequest(method, url, body, init)
+    } else if (requestOptions.method === 'DELETE') {
+      let { method, url, ...init} = requestOptions;
+      request = new HttpRequest(method, url, init)
+    }
     return this.http.request(request);
   }
 }

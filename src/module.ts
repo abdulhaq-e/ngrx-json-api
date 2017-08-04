@@ -1,8 +1,8 @@
 import { ModuleWithProviders, NgModule, OpaqueToken } from '@angular/core';
 
 import {
-  Http, HttpModule
-} from '@angular/http';
+  HttpClient
+} from '@angular/common/http';
 
 import { Store, StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -22,7 +22,7 @@ import { NgrxJsonApiConfig } from './interfaces';
 
 export const NGRX_JSON_API_CONFIG = new OpaqueToken('NGRX_JSON_API_CONFIG');
 
-export function apiFactory(http: Http, config: NgrxJsonApiConfig) {
+export function apiFactory(http: HttpClient, config: NgrxJsonApiConfig) {
   return new NgrxJsonApi(http, config);
 };
 
@@ -40,7 +40,7 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
     {
       provide: NgrxJsonApi,
       useFactory: apiFactory,
-      deps: [Http, NGRX_JSON_API_CONFIG]
+      deps: [HttpClient, NGRX_JSON_API_CONFIG]
     },
     {
       provide: NgrxJsonApiSelectors,
@@ -66,7 +66,6 @@ export function configure(config: NgrxJsonApiConfig): Array<any> {
     SelectStoreResourcePipe,
   ],
   imports: [
-    HttpModule,
     EffectsModule.forFeature([
       NgrxJsonApiEffects
     ]),
