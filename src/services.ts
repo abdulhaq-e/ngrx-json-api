@@ -105,11 +105,11 @@ export class NgrxJsonApiService {
   }
 
   public findOne(options: FindOptions): Observable<OneQueryResult> {
-    return this.findInternal(options, false);
+    return <Observable<OneQueryResult>>this.findInternal(options, false);
   };
 
   public findMany(options: FindOptions): Observable<ManyQueryResult> {
-    return this.findInternal(options, true);
+    return <Observable<ManyQueryResult>>this.findInternal(options, true);
   };
 
   /**
@@ -238,10 +238,9 @@ export class NgrxJsonApiService {
       .let(this.selectors.getStoreResource$(identifier));
   }
 
-  public denormaliseResource
-  (storeResource$: Observable<StoreResource> | Observable<StoreResource[]>):
-    Observable<StoreResource> | Observable<StoreResource[]> {
-    return storeResource$
+  public denormaliseResource(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>
+  ): Observable<StoreResource> | Observable<StoreResource[]> {
+    return <Observable<StoreResource> | Observable<StoreResource[]>>storeResource$
       .combineLatest(this.store
         .let(this.selectors.getNgrxJsonApiStore$())
         .let(this.selectors.getStoreData$()), (

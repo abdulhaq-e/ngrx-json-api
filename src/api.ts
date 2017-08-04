@@ -4,8 +4,16 @@ import {
   HttpHeaders,
   HttpClient,
   HttpRequest,
+  // required for building
+  HttpHeaderResponse,
+  HttpProgressEvent,
+  HttpResponse,
+  HttpSentEvent,
+  HttpUserEvent,
+
 } from '@angular/common/http';
 
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/throw';
@@ -216,20 +224,20 @@ export class NgrxJsonApi {
 
 
   private request(requestOptions) {
-    let request: HttpRequest;
-    let requestOptions = {...requestOptions, headers: this.headers}
+    let request: HttpRequest<any>;
+    let newRequestOptions = {...requestOptions, headers: this.headers}
 
     if (requestOptions.method === 'GET') {
-      let { method, url, ...init} = requestOptions;
+      let { method, url, ...init} = newRequestOptions;
       request = new HttpRequest(method, url, init)
     } else if (requestOptions.method === 'POST') {
-      let { method, url, body, ...init} = requestOptions;
+      let { method, url, body, ...init} = newRequestOptions;
       request = new HttpRequest(method, url, body, init)
     } else if (requestOptions.method === 'PATCH') {
-      let { method, url, body, ...init} = requestOptions;
+      let { method, url, body, ...init} = newRequestOptions;
       request = new HttpRequest(method, url, body, init)
     } else if (requestOptions.method === 'DELETE') {
-      let { method, url, ...init} = requestOptions;
+      let { method, url, ...init} = newRequestOptions;
       request = new HttpRequest(method, url, init)
     }
     return this.http.request(request);

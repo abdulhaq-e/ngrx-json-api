@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Response } from '@angular/http';
 
 import * as _ from 'lodash';
 
@@ -127,22 +126,22 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() triggerReadOnQueryRefresh$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_QUERY_REFRESH)
-    .withLatestFrom(this.store, (action, store) => {
+    .withLatestFrom(this.store, (action: any, store) => {
       let queryId = action.payload;
-      let state = store[this.selectors.storeLocation] as NgrxJsonApiStore;
+      let state = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
       let query = state.queries[queryId].query;
       return new ApiGetInitAction(query);
     });
 
   @Effect() refreshQueriesOnDelete$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_DELETE_SUCCESS)
-    .withLatestFrom(this.store, (action, store) => {
+    .withLatestFrom(this.store, (action: any, store) => {
       let id = {id: action.payload.query.id, type: action.payload.query.type};
       if (!id.id || !id.type) {
         throw new Error('API_DELETE_SUCCESS did not carry resource id and type information');
       }
 
-      let state = store[this.selectors.storeLocation] as NgrxJsonApiStore;
+      let state = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
 
       let actions = [];
       for (let queryId in state.queries) {
@@ -175,7 +174,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect() applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
-    .mergeMap(() => this.store.select(this.selectors.storeLocation).take(1))
+    .mergeMap(() => this.store.let(this.selectors.getNgrxJsonApiStore$()).take(1))
     .mergeMap((ngrxstore: NgrxJsonApiStore) => {
 
       let pending: Array<StoreResource> = getPendingChanges(ngrxstore);
@@ -205,7 +204,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             );
           } else if (pendingChange.state === 'DELETED') {
             let payload: Payload = this.generatePayload(pendingChange, 'DELETE');
-            actions.push(this.jsonApi.delete(payload)
+            actions.push(this.jsonApi.delete(payload.query)
               .map(res => res.json())
               .map(data => new ApiDeleteSuccessAction({
                 jsonApiData: data,
@@ -249,7 +248,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return new ApiApplySuccessAction(actions);
   }
 
-  private toErrorPayload(query: Query, response: Response): Payload {
+  private toErrorPayload(query: Query, response): Payload {
 
     let contentType = null;
     if (response && response.headers) {

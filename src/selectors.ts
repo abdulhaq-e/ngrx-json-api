@@ -22,6 +22,7 @@ import {
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   NgrxJsonApiStoreResources,
+  NgrxJsonApiStoreQueries,
   Resource,
   ResourceIdentifier,
   Query,
@@ -43,13 +44,13 @@ export class NgrxJsonApiSelectors<T> {
   }
 
   public getNgrxJsonApiStore$() {
-    return (state$: Observable<any>) => {
+    return (state$: Store<any>) => {
       return state$.select('NgrxJsonApi').select('api');
     };
   }
 
   public getStoreData$() {
-    return (state$: Observable<NgrxJsonApiStore>) => {
+    return (state$: Store<NgrxJsonApiStore>) => {
       return state$.select('data');
     };
   }
@@ -81,7 +82,7 @@ export class NgrxJsonApiSelectors<T> {
   }
 
   public getStoreQueries$() {
-    return (state$: Observable<NgrxJsonApiStore>) => {
+    return (state$: Store<NgrxJsonApiStore>) => {
       return state$.select('queries');
     };
   }
