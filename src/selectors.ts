@@ -112,9 +112,9 @@ export class NgrxJsonApiSelectors<T> {
             }
 
             if (_.isEmpty(storeQuery.resultIds)) {
-              let queryResult: ManyQueryResult = Object.assign({}, storeQuery, {
+              let queryResult: ManyQueryResult = {...storeQuery,
                 data: _.isUndefined(storeQuery.resultIds) ? undefined : []
-              });
+              };
               return queryResult;
             } else {
 
@@ -124,9 +124,9 @@ export class NgrxJsonApiSelectors<T> {
               if (denormalize) {
                 results = denormaliseStoreResources(results, state.data);
               }
-              return Object.assign({}, storeQuery, {
+              return {...storeQuery,
                 data: results as Array<StoreResource>
-              });
+              };
             }
           });
       };
@@ -141,9 +141,9 @@ export class NgrxJsonApiSelectors<T> {
         }
 
         if (_.isEmpty(storeQuery.resultIds)) {
-          let queryResult: ManyQueryResult = Object.assign({}, storeQuery, {
+          let queryResult: ManyQueryResult = {...storeQuery,
             data: _.isUndefined(storeQuery.resultIds) ? undefined : null
-          });
+          };
           return queryResult;
         } else {
           if (storeQuery.resultIds.length >= 2) {
@@ -156,9 +156,9 @@ export class NgrxJsonApiSelectors<T> {
           if (denormalize) {
             result = denormaliseStoreResource(result, state.data);
           }
-          return Object.assign({}, storeQuery, {
+          return {...storeQuery,
             data: result
-          });
+          };
         }
       });
     };

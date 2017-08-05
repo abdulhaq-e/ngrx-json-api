@@ -45,185 +45,125 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       case NgrxJsonApiActionTypes.API_POST_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         if (updatedData !== state.data) {
-          newState = Object.assign({},
-            state, {
-              data: updatedData,
-              isCreating: state.isCreating + 1
-            }
-          );
+          newState = {...state, data: updatedData,
+              isCreating: state.isCreating + 1};
           return newState;
         } else {
-          newState = Object.assign({},
-            state, {
-              isUpdating: state.isUpdating + 1
-            }
-          );
+          newState = {...state, isUpdating: state.isUpdating + 1};
           return newState;
         }
       }
       case NgrxJsonApiActionTypes.API_GET_INIT: {
         let query = action.payload as Query;
-        newState = Object.assign({}, state, {
-          queries: updateQueryParams(state.queries, query),
-          isReading: state.isReading + 1
-        });
+        newState = {...state, queries: updateQueryParams(state.queries, query),
+          isReading: state.isReading + 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_PATCH_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
         if (updatedData !== state.data) {
-          newState = Object.assign({},
-            state, {
-              data: updatedData,
-              isUpdating: state.isUpdating + 1
-            }
-          );
+          newState = {...state, data: updatedData,
+              isUpdating: state.isUpdating + 1};
           return newState;
         } else {
-          newState = Object.assign({},
-            state, {
-              isUpdating: state.isUpdating + 1
-            }
-          );
+          newState = {...state, isUpdating: state.isUpdating + 1};
           return newState;
         }
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
-        newState = Object.assign({},
-          state, {
+        newState = {...state,
             data: updateResourceState(
               state.data, action.payload, 'DELETED'),
-            isDeleting: state.isDeleting + 1
-          }
-        );
+            isDeleting: state.isDeleting + 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_POST_SUCCESS: {
-        newState = Object.assign({},
-          state, {
+        newState = {...state,
             data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
-            isCreating: state.isCreating - 1
-          }
-        );
+            isCreating: state.isCreating - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_GET_SUCCESS: {
-        newState = Object.assign({},
-          state, {
+        newState = {...state,
             data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
             queries: updateQueryResults(
               state.queries, action.payload.query.queryId, action.payload.jsonApiData),
-            isReading: state.isReading - 1
-          }
-        );
+            isReading: state.isReading - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_PATCH_SUCCESS: {
-        newState = Object.assign(
-          {},
-          state, {
+        newState = {...state,
             data: updateStoreDataFromPayload(
               state.data, action.payload.jsonApiData),
-            isUpdating: state.isUpdating - 1
-          }
-        );
+            isUpdating: state.isUpdating - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_DELETE_SUCCESS: {
-        newState = Object.assign({}, state,
-          {
-            data: deleteStoreResources(state.data, action.payload.query),
+        newState = {...state, data: deleteStoreResources(state.data, action.payload.query),
             queries: updateQueriesForDeletedResource(state.queries,
-              {id: action.payload.query.id, type: action.payload.query.type}
-            ),
-            isDeleting: state.isDeleting - 1
-          });
+              {id: action.payload.query.id, type: action.payload.query.type}),
+            isDeleting: state.isDeleting - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_QUERY_REFRESH: {
         // clear result ids and wait until new data is fetched (triggered by effect)
-        newState = Object.assign({}, state, {
-            queries: clearQueryResult(state.queries, action.payload)
-        });
+        newState = {...state, queries: clearQueryResult(state.queries, action.payload)};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_POST_FAIL: {
-        newState = Object.assign({}, state, {
-          data: updateResourceErrorsForQuery(state.data,
+        newState = {...state, data: updateResourceErrorsForQuery(state.data,
             action.payload.query, action.payload.jsonApiData),
-          isCreating: state.isCreating - 1
-        });
+          isCreating: state.isCreating - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_GET_FAIL: {
-        newState = Object.assign({}, state, {
-          queries: updateQueryErrors(state.queries, action.payload.query.queryId,
+        newState = {...state, queries: updateQueryErrors(state.queries, action.payload.query.queryId,
             action.payload.jsonApiData),
-          isReading: state.isReading - 1
-        });
+          isReading: state.isReading - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_PATCH_FAIL: {
-        newState = Object.assign({}, state, {
-          data: updateResourceErrorsForQuery(state.data,
+        newState = {...state, data: updateResourceErrorsForQuery(state.data,
             action.payload.query, action.payload.jsonApiData),
-          isUpdating: state.isUpdating - 1
-        }
-        );
+          isUpdating: state.isUpdating - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_DELETE_FAIL: {
-        newState = Object.assign({}, state, {
-          data: updateResourceErrorsForQuery(state.data,
+        newState = {...state, data: updateResourceErrorsForQuery(state.data,
             action.payload.query, action.payload.jsonApiData),
-          isDeleting: state.isDeleting - 1
-        }
-        );
+          isDeleting: state.isDeleting - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.REMOVE_QUERY: {
         let queryId = action.payload as string;
-        newState = Object.assign({}, state, {
-          queries: removeQuery(state.queries, queryId),
-        });
+        newState = {...state, queries: removeQuery(state.queries, queryId)};
         return newState;
       }
       case NgrxJsonApiActionTypes.LOCAL_QUERY_INIT: {
         let query = action.payload as Query;
-        newState = Object.assign({}, state, {
-          queries: updateQueryParams(state.queries, query),
-        });
+        newState = {...state, queries: updateQueryParams(state.queries, query)};
         return newState;
       }
       case NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS: {
         let payload = action.payload as ModifyStoreResourceErrorsPayload;
-        newState = Object.assign({}, state, {
-            data: updateResourceErrors(state.data, payload.resourceId,
-              payload.errors, payload.modificationType),
-          }
-        );
+        newState = {...state, data: updateResourceErrors(state.data, payload.resourceId,
+              payload.errors, payload.modificationType)};
         return newState;
 
       }
       case NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS: {
-        newState = Object.assign({}, state, {
-          queries: updateQueryResults(
+        newState = {...state, queries: updateQueryResults(
             state.queries,
             action.payload.query.queryId,
-            action.payload.jsonApiData),
-        });
+            action.payload.jsonApiData)};
         return newState;
       }
       case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
         if (updatedData !== state.data) {
-          newState = Object.assign({},
-            state, {
-              data: updatedData
-            }
-          );
+          newState = {...state, data: updatedData};
           return newState;
         } else {
           return state;
@@ -232,11 +172,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       case NgrxJsonApiActionTypes.POST_STORE_RESOURCE: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         if (updatedData !== state.data) {
-          newState = Object.assign({},
-            state, {
-              data: updatedData
-            }
-          );
+          newState = {...state, data: updatedData};
           return newState;
         } else {
           return state;
@@ -246,7 +182,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
         updatedData = updateResourceState(updatedData, action.payload, 'NEW');
         if (updatedData !== state.data) {
-          newState = Object.assign({}, state, {data: updatedData});
+          newState = {...state, data: updatedData};
           return newState;
         } else {
           return state;
@@ -259,20 +195,12 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
 
           if (resource.state === 'NEW' || resource.state === 'CREATED') {
             // not yet stored on server-side, just delete
-            newState = Object.assign({},
-              state, {
-                data: removeStoreResource(state.data, resourceId)
-              }
-            );
+            newState = {...state, data: removeStoreResource(state.data, resourceId)};
             return newState;
           } else {
             // stored on server, mark for deletion
-            newState = Object.assign({},
-              state, {
-                data: updateResourceState(
-                  state.data, action.payload, 'DELETED')
-              }
-            );
+            newState = {...state, data: updateResourceState(
+                  state.data, action.payload, 'DELETED')};
             return newState;
           }
         }
@@ -280,7 +208,7 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_APPLY_INIT: {
         let pending: Array<StoreResource> = getPendingChanges(state);
-        newState = Object.assign({}, state, {isApplying: state.isApplying + 1});
+        newState = {...state, isApplying: state.isApplying + 1};
         for (let pendingChange of pending) {
           if (pendingChange.state === 'CREATED') {
             newState.isCreating++;
@@ -302,15 +230,11 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         for (let commitAction of actions) {
           newState = NgrxJsonApiStoreReducer(newState, commitAction);
         }
-        newState = Object.assign({}, newState, { isApplying: state['isApplying'] - 1 });
+        newState = {...newState, isApplying: state['isApplying'] - 1};
         return newState;
       }
       case NgrxJsonApiActionTypes.API_ROLLBACK: {
-        newState = Object.assign({},
-          state, {
-            data: rollbackStoreResources(state.data)
-          }
-        );
+        newState = {...state, data: rollbackStoreResources(state.data)}
         return newState;
       }
       case NgrxJsonApiActionTypes.CLEAR_STORE: {

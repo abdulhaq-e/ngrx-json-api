@@ -151,7 +151,7 @@ export class NgrxJsonApiService {
 
     let newQuery;
     if (!query.queryId) {
-      newQuery = Object.assign({}, query, { queryId: this.uuid() });
+      newQuery = {...query, queryId: this.uuid() };
     } else {
       newQuery = query;
     }
