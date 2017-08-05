@@ -60,17 +60,17 @@ describe('Json Api Actions', () => {
     expect(NgrxJsonApiActionTypes.API_POST_FAIL).toBe('[NgrxJsonApi] API_POST_FAIL');
   });
 
-  it('should have an api read init action', () => {
+  it('should have an api get init action', () => {
     expect(NgrxJsonApiActionTypes.API_GET_INIT).toBeDefined();
     expect(NgrxJsonApiActionTypes.API_GET_INIT).toBe('[NgrxJsonApi] API_GET_INIT');
   });
 
-  it('should have an api read sueccess action', () => {
+  it('should have an api get sueccess action', () => {
     expect(NgrxJsonApiActionTypes.API_GET_SUCCESS).toBeDefined();
     expect(NgrxJsonApiActionTypes.API_GET_SUCCESS).toBe('[NgrxJsonApi] API_GET_SUCCESS');
   });
 
-  it('should have an api read fail action', () => {
+  it('should have an api get fail action', () => {
     expect(NgrxJsonApiActionTypes.API_GET_FAIL).toBeDefined();
     expect(NgrxJsonApiActionTypes.API_GET_FAIL).toBe('[NgrxJsonApi] API_GET_FAIL');
   });
