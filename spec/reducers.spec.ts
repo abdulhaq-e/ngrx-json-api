@@ -66,6 +66,14 @@ describe('NgrxJsonApiReducer', () => {
       expect(newState.isCreating).toBe(1);
     });
 
+    it('all other operation counters should be zero', () => {
+      expect(newState.isReading).toBe(0);
+      expect(newState.isDeleting).toBe(0);
+      expect(newState.isUpdating).toBe(0);
+      expect(newState.isApplying).toBe(0);
+    });
+
+
     it('should add the Resource (and or StoreResource) to the storeData', () => {
       expect(newState.data['Article']['1']).toBeDefined();
       expect(newState.data['Article']['1'].persistedResource).toBeDefined();

@@ -44,14 +44,9 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
     switch (action.type) {
       case NgrxJsonApiActionTypes.API_POST_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, true);
-        if (updatedData !== state.data) {
-          newState = {...state, data: updatedData,
+        newState = {...state, data: updatedData,
               isCreating: state.isCreating + 1};
-          return newState;
-        } else {
-          newState = {...state, isUpdating: state.isUpdating + 1};
-          return newState;
-        }
+        return newState;
       }
       case NgrxJsonApiActionTypes.API_GET_INIT: {
         let query = action.payload as Query;
@@ -61,14 +56,9 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
       }
       case NgrxJsonApiActionTypes.API_PATCH_INIT: {
         let updatedData = updateStoreDataFromResource(state.data, action.payload, false, false);
-        if (updatedData !== state.data) {
-          newState = {...state, data: updatedData,
+        newState = {...state, data: updatedData,
               isUpdating: state.isUpdating + 1};
-          return newState;
-        } else {
-          newState = {...state, isUpdating: state.isUpdating + 1};
-          return newState;
-        }
+        return newState;
       }
       case NgrxJsonApiActionTypes.API_DELETE_INIT: {
         newState = {...state,
