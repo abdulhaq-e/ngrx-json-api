@@ -9,8 +9,7 @@ let query = {
   id: '1',
 }
 // to fetch this 'article' from the server:
-let queryResults = this.ngrxService.findOne({query: query})
-
+let queryResults = this.ngrxService.findOne({query: query});
 ```
 
 #### 2- Fetching a single resource offline:
@@ -21,7 +20,7 @@ let query = {
   type: 'Article',
   id: '1',
 }
-let queryResults = this.ngrxService.findOne({query: query, fromServer: false})
+let queryResults = this.ngrxService.findOne({query: query, fromServer: false});
 ```
 
 #### 3- Fetching multiple resources
@@ -31,9 +30,9 @@ let query = {
   type: 'Article',
 }
 // to fetch all articles from the server:
-let queryResults = this.ngrxService.findMany({query: query})
+let queryResults = this.ngrxService.findMany({query: query});
 // to do the same thing without sending requests to the server:
-let queryResults = this.ngrxService.findMany({query, fromServer: false})
+let queryResults = this.ngrxService.findMany({query, fromServer: false});
 ```
 
 ### Creating/Updating/Deleting resources
@@ -68,3 +67,6 @@ toRemote: true})
 ```
 
 ### Deleting resources
+```ts
+this.ngrxService.deleteResource({resourceId: {type: 'Article', id: '10'}, toRemote: true})
+```

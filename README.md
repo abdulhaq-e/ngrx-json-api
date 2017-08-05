@@ -6,17 +6,14 @@
 
 **A JSON API client library for ngrx.**
 
-**Note: v1.0 of the library is compatible with old releases of @ngrx tools (< 2). The current version is compatible with the latest versions of @ngrx platform**
+**Note: v1.0 of the library is compatible with old releases of @ngrx tools (< 2). The current version (>= 2) is compatible with the latest versions of @ngrx platform (>= 4)**
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Basic Usage](#basic-usage)
-  - [Reading data](#reading-data)
-  - [Adding data](#adding-data)
-  - [Updating data](#updating-data)
-  - [Deleting data](#deleting-data)
-- [Advanced Usage](#advanced-usage)
+- [Basic Usage](./docs/basic_usage.md)
+- [Store Structure](./docs/store_structure.md)
+- [Advanced Usage](./docs/advanced_usage.md)
 - [Upgrading from v1.0](#upgrading-from-v1.0)
 
 
@@ -26,6 +23,7 @@
 ```
 npm i ngrx-json-api --save
 ```
+
 **2- Define the resources:**
 ```ts
 import { ResourceDefinition } from 'ngrx-json-api';
@@ -39,17 +37,16 @@ let resourceDefinitions: Array<ResourceDefinition> = [
 
 Note that if the type of a resource matches its `collectionPath` in the URL, then no resource definition is necessary.
 
-
-
 **3- Import `NgrxJsonApiModule` providing the above definitions and the API url.**
 
-Make sure `StoreModule` is imported beforehand.
+Make sure `StoreModule` and `HttpClientModule` are imported beforehand.
 
 ```ts
 @NgModule({
     imports: [
       BrowserModule,  
       /* other imports */
+      HttpClientModule,
       StoreModule.forRoot({ counter: counterReducer}, {})
       NgrxJsonApiModule.configure({
         apiUrl: 'http://localhost.com',
@@ -92,19 +89,11 @@ export class MyComponent {
     .findMany({
       queryType: 'getMany',
       type: 'Article'
-      });
-      
+      });      
 }
 ```
 
 The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. More details about the response type and other methods for the service are provided in the docs.
-
-
-## [Basic Usage](./docs/basic_usage.md)
-
-## [Store Structure](./docs/structure.md)
-
-## [Advanced Usage](./docs/advanced_usage.md)
 
 ## Upgrading from v1.0
 
@@ -112,7 +101,7 @@ Upgrade from v1 is really easy; two simple steps:
 
   1. Remove `storeLocation` from `NgrxJsonApiModule` configuration. It's not needed anymore!
   2. Remove `NgrxJsonApiReducer` from `StoreModule` configuration.
-
+  3. Import `HttpClientModule` in the application.
 
 # THANKS :heart:
 

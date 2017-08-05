@@ -8,7 +8,7 @@ Both fetching methods `findMany` and `findOne` take an object of type `FindOptio
 
 #### Query object
 
-The required `Query` object does not have an required properties but in general the `type` of the `Resource` and the `id` (for `findOne`) are passed just like the examples above. Other possible values are `queryId` and `queryParams` are discussed later. It is suffice to say that the `queryId` is auto generated if omitted.
+The required `Query` object does not have an required properties but in general the `type` of the `Resource` and the `id` (for `findOne`) are passed. Other possible values are `queryId` and `queryParams` are discussed later. It is suffice to say that the `queryId` is auto generated if omitted.
 
 
 #### Offline queries
@@ -20,11 +20,11 @@ let query = {
   id: '1',
 }
 // offline fetching
-let queryResults = this.ngrxService.findOne({query: query, fromServer: false})
+let queryResults = this.ngrxService.findOne({query: query, fromServer: false});
 // server fetching
-let queryResults = this.ngrxService.findOne({query: query})
+let queryResults = this.ngrxService.findOne({query: query});
 // similar to the above
-let queryResults = this.ngrxService.findOne({query: query, fromServer: true})
+let queryResults = this.ngrxService.findOne({query: query, fromServer: true});
 ```
 
 #### Denormalization
@@ -86,7 +86,7 @@ let query = {
   type: 'Article',
   id: '1',
 }
-let queryResults = this.ngrxService.findOne({query: query})
+let queryResults = this.ngrxService.findOne({query: query});
 ```
 
 How are the results obtained? The above `queryResults` variable is an `Observable` of type `OneQueryResult` (for `findOne`) or `ManyQueryResult` (for `findMany`). So we need to subscribe to this `Observable` to access the results.
@@ -160,7 +160,7 @@ this.ngrxService.patchResource({resource: resource})
 The optional `toRemote`  parameter lets you directly `PATCH` that resource to the server.
 
 
-#### Deleting data
+#### Deleting resources
 
 `deleteResource` allows to mark a new resource for deletion in the store. 
 
@@ -203,3 +203,7 @@ methods allow to either  entirely clear the store resp. remove all resources not
 or indirectly (relationships) by a query.
 
 ### Filtering and Sorting
+
+
+
+### Pipes
