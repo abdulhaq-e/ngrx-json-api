@@ -109,7 +109,8 @@ export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJso
         return newState;
       }
       case NgrxJsonApiActionTypes.API_GET_FAIL: {
-        newState = {...state, queries: updateQueryErrors(state.queries, action.payload.query.queryId,
+        newState = {...state, queries: updateQueryErrors(state.queries,
+          action.payload.query.queryId,
             action.payload.jsonApiData),
           isReading: state.isReading - 1};
         return newState;
