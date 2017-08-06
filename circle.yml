@@ -12,7 +12,7 @@ dependencies:
 
 test:
   override:
-    - yarn test
+    - yarn run ci
 
 notify:
   webhooks:

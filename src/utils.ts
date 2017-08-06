@@ -166,7 +166,7 @@ export const updateResourceObject = (original: Resource,
   source: Resource): Resource => {
 
   // by default arrays would make use of concat.
-  function customizer(objValue, srcValue) {
+  function customizer(objValue: any, srcValue: any) {
     if (_.isArray(objValue)) {
       return srcValue;
     }
@@ -405,7 +405,7 @@ export const rollbackStoreResources = (storeData: NgrxJsonApiStoreData): NgrxJso
       if (!storeResource.persistedResource) {
         delete newState[type][id];
       } else if (storeResource.state !== 'IN_SYNC') {
-        newState[type][id] = {...newState[type][id],
+        newState[type][id] = <StoreResource>{...newState[type][id],
           state: 'IN_SYNC',
           resource: newState[type][id].persistedResource
         };
@@ -565,7 +565,7 @@ export const updateQueryResults = (storeQueries: NgrxJsonApiStoreQueries,
     };
 
     let newState: NgrxJsonApiStoreQueries = {...storeQueries};
-    newState[queryId] = newQueryStore;
+    newState[queryId] = <StoreQuery>newQueryStore;
     return newState;
   }
   return storeQueries;
@@ -813,7 +813,7 @@ export const generateQueryParams = (...params: Array<string>) => {
   }
 };
 
-export const generatePayload = (resource: Resource, operation: OperationType): Payload => {
+export const generatePayload = (resource: StoreResource, operation: OperationType): Payload => {
   let payload: Payload = {
     query: {
       type: resource.type,
@@ -832,7 +832,7 @@ export const generatePayload = (resource: Resource, operation: OperationType): P
     };
   }
 
-  if (operation === 'POST' && resource['hasTemporaryId']) {
+  if (operation === 'POST' && resource.hasTemporaryId) {
     delete payload.jsonApiData.data.id;
   }
 
@@ -1035,7 +1035,7 @@ export const sortPendingChanges =
     cursor: pendingResources.length,
     sorted: new Array(pendingResources.length),
     dependencies: dependencies,
-    visited: []
+    visited: <any[]>[]
   };
 
   let i = context.cursor;
@@ -1049,7 +1049,7 @@ export const sortPendingChanges =
 };
 
 const visitPending =
-    (pendingResource: StoreResource, i, predecessors, context: TopologySortContext) => {
+    (pendingResource: StoreResource, i: any, predecessors: any, context: TopologySortContext) => {
   let key = toKey(pendingResource);
   if (predecessors.indexOf(key) >= 0) {
     throw new Error('Cyclic dependency: ' + key + ' with ' + JSON.stringify(predecessors));

@@ -149,7 +149,7 @@ export class NgrxJsonApiService {
     let fromServer = _.isUndefined(options.fromServer) ? true : options.fromServer;
     let denormalise = _.isUndefined(options.denormalise) ? false : options.denormalise;
 
-    let newQuery;
+    let newQuery: Query;
     if (!query.queryId) {
       newQuery = {...query, queryId: this.uuid() };
     } else {
@@ -158,14 +158,14 @@ export class NgrxJsonApiService {
 
     this.putQuery({ query: newQuery, fromServer });
 
-    let queryResult$;
+    let queryResult$: Observable<QueryResult>;
     if (multi) {
       queryResult$ = this.selectManyResults(newQuery.queryId, denormalise);
     } else {
       queryResult$ = this.selectOneResults(newQuery.queryId, denormalise);
     }
 
-    return queryResult$.finally(() => this.removeQuery(newQuery.queryId));
+    return <Observable<QueryResult>>queryResult$.finally(() => this.removeQuery(newQuery.queryId));
   }
 
   private uuid() {
@@ -255,13 +255,13 @@ export class NgrxJsonApiService {
       });
   }
 
-  public getDenormalisedPath(path, resourceType): string {
+  public getDenormalisedPath(path: string, resourceType: string): string {
     let pathSeparator = _.get(this.selectors.config, 'filteringConfig.pathSeparator') as string;
     return getDenormalisedPath(path, resourceType, this.selectors.config.resourceDefinitions,
       pathSeparator);
   }
 
-  public getDenormalisedValue(path, storeResource): any {
+  public getDenormalisedValue(path: string, storeResource: StoreResource): any {
     let pathSeparator = _.get(this.selectors.config, 'filteringConfig.pathSeparator') as string;
     return getDenormalisedValue(path, storeResource, this.selectors.config.resourceDefinitions,
       pathSeparator);

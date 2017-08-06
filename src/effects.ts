@@ -248,7 +248,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return new ApiApplySuccessAction(actions);
   }
 
-  private toErrorPayload(query: Query, response): Payload {
+  private toErrorPayload(query: Query, response: any): Payload {
 
     let contentType = null;
     if (response && response.headers) {

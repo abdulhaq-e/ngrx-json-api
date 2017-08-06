@@ -56,3 +56,6 @@ release
 spec/ngc/ngfactory/
 spec/ngc/output/
 aot
+
+# nyc
+.nyc*

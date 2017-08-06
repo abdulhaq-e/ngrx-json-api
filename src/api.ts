@@ -223,7 +223,7 @@ export class NgrxJsonApi {
   }
 
 
-  private request(requestOptions) {
+  private request(requestOptions: any) {
     let request: HttpRequest<any>;
     let newRequestOptions = {...requestOptions, headers: this.headers}
 

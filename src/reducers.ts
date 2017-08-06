@@ -38,7 +38,7 @@ export const initialNgrxJsonApiState: NgrxJsonApiStore = {
 };
 
 export function NgrxJsonApiStoreReducer(state: NgrxJsonApiStore = initialNgrxJsonApiState,
-  action: any) {
+  action: any): NgrxJsonApiStore {
     let newState;
 
     switch (action.type) {

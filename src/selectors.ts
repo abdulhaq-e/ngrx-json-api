@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 
 
 import { Observable } from 'rxjs/Observable';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/combineLatest';
@@ -25,6 +26,7 @@ import {
   NgrxJsonApiStoreQueries,
   Resource,
   ResourceIdentifier,
+  ResourceError,
   Query,
   StoreResource,
   ManyQueryResult,
@@ -64,7 +66,7 @@ export class NgrxJsonApiSelectors<T> {
 
   public queryStore$(query: Query) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      let selected$;
+      let selected$: Observable<any>;
       if (!query.type) {
         return state$.map(() => Observable.throw('Unknown query'));
       } else if (query.type && query.id) {
