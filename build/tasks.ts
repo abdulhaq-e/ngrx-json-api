@@ -163,7 +163,7 @@ export async function publishToRepo() {
   await util.git(['fetch origin master --depth=1']);
   await util.git(['checkout origin/master']);
   await util.git(['checkout -b master']);
-  await process.chdir('../../');
+  await process.chdir('../');
   await util.cmd('rm -rf', [`${REPO_DIR}/*`]);
   await util.git([`log --format="%h %s" -n 1 > ${REPO_DIR}/commit_message`]);
   await util.cmd('cp', [`-R ${SOURCE_DIR}/* ${REPO_DIR}/`]);
@@ -174,7 +174,7 @@ export async function publishToRepo() {
   await util.git([`commit -F commit_message`]);
   await util.cmd('rm', ['commit_message']);
   await util.git(['push origin master --force']);
-  await process.chdir('../../');
+  await process.chdir('../');
 }
 
 export function mapAsync<T>(
