@@ -43,7 +43,6 @@ export async function compilePackageWithNgc() {
  * a FESM (Flat Ecma Script Module)
  */
 export async function bundleFesms() {
-
   await util.exec('rollup', [
     `-i ./dist/ngrx-json-api.js`,
     `-o ./dist/FESM/ngrx-json-api.js`,
@@ -51,7 +50,6 @@ export async function bundleFesms() {
   ]);
 
   await util.mapSources(`./dist/FESM/ngrx-json-api.js`);
-
 }
 
 /**
@@ -76,12 +74,10 @@ export async function downLevelFesmsToES5() {
  * Re-runs Rollup on the downleveled ES5 to produce a UMD bundle
  */
 export async function createUmdBundles() {
-    const rollupArgs = [`-c ./rollup.config.js`, `--sourcemap`];
+  const rollupArgs = [`-c ./rollup.config.js`, `--sourcemap`];
 
-    await util.exec('rollup', rollupArgs);
-    await util.mapSources(
-      `./dist/bundles/ngrx-json-api.umd.js`
-    );
+  await util.exec('rollup', rollupArgs);
+  await util.mapSources(`./dist/bundles/ngrx-json-api.umd.js`);
 }
 
 /**
@@ -100,14 +96,9 @@ export async function cleanTypeScriptFiles() {
  * Removes any remaining source map files from running NGC
  */
 export async function removeRemainingSourceMapFiles() {
-  await util.removeRecursively(
-    `./dist/src/**/*.map`
-  );
-  await util.removeRecursively(
-    `./dist/*.map`
-  );
+  await util.removeRecursively(`./dist/src/**/*.map`);
+  await util.removeRecursively(`./dist/*.map`);
 }
-
 
 /**
  * Creates minified copies of each UMD bundle
@@ -115,16 +106,16 @@ export async function removeRemainingSourceMapFiles() {
 export async function minifyUmdBundles() {
   const uglifyArgs = ['-c', '-m', '--screw-ie8', '--comments'];
 
-    const file = `./dist/bundles/ngrx-json-api.umd.js`;
-    const out = `./dist/bundles/ngrx-json-api.umd.min.js`;
+  const file = `./dist/bundles/ngrx-json-api.umd.js`;
+  const out = `./dist/bundles/ngrx-json-api.umd.min.js`;
 
-    return util.exec('uglifyjs', [
-      ...uglifyArgs,
-      `-o ${out}`,
-      `--source-map ${out}.map`,
-      `--source-map-include-sources ${file}`,
-      `--in-source-map ${file}.map`,
-    ]);
+  return util.exec('uglifyjs', [
+    ...uglifyArgs,
+    `-o ${out}`,
+    `--source-map ${out}.map`,
+    `--source-map-include-sources ${file}`,
+    `--in-source-map ${file}.map`,
+  ]);
 }
 
 /**
@@ -132,59 +123,58 @@ export async function minifyUmdBundles() {
  * each package
  */
 export async function copyDocs() {
+  const source = `.`;
+  const target = `./dist/`;
 
-    const source = `.`;
-    const target = `./dist/`;
-
-    await Promise.all([
-      util.copy(`${source}/README.md`, `${target}/README.md`),
-      util.copy('./LICENSE', `${target}/LICENSE`),
-    ]);
+  await Promise.all([
+    util.copy(`${source}/README.md`, `${target}/README.md`),
+    util.copy('./LICENSE', `${target}/LICENSE`),
+  ]);
 }
 
 export async function copyPackageJsonFiles() {
-    const source = `.`;
-    const target = `./dist`;
+  const source = `.`;
+  const target = `./dist`;
 
-    await util.copy(`${source}/package.json`, `${target}/package.json`);
+  await util.copy(`${source}/package.json`, `${target}/package.json`);
 }
 
 /**
  * Deploy build artifacts to repos
  */
 export async function publishToRepo() {
-    const SOURCE_DIR = `./dist`;
-    const REPO_URL = `git@github.com:abdulhaq-e/ngrx-json-api-builds.git`;
-    const REPO_DIR = `./tmp`;
-    const SHA = await util.git([`rev-parse HEAD`]);
-    const SHORT_SHA = await util.git([`rev-parse --short HEAD`]);
-    const COMMITTER_USER_NAME = await util.git([
-      `--no-pager show -s --format='%cN' HEAD`,
-    ]);
-    const COMMITTER_USER_EMAIL = await util.git([
-      `--no-pager show -s --format='%cE' HEAD`,
-    ]);
+  const SOURCE_DIR = `./dist`;
+  const REPO_URL = `git@github.com:abdulhaq-e/ngrx-json-api-builds.git`;
+  const REPO_DIR = `./tmp`;
+  const SHA = await util.git([`rev-parse HEAD`]);
+  const SHORT_SHA = await util.git([`rev-parse --short HEAD`]);
+  const COMMITTER_USER_NAME = await util.git([
+    `--no-pager show -s --format='%cN' HEAD`,
+  ]);
+  const COMMITTER_USER_EMAIL = await util.git([
+    `--no-pager show -s --format='%cE' HEAD`,
+  ]);
 
-    await util.cmd('rm -rf', [`${REPO_DIR}`]);
-    await util.cmd('mkdir ', [`-p ${REPO_DIR}`]);
-    await process.chdir(`${REPO_DIR}`);
-    await util.git([`init`]);
-    await util.git([`remote add origin ${REPO_URL}`]);
-    await util.git(['fetch origin master --depth=1']);
-    await util.git(['checkout origin/master']);
-    await util.git(['checkout -b master']);
-    await process.chdir('../../');
-    await util.cmd('rm -rf', [`${REPO_DIR}/*`]);
-    await util.git([`log --format="%h %s" -n 1 > ${REPO_DIR}/commit_message`]);
-    await util.cmd('cp', [`-R ${SOURCE_DIR}/* ${REPO_DIR}/`]);
-    await process.chdir(`${REPO_DIR}`);
-    await util.git([`config user.name "${COMMITTER_USER_NAME}"`]);
-    await util.git([`config user.email "${COMMITTER_USER_EMAIL}"`]);
-    await util.git(['add --all']);
-    await util.git([`commit -F commit_message`]);
-    await util.cmd('rm', ['commit_message']);
-    await util.git(['push origin master --force']);
-    await process.chdir('../../');
+  await util.cmd('rm -rf', [`${REPO_DIR}`]);
+  await util.cmd('mkdir ', [`-p ${REPO_DIR}`]);
+  await process.chdir(`${REPO_DIR}`);
+  await util.git([`init`]);
+  await util.git([`remote add origin ${REPO_URL}`]);
+  await util.git(['fetch origin master --depth=1']);
+  await util.git(['checkout origin/master']);
+  await util.git(['checkout -b master']);
+  await process.chdir('../../');
+  await util.cmd('rm -rf', [`${REPO_DIR}/*`]);
+  await util.git([`log --format="%h %s" -n 1 > ${REPO_DIR}/commit_message`]);
+  await util.cmd('cp', [`-R ${SOURCE_DIR}/* ${REPO_DIR}/`]);
+  await process.chdir(`${REPO_DIR}`);
+  await util.git([`config user.name "${COMMITTER_USER_NAME}"`]);
+  await util.git([`config user.email "${COMMITTER_USER_EMAIL}"`]);
+  await util.git(['add --all']);
+  await util.git([`commit -F commit_message`]);
+  await util.cmd('rm', ['commit_message']);
+  await util.git(['push origin master --force']);
+  await process.chdir('../../');
 }
 
 export function mapAsync<T>(

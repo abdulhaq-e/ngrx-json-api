@@ -10,7 +10,6 @@ import {
   HttpResponse,
   HttpSentEvent,
   HttpUserEvent,
-
 } from '@angular/common/http';
 
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
@@ -31,22 +30,18 @@ import {
   generateFieldsQueryParams,
   generateFilteringQueryParams,
   generateSortingQueryParams,
-  generateQueryParams
+  generateQueryParams,
 } from './utils';
 
 export class NgrxJsonApi {
-
   public headers: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/vnd.api+json',
-    'Accept': 'application/vnd.api+json'
+    Accept: 'application/vnd.api+json',
   });
   public requestUrl: string;
   public definitions = this.config.resourceDefinitions;
 
-  constructor(
-    private http: HttpClient,
-    public config: NgrxJsonApiConfig
-  ) { }
+  constructor(private http: HttpClient, public config: NgrxJsonApiConfig) {}
 
   private urlBuilder(query: Query, operation: OperationType) {
     switch (operation) {
@@ -71,7 +66,6 @@ export class NgrxJsonApi {
         return this.collectionUrlFor(query.type);
       }
     }
-
   }
 
   private collectionPathFor(type: string) {
@@ -100,7 +94,6 @@ export class NgrxJsonApi {
   }
 
   public find(query: Query) {
-
     let _generateIncludedQueryParams = generateIncludedQueryParams;
     let _generateFilteringQueryParams = generateFilteringQueryParams;
     let _generateFieldsQueryParams = generateFieldsQueryParams;
@@ -159,8 +152,14 @@ export class NgrxJsonApi {
         offsetParams = 'page[offset]=' + query.params.offset;
       }
     }
-    queryParams = _generateQueryParams(includedParam, filteringParams, sortingParams,
-        fieldsParams, offsetParams, limitParams);
+    queryParams = _generateQueryParams(
+      includedParam,
+      filteringParams,
+      sortingParams,
+      fieldsParams,
+      offsetParams,
+      limitParams
+    );
 
     let requestOptions = {
       method: 'GET',
@@ -171,7 +170,6 @@ export class NgrxJsonApi {
   }
 
   public create(query: Query, document: Document) {
-
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }
@@ -183,14 +181,13 @@ export class NgrxJsonApi {
     let requestOptions = {
       method: 'POST',
       url: this.urlBuilder(query, 'POST'),
-      body: JSON.stringify({ data: document.data })
+      body: JSON.stringify({ data: document.data }),
     };
 
     return this.request(requestOptions);
   }
 
   public update(query: Query, document: Document) {
-
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }
@@ -201,44 +198,41 @@ export class NgrxJsonApi {
     let requestOptions = {
       method: 'PATCH',
       url: this.urlBuilder(query, 'PATCH'),
-      body: JSON.stringify({ data: document.data })
+      body: JSON.stringify({ data: document.data }),
     };
 
     return this.request(requestOptions);
   }
 
-
   public delete(query: Query) {
-
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }
 
     let requestOptions = {
       method: 'DELETE',
-      url: this.urlBuilder(query, 'DELETE')
+      url: this.urlBuilder(query, 'DELETE'),
     };
 
     return this.request(requestOptions);
   }
 
-
   private request(requestOptions: any) {
     let request: HttpRequest<any>;
-    let newRequestOptions = {...requestOptions, headers: this.headers}
+    let newRequestOptions = { ...requestOptions, headers: this.headers };
 
     if (requestOptions.method === 'GET') {
-      let { method, url, ...init} = newRequestOptions;
-      request = new HttpRequest(method, url, init)
+      let { method, url, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, init);
     } else if (requestOptions.method === 'POST') {
-      let { method, url, body, ...init} = newRequestOptions;
-      request = new HttpRequest(method, url, body, init)
+      let { method, url, body, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, body, init);
     } else if (requestOptions.method === 'PATCH') {
-      let { method, url, body, ...init} = newRequestOptions;
-      request = new HttpRequest(method, url, body, init)
+      let { method, url, body, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, body, init);
     } else if (requestOptions.method === 'DELETE') {
-      let { method, url, ...init} = newRequestOptions;
-      request = new HttpRequest(method, url, init)
+      let { method, url, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, init);
     }
     return this.http.request(request);
   }

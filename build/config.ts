@@ -12,5 +12,5 @@ export const packages: PackageDescription[] = [
   {
     name: 'ngrx-json-api',
     hasTestingModule: false,
-  }
+  },
 ];

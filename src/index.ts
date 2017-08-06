@@ -1,9 +1,8 @@
-
 export * from './interfaces';
 export {
   SelectStoreResourcePipe,
   DenormaliseStoreResourcePipe,
-  GetDenormalisedValuePipe
+  GetDenormalisedValuePipe,
 } from './pipes';
-export {NgrxJsonApiService} from './services';
-export {NgrxJsonApiModule} from './module';
+export { NgrxJsonApiService } from './services';
+export { NgrxJsonApiModule } from './module';

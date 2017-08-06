@@ -1,10 +1,4 @@
-import {
-  async,
-  inject,
-  fakeAsync,
-  tick,
-  TestBed
-} from '@angular/core/testing';
+import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
 
 import { Http, HttpModule } from '@angular/http';
 
@@ -37,43 +31,41 @@ import {
 
 import {
   denormaliseStoreResource,
-  updateStoreDataFromPayload
+  updateStoreDataFromPayload,
 } from '../src/utils';
 
 import { TestingModule } from './testing.module';
-import {
-  testPayload,
-  resourceDefinitions
-} from './test_utils';
+import { testPayload, resourceDefinitions } from './test_utils';
 
 describe('Pipes', () => {
   let pipe;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        TestingModule
-      ],
+      imports: [TestingModule],
       providers: [
         DenormaliseStoreResourcePipe,
         GetDenormalisedValuePipe,
         SelectStoreResourcePipe,
-      ]
-    })
+      ],
+    });
   });
 
-
   describe('GetDenormalisedValuePipe', () => {
-    beforeEach(inject([GetDenormalisedValuePipe], (p) => {
-      pipe = p;
-    }));
+    beforeEach(
+      inject([GetDenormalisedValuePipe], p => {
+        pipe = p;
+      })
+    );
 
     let denormalisedR;
     beforeEach(() => {
-      denormalisedR = denormaliseStoreResource(pipe.service.storeSnapshot.data['Article']['1'], pipe.service.storeSnapshot.data);
+      denormalisedR = denormaliseStoreResource(
+        pipe.service.storeSnapshot.data['Article']['1'],
+        pipe.service.storeSnapshot.data
+      );
     });
     it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
-
       let value = pipe.transform('title', denormalisedR);
       expect(value).toEqual('Article 1');
     });
@@ -98,25 +90,29 @@ describe('Pipes', () => {
   });
 
   describe('SelectStoreResourcePipe', () => {
-    beforeEach(inject([SelectStoreResourcePipe], (p) => {
-      pipe = p;
-    }));
-
+    beforeEach(
+      inject([SelectStoreResourcePipe], p => {
+        pipe = p;
+      })
+    );
   });
 
   describe('DenormaliseStoreResourcePipe', () => {
-
-    beforeEach(inject([DenormaliseStoreResourcePipe], (p) => {
-      pipe = p;
-    }));
+    beforeEach(
+      inject([DenormaliseStoreResourcePipe], p => {
+        pipe = p;
+      })
+    );
 
     it('should denormalise a Resource', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = pipe.service.findOne({query, fromServer: false}).map(it => it.data);
+        queryId: '22',
+      };
+      let storeResource = pipe.service
+        .findOne({ query, fromServer: false })
+        .map(it => it.data);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it, 'relationships.author.reference')).toBeDefined();
@@ -126,14 +122,14 @@ describe('Pipes', () => {
     it('should denormalise multiple StoreResource', () => {
       let query = {
         type: 'Article',
-      }
-      let storeResource = pipe.service.findMany({query, fromServer: false}).map(it => it.data);
+      };
+      let storeResource = pipe.service
+        .findMany({ query, fromServer: false })
+        .map(it => it.data);
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
       });
     });
-
   });
-
 });

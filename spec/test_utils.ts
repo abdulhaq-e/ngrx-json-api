@@ -1,6 +1,4 @@
-import {
-  ResourceDefinition
-} from '../src/interfaces';
+import { ResourceDefinition } from '../src/interfaces';
 
 export const resourceDefinitions = [
   {
@@ -14,16 +12,16 @@ export const resourceDefinitions = [
     relationships: {
       author: {
         type: 'Person',
-        relationType: 'hasOne'
+        relationType: 'hasOne',
       },
       comments: {
         type: 'Comment',
-        relationType: 'hasMany'
+        relationType: 'hasMany',
       },
       blog: {
         type: 'Blog',
-        relationType: 'hasOne'
-      }
+        relationType: 'hasOne',
+      },
     },
   },
   {
@@ -31,14 +29,14 @@ export const resourceDefinitions = [
     collectionPath: 'people',
     attributes: {
       firstName: {},
-      name: {}
+      name: {},
     },
     relationships: {
       profile: {
         type: 'Profile',
-        relationType: 'hasOne'
-      }
-    }
+        relationType: 'hasOne',
+      },
+    },
   },
   {
     type: 'Comment',
@@ -48,19 +46,19 @@ export const resourceDefinitions = [
     type: 'Profile',
     collectionPath: 'profiles',
     attributes: {
-      id: {}
-    }
+      id: {},
+    },
   },
   {
     type: 'Blog',
     collectionPAth: 'blogs',
     attributes: {
-      name: {}
-    }
+      name: {},
+    },
   },
   {
-      type: 'Post',
-      collectionPath: 'posts',
+    type: 'Post',
+    collectionPath: 'posts',
   },
 ];
 
@@ -70,125 +68,120 @@ export const documentPayload = {
       type: 'Article',
       id: '1',
       attributes: {
-        'title': 'JSON API paints my bikeshed!'
-      }
+        title: 'JSON API paints my bikeshed!',
+      },
     },
     {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled'
-      }
-    }
+        title: 'Untitled',
+      },
+    },
   ],
   included: [
     {
       type: 'Person',
       id: '1',
       attributes: {
-        'name': 'Person 1'
-      }
+        name: 'Person 1',
+      },
     },
     {
       type: 'Person',
       id: '2',
       attributes: {
-        'name': 'Person 2'
-      }
-    }
-  ]
+        name: 'Person 2',
+      },
+    },
+  ],
 };
 
 export const testPayload = {
   links: {
-    someLink: 'someLinkValue'
+    someLink: 'someLinkValue',
   },
   meta: {
-    someMeta: 'someMetaValue'
+    someMeta: 'someMetaValue',
   },
   data: [
     {
-      type: "Article",
-      id: "1",
+      type: 'Article',
+      id: '1',
       attributes: {
-        "title": "Article 1"
+        title: 'Article 1',
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '1' }
+          data: { type: 'Person', id: '1' },
         },
         comments: {
-          data: [
-            { type: 'Comment', id: '1' },
-          ]
-        }
-      }
+          data: [{ type: 'Comment', id: '1' }],
+        },
+      },
     },
     {
-      type: "Article",
-      id: "2",
+      type: 'Article',
+      id: '2',
       attributes: {
-        "title": "Article 2"
+        title: 'Article 2',
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '22' }
+          data: { type: 'Person', id: '22' },
         },
         comments: {
-          data: []
-        }
-      }
+          data: [],
+        },
+      },
     },
     {
-      type: "Person",
-      id: "1",
+      type: 'Person',
+      id: '1',
       attributes: {
-        "name": "Person 1"
+        name: 'Person 1',
       },
       relationships: {
-        'blogs': {
-          data: [
-            { type: 'Blog', id: '1' },
-            { type: 'Blog', id: '3' }
-          ]
+        blogs: {
+          data: [{ type: 'Blog', id: '1' }, { type: 'Blog', id: '3' }],
         },
         profile: {
-          data: { type: 'Profile', id: '1' }
-        }
-      }
-    },
-    {
-      type: "Person",
-      id: "2",
-      attributes: {
-        "name": "Person 2"
+          data: { type: 'Profile', id: '1' },
+        },
       },
     },
     {
-      type: "Comment",
-      id: "1",
+      type: 'Person',
+      id: '2',
       attributes: {
-        "text": "Uncommented"
-      }
+        name: 'Person 2',
+      },
     },
     {
-      type: "Comment",
-      id: "2",
+      type: 'Comment',
+      id: '1',
       attributes: {
-        "text": "No comment"
-      }
+        text: 'Uncommented',
+      },
     },
     {
-      type: "Blog",
-      id: "1",
+      type: 'Comment',
+      id: '2',
       attributes: {
-        name: "Blog 1"
+        text: 'No comment',
+      },
+    },
+    {
+      type: 'Blog',
+      id: '1',
+      attributes: {
+        name: 'Blog 1',
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '2' }
-        }
-      }
+          data: { type: 'Person', id: '2' },
+        },
+      },
     },
     {
       type: 'Blog',
@@ -199,20 +192,20 @@ export const testPayload = {
       id: '3',
       relationships: {
         author: {
-          data: { type: 'Person', id: '1' }
-        }
-      }
+          data: { type: 'Person', id: '1' },
+        },
+      },
     },
     {
       type: 'Profile',
       id: '1',
       attributes: {
-        id: 'firstProfile'
-      }
+        id: 'firstProfile',
+      },
     },
     {
       type: 'Whatever',
-      id: '1'
-    }
-  ]
+      id: '1',
+    },
+  ],
 };

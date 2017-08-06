@@ -1,10 +1,4 @@
-import {
-  async,
-  inject,
-  fakeAsync,
-  tick,
-  TestBed
-} from '@angular/core/testing';
+import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
 
 import * as _ from 'lodash';
 
@@ -34,41 +28,36 @@ import {
 
 import {
   denormaliseStoreResource,
-  updateStoreDataFromPayload
+  updateStoreDataFromPayload,
 } from '../src/utils';
 
-import {
-  StoreResource
-} from '../src/interfaces';
+import { StoreResource } from '../src/interfaces';
 import { TestingModule } from './testing.module';
-import {
-  testPayload,
-  resourceDefinitions
-} from './test_utils';
+import { testPayload, resourceDefinitions } from './test_utils';
 
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        TestingModule,
-      ],
-    })
+      imports: [TestingModule],
+    });
   });
 
-  beforeEach(inject([NgrxJsonApiService], (s) => {
-    service = s;
-  }));
+  beforeEach(
+    inject([NgrxJsonApiService], s => {
+      service = s;
+    })
+  );
 
   describe('findOne', () => {
     it('find a single StoreResource from the state', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      let storeResource = service.findOne({ query, fromServer: false });
       storeResource.subscribe(it => {
         expect(_.get(it.data, 'type')).toEqual('Article');
         expect(_.get(it.data, 'id')).toEqual('1');
@@ -79,50 +68,51 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      let storeResource = service.findOne({ query, fromServer: false });
       let subs = storeResource.subscribe();
-      expect(service.storeSnapshot.queries['22']).toBeDefined()
+      expect(service.storeSnapshot.queries['22']).toBeDefined();
       subs.unsubscribe();
-      expect(service.storeSnapshot.queries['22']).not.toBeDefined()
+      expect(service.storeSnapshot.queries['22']).not.toBeDefined();
     });
 
     it('shoud run without a provided queryId and should remote it properly when done', () => {
       let query = {
         id: '1',
         type: 'Article',
-      }
-      let storeResource = service.findOne({query, fromServer: false});
+      };
+      let storeResource = service.findOne({ query, fromServer: false });
       let subs = storeResource.subscribe();
-      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(5)
+      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(5);
       subs.unsubscribe();
-      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(4)
+      expect(Object.keys(service.storeSnapshot.queries).length).toEqual(4);
     });
 
     it('find a single StoreResource from the state and denormalises it if told to', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
+        queryId: '22',
+      };
       let res;
-      let storeResource = service.findOne({query, fromServer: false, denormalise: true}).map(it => it.data);
-      storeResource.subscribe(it => res = it);
+      let storeResource = service
+        .findOne({ query, fromServer: false, denormalise: true })
+        .map(it => it.data);
+      storeResource.subscribe(it => (res = it));
       service.denormaliseResource(storeResource).subscribe(it => {
         expect(it).toEqual(res);
       });
     });
   });
 
-
   describe('findMany', () => {
     it('find multiple StoreResources from the state', () => {
       let query = {
         type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findMany({query, fromServer: false});
+        queryId: '22',
+      };
+      let storeResource = service.findMany({ query, fromServer: false });
       storeResource.subscribe(it => {
         expect(_.get(it.data[0], 'type')).toEqual('Article');
         expect(_.get(it.data[0], 'id')).toEqual('1');
@@ -134,180 +124,193 @@ describe('NgrxJsonApiService', () => {
     it('remove the query from the state after unsubscribing', () => {
       let query = {
         type: 'Article',
-        queryId: '22'
-      }
-      let storeResource = service.findMany({query, fromServer: false, denormalise: true});
+        queryId: '22',
+      };
+      let storeResource = service.findMany({
+        query,
+        fromServer: false,
+        denormalise: true,
+      });
       let subs = storeResource.subscribe();
-      expect(service.storeSnapshot.queries['22']).toBeDefined()
+      expect(service.storeSnapshot.queries['22']).toBeDefined();
       subs.unsubscribe();
-      expect(service.storeSnapshot.queries['22']).not.toBeDefined()
+      expect(service.storeSnapshot.queries['22']).not.toBeDefined();
     });
 
     it('find multiple StoreResource from the state and denormalises it if told to', () => {
       let query = {
         type: 'Article',
-        queryId: '22'
-      }
-      let res : Array<StoreResource>;
-      let storeResources : Observable<Array<StoreResource>> = service.findMany({query, fromServer: false, denormalise: true}).map(it => it.data);
-      storeResources.subscribe(it => res = it);
+        queryId: '22',
+      };
+      let res: Array<StoreResource>;
+      let storeResources: Observable<Array<StoreResource>> = service
+        .findMany({ query, fromServer: false, denormalise: true })
+        .map(it => it.data);
+      storeResources.subscribe(it => (res = it));
       service.denormaliseResource(storeResources).subscribe(it => {
         expect(it).toEqual(res);
       });
-
     });
   });
-
 
   describe('putQuery', () => {
     it('putQuery adds query to store', () => {
       let query = {
         type: 'Article',
-        queryId: '22'
-      }
-      service.putQuery({query, fromServer: false});
+        queryId: '22',
+      };
+      service.putQuery({ query, fromServer: false });
 
-      expect(service.storeSnapshot.queries['22']).toBeDefined()
-      expect(service.storeSnapshot.queries['22'].query.type).toBe("Article")
+      expect(service.storeSnapshot.queries['22']).toBeDefined();
+      expect(service.storeSnapshot.queries['22'].query.type).toBe('Article');
     });
 
     it('putQuery should replace existing query', () => {
       let query1 = {
         type: 'Article',
         queryId: '22',
-        params:{
-          limit: 4
-        }
-      }
+        params: {
+          limit: 4,
+        },
+      };
       let query2 = {
         type: 'Article',
         queryId: '22',
-        params:{
-          limit: 5
-        }
-      }
-      service.putQuery({query: query1, fromServer: false});
-      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(4)
-      service.putQuery({query: query2, fromServer: false});
-      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(5)
+        params: {
+          limit: 5,
+        },
+      };
+      service.putQuery({ query: query1, fromServer: false });
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(4);
+      service.putQuery({ query: query2, fromServer: false });
+      expect(service.storeSnapshot.queries['22'].query.params.limit).toBe(5);
     });
-
   });
 
-  describe('findInternal', () => {
+  describe('findInternal', () => {});
 
-  });
+  describe('removeQuery', () => {});
 
-  describe('removeQuery', () => {
+  describe('getResourceSnapshot', () => {});
 
-  });
+  describe('getPersistedResourceSnapshot', () => {});
 
-  describe('getResourceSnapshot', () => {
+  describe('getResourceSnapshot', () => {});
 
-  });
+  describe('selectResults', () => {});
 
-  describe('getPersistedResourceSnapshot', () => {
+  describe('selectResultIdentifiers', () => {});
 
-  });
+  describe('selectResource', () => {});
 
-  describe('getResourceSnapshot', () => {
-
-  });
-
-  describe('selectResults', () => {
-
-  });
-
-  describe('selectResultIdentifiers', () => {
-
-  });
-
-  describe('selectResource', () => {
-
-  });
-
-  describe('selectStoreResource', () => {
-
-  });
-
+  describe('selectStoreResource', () => {});
 
   describe('modifyResourceErrors', () => {
     it('add/modify/removeResourceError should update StoreResource accordingly', () => {
       service.postResource({
         resource: {
           type: 'Article',
-          id: '1'
-        }
+          id: '1',
+        },
       });
 
-      service.addResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      service.addResourceErrors({ type: 'Article', id: '1' }, [{ code: '0' }]);
       expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
       expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(1);
-      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe('0');
+      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe(
+        '0'
+      );
 
-      service.removeResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      service.removeResourceErrors({ type: 'Article', id: '1' }, [
+        { code: '0' },
+      ]);
       expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
       expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(0);
 
-      service.setResourceErrors({type: 'Article', id: '1'}, [{code: '0'}]);
+      service.setResourceErrors({ type: 'Article', id: '1' }, [{ code: '0' }]);
       expect(service.storeSnapshot.data['Article']['1']).toBeDefined();
       expect(service.storeSnapshot.data['Article']['1'].errors.length).toBe(1);
-      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe('0');
+      expect(service.storeSnapshot.data['Article']['1'].errors[0].code).toBe(
+        '0'
+      );
     });
   });
 
   describe('getDenormalisedPath', () => {
     it('should get the denormalised path for a simple', () => {
-      let path = 'title'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      let path = 'title';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
+      );
       expect(resolvedPath).toEqual('attributes.title');
     });
 
     it('should get the denormalised path for an attribute in a related resource', () => {
-      let path = 'author.firstName'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      let path = 'author.firstName';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
+      );
       expect(resolvedPath).toEqual(
         'relationships.author.reference.attributes.firstName'
       );
     });
 
     it('should get the denormalised path for an attribute in a deeply related resource', () => {
-      let path = 'author.profile.id'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      let path = 'author.profile.id';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
+      );
       expect(resolvedPath).toEqual(
         'relationships.author.reference.relationships.profile.reference.attributes.id'
       );
     });
 
     it('should get the denormalised path for a hasOne related resource', () => {
-      let path = 'author'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
-      expect(resolvedPath).toEqual(
-        'relationships.author.reference'
+      let path = 'author';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
       );
+      expect(resolvedPath).toEqual('relationships.author.reference');
     });
 
     it('should get the denormalised path for a deeply hasOne related resource', () => {
-      let path = 'author.profile'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
+      let path = 'author.profile';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
+      );
       expect(resolvedPath).toEqual(
         'relationships.author.reference.relationships.profile.reference'
       );
     });
 
     it('should get the denormalised path for a hasMany related resource', () => {
-      let path = 'comments'
-      let resolvedPath = service.getDenormalisedPath(path, 'Article', resourceDefinitions);
-      expect(resolvedPath).toEqual(
-        'relationships.comments.reference'
+      let path = 'comments';
+      let resolvedPath = service.getDenormalisedPath(
+        path,
+        'Article',
+        resourceDefinitions
       );
+      expect(resolvedPath).toEqual('relationships.comments.reference');
     });
   });
 
   describe('getDenormalisedValue', () => {
     let denormalisedR;
     beforeEach(() => {
-      denormalisedR = denormaliseStoreResource(service.storeSnapshot.data['Article']['1'], service.storeSnapshot.data);
+      denormalisedR = denormaliseStoreResource(
+        service.storeSnapshot.data['Article']['1'],
+        service.storeSnapshot.data
+      );
     });
     it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
       let value = service.getDenormalisedValue('title', denormalisedR);
@@ -338,9 +341,9 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
-      service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      service.findOne({ query, fromServer: false });
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
 
@@ -362,9 +365,9 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Comment',
-        queryId: '22'
-      }
-      service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      service.findOne({ query, fromServer: false });
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.data['Blog'])).toBe(false);
@@ -386,9 +389,9 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Comment',
-        queryId: '22'
-      }
-      service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      service.findOne({ query, fromServer: false });
 
       let state0 = service.storeSnapshot;
       service.compact();
@@ -425,9 +428,9 @@ describe('NgrxJsonApiService', () => {
       let query = {
         id: '1',
         type: 'Article',
-        queryId: '22'
-      }
-      service.findOne({query, fromServer: false});
+        queryId: '22',
+      };
+      service.findOne({ query, fromServer: false });
       expect(_.isEmpty(service.storeSnapshot.data)).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.queries['22'])).toBe(false);
       expect(_.isEmpty(service.storeSnapshot.data['Article']['1'])).toBe(false);
@@ -452,5 +455,4 @@ describe('NgrxJsonApiService', () => {
       expect(_.keys(service.storeSnapshot.data['Profile'])).toEqual(['1']);
     });
   });
-
 });

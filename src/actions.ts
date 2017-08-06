@@ -7,9 +7,8 @@ import {
   Resource,
   ResourceIdentifier,
   Query,
-  ModifyStoreResourceErrorsPayload
+  ModifyStoreResourceErrorsPayload,
 } from './interfaces';
-
 
 export const NgrxJsonApiActionTypes = {
   API_POST_INIT: '[NgrxJsonApi] API_POST_INIT',
@@ -48,127 +47,127 @@ export class ApiApplyInitAction implements Action {
 
 export class ApiApplySuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_APPLY_SUCCESS;
-  constructor(public payload: Array<Action>) { }
+  constructor(public payload: Array<Action>) {}
 }
 
 export class ApiApplyFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_APPLY_FAIL;
-  constructor(public payload: Array<Action>) { }
+  constructor(public payload: Array<Action>) {}
 }
 
 export class ApiPostInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_POST_INIT;
-  constructor(public payload: Resource) { }
+  constructor(public payload: Resource) {}
 }
 
 export class ApiPostSuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_POST_SUCCESS;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiPostFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_POST_FAIL;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiDeleteInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_INIT;
-  constructor(public payload: ResourceIdentifier) { }
+  constructor(public payload: ResourceIdentifier) {}
 }
 
 export class ApiDeleteSuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_SUCCESS;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiDeleteFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_FAIL;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiGetInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_GET_INIT;
-  constructor(public payload: Query) { }
+  constructor(public payload: Query) {}
 }
 
 export class ApiGetSuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_GET_SUCCESS;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiGetFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_GET_FAIL;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiRollbackAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_ROLLBACK;
-  constructor() { }
+  constructor() {}
 }
 
 export class ApiPatchInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_INIT;
-  constructor(public payload: Resource) { }
+  constructor(public payload: Resource) {}
 }
 
 export class ApiPatchSuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_SUCCESS;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class ApiPatchFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_FAIL;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class DeleteStoreResourceAction implements Action {
   readonly type = NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE;
-  constructor(public payload: ResourceIdentifier) { }
+  constructor(public payload: ResourceIdentifier) {}
 }
 
 export class PatchStoreResourceAction implements Action {
   readonly type = NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE;
-  constructor(public payload: Resource) { }
+  constructor(public payload: Resource) {}
 }
 
 export class NewStoreResourceAction implements Action {
   readonly type = NgrxJsonApiActionTypes.NEW_STORE_RESOURCE;
-  constructor(public payload: Resource) { }
+  constructor(public payload: Resource) {}
 }
 
 export class PostStoreResourceAction implements Action {
   readonly type = NgrxJsonApiActionTypes.POST_STORE_RESOURCE;
-  constructor(public payload: Resource) { }
+  constructor(public payload: Resource) {}
 }
 
 export class RemoveQueryAction implements Action {
   readonly type = NgrxJsonApiActionTypes.REMOVE_QUERY;
-  constructor(public payload: string) { }
+  constructor(public payload: string) {}
 }
 
 export class LocalQueryInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_INIT;
-  constructor(public payload: Query) { }
+  constructor(public payload: Query) {}
 }
 
 export class LocalQuerySuccessAction implements Action {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class LocalQueryFailAction implements Action {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_FAIL;
-  constructor(public payload: Payload) { }
+  constructor(public payload: Payload) {}
 }
 
 export class CompactStoreAction implements Action {
   readonly type = NgrxJsonApiActionTypes.COMPACT_STORE;
-  constructor() { }
+  constructor() {}
 }
 
 export class ClearStoreAction implements Action {
   readonly type = NgrxJsonApiActionTypes.CLEAR_STORE;
-  constructor() { }
+  constructor() {}
 }
 
 export class ApiQueryRefreshAction implements Action {
@@ -182,11 +181,11 @@ export class ApiQueryRefreshAction implements Action {
 
 export class ModifyStoreResourceErrorsAction implements Action {
   readonly type = NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS;
-  constructor(public payload: ModifyStoreResourceErrorsPayload) { }
+  constructor(public payload: ModifyStoreResourceErrorsPayload) {}
 }
 
-export type NgrxJsonApiActions
-  = ApiApplyInitAction
+export type NgrxJsonApiActions =
+  | ApiApplyInitAction
   | ApiApplySuccessAction
   | ApiApplyFailAction
   | ApiPostInitAction

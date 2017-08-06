@@ -1,11 +1,7 @@
 import { NgModule } from '@angular/core';
 
-import {
-  HttpClient, HttpClientModule
-} from '@angular/common/http';
-import {
-  HttpClientTestingModule
-} from '@angular/common/http/testing';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
@@ -18,56 +14,50 @@ import { NgrxJsonApi } from '../src/api';
 import { initialNgrxJsonApiState } from '../src/reducers';
 import { NgrxJsonApiModule } from '../src/module';
 import { updateStoreDataFromPayload } from '../src/utils';
-import {
-  Payload,
-  Query,
-} from '../src/interfaces';
+import { Payload, Query } from '../src/interfaces';
 import { NgrxJsonApiEffects } from '../src/effects';
 
-import {
-  testPayload,
-  resourceDefinitions
-} from './test_utils';
-
-
+import { testPayload, resourceDefinitions } from './test_utils';
 
 let queries = {
   '1': {
     query: {
       queryId: '1',
     },
-    resultIds: [{ type: 'Article', id: '1' }, { type: 'Article', id: '2' }]
+    resultIds: [{ type: 'Article', id: '1' }, { type: 'Article', id: '2' }],
   },
   '2': {
     query: {
       queryId: '2',
     },
-    resultIds: [{ type: 'Blog', id: '1' }]
+    resultIds: [{ type: 'Blog', id: '1' }],
   },
   '55': {
     query: {
       queryId: '55',
     },
-    resultIds: []
+    resultIds: [],
   },
   '56': {
     query: {
       queryId: '1',
     },
-    resultIds: [{ type: 'Article', id: '10' }, { type: 'Article', id: '20' }]
+    resultIds: [{ type: 'Article', id: '10' }, { type: 'Article', id: '20' }],
   },
 };
 
 let initialState = {
   NgrxJsonApi: {
     api: {
-    ...{ }, ...initialNgrxJsonApiState, ...{
-  data: updateStoreDataFromPayload({}, testPayload),
-    queries: queries
-}
-  }
-}};
-
+      ...{},
+      ...initialNgrxJsonApiState,
+      ...{
+        data: updateStoreDataFromPayload({}, testPayload),
+        queries: queries,
+      },
+    },
+  },
+};
 
 @NgModule({
   imports: [
@@ -75,14 +65,14 @@ let initialState = {
     EffectsModule.forRoot([]),
     HttpClientTestingModule,
     HttpClientModule,
-    NgrxJsonApiModule.configure({ resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com' }),
+    NgrxJsonApiModule.configure({
+      resourceDefinitions: resourceDefinitions,
+      apiUrl: 'myapi.com',
+    }),
   ],
-  providers: []
+  providers: [],
 })
-export class TestingModule {
-
-}
-
+export class TestingModule {}
 
 @NgModule({
   imports: [
@@ -91,22 +81,20 @@ export class TestingModule {
     HttpClientModule,
     HttpClientTestingModule,
     NgrxJsonApiModule.configure({
-      resourceDefinitions: resourceDefinitions, apiUrl: 'myapi.com',
+      resourceDefinitions: resourceDefinitions,
+      apiUrl: 'myapi.com',
       urlBuilder: {
-        generateIncludedQueryParams: (params) => 'helloIncluded',
-        generateFilteringQueryParams: (params) => 'helloFiltering',
-        generateFieldsQueryParams: (params) => 'helloFields',
-        generateSortingQueryParams: (params) => 'helloSorting'
+        generateIncludedQueryParams: params => 'helloIncluded',
+        generateFilteringQueryParams: params => 'helloFiltering',
+        generateFieldsQueryParams: params => 'helloFields',
+        generateSortingQueryParams: params => 'helloSorting',
         // generateQueryParams: (params) => 'helloGenerator'
-      }
+      },
     }),
   ],
-  providers: []
+  providers: [],
 })
-export class AlternativeTestingModule {
-
-}
-
+export class AlternativeTestingModule {}
 
 // export class JsonApiMock {
 //   constructor() { }
