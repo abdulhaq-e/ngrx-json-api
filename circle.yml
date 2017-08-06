@@ -19,3 +19,11 @@ notify:
     # A list of hook hashes, containing the url field
     # gitter hook
     - url: https://webhooks.gitter.im/e/971f7bdb4ca140adafdf
+
+
+deployment:
+  builds:
+    owner: abdulhaq-e
+    branch: v2.0
+    commands:
+      - yarn run deploy:builds
