@@ -1,10 +1,6 @@
 import _ = require('lodash');
 
-import {
-  async,
-  inject,
-  fakeAsync,
-} from '@angular/core/testing';
+import { async, inject, fakeAsync } from '@angular/core/testing';
 
 let deepFreeze = require('deep-freeze');
 //
@@ -41,12 +37,10 @@ import {
   updateResourceErrors,
   updateResourceErrorsForQuery,
   sortPendingChanges,
-  isEqualResource
+  isEqualResource,
 } from '../src/utils';
 //
-import {
-  initialNgrxJsonApiState
-} from '../src/reducers';
+import { initialNgrxJsonApiState } from '../src/reducers';
 //
 import {
   NgrxJsonApiStore,
@@ -107,7 +101,10 @@ deepFreeze(initialNgrxJsonApiState);
 // });
 
 describe('denormalise and denormaliseObject', () => {
-  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload)
+  let storeData = updateStoreDataFromPayload(
+    initialNgrxJsonApiState.data,
+    testPayload
+  );
   deepFreeze(storeData);
 
   it('should do nothing given a resource with attributes only', () => {
@@ -124,124 +121,181 @@ describe('denormalise and denormaliseObject', () => {
     expect(dR.attributes.name).toEqual('Blog 1');
     expect(dR.id).toEqual('1');
     expect(dR.relationships.author.reference).toBeDefined();
-    expect(dR.relationships.author.reference.attributes.name).toEqual('Person 2');
+    expect(dR.relationships.author.reference.attributes.name).toEqual(
+      'Person 2'
+    );
   });
 
   it('should denormalise a resource with deep relations', () => {
     let dR = denormaliseStoreResource(storeData['Person']['1'], storeData, {});
-    expect(_.isArray(_.get(dR,
-      ['relationships', 'blogs', 'reference']))).toBeTruthy();
-    expect(_.get(dR,
-      ['relationships', 'blogs', 'reference', '0',
-        'type'])).toEqual('Blog');
-    expect(_.get(dR,
-      ['relationships', 'blogs', 'reference', '0',
-        'id'])).toEqual('1');
-    expect(_.get(dR,
-      ['relationships', 'blogs', 'reference', '1',
-       'type'])).toEqual('Blog');
-    expect(_.get(dR,
-      ['relationships', 'blogs', 'reference', '1',
-       'id'])).toEqual('3');
-    expect(_.get(dR,
-      ['relationships', 'blogs', 'reference', '0',
-       'relationships', 'author', 'reference',
-       'attributes', 'name'])).toEqual('Person 2');
+    expect(
+      _.isArray(_.get(dR, ['relationships', 'blogs', 'reference']))
+    ).toBeTruthy();
+    expect(
+      _.get(dR, ['relationships', 'blogs', 'reference', '0', 'type'])
+    ).toEqual('Blog');
+    expect(
+      _.get(dR, ['relationships', 'blogs', 'reference', '0', 'id'])
+    ).toEqual('1');
+    expect(
+      _.get(dR, ['relationships', 'blogs', 'reference', '1', 'type'])
+    ).toEqual('Blog');
+    expect(
+      _.get(dR, ['relationships', 'blogs', 'reference', '1', 'id'])
+    ).toEqual('3');
+    expect(
+      _.get(dR, [
+        'relationships',
+        'blogs',
+        'reference',
+        '0',
+        'relationships',
+        'author',
+        'reference',
+        'attributes',
+        'name',
+      ])
+    ).toEqual('Person 2');
   });
 
   it('should denormalise a resource with very deep relations (circular dependency)', () => {
     let dR = denormaliseStoreResource(storeData['Article']['1'], storeData, {});
-    expect(_.get(dR, [
-      'relationships', 'author', 'reference',
-    ])).toEqual(
+    expect(_.get(dR, ['relationships', 'author', 'reference'])).toEqual(
       _.get(dR, [
-        'relationships', 'author', 'reference',
-        'relationships', 'blogs', 'reference', '1',
-        'relationships', 'author', 'reference'
-      ]));
+        'relationships',
+        'author',
+        'reference',
+        'relationships',
+        'blogs',
+        'reference',
+        '1',
+        'relationships',
+        'author',
+        'reference',
+      ])
+    );
   });
 });
 
 describe('getDenormalisedPath', () => {
   it('should get the denormalised path for a simple', () => {
-    let path = 'title'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    let path = 'title';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
+    );
     expect(resolvedPath).toEqual('attributes.title');
   });
 
   it('should get the denormalised path for an attribute in a related resource', () => {
-    let path = 'author.firstName'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    let path = 'author.firstName';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
+    );
     expect(resolvedPath).toEqual(
       'relationships.author.reference.attributes.firstName'
     );
   });
 
   it('should get the denormalised path for an attribute in a deeply related resource', () => {
-    let path = 'author.profile.id'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    let path = 'author.profile.id';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
+    );
     expect(resolvedPath).toEqual(
       'relationships.author.reference.relationships.profile.reference.attributes.id'
     );
   });
 
   it('should get the denormalised path for a hasOne related resource', () => {
-    let path = 'author'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
-    expect(resolvedPath).toEqual(
-      'relationships.author.reference'
+    let path = 'author';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
     );
+    expect(resolvedPath).toEqual('relationships.author.reference');
   });
 
   it('should get the denormalised path for a deeply hasOne related resource', () => {
-    let path = 'author.profile'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
+    let path = 'author.profile';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
+    );
     expect(resolvedPath).toEqual(
       'relationships.author.reference.relationships.profile.reference'
     );
   });
 
   it('should get the denormalised path for a hasMany related resource', () => {
-    let path = 'comments'
-    let resolvedPath = getDenormalisedPath(path, 'Article', resourceDefinitions);
-    expect(resolvedPath).toEqual(
-      'relationships.comments.reference'
+    let path = 'comments';
+    let resolvedPath = getDenormalisedPath(
+      path,
+      'Article',
+      resourceDefinitions
     );
+    expect(resolvedPath).toEqual('relationships.comments.reference');
   });
 });
 
 describe('getDenormalisedValue', () => {
-  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
-  let denormalisedR = denormaliseStoreResource(storeData['Article']['1'], storeData);
+  let storeData = updateStoreDataFromPayload(
+    initialNgrxJsonApiState.data,
+    testPayload
+  );
+  let denormalisedR = denormaliseStoreResource(
+    storeData['Article']['1'],
+    storeData
+  );
   it('should get the value from a DenormalisedStoreResource given a simple path: attribute', () => {
-    let value = getDenormalisedValue('title', denormalisedR, resourceDefinitions);
+    let value = getDenormalisedValue(
+      'title',
+      denormalisedR,
+      resourceDefinitions
+    );
     expect(value).toEqual('Article 1');
   });
 
   it('should get the value from a DenormalisedStoreResource given a simple path: related attribute', () => {
-    let value = getDenormalisedValue('author.name', denormalisedR, resourceDefinitions);
+    let value = getDenormalisedValue(
+      'author.name',
+      denormalisedR,
+      resourceDefinitions
+    );
     expect(value).toEqual('Person 1');
   });
 
   it('should get a hasOne related resource from a DenormalisedStoreResource given a simple path', () => {
-    let relatedR = getDenormalisedValue('author', denormalisedR, resourceDefinitions);
+    let relatedR = getDenormalisedValue(
+      'author',
+      denormalisedR,
+      resourceDefinitions
+    );
     expect(relatedR).toBeDefined();
     expect(relatedR.type).toEqual('Person');
   });
 
   it('should get a hasMany related resource from a DenormalisedStoreResource given a simple path', () => {
-    let relatedR = getDenormalisedValue('comments', denormalisedR, resourceDefinitions);
+    let relatedR = getDenormalisedValue(
+      'comments',
+      denormalisedR,
+      resourceDefinitions
+    );
     expect(relatedR).toBeDefined();
     expect(relatedR[0].type).toEqual('Comment');
     expect(relatedR[0].id).toEqual('1');
   });
-
 });
 
 describe('updateResourceObject', () => {
-
   it('should update attributes', () => {
-
     let original: Resource = {
       type: 'Article',
       id: '1',
@@ -251,38 +305,39 @@ describe('updateResourceObject', () => {
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '1' }
-        }
-      }
+          data: { type: 'Person', id: '1' },
+        },
+      },
     };
     let source: Resource = {
       type: 'Article',
       id: '1',
       attributes: {
-        title: 'Untitled'
+        title: 'Untitled',
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '2' }
-        }
-      }
+          data: { type: 'Person', id: '2' },
+        },
+      },
     };
     deepFreeze(original);
-    deepFreeze(source)
+    deepFreeze(source);
 
-    expect(updateResourceObject(original, source).attributes.title)
-      .toEqual('Untitled');
-    expect(updateResourceObject(original, source).attributes.body)
-      .toEqual('Testing JSON API');
-    expect(updateResourceObject(original, source).relationships.author.data)
-      .toEqual({ type: 'Person', id: '2' });
+    expect(updateResourceObject(original, source).attributes.title).toEqual(
+      'Untitled'
+    );
+    expect(updateResourceObject(original, source).attributes.body).toEqual(
+      'Testing JSON API'
+    );
+    expect(
+      updateResourceObject(original, source).relationships.author.data
+    ).toEqual({ type: 'Person', id: '2' });
   });
 });
 
 describe('insertStoreResource', () => {
-
   it('should insert StoreResource with IN_SYNC state if from server', () => {
-
     let resource: Resource = {
       type: 'Article',
       id: '1',
@@ -292,23 +347,24 @@ describe('insertStoreResource', () => {
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '1' }
-        }
-      }
+          data: { type: 'Person', id: '1' },
+        },
+      },
     };
-    deepFreeze(resource)
+    deepFreeze(resource);
     let storeResources = {};
     let newStoreResources = insertStoreResource(storeResources, resource, true);
     expect(newStoreResources['1']).toBeDefined();
     expect(newStoreResources['1']['type']).toEqual('Article');
     expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
-    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].relationships).toEqual(
+      resource.relationships
+    );
     expect(newStoreResources['1'].persistedResource).toEqual(resource);
-    expect(newStoreResources['1'].state).toEqual("IN_SYNC");
+    expect(newStoreResources['1'].state).toEqual('IN_SYNC');
   });
 
   it('should insert StoreResource with CREATED state if from server', () => {
-
     let resource: Resource = {
       type: 'Article',
       id: '1',
@@ -318,100 +374,110 @@ describe('insertStoreResource', () => {
       },
       relationships: {
         author: {
-          data: { type: 'Person', id: '1' }
-        }
-      }
+          data: { type: 'Person', id: '1' },
+        },
+      },
     };
-    deepFreeze(resource)
+    deepFreeze(resource);
     let storeResources = {};
-    let newStoreResources = insertStoreResource(storeResources, resource, false);
+    let newStoreResources = insertStoreResource(
+      storeResources,
+      resource,
+      false
+    );
     expect(newStoreResources['1']).toBeDefined();
     expect(newStoreResources['1']['type']).toEqual('Article');
     expect(newStoreResources['1'].attributes).toEqual(resource.attributes);
-    expect(newStoreResources['1'].relationships).toEqual(resource.relationships);
+    expect(newStoreResources['1'].relationships).toEqual(
+      resource.relationships
+    );
     expect(newStoreResources['1'].persistedResource).toBeNull();
-    expect(newStoreResources['1'].state).toEqual("CREATED");
+    expect(newStoreResources['1'].state).toEqual('CREATED');
   });
 });
 
 describe('updateResourceState', () => {
   it('should return the state if the resource or its type were not found', () => {
     let state = {};
-    let newState = updateResourceState(state, { type: 'Article', id: '1' })
+    let newState = updateResourceState(state, { type: 'Article', id: '1' });
     expect(newState).toEqual({});
   });
 
   it('should update the resourceState and loading state', () => {
     let state = {
-      'Article': {
+      Article: {
         '1': {
-          state: "CREATED",
-          loading: true
-        }
-      }
+          state: 'CREATED',
+          loading: true,
+        },
+      },
     };
-    let newState = updateResourceState(state, { type: 'Article', id: '1' },
-      "IN_SYNC", false);
-    expect(newState['Article']['1'].state).toEqual("IN_SYNC");
+    let newState = updateResourceState(
+      state,
+      { type: 'Article', id: '1' },
+      'IN_SYNC',
+      false
+    );
+    expect(newState['Article']['1'].state).toEqual('IN_SYNC');
     expect(newState['Article']['1'].loading).toEqual(false);
   });
 });
 
 describe('updateStoreResource', () => {
-
   let state = {
     '1': {
       type: 'Article',
       id: '1',
       attributes: {
-        'title': 'JSON API paints my bikeshed!'
+        title: 'JSON API paints my bikeshed!',
       },
       persistedResource: {
         type: 'Article',
         id: '1',
         attributes: {
-          'title': 'JSON API paints my bikeshed!'
-        }
-      }
+          title: 'JSON API paints my bikeshed!',
+        },
+      },
     },
     '2': {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Second article'
+        title: 'Second article',
       },
       persistedResource: {
         type: 'Article',
         id: '2',
         attributes: {
-          'title': 'Second article'
-        }
-      }
+          title: 'Second article',
+        },
+      },
     },
     '3': {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Third article'
+        title: 'Third article',
       },
-      persistedResource: null
-    }
+      persistedResource: null,
+    },
   };
   deepFreeze(state);
 
   it('should override the store resource if the store came from the server', () => {
-
     let resource: Resource = {
       type: 'Article',
       id: '1',
       attributes: {
-        'title': 'Untitled'
-      }
+        title: 'Untitled',
+      },
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, true);
     expect(newState['1'].attributes.title).toEqual('Untitled');
-    expect(newState['1'].persistedResource.attributes.title).toEqual('Untitled');
+    expect(newState['1'].persistedResource.attributes.title).toEqual(
+      'Untitled'
+    );
   });
 
   it('should do nothing for an equal resource not from server', () => {
@@ -419,13 +485,17 @@ describe('updateStoreResource', () => {
       type: 'Article',
       id: '1',
       attributes: {
-        'title': 'JSON API paints my bikeshed!'
-      }
+        title: 'JSON API paints my bikeshed!',
+      },
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
-    expect(newState['1'].attributes.title).toEqual('JSON API paints my bikeshed!');
-    expect(newState['1'].persistedResource.attributes.title).toEqual('JSON API paints my bikeshed!');
+    expect(newState['1'].attributes.title).toEqual(
+      'JSON API paints my bikeshed!'
+    );
+    expect(newState['1'].persistedResource.attributes.title).toEqual(
+      'JSON API paints my bikeshed!'
+    );
   });
 
   it('should merge a new resource not from server and add UPDATED state if a persistedResource exists', () => {
@@ -433,14 +503,16 @@ describe('updateStoreResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled'
-      }
+        title: 'Untitled',
+      },
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
     expect(newState['2'].attributes.title).toEqual('Untitled');
-    expect(newState['2'].persistedResource.attributes.title).toEqual('Second article');
-    expect(newState['2'].state).toEqual("UPDATED");
+    expect(newState['2'].persistedResource.attributes.title).toEqual(
+      'Second article'
+    );
+    expect(newState['2'].state).toEqual('UPDATED');
   });
 
   it('should not concat arrays when merging resource', () => {
@@ -448,24 +520,24 @@ describe('updateStoreResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
-      }
+        title: 'Untitled',
+        keywords: ['a', 'b'],
+      },
     };
     let resource2: Resource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['b', 'c']
-      }
+        title: 'Untitled',
+        keywords: ['b', 'c'],
+      },
     };
     deepFreeze(resource1);
     deepFreeze(resource2);
     let newState1 = updateStoreResource(state, resource1, false);
     let newState2 = updateStoreResource(newState1, resource2, false);
     expect(newState2['2'].attributes['keywords']).toEqual(['b', 'c']);
-    expect(newState2['2'].state).toEqual("UPDATED");
+    expect(newState2['2'].state).toEqual('UPDATED');
   });
 
   it('should merge a new resource not from server and add CREATED state if a persistedResource does not exists', () => {
@@ -473,18 +545,16 @@ describe('updateStoreResource', () => {
       type: 'Article',
       id: '3',
       attributes: {
-        'title': 'Untitled'
-      }
+        title: 'Untitled',
+      },
     };
     deepFreeze(resource);
     let newState = updateStoreResource(state, resource, false);
     expect(newState['3'].attributes.title).toEqual('Untitled');
     expect(newState['3'].persistedResource).toBeNull();
-    expect(newState['3'].state).toEqual("CREATED");
+    expect(newState['3'].state).toEqual('CREATED');
   });
-
 });
-
 
 describe('isEqualResource', () => {
   it('should ignore different states', () => {
@@ -492,19 +562,19 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
-      state: 'CREATED'
+      state: 'CREATED',
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
-      state: 'IN_SYNC'
+      state: 'IN_SYNC',
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeTruthy();
@@ -515,17 +585,17 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
-      }
+        title: 'Untitled',
+        keywords: ['a', 'b'],
+      },
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeTruthy();
@@ -536,17 +606,17 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '1',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
-      }
+        title: 'Untitled',
+        keywords: ['a', 'b'],
+      },
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeFalsy();
@@ -557,17 +627,17 @@ describe('isEqualResource', () => {
       type: 'different',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
-      }
+        title: 'Untitled',
+        keywords: ['a', 'b'],
+      },
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeFalsy();
@@ -578,17 +648,17 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'different',
-        'keywords': ['a', 'b']
+        title: 'different',
+        keywords: ['a', 'b'],
       },
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
-      }
+        title: 'Untitled',
+        keywords: ['a', 'b'],
+      },
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeFalsy();
@@ -599,25 +669,25 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
     };
     let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
-      relationships:{
-        test:{
+      relationships: {
+        test: {
           data: {
             type: 'test',
-            id: '1'
-          }
-        }
-      }
+            id: '1',
+          },
+        },
+      },
     };
     let equal = isEqualResource(resource1, resource2);
     expect(equal).toBeFalsy();
@@ -628,16 +698,15 @@ describe('isEqualResource', () => {
       type: 'Article',
       id: '2',
       attributes: {
-        'title': 'Untitled',
-        'keywords': ['a', 'b']
+        title: 'Untitled',
+        keywords: ['a', 'b'],
       },
-      state: 'CREATED'
+      state: 'CREATED',
     };
     let equal = isEqualResource(resource1, resource1);
     expect(equal).toBeTruthy();
   });
 });
-
 
 describe('updateResourceErrorsForQuery', () => {
   // it('should throw error if the query type and id is not defined', () => {
@@ -646,37 +715,32 @@ describe('updateResourceErrorsForQuery', () => {
 
   it('should update resource errors given a query and a JsonApiDocument', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: []
-        }
-      }
+          errors: [],
+        },
+      },
     };
     let query = {
       type: 'Article',
-      id: '1'
-    }
+      id: '1',
+    };
     deepFreeze(storeData);
     let document = {
-      errors: ['permission denied', 'i said permission denied']
+      errors: ['permission denied', 'i said permission denied'],
     };
     let newStoreData = updateResourceErrorsForQuery(storeData, query, document);
     expect(newStoreData['Article']['1']['errors']).toEqual(document['errors']);
   });
 });
 
-
-
-
 describe('sortPendingChanges', () => {
-
   it('should POST resource before updating a reference to it', () => {
-
-    let resource1: StoreResource =  {
+    let resource1: StoreResource = {
       type: 'Article',
       id: '1',
       state: 'UPDATED',
@@ -685,12 +749,12 @@ describe('sortPendingChanges', () => {
           data: {
             type: 'Article',
             id: '2',
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
-    let resource2: StoreResource =  {
+    let resource2: StoreResource = {
       type: 'Article',
       id: '2',
       state: 'CREATED',
@@ -706,121 +770,154 @@ describe('sortPendingChanges', () => {
   });
 });
 
-
-
 describe('updateResourceErrors', () => {
   it('should add resource errors', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: [{code: '0'}]
-        }
-      }
+          errors: [{ code: '0' }],
+        },
+      },
     };
     deepFreeze(storeData);
 
-    let newErrors = [{code: '1'}, {code: '2'}];
-    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'ADD');
-    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '0'}, {code: '1'}, {code: '2'}]);
+    let newErrors = [{ code: '1' }, { code: '2' }];
+    let newStoreData = updateResourceErrors(
+      storeData,
+      { id: '1', type: 'Article' },
+      newErrors,
+      'ADD'
+    );
+    expect(newStoreData['Article']['1']['errors']).toEqual([
+      { code: '0' },
+      { code: '1' },
+      { code: '2' },
+    ]);
   });
 
   it('should set resource errors', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: [{code: '0'}]
-        }
-      }
+          errors: [{ code: '0' }],
+        },
+      },
     };
     deepFreeze(storeData);
 
-    let newErrors = [{code: '1'}, {code: '2'}];
-    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
-    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '1'}, {code: '2'}]);
+    let newErrors = [{ code: '1' }, { code: '2' }];
+    let newStoreData = updateResourceErrors(
+      storeData,
+      { id: '1', type: 'Article' },
+      newErrors,
+      'SET'
+    );
+    expect(newStoreData['Article']['1']['errors']).toEqual([
+      { code: '1' },
+      { code: '2' },
+    ]);
   });
 
   it('should empty resource errors on set with no errors', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: [{code: '0'}]
-        }
-      }
+          errors: [{ code: '0' }],
+        },
+      },
     };
     deepFreeze(storeData);
 
     let newErrors = [];
-    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
+    let newStoreData = updateResourceErrors(
+      storeData,
+      { id: '1', type: 'Article' },
+      newErrors,
+      'SET'
+    );
     expect(newStoreData['Article']['1']['errors']).toEqual([]);
   });
 
   it('should empty resource errors on set with undefined errors', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: [{code: '0'}]
-        }
-      }
+          errors: [{ code: '0' }],
+        },
+      },
     };
     deepFreeze(storeData);
 
     let newErrors = undefined;
-    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, newErrors, 'SET');
+    let newStoreData = updateResourceErrors(
+      storeData,
+      { id: '1', type: 'Article' },
+      newErrors,
+      'SET'
+    );
     expect(newStoreData['Article']['1']['errors']).toEqual([]);
   });
 
   it('should remove resource errors', () => {
     let storeData = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
-            id: '1'
+            id: '1',
           },
-          errors: [{code: '0'}, {code: '2'}]
-        }
-      }
+          errors: [{ code: '0' }, { code: '2' }],
+        },
+      },
     };
     deepFreeze(storeData);
 
-    let removedErrors = [{code: '0'}, {code: '1'}];
-    let newStoreData = updateResourceErrors(storeData, {id: '1', type: 'Article'}, removedErrors, 'REMOVE');
-    expect(newStoreData['Article']['1']['errors']).toEqual([{code: '2'}]);
+    let removedErrors = [{ code: '0' }, { code: '1' }];
+    let newStoreData = updateResourceErrors(
+      storeData,
+      { id: '1', type: 'Article' },
+      removedErrors,
+      'REMOVE'
+    );
+    expect(newStoreData['Article']['1']['errors']).toEqual([{ code: '2' }]);
   });
 });
 
-
 describe('rollbackStoreResources', () => {
   let storeData = {
-    'Article': {
+    Article: {
       '1': {
         resource: { type: 'Article', id: '1' },
-        state: "CREATED"
+        state: 'CREATED',
       },
     },
-    'Comment': {
+    Comment: {
       '1': {
         resource: { type: 'Comment', id: '1', attributes: { title: 'C1' } },
-        state: "UPDATED",
-        persistedResource: { type: 'Comment', id: '1', attributes: { title: 'C11' } },
-      }
-    }
+        state: 'UPDATED',
+        persistedResource: {
+          type: 'Comment',
+          id: '1',
+          attributes: { title: 'C11' },
+        },
+      },
+    },
   };
   it('should delete the resource if a persistedResource does not exist', () => {
     let newState = rollbackStoreResources(storeData);
@@ -828,23 +925,26 @@ describe('rollbackStoreResources', () => {
     expect(newState['Article']['1']).not.toBeDefined();
     expect(newState['Comment']['1']).toBeDefined();
     expect(newState['Comment']['1'].resource.attributes.title).toEqual('C11');
-    expect(newState['Comment']['1'].state).toEqual("IN_SYNC");
+    expect(newState['Comment']['1'].state).toEqual('IN_SYNC');
   });
 });
 
 describe('deleteStoreResources', () => {
   let storeData = {
-    'Article': {
-      '1': {},
-      '2': {}
-    },
-    'Comment': {
+    Article: {
       '1': {},
       '2': {},
-    }
+    },
+    Comment: {
+      '1': {},
+      '2': {},
+    },
   };
   it('should delete a single resource given a type and id', () => {
-    let newStoreData = deleteStoreResources(storeData, { type: 'Article', id: '1' });
+    let newStoreData = deleteStoreResources(storeData, {
+      type: 'Article',
+      id: '1',
+    });
     expect(newStoreData['Article']['1']).not.toBeDefined();
     expect(newStoreData['Article']['2']).toBeDefined();
   });
@@ -855,58 +955,56 @@ describe('deleteStoreResources', () => {
   });
 });
 
-
 describe('updateStoreDataFromResource', () => {
-
   it(`should insert a resource if it was not found`, () => {
     let state = {
-      'Article': {
-        '1': {
-          resource: {
-            type: 'Article',
-            id: '1',
-            attributes: {
-              'title': 'JSON API paints my bikeshed!'
-            }
-          },
-        }
-      }
-    }
-    deepFreeze(state);
-
-    let newResource: Resource = {
-      type: 'Article',
-      id: '3'
-    };
-    let newState = updateStoreDataFromResource(state, newResource, true, true);
-    expect(newState['Article']['3']).toBeDefined();
-    expect(newState['Article']['3'].id).toEqual('3')
-    expect(newState['Article']['1']).toBeDefined();
-  });
-
-  it('should update a resource if found', () => {
-    let state = {
-      'Article': {
+      Article: {
         '1': {
           resource: {
             type: 'Article',
             id: '1',
             attributes: {
               title: 'JSON API paints my bikeshed!',
-              body: 'Test'
-            }
+            },
           },
-        }
-      }
-    }
+        },
+      },
+    };
+    deepFreeze(state);
+
+    let newResource: Resource = {
+      type: 'Article',
+      id: '3',
+    };
+    let newState = updateStoreDataFromResource(state, newResource, true, true);
+    expect(newState['Article']['3']).toBeDefined();
+    expect(newState['Article']['3'].id).toEqual('3');
+    expect(newState['Article']['1']).toBeDefined();
+  });
+
+  it('should update a resource if found', () => {
+    let state = {
+      Article: {
+        '1': {
+          resource: {
+            type: 'Article',
+            id: '1',
+            attributes: {
+              title: 'JSON API paints my bikeshed!',
+              body: 'Test',
+            },
+          },
+        },
+      },
+    };
     deepFreeze(state);
 
     let newResource: Resource = {
       type: 'Article',
       id: '1',
       attributes: {
-        tag: 'Whatever'
-      }
+        tag: 'Whatever',
+      },
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']['1']).toBeDefined();
@@ -914,12 +1012,12 @@ describe('updateStoreDataFromResource', () => {
   });
 
   it('should insert resource type and resource if none were found', () => {
-    let state = {}
+    let state = {};
     deepFreeze(state);
 
     let newResource: Resource = {
       type: 'Article',
-      id: '3'
+      id: '3',
     };
     let newState = updateStoreDataFromResource(state, newResource, true, true);
     expect(newState['Article']).toBeDefined();
@@ -929,7 +1027,10 @@ describe('updateStoreDataFromResource', () => {
 
 describe('updateStoreDataFromPayload', () => {
   it('should update the store data given a JsonApiDocument', () => {
-    let newState = updateStoreDataFromPayload(initialNgrxJsonApiState.data, documentPayload);
+    let newState = updateStoreDataFromPayload(
+      initialNgrxJsonApiState.data,
+      documentPayload
+    );
     expect(newState['Article']).toBeDefined();
     expect(newState['Person']).toBeDefined();
     expect(newState['Article']['1']).toBeDefined();
@@ -944,22 +1045,22 @@ describe('updateQueryParams', () => {
   let storeQueries = {
     '1': {
       query: {},
-      loading: false
+      loading: false,
     },
     '2': {
       query: {},
-      loading: false
+      loading: false,
     },
     '3': {
       query: {},
       loading: false,
-    }
-  }
+    },
+  };
   it('should update query params given a query store and a query', () => {
     let newQuery = {
       queryId: '1',
-      type: 'getOne'
-    }
+      type: 'getOne',
+    };
     let newStoreQueries = updateQueryParams(storeQueries, newQuery);
     expect(newStoreQueries['1'].query.type).toEqual('getOne');
   });
@@ -967,8 +1068,8 @@ describe('updateQueryParams', () => {
   it('should create a new query if the query was not found in the storeQueries', () => {
     let newQuery = {
       queryId: '4',
-      type: 'getOne'
-    }
+      type: 'getOne',
+    };
     let newStoreQueries = updateQueryParams(storeQueries, newQuery);
     expect(newStoreQueries['4']).toBeDefined();
     expect(newStoreQueries['4'].query.type).toEqual('getOne');
@@ -978,57 +1079,59 @@ describe('updateQueryParams', () => {
 describe('updateQueryResults', () => {
   it('should update the query data given a storeQueries and a queryId', () => {
     let storeQueries = {
-      'a1': {
+      a1: {
         query: {
           queryId: 'a1',
-          type: 'Article'
+          type: 'Article',
         },
-        loading: true
-      }
+        loading: true,
+      },
     };
     let document = {
       data: [
         {
-          type: "Article",
-          id: "1",
+          type: 'Article',
+          id: '1',
           attributes: {
-            "title": "Article 1"
+            title: 'Article 1',
           },
         },
         {
-          type: "Article",
-          id: "2",
+          type: 'Article',
+          id: '2',
           attributes: {
-            "title": "Article 2"
+            title: 'Article 2',
           },
         },
-      ]
-    }
+      ],
+    };
     let newStoreQueries = updateQueryResults(storeQueries, 'a1', document);
     expect(newStoreQueries['a1'].resultIds.length).toEqual(2);
-    expect(newStoreQueries['a1'].resultIds[0]).toEqual({ type: 'Article', id: '1' });
+    expect(newStoreQueries['a1'].resultIds[0]).toEqual({
+      type: 'Article',
+      id: '1',
+    });
     expect(newStoreQueries['a1'].loading).toBe(false);
-  })
+  });
 });
 
 describe('updateQueryErrors', () => {
   it('should return the state if the queryId is not given or query not found', () => {
-    let queriesStore = {}
+    let queriesStore = {};
     expect(updateQueryErrors(queriesStore)).toEqual({});
   });
 
   it('should add any errors in the JsonApiDocument to the query erros', () => {
-
     let queriesStore = {
       '1': {
         query: {},
         loading: false,
-        errors: []
-      }
+        errors: [],
+      },
     };
     deepFreeze(queriesStore);
     let document = {
-      errors: ['permission denied', 'i said permission denied']
+      errors: ['permission denied', 'i said permission denied'],
     };
     let newQueriesStore = updateQueryErrors(queriesStore, '1', document);
     expect(newQueriesStore['1'].errors.length).toEqual(2);
@@ -1041,8 +1144,8 @@ describe('removeQuery', () => {
     let storeQueries = {
       '1': {},
       '2': {},
-      '3': {}
-    }
+      '3': {},
+    };
     let newStoreQueries = removeQuery(storeQueries, '2');
     expect(newStoreQueries['2']).not.toBeDefined();
     expect(storeQueries['2']).toBeDefined();
@@ -1055,97 +1158,169 @@ describe('toResourceIdentifier', () => {
       type: 'Article',
       id: '1',
       attributes: {
-        title: 'Untitled'
-      }
+        title: 'Untitled',
+      },
     };
-    expect(toResourceIdentifier(resource)).toEqual({ type: 'Article', id: '1' });
+    expect(toResourceIdentifier(resource)).toEqual({
+      type: 'Article',
+      id: '1',
+    });
   });
 });
 
 describe('getResourceFieldValueFromPath', () => {
-  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
+  let storeData = updateStoreDataFromPayload(
+    initialNgrxJsonApiState.data,
+    testPayload
+  );
 
   it('should throw an error if the definition was not found', () => {
     let baseResource = storeData['Whatever']['1'];
-    expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
+    expect(() =>
+      getResourceFieldValueFromPath(
+        'whatever',
+        baseResource,
+        storeData,
+        resourceDefinitions
+      )
     ).toThrow();
   });
 
   it('should throw an error if definition has no attributes or relations', () => {
     let baseResource = storeData['Comment']['1'];
-    expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
+    expect(() =>
+      getResourceFieldValueFromPath(
+        'whatever',
+        baseResource,
+        storeData,
+        resourceDefinitions
+      )
     ).toThrow();
   });
 
   it('should return the attribute if the path is made of a single field', () => {
     let baseResource = storeData['Article']['1'];
-    let typeAttrib = getResourceFieldValueFromPath('title', baseResource, storeData, resourceDefinitions);
+    let typeAttrib = getResourceFieldValueFromPath(
+      'title',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(typeAttrib).toEqual('Article 1');
   });
 
   it('should return null if the field is found in attributes definition but not in resource', () => {
     let baseResource = storeData['Article']['1'];
-    let value = getResourceFieldValueFromPath('body', baseResource, storeData, resourceDefinitions);
+    let value = getResourceFieldValueFromPath(
+      'body',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(value).toBeNull();
   });
 
   it('should throw an error if the last field in the path is a relationship', () => {
     let baseResource = storeData['Article']['1'];
-    expect(() => getResourceFieldValueFromPath('blog', baseResource, storeData, resourceDefinitions)
+    expect(() =>
+      getResourceFieldValueFromPath(
+        'blog',
+        baseResource,
+        storeData,
+        resourceDefinitions
+      )
     ).toThrow();
   });
 
   it('should throw an error if the path contains a hasMany relationship', () => {
     let baseResource = storeData['Article']['1'];
-    expect(() => getResourceFieldValueFromPath('author.comments.text', baseResource, storeData, resourceDefinitions)
+    expect(() =>
+      getResourceFieldValueFromPath(
+        'author.comments.text',
+        baseResource,
+        storeData,
+        resourceDefinitions
+      )
     ).toThrow();
   });
 
   it('should return null if the field is found in relationships definition but not in resource', () => {
     let baseResource = storeData['Article']['1'];
-    let value = getResourceFieldValueFromPath('blog.name', baseResource, storeData, resourceDefinitions);
+    let value = getResourceFieldValueFromPath(
+      'blog.name',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(value).toBeNull();
   });
 
   it('should return the attribute for a complex path', () => {
     let baseResource = storeData['Article']['1'];
-    let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
+    let value = getResourceFieldValueFromPath(
+      'author.name',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(value).toEqual('Person 1');
   });
 
   it('should throw an error if the field is not found in attributes or relationships', () => {
     let baseResource = storeData['Article']['1'];
-    expect(() => getResourceFieldValueFromPath('whatever', baseResource, storeData, resourceDefinitions)
+    expect(() =>
+      getResourceFieldValueFromPath(
+        'whatever',
+        baseResource,
+        storeData,
+        resourceDefinitions
+      )
     ).toThrow();
   });
 
   it('should return null if a related resource was not found', () => {
     let baseResource = storeData['Article']['2'];
-    let value = getResourceFieldValueFromPath('author.name', baseResource, storeData, resourceDefinitions);
+    let value = getResourceFieldValueFromPath(
+      'author.name',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(value).toBeNull();
   });
 
   it('should return the attribute for a very complex path', () => {
     let baseResource = storeData['Article']['1'];
-    let value = getResourceFieldValueFromPath('author.profile.id', baseResource, storeData, resourceDefinitions);
+    let value = getResourceFieldValueFromPath(
+      'author.profile.id',
+      baseResource,
+      storeData,
+      resourceDefinitions
+    );
     expect(value).toEqual('firstProfile');
   });
-
 });
 
 describe('filterResources (TODO: test remaining types)', () => {
-
-  let storeData = updateStoreDataFromPayload(initialNgrxJsonApiState.data, testPayload);
+  let storeData = updateStoreDataFromPayload(
+    initialNgrxJsonApiState.data,
+    testPayload
+  );
 
   let resources = storeData['Article'];
   it('should filter resources using an iexact filter if no type is given', () => {
     let query = {
       type: 'Article',
       params: {
-        filtering: [{ path: 'title', value: 'article 2' }]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+        filtering: [{ path: 'title', value: 'article 2' }],
+      },
+    };
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions
+    );
     expect(filtered.length).toBe(1);
     expect(filtered[0].id).toBe('2');
     expect(filtered[0].type).toBe('Article');
@@ -1155,12 +1330,15 @@ describe('filterResources (TODO: test remaining types)', () => {
     let query = {
       type: 'Article',
       params: {
-        filtering: [
-          { path: 'title', value: 'article 2', operator: 'iexact' }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+        filtering: [{ path: 'title', value: 'article 2', operator: 'iexact' }],
+      },
+    };
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions
+    );
     expect(filtered.length).toBe(1);
     expect(filtered[0].id).toBe('2');
     expect(filtered[0].type).toBe('Article');
@@ -1174,12 +1352,17 @@ describe('filterResources (TODO: test remaining types)', () => {
           {
             path: 'title',
             value: ['Article 2', 'Article 1'],
-            operator: 'in'
-          }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+            operator: 'in',
+          },
+        ],
+      },
+    };
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions
+    );
     expect(filtered.length).toBe(2);
     expect(filtered[0].id).toBe('1');
     expect(filtered[0].type).toBe('Article');
@@ -1191,11 +1374,16 @@ describe('filterResources (TODO: test remaining types)', () => {
       type: 'Article',
       params: {
         filtering: [
-          { path: 'author.name', value: 'person 1', operator: 'iexact', }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+          { path: 'author.name', value: 'person 1', operator: 'iexact' },
+        ],
+      },
+    };
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions
+    );
     expect(filtered.length).toBe(1);
     expect(filtered[0].id).toBe('1');
     expect(filtered[0].type).toBe('Article');
@@ -1205,12 +1393,15 @@ describe('filterResources (TODO: test remaining types)', () => {
     let query = {
       type: 'Article',
       params: {
-        filtering: [
-          { path: 'body', value: 'person 1', operator: 'iexact', }
-        ]
-      }
-    }
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions);
+        filtering: [{ path: 'body', value: 'person 1', operator: 'iexact' }],
+      },
+    };
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions
+    );
     expect(filtered.length).toBe(0);
   });
 
@@ -1219,24 +1410,29 @@ describe('filterResources (TODO: test remaining types)', () => {
       type: 'Article',
       params: {
         filtering: [
-          { path: 'title', value: 'Article', operator: 'firstLetterEqual', }
-        ]
-      }
-    }
+          { path: 'title', value: 'Article', operator: 'firstLetterEqual' },
+        ],
+      },
+    };
     let filteringConfig = {
       filteringOperators: [
         {
           name: 'firstLetterEqual',
-          comparison: (value, fieldValue) => value[0] == fieldValue[0]
-        }
-      ]
+          comparison: (value, fieldValue) => value[0] == fieldValue[0],
+        },
+      ],
     };
-    let filtered = filterResources(resources, storeData, query, resourceDefinitions, filteringConfig);
+    let filtered = filterResources(
+      resources,
+      storeData,
+      query,
+      resourceDefinitions,
+      filteringConfig
+    );
     expect(filtered.length).toBe(2);
     expect(filtered[0].id).toBe('1');
     expect(filtered[0].type).toBe('Article');
   });
-
 
   // it('should filter hasMany related resources using iexact filter', () => {
   //     let query = {
@@ -1252,31 +1448,30 @@ describe('filterResources (TODO: test remaining types)', () => {
   //     expect(filtered[0].resource.id).toBe('1');
   //     expect(filtered[0].resource.type).toBe('Article');
   // });
-
 });
 
 describe('generateIncludedQueryParams', () => {
   it('should generate an included query param given an array of resources to be included', () => {
-    let params = generateIncludedQueryParams(['comments', 'comments.author'])
+    let params = generateIncludedQueryParams(['comments', 'comments.author']);
     expect(params).toEqual('include=comments,comments.author');
-  })
+  });
 
   it('should return an empty string if the array is empty', () => {
-    let params = generateIncludedQueryParams([])
+    let params = generateIncludedQueryParams([]);
     expect(params).toEqual('');
-  })
+  });
 });
 
 describe('generateFieldsQueryParams', () => {
   it('should generate fields query param given an array of resources to be included', () => {
-    let params = generateFieldsQueryParams(['comments', 'author'])
+    let params = generateFieldsQueryParams(['comments', 'author']);
     expect(params).toEqual('fields=comments,author');
-  })
+  });
 
   it('should return an empty string if the array is empty', () => {
-    let params = generateFieldsQueryParams([])
+    let params = generateFieldsQueryParams([]);
     expect(params).toEqual('');
-  })
+  });
 });
 //
 describe('generateFilteringParams', () => {
@@ -1301,9 +1496,7 @@ describe('generateFilteringParams', () => {
   // });
 });
 
-describe('generateSortingQueryParams', () => {
-
-});
+describe('generateSortingQueryParams', () => {});
 
 describe('generateQueryParams', () => {
   it('should generate query params', () => {
@@ -1319,8 +1512,8 @@ describe('generatePayload', () => {
   it('should generate a payload for a "create" request given a resource', () => {
     let resource = {
       id: '10',
-      type: 'Article'
-    }
+      type: 'Article',
+    };
     let payload = generatePayload(resource, 'POST');
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData.data.id).toEqual('10');
@@ -1330,8 +1523,8 @@ describe('generatePayload', () => {
   it('should generate a payload for a "update" request given a resource', () => {
     let resource = {
       id: '10',
-      type: 'Article'
-    }
+      type: 'Article',
+    };
     let payload = generatePayload(resource, 'PATCH');
     expect(payload.query.id).toEqual('10');
     expect(payload.query.type).toEqual('Article');
@@ -1342,12 +1535,11 @@ describe('generatePayload', () => {
   it('should generate a payload for a "delete" request given a resource', () => {
     let resource = {
       id: '10',
-      type: 'Article'
-    }
+      type: 'Article',
+    };
     let payload = generatePayload(resource, 'DELETE');
     expect(payload.query.id).toEqual('10');
     expect(payload.query.type).toEqual('Article');
     expect(payload.jsonApiData).not.toBeDefined();
   });
-
 });

@@ -21,7 +21,7 @@
             "webpack"
         ],
         "lib": [
-            "dom", "es6"
+            "dom", "es6", "ES2015"
         ]
     },
     "compileOnSave": false,

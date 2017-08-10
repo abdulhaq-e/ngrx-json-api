@@ -3,7 +3,7 @@ import { AnonymousSubscription } from 'rxjs/Subscription';
 
 export enum Direction {
   ASC,
-  DESC
+  DESC,
 }
 
 export interface Document {
@@ -36,7 +36,7 @@ export interface ManyResourceRelationship {
  * See crnk.io for a first such generator.
  */
 export interface TypedManyResourceRelationship<T extends StoreResource>
-    extends ManyResourceRelationship {
+  extends ManyResourceRelationship {
   reference?: Array<T>;
 }
 
@@ -45,15 +45,14 @@ export interface TypedManyResourceRelationship<T extends StoreResource>
  * See crnk.io for a first such generator.
  */
 export interface TypedOneResourceRelationship<T extends StoreResource>
-    extends OneResourceRelationship {
+  extends OneResourceRelationship {
   reference?: T;
 }
 
-
 export interface NgrxJsonApiConfig {
   apiUrl: string;
+  initialState?: any;
   resourceDefinitions: Array<ResourceDefinition>;
-  storeLocation: string;
   urlBuilder?: NgrxJsonApiUrlBuilder;
   filteringConfig?: NgrxJsonApiFilteringConfig;
 }
@@ -70,16 +69,15 @@ export interface NgrxJsonApiStore {
 
 export interface NgrxJsonApiStoreData {
   [id: string]: NgrxJsonApiStoreResources;
-};
+}
 
 export interface NgrxJsonApiStoreQueries {
   [id: string]: StoreQuery;
-};
+}
 
 export interface NgrxJsonApiStoreResources {
   [id: string]: StoreResource;
-};
-
+}
 
 export interface NgrxJsonApiFilteringConfig {
   pathSeparator?: string;
@@ -94,13 +92,7 @@ export interface NgrxJsonApiUrlBuilder {
   generateQueryParams?: (...params: Array<string>) => string;
 }
 
-export type OperationType
-  = 'GET'
-  | 'DELETE'
-  | 'PATCH'
-  | 'POST'
-  | false;
-
+export type OperationType = 'GET' | 'DELETE' | 'PATCH' | 'POST' | false;
 
 export interface OneResourceRelationship {
   data?: ResourceIdentifier;
@@ -152,7 +144,7 @@ export interface ResourceDefinition {
   collectionPath: string;
   attributes?: { [key: string]: ResourceAttributeDefinition };
   relationships?: { [key: string]: ResourceRelationDefinition };
-};
+}
 
 export interface ResourceError {
   id?: string;
@@ -186,23 +178,20 @@ export interface ResourceRelationDefinition {
   relationType: ResourceRelationType;
 }
 
-export type ResourceRelationType
-  = 'hasOne'
-  | 'hasMany';
+export type ResourceRelationType = 'hasOne' | 'hasMany';
 
 export type ResourceState =
-  'NEW' |
-  'IN_SYNC' |
-  'CREATED' |
-  'UPDATED' |
-  'DELETED' |
-  'NOT_LOADED';
+  | 'NEW'
+  | 'IN_SYNC'
+  | 'CREATED'
+  | 'UPDATED'
+  | 'DELETED'
+  | 'NOT_LOADED';
 
 export interface SortingParam {
   api: string;
   direction: Direction;
 }
-
 
 export interface QueryResult extends StoreQuery {
   data?: StoreResource | Array<StoreResource>;

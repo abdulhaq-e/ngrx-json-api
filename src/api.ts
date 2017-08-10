@@ -1,15 +1,18 @@
 import * as _ from 'lodash';
 
 import {
-  Headers,
-  Http,
-  Request,
-  RequestOptions,
-  Response,
-  RequestMethod,
-  URLSearchParams
-} from '@angular/http';
+  HttpHeaders,
+  HttpClient,
+  HttpRequest,
+  // required for building
+  HttpHeaderResponse,
+  HttpProgressEvent,
+  HttpResponse,
+  HttpSentEvent,
+  HttpUserEvent,
+} from '@angular/common/http';
 
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/throw';
@@ -27,22 +30,18 @@ import {
   generateFieldsQueryParams,
   generateFilteringQueryParams,
   generateSortingQueryParams,
-  generateQueryParams
+  generateQueryParams,
 } from './utils';
 
 export class NgrxJsonApi {
-
-  public headers: Headers = new Headers({
+  public headers: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/vnd.api+json',
-    'Accept': 'application/vnd.api+json'
+    Accept: 'application/vnd.api+json',
   });
   public requestUrl: string;
   public definitions = this.config.resourceDefinitions;
 
-  constructor(
-    private http: Http,
-    public config: NgrxJsonApiConfig
-  ) { }
+  constructor(private http: HttpClient, public config: NgrxJsonApiConfig) {}
 
   private urlBuilder(query: Query, operation: OperationType) {
     switch (operation) {
@@ -67,7 +66,6 @@ export class NgrxJsonApi {
         return this.collectionUrlFor(query.type);
       }
     }
-
   }
 
   private collectionPathFor(type: string) {
@@ -96,7 +94,6 @@ export class NgrxJsonApi {
   }
 
   public find(query: Query) {
-
     let _generateIncludedQueryParams = generateIncludedQueryParams;
     let _generateFilteringQueryParams = generateFilteringQueryParams;
     let _generateFieldsQueryParams = generateFieldsQueryParams;
@@ -155,78 +152,88 @@ export class NgrxJsonApi {
         offsetParams = 'page[offset]=' + query.params.offset;
       }
     }
-    queryParams = _generateQueryParams(includedParam, filteringParams, sortingParams,
-        fieldsParams, offsetParams, limitParams);
-
-    let requestOptionsArgs = {
-      method: RequestMethod.Get,
-      url: this.urlBuilder(query, 'GET') + queryParams,
-    };
-
-    return this.request(requestOptionsArgs);
-  }
-
-  public create(query: Query, document: Document) {
-
-    if (typeof query === undefined) {
-      return Observable.throw('Query not found');
-    }
-
-    if (typeof document === undefined) {
-      return Observable.throw('Data not found');
-    }
-
-    let requestOptionsArgs = {
-      method: RequestMethod.Post,
-      url: this.urlBuilder(query, 'POST'),
-      body: JSON.stringify({ data: document.data })
-    };
-
-    return this.request(requestOptionsArgs);
-  }
-
-  public update(query: Query, document: Document) {
-
-    if (typeof query === undefined) {
-      return Observable.throw('Query not found');
-    }
-
-    if (typeof document === undefined) {
-      return Observable.throw('Data not found');
-    }
-    let requestOptionsArgs = {
-      method: RequestMethod.Patch,
-      url: this.urlBuilder(query, 'PATCH'),
-      body: JSON.stringify({ data: document.data })
-    };
-
-    return this.request(requestOptionsArgs);
-  }
-
-
-  public delete(query: Query) {
-
-    if (typeof query === undefined) {
-      return Observable.throw('Query not found');
-    }
+    queryParams = _generateQueryParams(
+      includedParam,
+      filteringParams,
+      sortingParams,
+      fieldsParams,
+      offsetParams,
+      limitParams
+    );
 
     let requestOptions = {
-      method: RequestMethod.Delete,
-      url: this.urlBuilder(query, 'DELETE')
+      method: 'GET',
+      url: this.urlBuilder(query, 'GET') + queryParams,
     };
 
     return this.request(requestOptions);
   }
 
+  public create(query: Query, document: Document) {
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
 
-  private request(requestOptionsArgs) {
+    if (typeof document === undefined) {
+      return Observable.throw('Data not found');
+    }
 
-    let requestOptions = new RequestOptions(requestOptionsArgs);
+    let requestOptions = {
+      method: 'POST',
+      url: this.urlBuilder(query, 'POST'),
+      body: JSON.stringify({ data: document.data }),
+    };
 
-    let request = new Request(requestOptions.merge({
-      headers: this.headers
-    }));
+    return this.request(requestOptions);
+  }
 
+  public update(query: Query, document: Document) {
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
+
+    if (typeof document === undefined) {
+      return Observable.throw('Data not found');
+    }
+    let requestOptions = {
+      method: 'PATCH',
+      url: this.urlBuilder(query, 'PATCH'),
+      body: JSON.stringify({ data: document.data }),
+    };
+
+    return this.request(requestOptions);
+  }
+
+  public delete(query: Query) {
+    if (typeof query === undefined) {
+      return Observable.throw('Query not found');
+    }
+
+    let requestOptions = {
+      method: 'DELETE',
+      url: this.urlBuilder(query, 'DELETE'),
+    };
+
+    return this.request(requestOptions);
+  }
+
+  private request(requestOptions: any) {
+    let request: HttpRequest<any>;
+    let newRequestOptions = { ...requestOptions, headers: this.headers };
+
+    if (requestOptions.method === 'GET') {
+      let { method, url, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, init);
+    } else if (requestOptions.method === 'POST') {
+      let { method, url, body, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, body, init);
+    } else if (requestOptions.method === 'PATCH') {
+      let { method, url, body, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, body, init);
+    } else if (requestOptions.method === 'DELETE') {
+      let { method, url, ...init } = newRequestOptions;
+      request = new HttpRequest(method, url, init);
+    }
     return this.http.request(request);
   }
 }
