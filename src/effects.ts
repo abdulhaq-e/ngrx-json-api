@@ -95,7 +95,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((query: Query) => {
       return this.jsonApi
         .find(query)
-        .map(res => res.json())
         .map(
           data =>
             new ApiGetSuccessAction({
@@ -138,7 +137,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi
         .delete(payload.query)
-        .map(res => res.json())
         .map(
           data =>
             new ApiDeleteSuccessAction({
@@ -238,7 +236,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
             actions.push(
               this.jsonApi
                 .update(payload.query, payload.jsonApiData)
-                .map(res => res.json())
                 .map(
                   data =>
                     new ApiPatchSuccessAction({
@@ -262,7 +259,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
             actions.push(
               this.jsonApi
                 .delete(payload.query)
-                .map(res => res.json())
                 .map(
                   data =>
                     new ApiDeleteSuccessAction({
@@ -332,7 +328,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
       // transform http to json api error
       let errors: Array<ResourceError> = [];
       let error: ResourceError = {
-        status: response.status.toString(),
+        status: String(response.status),
         code: response.statusText,
       };
 
