@@ -328,7 +328,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
       // transform http to json api error
       let errors: Array<ResourceError> = [];
       let error: ResourceError = {
-        status: response.status.toString(),
+        status: String(response.status),
         code: response.statusText,
       };
 
