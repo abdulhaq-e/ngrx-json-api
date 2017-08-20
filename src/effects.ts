@@ -1,9 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
+import { HttpResponse } from '@angular/common/http';
+
 import * as _ from 'lodash';
 
 import { Action, Store } from '@ngrx/store';
-import { Effect, Actions, toPayload } from '@ngrx/effects';
+import { Effect, Actions } from '@ngrx/effects';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
@@ -22,15 +24,19 @@ import {
   ApiGetInitAction,
   ApiApplyFailAction,
   ApiApplySuccessAction,
+  ApiPostInitAction,
   ApiPostFailAction,
   ApiPostSuccessAction,
+  ApiDeleteInitAction,
   ApiDeleteFailAction,
   ApiDeleteSuccessAction,
   ApiGetFailAction,
   ApiGetSuccessAction,
+  ApiPatchInitAction,
   ApiPatchFailAction,
   ApiPatchSuccessAction,
   NgrxJsonApiActionTypes,
+  LocalQueryInitAction,
   LocalQuerySuccessAction,
   LocalQueryFailAction,
   ApiQueryRefreshAction,
@@ -57,10 +63,9 @@ import {
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
   @Effect()
-  createResource$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.API_POST_INIT)
-    .map<Action, Resource>(toPayload)
-    .map<Resource, Payload>(it => this.generatePayload(it, 'POST'))
+  createResource$: Observable<Action> = this.actions$
+    .ofType<ApiPostInitAction>(NgrxJsonApiActionTypes.API_POST_INIT)
+    .map(it => this.generatePayload(it.payload, 'POST'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi
         .create(payload.query, payload.jsonApiData)
@@ -74,9 +79,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect()
   updateResource$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.API_PATCH_INIT)
-    .map<Action, Resource>(toPayload)
-    .map<Resource, Payload>(it => this.generatePayload(it, 'PATCH'))
+    .ofType<ApiPatchInitAction>(NgrxJsonApiActionTypes.API_PATCH_INIT)
+    .map(it => this.generatePayload(it.payload, 'PATCH'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi
         .update(payload.query, payload.jsonApiData)
@@ -90,8 +94,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect()
   readResource$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.API_GET_INIT)
-    .map<Action, Query>(toPayload)
+    .ofType<ApiGetInitAction>(NgrxJsonApiActionTypes.API_GET_INIT)
+    .map(it => it.payload)
     .mergeMap((query: Query) => {
       return this.jsonApi
         .find(query)
@@ -109,8 +113,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect()
   queryStore$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
-    .map<Action, Query>(toPayload)
+    .ofType<LocalQueryInitAction>(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
+    .map(it => it.payload)
     .mergeMap((query: Query) => {
       return this.store
         .let(this.selectors.getNgrxJsonApiStore$())
@@ -131,8 +135,8 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   @Effect()
   deleteResource$ = this.actions$
-    .ofType(NgrxJsonApiActionTypes.API_DELETE_INIT)
-    .map<Action, ResourceIdentifier>(toPayload)
+    .ofType<ApiDeleteInitAction>(NgrxJsonApiActionTypes.API_DELETE_INIT)
+    .map(it => it.payload)
     .map<ResourceIdentifier, Payload>(it => this.generatePayload(it, 'DELETE'))
     .mergeMap((payload: Payload) => {
       return this.jsonApi
@@ -310,14 +314,17 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return new ApiApplySuccessAction(actions);
   }
 
-  private toErrorPayload(query: Query, response: any): Payload {
+  private toErrorPayload(
+    query: Query,
+    response: HttpResponse<any> | any
+  ): Payload {
     let contentType = null;
     if (response && response.headers) {
       contentType = response.headers.get('Content-Type');
     }
     let document = null;
     if (contentType === 'application/vnd.api+json') {
-      document = response.json();
+      document = response;
     }
     if (document && document.errors && document.errors.length > 0) {
       return {
