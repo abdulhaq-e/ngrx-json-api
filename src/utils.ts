@@ -54,7 +54,7 @@ export const denormaliseObject = (
       } else if (_.isArray(data)) {
         // hasMany relation
         let relatedRSs: Array<StoreResource> = getMultipleStoreResource(
-          data,
+          <ResourceIdentifier[]>data,
           storeData
         );
         relationDenorm = relatedRSs.map(r =>
@@ -587,7 +587,7 @@ export const updateStoreDataFromPayload = (
     return storeData;
   }
 
-  data = _.isArray(data) ? data : [data];
+  data = _.isArray(data) ? <Resource[]>data : <Resource[]>[data];
 
   let included = <Array<Resource>>_.get(payload, 'included');
 
