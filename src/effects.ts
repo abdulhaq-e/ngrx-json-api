@@ -99,6 +99,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((query: Query) => {
       return this.jsonApi
         .find(query)
+        .map((response: HttpResponse<any>) => response.body)
         .map(
           data =>
             new ApiGetSuccessAction({
@@ -119,6 +120,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
       return this.store
         .let(this.selectors.getNgrxJsonApiStore$())
         .let(this.selectors.queryStore$(query))
+        .do(it => console.log(it))
         .map(
           results =>
             new LocalQuerySuccessAction({
@@ -141,6 +143,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .mergeMap((payload: Payload) => {
       return this.jsonApi
         .delete(payload.query)
+        .map((response: HttpResponse<any>) => response.body)
         .map(
           data =>
             new ApiDeleteSuccessAction({

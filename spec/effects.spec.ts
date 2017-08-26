@@ -5,26 +5,26 @@ import { Observable } from 'rxjs/Observable';
 
 import { hot, cold } from 'jasmine-marbles';
 
-// import { Store, StoreModule } from '@ngrx/store';
+import { Store, StoreModule } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 
 import { NgrxJsonApi } from '../src/api';
-// import { NgrxJsonApiService } from '../src/services';
-// import { NgrxJsonApiSelectors } from '../src/selectors';
+import { NgrxJsonApiService } from '../src/services';
+import { NgrxJsonApiSelectors } from '../src/selectors';
 import { NgrxJsonApiEffects } from '../src/effects';
-//
-// import {
-//   NGRX_JSON_API_CONFIG,
-//   apiFactory,
-//   selectorsFactory,
-// } from '../src/module';
-//
-// import {
-//   initialNgrxJsonApiState,
-//   NgrxJsonApiStoreReducer,
-// } from '../src/reducers';
-//
+
+import {
+  NGRX_JSON_API_CONFIG,
+  apiFactory,
+  selectorsFactory,
+} from '../src/module';
+
+import {
+  initialNgrxJsonApiState,
+  NgrxJsonApiStoreReducer,
+} from '../src/reducers';
+
 import {
   ApiPostInitAction,
   ApiPostSuccessAction,
@@ -44,23 +44,18 @@ import {
 } from '../src/actions';
 import { generatePayload } from '../src/utils';
 
-// import {
-//   testPayload,
-//   resourceDefinitions
-// } from './test_utils';
+import { testPayload, resourceDefinitions } from './test_utils';
 
-// import { updateStoreDataFromPayload } from '../src/utils';
+import { updateStoreDataFromPayload } from '../src/utils';
 
-import {
-  //   MOCK_JSON_API_PROVIDERS,
-  //   MOCK_NGRX_EFFECTS_PROVIDERS,
-  TestingModule,
-} from './testing.module';
+import { TestingModule } from './testing.module';
 
 describe('NgrxJsonApiEffects', () => {
   let effects: NgrxJsonApiEffects;
   let actions: Observable<any>;
-  let api;
+  let api: NgrxJsonApi;
+  let store: Store<any>;
+  let selectors: NgrxJsonApiSelectors<any>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -73,9 +68,7 @@ describe('NgrxJsonApiEffects', () => {
             'create',
             'update',
             'find',
-            // 'query',
-            // 'insert',
-            // 'executeWrite',
+            'delete',
           ]),
         },
         provideMockActions(() => actions),
@@ -83,42 +76,15 @@ describe('NgrxJsonApiEffects', () => {
     });
     api = TestBed.get(NgrxJsonApi);
     effects = TestBed.get(NgrxJsonApiEffects);
+    store = TestBed.get(Store);
+    selectors = TestBed.get(NgrxJsonApiSelectors);
+    spyOn(selectors, 'queryStore$');
   });
 
   let resource = {
     type: 'Person',
     id: '1',
   };
-  //   let successPayload = {
-  //     jsonApiData: {
-  //       data: {
-  //         type: 'SUCCESS'
-  //       }
-  //     },
-  //     query: {
-  //       type: 'SUCCESS'
-  //     }
-  //   };
-  //   let failPayload = {
-  //     jsonApiData: {
-  //       data: {
-  //         type: 'FAIL'
-  //       }
-  //     },
-  //     query: {
-  //       type: 'FAIL'
-  //     }
-  //   };
-  //   let successQuery = {
-  //     query: {
-  //       type: 'SUCCESS'
-  //     }
-  //   };
-  //   let failQuery = {
-  //     query: {
-  //       type: 'FAIL'
-  //     }
-  //   };
   //
   it('should respond to successfull CREATE_INIT action', () => {
     let postinitAction = new ApiPostInitAction(resource);
@@ -186,73 +152,91 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.updateResource$).toBeObservable(expected);
   });
 
-  // fit('should respond to successfull READ_INIT action', () => {
-  //   let query = { type: 'Person', id: '1'}
-  //   let getinitAction = new ApiGetInitAction(query);
-  //   let completed = new ApiGetSuccessAction({
-  //     jsonApiData: {data: query},
-  //     query: query
-  //   });
-  //   actions = hot('-a', {a: getinitAction});
-  //   let response = cold('--a|', {a: new HttpResponse({body: JSON.stringify({data: query}),
-  //     status: 200})});
-  //   let expected = cold('---b', { b: completed });
-  //   api.find.and.returnValue(response);
-  //   expect(effects.readResource$).toBeObservable(expected);
-  //
+  it('should respond to successfull READ_INIT action', () => {
+    let query = { type: 'Person', id: '1' };
+    let getinitAction = new ApiGetInitAction(query);
+    let completed = new ApiGetSuccessAction({
+      jsonApiData: { data: query },
+      query: query,
+    });
+    actions = hot('-a', { a: getinitAction });
+    let response = cold('--a|', {
+      a: new HttpResponse({ body: { data: query } }),
+      status: 200,
+    });
+    let expected = cold('---b', { b: completed });
+    api.find.and.returnValue(response);
+    expect(effects.readResource$).toBeObservable(expected);
+  });
+
+  it('should respond to failed READ_INIT action', () => {
+    let query = { type: 'Person', id: '1' };
+    let getinitAction = new ApiGetInitAction(query);
+    let error = new HttpResponse({
+      body: query,
+      status: 400,
+    });
+    let completed = new ApiGetFailAction(effects.toErrorPayload(query, error));
+    actions = hot('-a', { a: getinitAction });
+    let response = cold('--#', {}, error);
+    let expected = cold('---b', { b: completed });
+    api.find.and.returnValue(response);
+    expect(effects.readResource$).toBeObservable(expected);
+  });
+
+  it('should respond to successfull DELETE_INIT action', () => {
+    let deleteinitAction = new ApiDeleteInitAction(resource);
+    let payload = generatePayload(resource, 'DELETE');
+    let completed = new ApiDeleteSuccessAction({
+      jsonApiData: payload.query,
+      query: payload.query,
+    });
+    actions = hot('-a', { a: deleteinitAction });
+    let response = cold('--a|', {
+      a: new HttpResponse({
+        body: payload.query,
+        status: 200,
+      }),
+    });
+    let expected = cold('---b', { b: completed });
+    api.delete.and.returnValue(response);
+    expect(effects.deleteResource$).toBeObservable(expected);
+  });
+
+  it('should respond to failed DELETE_INIT action', () => {
+    let deletefailAction = new ApiDeleteInitAction(resource);
+    let payload = generatePayload(resource, 'DELETE');
+    let error = new HttpResponse({
+      body: resource,
+      status: 400,
+    });
+    let completed = new ApiDeleteFailAction(
+      effects.toErrorPayload(payload.query, error)
+    );
+    actions = hot('-a', { a: deletefailAction });
+    let response = cold('--#', {}, error);
+    let expected = cold('---b', { b: completed });
+    api.delete.and.returnValue(response);
+    expect(effects.deleteResource$).toBeObservable(expected);
+  });
+
+  // fit('should respond to successfull LOCAL_QUERY_INIT action', () => {
+  //     let query = {
+  //         type: 'Article',
+  //         id: '1',
+  //     }
+  //     let localqueryinitAction = new LocalQueryInitAction(query)
+  //     let completed = new LocalQuerySuccessAction({
+  //         jsonApiData: { data: query },
+  //         query: query
+  //     });
+  //     actions = hot('-a', { a: localqueryinitAction });
+  //     let response = cold('--a', { a: query })
+  //     let expected = cold('---b', { b: completed });
+  //     selectors.queryStore$.and.returnValue(response);
+  //     expect(effects.queryStore$).toBeObservable(expected);
   // });
 
-  //   it('should respond to failed READ_INIT action', () => {
-  //     let res;
-  //     runner.queue(new ApiGetInitAction(failQuery.query));
-  //     effects.readResource$.subscribe(result => {
-  //       res = result;
-  //       expect(result).toEqual(
-  //         new ApiGetFailAction(failQuery));
-  //     });
-  //     expect(res).toBeDefined();
-  //   });
-  //
-  //   it('should respond to successfull DELETE_INIT action', () => {
-  //     let res;
-  //     runner.queue(new ApiDeleteInitAction(successQuery));
-  //     effects.deleteResource$.subscribe(result => {
-  //       res = result;
-  //       expect(result).toEqual(
-  //         new ApiDeleteSuccessAction(Object.assign({}, successQuery, { jsonApiData: null }));
-  //     });
-  //     expect(res).toBeDefined();
-  //   });
-  //
-  //   it('should respond to failed DELETE_INIT action', () => {
-  //     let res;
-  //     runner.queue(new ApiDeleteInitAction(failQuery));
-  //     effects.deleteResource$.subscribe(result => {
-  //       res = result;
-  //       expect(result).toEqual(
-  //         new ApiDeleteFailAction(failQuery));
-  //     });
-  //     expect(res).toBeDefined();
-  //   });
-  //
-  //   it('should respond to successfull LOCAL_QUERY_INIT action', () => {
-  //     let res;
-  //     let query = {
-  //       type: 'Article',
-  //       id: '1',
-  //       queryId: '11'
-  //     }
-  //     runner.queue(new LocalQueryInitAction(query));
-  //     effects.queryStore$.subscribe(result => {
-  //       res = result;
-  //       expect(result).toEqual(
-  //         new LocalQuerySuccessAction({
-  //           jsonApiData: { data: result.payload.jsonApiData.data },
-  //           query: query,
-  //         }));
-  //     });
-  //     expect(res).toBeDefined();
-  //   });
   //
   //   // it('should respond to failed LOCAL_QUERY_INIT action', () => {
   //   //   let res;
