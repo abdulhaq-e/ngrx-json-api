@@ -4,6 +4,7 @@ import { HttpTestingController } from '@angular/common/http/testing';
 import { HttpRequest } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/skip';
 
 import { NgrxJsonApi } from '../src/api';
 
@@ -148,6 +149,19 @@ describe('ngrx json api', () => {
     it('should make handle requests using request!', () => {
       jsonapi.request({ url: 'myapi.com/posts/1', method: 'GET' }).subscribe();
       getRequest();
+      expect(req.request.url).toBe('myapi.com/posts/1');
+      expect(req.request.method).toBe('GET');
+    });
+    it('should return the complete response!', () => {
+      jsonapi
+        .request({ url: 'myapi.com/posts/1', method: 'GET' })
+        .skip(1)
+        .subscribe(it => {
+          expect(it.status).toBeDefined();
+          expect(it.body).toBeDefined();
+        });
+      getRequest();
+      req.flush({ data: { type: 'Person', id: '10' } });
       expect(req.request.url).toBe('myapi.com/posts/1');
       expect(req.request.method).toBe('GET');
     });
