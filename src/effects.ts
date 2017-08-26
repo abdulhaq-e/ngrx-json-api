@@ -120,7 +120,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
       return this.store
         .let(this.selectors.getNgrxJsonApiStore$())
         .let(this.selectors.queryStore$(query))
-        .do(it => console.log(it))
         .map(
           results =>
             new LocalQuerySuccessAction({

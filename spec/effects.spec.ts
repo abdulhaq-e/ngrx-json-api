@@ -55,6 +55,7 @@ describe('NgrxJsonApiEffects', () => {
   let actions: Observable<any>;
   let api: NgrxJsonApi;
   let store: Store<any>;
+  let mockStoreLet: any;
   let selectors: NgrxJsonApiSelectors<any>;
 
   beforeEach(() => {
@@ -77,8 +78,11 @@ describe('NgrxJsonApiEffects', () => {
     api = TestBed.get(NgrxJsonApi);
     effects = TestBed.get(NgrxJsonApiEffects);
     store = TestBed.get(Store);
-    selectors = TestBed.get(NgrxJsonApiSelectors);
-    spyOn(selectors, 'queryStore$');
+    mockStoreLet = {
+      let: function() {},
+    };
+    spyOn(store, 'let');
+    spyOn(mockStoreLet, 'let');
   });
 
   let resource = {
@@ -220,32 +224,39 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.deleteResource$).toBeObservable(expected);
   });
 
-  // fit('should respond to successfull LOCAL_QUERY_INIT action', () => {
-  //     let query = {
-  //         type: 'Article',
-  //         id: '1',
-  //     }
-  //     let localqueryinitAction = new LocalQueryInitAction(query)
-  //     let completed = new LocalQuerySuccessAction({
-  //         jsonApiData: { data: query },
-  //         query: query
-  //     });
-  //     actions = hot('-a', { a: localqueryinitAction });
-  //     let response = cold('--a', { a: query })
-  //     let expected = cold('---b', { b: completed });
-  //     selectors.queryStore$.and.returnValue(response);
-  //     expect(effects.queryStore$).toBeObservable(expected);
-  // });
+  it('should respond to successfull LOCAL_QUERY_INIT action', () => {
+    let query = {
+      type: 'Article',
+      id: '1',
+    };
+    let localqueryinitAction = new LocalQueryInitAction(query);
+    let completed = new LocalQuerySuccessAction({
+      jsonApiData: { data: query },
+      query: query,
+    });
+    actions = hot('-a', { a: localqueryinitAction });
+    let response = cold('--a', { a: query });
+    let expected = cold('---b', { b: completed });
+    store.let.and.returnValue(mockStoreLet);
+    mockStoreLet.let.and.returnValue(response);
+    expect(effects.queryStore$).toBeObservable(expected);
+  });
 
-  //
-  //   // it('should respond to failed LOCAL_QUERY_INIT action', () => {
-  //   //   let res;
-  //   //   runner.queue(new LocalQueryInitAction(failQuery));
-  //   //   effects.queryStore$.subscribe(result => {
-  //   //     res = result;
-  //   //     expect(result).toEqual(
-  //   //       new LocalQueryFailAction(failQuery));
-  //   //   });
-  //   //   expect(res).toBeDefined();
-  //   // });
+  it('should respond to failed LOCAL_QUERY_INIT action', () => {
+    let query = {
+      type: 'Article',
+      id: '1',
+    };
+    let localqueryfailAction = new LocalQueryInitAction(query);
+    let error = 'ERROR';
+    let completed = new LocalQueryFailAction(
+      effects.toErrorPayload(query, error)
+    );
+    actions = hot('-a', { a: localqueryfailAction });
+    let response = cold('--#', {}, error);
+    let expected = cold('---b', { b: completed });
+    store.let.and.returnValue(mockStoreLet);
+    mockStoreLet.let.and.returnValue(response);
+    expect(effects.queryStore$).toBeObservable(expected);
+  });
 });
