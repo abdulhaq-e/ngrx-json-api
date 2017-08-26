@@ -52,7 +52,7 @@ export interface TypedOneResourceRelationship<T extends StoreResource>
 export interface NgrxJsonApiConfig {
   apiUrl: string;
   initialState?: any;
-  resourceDefinitions: Array<ResourceDefinition>;
+  resourceDefinitions?: Array<ResourceDefinition>;
   urlBuilder?: NgrxJsonApiUrlBuilder;
   filteringConfig?: NgrxJsonApiFilteringConfig;
 }
