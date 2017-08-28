@@ -24,6 +24,6 @@ notify:
 deployment:
   builds:
     owner: abdulhaq-e
-    branch: development
+    branch: master
     commands:
       - yarn run deploy:builds
