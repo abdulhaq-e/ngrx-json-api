@@ -4,7 +4,6 @@ import { HttpTestingController } from '@angular/common/http/testing';
 import { HttpRequest } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/skip';
 
 import { NgrxJsonApi } from '../src/api';
 
@@ -155,7 +154,6 @@ describe('ngrx json api', () => {
     it('should return the complete response!', () => {
       jsonapi
         .request({ url: 'myapi.com/posts/1', method: 'GET' })
-        .skip(1)
         .subscribe(it => {
           expect(it.status).toBeDefined();
           expect(it.body).toBeDefined();

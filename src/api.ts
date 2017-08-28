@@ -227,17 +227,16 @@ export class NgrxJsonApi {
 
     if (requestOptions.method === 'GET') {
       let { method, url, ...init } = newRequestOptions;
-      request = new HttpRequest(method, url, init);
+      return this.http.get(url, init);
     } else if (requestOptions.method === 'POST') {
       let { method, url, body, ...init } = newRequestOptions;
-      request = new HttpRequest(method, url, body, init);
+      return this.http.post(url, body, init);
     } else if (requestOptions.method === 'PATCH') {
       let { method, url, body, ...init } = newRequestOptions;
-      request = new HttpRequest(method, url, body, init);
+      return this.http.patch(url, body, init);
     } else if (requestOptions.method === 'DELETE') {
       let { method, url, ...init } = newRequestOptions;
-      request = new HttpRequest(method, url, init);
+      return this.http.delete(url, init);
     }
-    return this.http.request(request);
   }
 }
