@@ -91,16 +91,12 @@ export class NgrxJsonApiService {
   /**
    * Keeps current snapshot of the store to allow fast access to resources.
    */
-  private storeSnapshot: NgrxJsonApiStore;
+  private _storeSnapshot: NgrxJsonApiStore;
 
   constructor(
     private store: Store<any>,
     private selectors: NgrxJsonApiSelectors<any>
-  ) {
-    this.store
-      .let(this.selectors.getNgrxJsonApiStore$())
-      .subscribe(it => (this.storeSnapshot = it as NgrxJsonApiStore));
-  }
+  ) {}
 
   public findOne(options: FindOptions): Observable<OneQueryResult> {
     return <Observable<OneQueryResult>>this.findInternal(options, false);
@@ -108,6 +104,19 @@ export class NgrxJsonApiService {
 
   public findMany(options: FindOptions): Observable<ManyQueryResult> {
     return <Observable<ManyQueryResult>>this.findInternal(options, true);
+  }
+
+  public get storeSnapshot() {
+    if (!this._storeSnapshot) {
+      this.store
+        .let(this.selectors.getNgrxJsonApiStore$())
+        .subscribe(it => (this._storeSnapshot = it as NgrxJsonApiStore));
+
+      if (!this._storeSnapshot) {
+        throw new Error('failed to initialize store snapshot');
+      }
+    }
+    return this._storeSnapshot;
   }
 
   /**
