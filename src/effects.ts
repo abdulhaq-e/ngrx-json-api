@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { HttpResponse } from '@angular/common/http';
+import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
 
 import * as _ from 'lodash';
 
@@ -318,20 +318,20 @@ export class NgrxJsonApiEffects implements OnDestroy {
 
   private toErrorPayload(
     query: Query,
-    response: HttpResponse<any> | any
+    response: HttpErrorResponse | any
   ): Payload {
-    let contentType = null;
+    let contentType: String = null;
     if (response && response.headers) {
       contentType = response.headers.get('Content-Type');
     }
     let document = null;
-    if (contentType === 'application/vnd.api+json') {
+    if (contentType != null && contentType.startsWith('application/vnd.api+json')) {
       document = response;
     }
-    if (document && document.errors && document.errors.length > 0) {
+    if (document && document.error && document.error.errors && document.error.errors.length > 0) {
       return {
         query: query,
-        jsonApiData: document,
+        jsonApiData: document.error,
       };
     } else {
       // transform http to json api error

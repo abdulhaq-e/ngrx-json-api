@@ -1,5 +1,5 @@
 import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
-import { HttpResponse } from '@angular/common/http';
+import {HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -258,5 +258,61 @@ describe('NgrxJsonApiEffects', () => {
     store.let.and.returnValue(mockStoreLet);
     mockStoreLet.let.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
+  });
+
+  it('should ignore charset in Content-Type to map errors', () => {
+    let payload = generatePayload(resource, 'PATCH');
+    let headers = new HttpHeaders().set('Content-Type', 'application/vnd.api+json;charset=utf-8');
+    let error = new HttpErrorResponse({
+      error: {
+        errors: [{
+          detail: 'someDetail'
+        }]
+      },
+      headers: headers,
+      status: 400
+    });
+    let payload = effects.toErrorPayload(payload.query, error);
+    expect(payload.jsonApiData.errors).toEqual([{
+      detail: 'someDetail'
+    }]);
+  });
+
+  it('should map JSON_API errors to payload', () => {
+    let payload = generatePayload(resource, 'PATCH');
+    let headers = new HttpHeaders().set('Content-Type', 'application/vnd.api+json');
+    let error = new HttpErrorResponse({
+      error: {
+        errors: [{
+          detail: 'someDetail'
+        }]
+      },
+      headers: headers,
+      status: 400
+    });
+    let payload = effects.toErrorPayload(payload.query, error);
+    expect(payload.jsonApiData.errors).toEqual([{
+      detail: 'someDetail'
+    }]);
+  });
+
+  it('should map HTTP errors for non-JSON_API errors', () => {
+    let payload = generatePayload(resource, 'PATCH');
+    let headers = new HttpHeaders().set('Content-Type', 'application/not-json-api');
+    let error = new HttpErrorResponse({
+      error: {
+        errors: [{
+          detail: 'someDetail'
+        }]
+      },
+      headers: headers,
+      status: 400,
+      statusText: 'someErrorText'
+    });
+    let payload = effects.toErrorPayload(payload.query, error);
+    expect(payload.jsonApiData.errors).toEqual([{
+      code: 'someErrorText',
+      status: '400'
+    }]);
   });
 });
