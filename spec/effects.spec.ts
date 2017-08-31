@@ -90,7 +90,7 @@ describe('NgrxJsonApiEffects', () => {
     id: '1',
   };
   //
-  it('should respond to successfull CREATE_INIT action', () => {
+  it('should respond to successful POST_INIT action', () => {
     let postinitAction = new ApiPostInitAction(resource);
     let payload = generatePayload(resource, 'POST');
     let completed = new ApiPostSuccessAction(payload);
@@ -106,7 +106,7 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.createResource$).toBeObservable(expected);
   });
 
-  it('should respond to failed CREATE_INIT action', () => {
+  it('should respond to failed POST_INIT action', () => {
     let postinitAction = new ApiPostInitAction(resource);
     let payload = generatePayload(resource, 'POST');
     let error = new HttpResponse({
@@ -123,7 +123,7 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.createResource$).toBeObservable(expected);
   });
 
-  it('should respond to successfull UPDATE_INIT action', () => {
+  it('should respond to successful PATCH_INIT action', () => {
     let patchinitAction = new ApiPatchInitAction(resource);
     let payload = generatePayload(resource, 'PATCH');
     let completed = new ApiPatchSuccessAction(payload);
@@ -139,7 +139,7 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.updateResource$).toBeObservable(expected);
   });
 
-  it('should respond to failed UPDATE_INIT action', () => {
+  it('should respond to failed PATCH_INIT action', () => {
     let patchinitAction = new ApiPatchInitAction(resource);
     let payload = generatePayload(resource, 'PATCH');
     let error = new HttpResponse({
