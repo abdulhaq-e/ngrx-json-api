@@ -41,14 +41,14 @@ import {
 export class NgrxJsonApiSelectors {
   constructor(public config: NgrxJsonApiConfig) {}
 
-  public getNgrxJsonApiStore$() {
-    return (state$: Store<any>) => {
+  public getNgrxJsonApiStore$(): (state$: Store<any>) => Observable<NgrxJsonApiStore> {
+    return (state$: Store<any>): Observable<NgrxJsonApiStore> => {
       return state$.select('NgrxJsonApi').select('api');
     };
   }
 
-  public getStoreData$() {
-    return (state$: Store<NgrxJsonApiStore>) => {
+  public getStoreData$(): (state$: Store<NgrxJsonApiStore>) => Observable<NgrxJsonApiStoreData> {
+    return (state$: Store<NgrxJsonApiStore>): Observable<NgrxJsonApiStoreData> => {
       return state$.select('data');
     };
   }
