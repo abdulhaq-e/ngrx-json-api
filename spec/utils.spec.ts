@@ -1,60 +1,43 @@
 import _ = require('lodash');
-
-import { async, inject, fakeAsync } from '@angular/core/testing';
-
-let deepFreeze = require('deep-freeze');
 //
 import {
   deleteStoreResources,
-  denormaliseObject,
   denormaliseStoreResource,
   filterResources,
-  getDenormalisedPath,
-  getDenormalisedValue,
-  //     getSingleStoreResource,
-  //     getMultipleStoreResource,
   generateFieldsQueryParams,
   generateIncludedQueryParams,
-  generateFilteringQueryParams,
-  generateQueryParams,
   generatePayload,
+  generateQueryParams,
   generateSortingQueryParams,
+  getDenormalisedPath,
+  getDenormalisedValue,
+  getPendingChanges,
   getResourceFieldValueFromPath,
   insertStoreResource,
-  //     transformStoreData,
-  //     transformStoreResources,
+  isEqualResource,
   removeQuery,
   rollbackStoreResources,
+  sortPendingChanges,
   toResourceIdentifier,
-  updateStoreDataFromResource,
   updateQueryErrors,
   updateQueryParams,
   updateQueryResults,
-  updateResourceObject,
-  updateStoreResource,
-  updateStoreDataFromPayload,
-  updateResourceState,
   updateResourceErrors,
   updateResourceErrorsForQuery,
-  sortPendingChanges,
-  isEqualResource,
+  updateResourceObject,
+  updateResourceState,
+  updateStoreDataFromPayload,
+  updateStoreDataFromResource,
+  updateStoreResource,
 } from '../src/utils';
 //
-import { initialNgrxJsonApiState } from '../src/reducers';
+import {initialNgrxJsonApiState} from '../src/reducers';
 //
-import {
-  NgrxJsonApiStore,
-  Resource,
-  ResourceDefinition,
-  ResourceState,
-  StoreResource,
-} from '../src/interfaces';
+import {NgrxJsonApiStoreData, Resource, StoreResource,} from '../src/interfaces';
 
-import {
-  resourceDefinitions,
-  documentPayload,
-  testPayload,
-} from './test_utils';
+import {documentPayload, resourceDefinitions, testPayload,} from './test_utils';
+
+let deepFreeze = require('deep-freeze');
 
 deepFreeze(initialNgrxJsonApiState);
 
@@ -1449,6 +1432,186 @@ describe('filterResources (TODO: test remaining types)', () => {
   //     expect(filtered[0].resource.type).toBe('Article');
   // });
 });
+
+
+
+describe('getPendingChanges', () => {
+
+  let state: NgrxJsonApiStoreData;
+
+  beforeEach(() => {
+    state = {
+      'Country': {
+        'ch': {
+          type: 'Country',
+          id: 'ch',
+          state: 'IN_SYNC',
+          attributes: {
+            name: 'CH',
+          },
+          relationships: {
+            country: {
+              data: { type: 'Country', id: 'ch' },
+            },
+          }
+        },
+        'de': {
+          type: 'Person',
+          id: 'de',
+          state: 'IN_SYNC',
+          attributes: {
+            name: 'DE',
+          },
+          relationships: {
+            country: {
+              data: { type: 'Country', id: 'de' },
+            },
+          }
+        }
+      },
+      'Person': {
+        '3': {
+          type: 'Person',
+          id: '3',
+          state: 'IN_SYNC',
+          attributes: {
+            name: 'Person 3',
+          },
+          relationships: {
+            country: {
+              data: { type: 'Country', id: 'ch' },
+            },
+          }
+        },
+        '4': {
+          type: 'Person',
+          id: '4',
+          state: 'IN_SYNC',
+          attributes: {
+            name: 'Person 4',
+          },
+          relationships: {
+            country: {
+              data: { type: 'Country', id: 'de' },
+            },
+          }
+        }
+      },
+      'Article': {
+        '1': {
+          type: 'Article',
+          id: '1',
+          state: 'IN_SYNC',
+          attributes: {
+            title: 'Article 1',
+          },
+          relationships: {
+            author: {
+              data: { type: 'Person', id: '3' },
+            },
+          }
+        },
+        '2': {
+          type: 'Article',
+          id: '2',
+          state: 'IN_SYNC',
+          attributes: {
+            title: 'Article 2',
+          },
+          relationships: {
+            author: {
+              data: { type: 'Person', id: '4' },
+            },
+          }
+        }
+      }
+    };
+  })
+
+  it('should return empty array if store in sync', () => {
+    let changes = getPendingChanges(state, undefined, undefined, undefined);
+    expect(changes.length).toEqual(0);
+  });
+
+  it('should return empty array if store in sync', () => {
+    let changes = getPendingChanges(state, undefined, undefined, true);
+    expect(changes.length).toEqual(0);
+  });
+
+  it('should not return new resources by default', () => {
+    state['Article']['1'].state = 'NEW';
+    let changes = getPendingChanges(state, undefined, undefined, undefined);
+    expect(changes.length).toEqual(0);
+  });
+
+  it('should return new resources by requested', () => {
+    state['Article']['1'].state = 'NEW';
+    let changes = getPendingChanges(state, undefined, undefined, true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('1');
+  });
+
+  it('should return updated resource', () => {
+    state['Article']['2'].state = 'UPDATED';
+    let changes = getPendingChanges(state, undefined, undefined, true);
+    expect(changes.length).toEqual(1);
+    console.log(changes);
+    expect(changes[0].id).toEqual('2');
+  });
+
+  it('should return changed resource', () => {
+    state['Article']['1'].state = 'CREATED';
+    state['Article']['2'].state = 'UPDATED';
+    state['Country']['de'].state = 'DELETED';
+    let changes = getPendingChanges(state, undefined, undefined, true);
+    expect(changes.length).toEqual(3);
+  });
+
+  it('should return only request changes', () => {
+    state['Article']['1'].state = 'CREATED';
+    state['Article']['2'].state = 'UPDATED';
+    state['Country']['de'].state = 'DELETED';
+    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], undefined, true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('1');
+
+    changes = getPendingChanges(state, [{type: 'Article', id: '2'}], undefined, true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('2');
+  });
+
+  it('should return only request changes and relationships', () => {
+    state['Person']['3'].state = 'UPDATED';
+    state['Country']['de'].state = 'DELETED';
+    state['Country']['ch'].state = 'DELETED';
+    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author'], true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('3');
+
+    let changes = getPendingChanges(state, [{type: 'Article', id: '2'}], ['author'], true);
+    expect(changes.length).toEqual(0);
+  });
+
+  it('should return nested relationships', () => {
+    state['Country']['de'].state = 'DELETED';
+    state['Country']['ch'].state = 'DELETED';
+    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.country'], true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('ch');
+
+    changes = getPendingChanges(state, [{type: 'Article', id: '2'}], ['author.country'], true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('de');
+
+    changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.country.someOther'], true);
+    expect(changes.length).toEqual(1);
+    expect(changes[0].id).toEqual('ch');
+
+    changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.notCountry'], true);
+    expect(changes.length).toEqual(0);
+  });
+});
+
 
 describe('generateIncludedQueryParams', () => {
   it('should generate an included query param given an array of resources to be included', () => {

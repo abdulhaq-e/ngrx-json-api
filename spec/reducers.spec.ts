@@ -671,7 +671,7 @@ describe('NgrxJsonApiReducer', () => {
       let newState1 = NgrxJsonApiStoreReducer(state, action);
       let newState2 = NgrxJsonApiStoreReducer(
         newState1,
-        new ApiApplyInitAction()
+        new ApiApplyInitAction({})
       );
       expect(newState2.isApplying - newState1.isApplying).toBe(1);
       expect(newState2.isCreating - newState1.isCreating).toBe(1);
@@ -691,7 +691,7 @@ describe('NgrxJsonApiReducer', () => {
       newState1.data['Article']['1'].state = 'UPDATED';
       let newState2 = NgrxJsonApiStoreReducer(
         newState1,
-        new ApiApplyInitAction()
+        new ApiApplyInitAction({})
       );
       expect(newState2.isApplying - newState1.isApplying).toBe(1);
       expect(newState2.isCreating - newState1.isCreating).toBe(0);
@@ -718,7 +718,7 @@ describe('NgrxJsonApiReducer', () => {
       );
       let newState3 = NgrxJsonApiStoreReducer(
         newState2,
-        new ApiApplyInitAction()
+        new ApiApplyInitAction({})
       );
       expect(newState3.isApplying - newState2.isApplying).toBe(1);
       expect(newState3.isCreating - newState2.isCreating).toBe(0);

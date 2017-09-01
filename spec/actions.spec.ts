@@ -288,7 +288,7 @@ describe('Json Api Actions', () => {
   it('should generate an api commit init action using ApiApplyInit', () => {
     let action = new ApiApplyInitAction({});
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_INIT);
-    expect(action.payload).not.toBeDefined();
+    expect(action.payload).toBeDefined();
   });
 
   it('should generate an api commit success action using ApiApplySuccess', () => {
