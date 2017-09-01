@@ -19,6 +19,8 @@ import 'rxjs/add/operator/switchMapTo';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/toArray';
 import 'rxjs/add/operator/withLatestFrom';
+import 'rxjs/add/operator/takeWhile';
+import 'rxjs/add/operator/takeUntil';
 
 import {
   ApiApplyFailAction, ApiApplyInitAction,
@@ -86,7 +88,6 @@ export class NgrxJsonApiEffects implements OnDestroy {
           jsonApiData: response.body,
           query: payload.query,
         }))
-        .do(it => console.log(it))
         .catch(error =>
           Observable.of(
             new ApiPatchFailAction(this.toErrorPayload(payload.query, error))
@@ -114,6 +115,20 @@ export class NgrxJsonApiEffects implements OnDestroy {
         );
     });
 
+
+  private localQueryInitEventFor(query:Query){
+    return this.actions$.ofType<LocalQueryInitAction>(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
+      .map(action => action as LocalQueryInitAction)
+      .filter(action => query.queryId == action.payload.queryId)
+  }
+
+  private removeQueryEventFor(query:Query){
+    return this.actions$.ofType<LocalQueryInitAction>(NgrxJsonApiActionTypes.REMOVE_QUERY)
+      .map(action => action as LocalQueryInitAction)
+      .filter(action => query.queryId == action.payload)
+  }
+
+
   @Effect()
   queryStore$ = this.actions$
     .ofType<LocalQueryInitAction>(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT)
@@ -133,7 +148,9 @@ export class NgrxJsonApiEffects implements OnDestroy {
           Observable.of(
             new LocalQueryFailAction(this.toErrorPayload(query, error))
           )
-        );
+        )
+        .takeUntil(this.localQueryInitEventFor(query))
+        .takeUntil(this.removeQueryEventFor(query));
     });
 
   @Effect()
@@ -215,10 +232,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
     .filter(() => this.jsonApi.config.applyEnabled !== false)
-    .withLatestFrom(this.store.select(it => {
-      let feature = it['NgrxJsonApi'];
-      return feature ? feature['api'] : undefined;
-    }), (action, ngrxstore: NgrxJsonApiStore) => {
+    .withLatestFrom(this.store.select(this.selectors.getNgrxJsonApiStore$), (action, ngrxstore: NgrxJsonApiStore) => {
       let payload = (action as ApiApplyInitAction).payload;
       const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include);
       return pending;

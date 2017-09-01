@@ -1,54 +1,39 @@
-import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 import {HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
+import {Observable} from 'rxjs/Observable';
 
-import { hot, cold } from 'jasmine-marbles';
+import {cold, hot} from 'jasmine-marbles';
 
-import { Store, StoreModule } from '@ngrx/store';
-import { Actions } from '@ngrx/effects';
-import { provideMockActions } from '@ngrx/effects/testing';
+import {Store} from '@ngrx/store';
+import {provideMockActions} from '@ngrx/effects/testing';
 
-import { NgrxJsonApi } from '../src/api';
-import { NgrxJsonApiService } from '../src/services';
-import { NgrxJsonApiSelectors } from '../src/selectors';
-import { NgrxJsonApiEffects } from '../src/effects';
+import {NgrxJsonApi} from '../src/api';
+import {NgrxJsonApiSelectors} from '../src/selectors';
+import {NgrxJsonApiEffects} from '../src/effects';
 
 import {
-  NGRX_JSON_API_CONFIG,
-  apiFactory,
-  selectorsFactory,
-} from '../src/module';
-
-import {
-  initialNgrxJsonApiState,
-  NgrxJsonApiStoreReducer,
-} from '../src/reducers';
-
-import {
-  ApiPostInitAction,
-  ApiPostSuccessAction,
-  ApiPostFailAction,
-  ApiPatchInitAction,
-  ApiPatchSuccessAction,
-  ApiPatchFailAction,
-  ApiGetInitAction,
-  ApiGetSuccessAction,
-  ApiGetFailAction,
+  ApiDeleteFailAction,
   ApiDeleteInitAction,
   ApiDeleteSuccessAction,
-  ApiDeleteFailAction,
+  ApiGetFailAction,
+  ApiGetInitAction,
+  ApiGetSuccessAction,
+  ApiPatchFailAction,
+  ApiPatchInitAction,
+  ApiPatchSuccessAction,
+  ApiPostFailAction,
+  ApiPostInitAction,
+  ApiPostSuccessAction,
+  LocalQueryFailAction,
   LocalQueryInitAction,
   LocalQuerySuccessAction,
-  LocalQueryFailAction,
+  RemoveQueryAction,
 } from '../src/actions';
-import { generatePayload } from '../src/utils';
+import {generatePayload} from '../src/utils';
 
-import { testPayload, resourceDefinitions } from './test_utils';
-
-import { updateStoreDataFromPayload } from '../src/utils';
-
-import { TestingModule } from './testing.module';
+import {TestingModule} from './testing.module';
+import {Query, Resource} from "../src/interfaces";
 
 describe('NgrxJsonApiEffects', () => {
   let effects: NgrxJsonApiEffects;
@@ -56,7 +41,7 @@ describe('NgrxJsonApiEffects', () => {
   let api: NgrxJsonApi;
   let store: Store<any>;
   let mockStoreLet: any;
-  let selectors: NgrxJsonApiSelectors<any>;
+  let selectors: NgrxJsonApiSelectors;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -224,10 +209,11 @@ describe('NgrxJsonApiEffects', () => {
     expect(effects.deleteResource$).toBeObservable(expected);
   });
 
-  it('should respond to successfull LOCAL_QUERY_INIT action', () => {
-    let query = {
+  it('should respond to successful LOCAL_QUERY_INIT action', () => {
+    let query: Query = {
       type: 'Article',
       id: '1',
+      queryId: 'someId'
     };
     let localqueryinitAction = new LocalQueryInitAction(query);
     let completed = new LocalQuerySuccessAction({
@@ -237,6 +223,76 @@ describe('NgrxJsonApiEffects', () => {
     actions = hot('-a', { a: localqueryinitAction });
     let response = cold('--a', { a: query });
     let expected = cold('---b', { b: completed });
+    store.let.and.returnValue(mockStoreLet);
+    mockStoreLet.let.and.returnValue(response);
+    expect(effects.queryStore$).toBeObservable(expected);
+  });
+
+  it('should switch to new query on repeated LOCAL_QUERY_INIT', () => {
+    let query1: Query = {
+      type: 'Article',
+      id: '1',
+      queryId: 'someId'
+    };
+    let query2: Query = {
+      type: 'Article',
+      id: '2',
+      queryId: 'someId'
+    };
+    let resource1: Resource = {
+      type: 'Article',
+      id: '1',
+    };
+    let resource2: Resource = {
+      type: 'Article',
+      id: '2',
+    };
+    let localqueryinitAction1 = new LocalQueryInitAction(query1);
+    let localqueryinitAction2 = new LocalQueryInitAction(query2);
+    let completed1 = new LocalQuerySuccessAction({
+      jsonApiData: { data: resource1 },
+      query: query1,
+    });
+    // note that mock setup is not perfect, second query will get resource1 and resource2
+    let completed2 = new LocalQuerySuccessAction({
+      jsonApiData: { data: resource1 },
+      query: query2,
+    });
+    let completed3 = new LocalQuerySuccessAction({
+      jsonApiData: { data: resource2 },
+      query: query2,
+    });
+    actions = hot('-a--b', { a: localqueryinitAction1, b: localqueryinitAction2 });
+    let response = cold('--a--b', { a: resource1, b: resource2 });
+    let expected = cold('---a--b--c', { a: completed1, b: completed2, c: completed3 });
+    store.let.and.returnValue(mockStoreLet);
+    mockStoreLet.let.and.returnValue(response);
+    expect(effects.queryStore$).toBeObservable(expected);
+  });
+
+  it('should cancel LOCAL_QUERY_INIT with REMOVE_QUERY', () => {
+    let query: Query = {
+      type: 'Article',
+      id: '1',
+      queryId: 'someId'
+    };
+    let resource1: Resource = {
+      type: 'Article',
+      id: '1',
+    };
+    let resource2: Resource = {
+      type: 'Article',
+      id: '2',
+    };
+    let localqueryinitAction = new LocalQueryInitAction(query);
+    let removeQueryAction = new RemoveQueryAction(query.queryId);
+    let completed = new LocalQuerySuccessAction({
+      jsonApiData: { data: resource1 },
+      query: query,
+    });
+    actions = hot('-a--b', { a: localqueryinitAction, b: removeQueryAction });
+    let response = cold('--a----b', { a: resource1, b: resource2 });
+    let expected = cold('---a', { a: completed });
     store.let.and.returnValue(mockStoreLet);
     mockStoreLet.let.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
