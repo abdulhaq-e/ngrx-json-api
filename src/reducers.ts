@@ -1,31 +1,24 @@
-import { Action, ActionReducer, ActionReducerMap } from '@ngrx/store';
+import {Action, ActionReducerMap} from '@ngrx/store';
 
-import { NgrxJsonApiActionTypes, NgrxJsonApiActions } from './actions';
+import {ApiApplyInitAction, ApiRollbackAction, NgrxJsonApiActionTypes} from './actions';
+import {ModifyStoreResourceErrorsPayload, NgrxJsonApiStore, Query, ResourceIdentifier, StoreResource,} from './interfaces';
 import {
-  Query,
-  ResourceState,
-  StoreResource,
-  NgrxJsonApiStore,
-  ModifyStoreResourceErrorsPayload,
-  ResourceIdentifier,
-} from './interfaces';
-import {
-  deleteStoreResources,
   clearQueryResult,
+  compactStore,
+  deleteStoreResources,
+  getPendingChanges,
+  removeQuery,
+  removeStoreResource,
+  rollbackStoreResources,
+  updateQueriesForDeletedResource,
+  updateQueryErrors,
   updateQueryParams,
   updateQueryResults,
-  updateQueryErrors,
+  updateResourceErrors,
+  updateResourceErrorsForQuery,
+  updateResourceState,
   updateStoreDataFromPayload,
   updateStoreDataFromResource,
-  updateResourceState,
-  removeQuery,
-  rollbackStoreResources,
-  updateResourceErrorsForQuery,
-  updateQueriesForDeletedResource,
-  compactStore,
-  updateResourceErrors,
-  removeStoreResource,
-  getPendingChanges,
 } from './utils';
 
 export const initialNgrxJsonApiState: NgrxJsonApiStore = {
@@ -300,7 +293,8 @@ export function NgrxJsonApiStoreReducer(
       return state;
     }
     case NgrxJsonApiActionTypes.API_APPLY_INIT: {
-      let pending: Array<StoreResource> = getPendingChanges(state);
+      let payload = (action as ApiApplyInitAction).payload;
+      let pending: Array<StoreResource> = getPendingChanges(state.data, payload.ids, payload.include);
       newState = { ...state, isApplying: state.isApplying + 1 };
       for (let pendingChange of pending) {
         if (pendingChange.state === 'CREATED') {
@@ -327,7 +321,8 @@ export function NgrxJsonApiStoreReducer(
       return newState;
     }
     case NgrxJsonApiActionTypes.API_ROLLBACK: {
-      newState = { ...state, data: rollbackStoreResources(state.data) };
+      let payload = (action as ApiRollbackAction).payload;
+      newState = { ...state, data: rollbackStoreResources(state.data, payload.ids, payload.include) };
       return newState;
     }
     case NgrxJsonApiActionTypes.CLEAR_STORE: {

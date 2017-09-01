@@ -382,7 +382,7 @@ export class NgrxJsonApiService {
    * Applies all pending changes to the remote JSON API endpoint.
    */
   public apply() {
-    this.store.dispatch(new ApiApplyInitAction());
+    this.store.dispatch(new ApiApplyInitAction({}));
   }
 
   /**

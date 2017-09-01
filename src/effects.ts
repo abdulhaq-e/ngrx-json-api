@@ -21,7 +21,7 @@ import 'rxjs/add/operator/toArray';
 import 'rxjs/add/operator/withLatestFrom';
 
 import {
-  ApiApplyFailAction,
+  ApiApplyFailAction, ApiApplyInitAction,
   ApiApplySuccessAction,
   ApiDeleteFailAction,
   ApiDeleteInitAction,
@@ -215,93 +215,96 @@ export class NgrxJsonApiEffects implements OnDestroy {
   applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
     .filter(() => this.jsonApi.config.applyEnabled !== false)
-    .mergeMap(() =>
-      this.store.let(this.selectors.getNgrxJsonApiStore$()).take(1)
-    )
-    .mergeMap((ngrxstore: NgrxJsonApiStore) => {
-      let pending: Array<StoreResource> = getPendingChanges(ngrxstore);
-      if (pending.length > 0) {
-        pending = sortPendingChanges(pending);
-
-        let actions: Array<Observable<Action>> = [];
-        for (let pendingChange of pending) {
-          if (pendingChange.state === 'CREATED') {
-            let payload: Payload = this.generatePayload(pendingChange, 'POST');
-            actions.push(
-              this.jsonApi
-                .create(payload.query, payload.jsonApiData)
-                .map(response =>
-                  new ApiPostSuccessAction({
-                    jsonApiData: response.body,
-                    query: payload.query,
-                  })
-                )
-                .catch(error =>
-                  Observable.of(
-                    new ApiPostFailAction(
-                      this.toErrorPayload(payload.query, error)
-                    )
-                  )
-                )
-            );
-          }
-          else if (pendingChange.state === 'UPDATED') {
-            // prepare payload, omit links and meta information
-            let payload: Payload = this.generatePayload(pendingChange, 'PATCH');
-            actions.push(
-              this.jsonApi
-                .update(payload.query, payload.jsonApiData)
-                .map(response =>
-                  new ApiPatchSuccessAction({
-                    jsonApiData: response.body,
-                    query: payload.query,
-                  })
-                )
-                .catch(error =>
-                  Observable.of(
-                    new ApiPatchFailAction(
-                      this.toErrorPayload(payload.query, error)
-                    )
-                  )
-                )
-            );
-          }
-          else if (pendingChange.state === 'DELETED') {
-            let payload: Payload = this.generatePayload(
-              pendingChange,
-              'DELETE'
-            );
-            actions.push(
-              this.jsonApi
-                .delete(payload.query)
-                .map(response =>
-                  new ApiDeleteSuccessAction({
-                    jsonApiData: response.body,
-                    query: payload.query,
-                  })
-                )
-                .catch(error =>
-                  Observable.of(
-                    new ApiDeleteFailAction(
-                      this.toErrorPayload(payload.query, error)
-                    )
-                  )
-                )
-            );
-          }
-          else {
-            throw new Error('unknown state ' + pendingChange.state);
-          }
-        }
-
-        return Observable.of(...actions)
-          .concatAll()
-          .toArray()
-          .map(actions => this.toApplyAction(actions));
-      }
-      else {
+    .withLatestFrom(this.store.select(it => {
+      let feature = it['NgrxJsonApi'];
+      return feature ? feature['api'] : undefined;
+    }), (action, ngrxstore: NgrxJsonApiStore) => {
+      let payload = (action as ApiApplyInitAction).payload;
+      const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include);
+      return pending;
+    })
+    .flatMap(pending => {
+      if (pending.length === 0) {
         return Observable.of(new ApiApplySuccessAction([]));
       }
+      pending = sortPendingChanges(pending);
+
+      let actions: Array<Observable<Action>> = [];
+      for (let pendingChange of pending) {
+        if (pendingChange.state === 'CREATED') {
+          let payload: Payload = this.generatePayload(pendingChange, 'POST');
+          actions.push(
+            this.jsonApi
+              .create(payload.query, payload.jsonApiData)
+              .map(response =>
+                new ApiPostSuccessAction({
+                  jsonApiData: response.body,
+                  query: payload.query,
+                })
+              )
+              .catch(error =>
+                Observable.of(
+                  new ApiPostFailAction(
+                    this.toErrorPayload(payload.query, error)
+                  )
+                )
+              )
+          );
+        }
+        else if (pendingChange.state === 'UPDATED') {
+          // prepare payload, omit links and meta information
+          let payload: Payload = this.generatePayload(pendingChange, 'PATCH');
+          actions.push(
+            this.jsonApi
+              .update(payload.query, payload.jsonApiData)
+              .map(response =>
+                new ApiPatchSuccessAction({
+                  jsonApiData: response.body,
+                  query: payload.query,
+                })
+              )
+              .catch(error =>
+                Observable.of(
+                  new ApiPatchFailAction(
+                    this.toErrorPayload(payload.query, error)
+                  )
+                )
+              )
+          );
+        }
+        else if (pendingChange.state === 'DELETED') {
+          let payload: Payload = this.generatePayload(
+            pendingChange,
+            'DELETE'
+          );
+          actions.push(
+            this.jsonApi
+              .delete(payload.query)
+              .map(response =>
+                new ApiDeleteSuccessAction({
+                  jsonApiData: response.body,
+                  query: payload.query,
+                })
+              )
+              .catch(error =>
+                Observable.of(
+                  new ApiDeleteFailAction(
+                    this.toErrorPayload(payload.query, error)
+                  )
+                )
+              )
+          );
+        }
+        else {
+          throw new Error('unknown state ' + pendingChange.state);
+        }
+      }
+
+      return Observable.of(...actions)
+        .concatAll()
+        .toArray()
+        .map(actions => this.toApplyAction(actions));
+
     });
 
   constructor(
