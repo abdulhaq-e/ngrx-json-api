@@ -214,6 +214,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   @Effect()
   applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
+    .filter(() => this.jsonApi.config.applyEnabled !== false)
     .mergeMap(() =>
       this.store.let(this.selectors.getNgrxJsonApiStore$()).take(1)
     )
@@ -307,7 +308,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     private actions$: Actions,
     private jsonApi: NgrxJsonApi,
     private store: Store<any>,
-    private selectors: NgrxJsonApiSelectors<any>
+    private selectors: NgrxJsonApiSelectors
   ) {}
 
   ngOnDestroy() {}

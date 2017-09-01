@@ -95,7 +95,7 @@ export class NgrxJsonApiService {
 
   constructor(
     private store: Store<any>,
-    private selectors: NgrxJsonApiSelectors<any>
+    private selectors: NgrxJsonApiSelectors
   ) {}
 
   public findOne(options: FindOptions): Observable<OneQueryResult> {

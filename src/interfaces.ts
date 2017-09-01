@@ -55,6 +55,12 @@ export interface NgrxJsonApiConfig {
   resourceDefinitions?: Array<ResourceDefinition>;
   urlBuilder?: NgrxJsonApiUrlBuilder;
   filteringConfig?: NgrxJsonApiFilteringConfig;
+
+  /**
+   * Allows to disable the apply action and replace it with a custom one. For example
+   * have a look at www.crnk.io that makes use of JSON PATCH to perform bulk updates.
+   */
+  applyEnabled?: boolean;
 }
 
 export interface NgrxJsonApiStore {

@@ -25,12 +25,12 @@ export function apiFactory(http: HttpClient, config: NgrxJsonApiConfig) {
 }
 
 export function selectorsFactory(config: NgrxJsonApiConfig) {
-  return new NgrxJsonApiSelectors<any>(config);
+  return new NgrxJsonApiSelectors(config);
 }
 
 export function serviceFactory(
   store: Store<any>,
-  selectors: NgrxJsonApiSelectors<any>
+  selectors: NgrxJsonApiSelectors
 ) {
   return new NgrxJsonApiService(store, selectors);
 }

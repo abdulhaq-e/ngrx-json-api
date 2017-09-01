@@ -38,7 +38,7 @@ import {
   denormaliseStoreResources,
 } from './utils';
 
-export class NgrxJsonApiSelectors<T> {
+export class NgrxJsonApiSelectors {
   constructor(public config: NgrxJsonApiConfig) {}
 
   public getNgrxJsonApiStore$() {
@@ -185,7 +185,6 @@ export class NgrxJsonApiSelectors<T> {
   }
 
   public getPersistedResource$(
-    store: Store<T>,
     identifier: ResourceIdentifier
   ) {
     return (state$: Observable<NgrxJsonApiStore>) => {
