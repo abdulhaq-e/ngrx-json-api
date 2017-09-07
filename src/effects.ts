@@ -232,7 +232,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
   applyResources$ = this.actions$
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
     .filter(() => this.jsonApi.config.applyEnabled !== false)
-    .withLatestFrom(this.store.select(this.selectors.getNgrxJsonApiStore$), (action, ngrxstore: NgrxJsonApiStore) => {
+    .withLatestFrom(this.store.select(this.selectors.getNgrxJsonApiStore$()), (action, ngrxstore: NgrxJsonApiStore) => {
       let payload = (action as ApiApplyInitAction).payload;
       const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include);
       return pending;
