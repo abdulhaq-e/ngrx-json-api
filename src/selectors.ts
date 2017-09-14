@@ -41,15 +41,23 @@ import {
 export class NgrxJsonApiSelectors {
   constructor(public config: NgrxJsonApiConfig) {}
 
-  public getNgrxJsonApiStore$(): (state$: Store<any>) => Observable<NgrxJsonApiStore> {
+  public getNgrxJsonApiStore$(): (
+    state$: Store<any>
+  ) => Observable<NgrxJsonApiStore> {
     return (state$: Store<any>): Observable<NgrxJsonApiStore> => {
       // note that upon setup the store may not yet be initialized
-      return state$.select('NgrxJsonApi').map(it => it ? it['api'] : undefined);
+      return state$
+        .select('NgrxJsonApi')
+        .map(it => (it ? it['api'] : undefined));
     };
   }
 
-  public getStoreData$(): (state$: Store<NgrxJsonApiStore>) => Observable<NgrxJsonApiStoreData> {
-    return (state$: Store<NgrxJsonApiStore>): Observable<NgrxJsonApiStoreData> => {
+  public getStoreData$(): (
+    state$: Store<NgrxJsonApiStore>
+  ) => Observable<NgrxJsonApiStoreData> {
+    return (
+      state$: Store<NgrxJsonApiStore>
+    ): Observable<NgrxJsonApiStoreData> => {
       return state$.select('data');
     };
   }
@@ -185,9 +193,7 @@ export class NgrxJsonApiSelectors {
     };
   }
 
-  public getPersistedResource$(
-    identifier: ResourceIdentifier
-  ) {
+  public getPersistedResource$(identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
         .let(this.getStoreResource$(identifier))

@@ -42,30 +42,24 @@ export const NgrxJsonApiActionTypes = {
 };
 
 export interface ApiApplyInitPayload {
-
   /**
    * optional list of resource identifiers to perform apply. If not specified all change will be applied
    * to the backend.
    */
-  ids?: Array<ResourceIdentifier>
+  ids?: Array<ResourceIdentifier>;
 
   /**
    * if the apply action is restricted to a set of resources with the ids parameter. The include flag allows to
    * specify which relationships to apply as well. Nested relationships are separated by a dot.
    */
   include?: Array<string>;
-
 }
 
-export interface ApiApplyRollbackPayload extends ApiApplyInitPayload{
-
-}
-
+export interface ApiApplyRollbackPayload extends ApiApplyInitPayload {}
 
 export class ApiApplyInitAction implements Action {
   readonly type = NgrxJsonApiActionTypes.API_APPLY_INIT;
-  constructor(public payload: ApiApplyInitPayload) {
-  }
+  constructor(public payload: ApiApplyInitPayload) {}
 }
 
 export class ApiApplySuccessAction implements Action {

@@ -1,16 +1,20 @@
-import {TestBed} from '@angular/core/testing';
-import {HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import {
+  HttpErrorResponse,
+  HttpHeaders,
+  HttpResponse,
+} from '@angular/common/http';
 
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs/Observable';
 
-import {cold, hot} from 'jasmine-marbles';
+import { cold, hot } from 'jasmine-marbles';
 
-import {Store} from '@ngrx/store';
-import {provideMockActions} from '@ngrx/effects/testing';
+import { Store } from '@ngrx/store';
+import { provideMockActions } from '@ngrx/effects/testing';
 
-import {NgrxJsonApi} from '../src/api';
-import {NgrxJsonApiSelectors} from '../src/selectors';
-import {NgrxJsonApiEffects} from '../src/effects';
+import { NgrxJsonApi } from '../src/api';
+import { NgrxJsonApiSelectors } from '../src/selectors';
+import { NgrxJsonApiEffects } from '../src/effects';
 
 import {
   ApiDeleteFailAction,
@@ -30,10 +34,10 @@ import {
   LocalQuerySuccessAction,
   RemoveQueryAction,
 } from '../src/actions';
-import {generatePayload} from '../src/utils';
+import { generatePayload } from '../src/utils';
 
-import {TestingModule} from './testing.module';
-import {Query, Resource} from "../src/interfaces";
+import { TestingModule } from './testing.module';
+import { Query, Resource } from '../src/interfaces';
 
 describe('NgrxJsonApiEffects', () => {
   let effects: NgrxJsonApiEffects;
@@ -213,7 +217,7 @@ describe('NgrxJsonApiEffects', () => {
     let query: Query = {
       type: 'Article',
       id: '1',
-      queryId: 'someId'
+      queryId: 'someId',
     };
     let localqueryinitAction = new LocalQueryInitAction(query);
     let completed = new LocalQuerySuccessAction({
@@ -232,12 +236,12 @@ describe('NgrxJsonApiEffects', () => {
     let query1: Query = {
       type: 'Article',
       id: '1',
-      queryId: 'someId'
+      queryId: 'someId',
     };
     let query2: Query = {
       type: 'Article',
       id: '2',
-      queryId: 'someId'
+      queryId: 'someId',
     };
     let resource1: Resource = {
       type: 'Article',
@@ -262,9 +266,16 @@ describe('NgrxJsonApiEffects', () => {
       jsonApiData: { data: resource2 },
       query: query2,
     });
-    actions = hot('-a--b', { a: localqueryinitAction1, b: localqueryinitAction2 });
+    actions = hot('-a--b', {
+      a: localqueryinitAction1,
+      b: localqueryinitAction2,
+    });
     let response = cold('--a--b', { a: resource1, b: resource2 });
-    let expected = cold('---a--b--c', { a: completed1, b: completed2, c: completed3 });
+    let expected = cold('---a--b--c', {
+      a: completed1,
+      b: completed2,
+      c: completed3,
+    });
     store.let.and.returnValue(mockStoreLet);
     mockStoreLet.let.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
@@ -274,7 +285,7 @@ describe('NgrxJsonApiEffects', () => {
     let query: Query = {
       type: 'Article',
       id: '1',
-      queryId: 'someId'
+      queryId: 'someId',
     };
     let resource1: Resource = {
       type: 'Article',
@@ -318,57 +329,78 @@ describe('NgrxJsonApiEffects', () => {
 
   it('should ignore charset in Content-Type to map errors', () => {
     let payload = generatePayload(resource, 'PATCH');
-    let headers = new HttpHeaders().set('Content-Type', 'application/vnd.api+json;charset=utf-8');
+    let headers = new HttpHeaders().set(
+      'Content-Type',
+      'application/vnd.api+json;charset=utf-8'
+    );
     let error = new HttpErrorResponse({
       error: {
-        errors: [{
-          detail: 'someDetail'
-        }]
+        errors: [
+          {
+            detail: 'someDetail',
+          },
+        ],
       },
       headers: headers,
-      status: 400
+      status: 400,
     });
     let payload = effects.toErrorPayload(payload.query, error);
-    expect(payload.jsonApiData.errors).toEqual([{
-      detail: 'someDetail'
-    }]);
+    expect(payload.jsonApiData.errors).toEqual([
+      {
+        detail: 'someDetail',
+      },
+    ]);
   });
 
   it('should map JSON_API errors to payload', () => {
     let payload = generatePayload(resource, 'PATCH');
-    let headers = new HttpHeaders().set('Content-Type', 'application/vnd.api+json');
+    let headers = new HttpHeaders().set(
+      'Content-Type',
+      'application/vnd.api+json'
+    );
     let error = new HttpErrorResponse({
       error: {
-        errors: [{
-          detail: 'someDetail'
-        }]
+        errors: [
+          {
+            detail: 'someDetail',
+          },
+        ],
       },
       headers: headers,
-      status: 400
+      status: 400,
     });
     let payload = effects.toErrorPayload(payload.query, error);
-    expect(payload.jsonApiData.errors).toEqual([{
-      detail: 'someDetail'
-    }]);
+    expect(payload.jsonApiData.errors).toEqual([
+      {
+        detail: 'someDetail',
+      },
+    ]);
   });
 
   it('should map HTTP errors for non-JSON_API errors', () => {
     let payload = generatePayload(resource, 'PATCH');
-    let headers = new HttpHeaders().set('Content-Type', 'application/not-json-api');
+    let headers = new HttpHeaders().set(
+      'Content-Type',
+      'application/not-json-api'
+    );
     let error = new HttpErrorResponse({
       error: {
-        errors: [{
-          detail: 'someDetail'
-        }]
+        errors: [
+          {
+            detail: 'someDetail',
+          },
+        ],
       },
       headers: headers,
       status: 400,
-      statusText: 'someErrorText'
+      statusText: 'someErrorText',
     });
     let payload = effects.toErrorPayload(payload.query, error);
-    expect(payload.jsonApiData.errors).toEqual([{
-      code: 'someErrorText',
-      status: '400'
-    }]);
+    expect(payload.jsonApiData.errors).toEqual([
+      {
+        code: 'someErrorText',
+        status: '400',
+      },
+    ]);
   });
 });

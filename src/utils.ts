@@ -467,7 +467,11 @@ export const updateResourceErrors = (
   return newState;
 };
 
-function rollbackResource(newState: NgrxJsonApiStoreData, type: string, id: string){
+function rollbackResource(
+  newState: NgrxJsonApiStoreData,
+  type: string,
+  id: string
+) {
   let storeResource = newState[type][id];
   if (!storeResource.persistedResource) {
     delete newState[type][id];
@@ -487,16 +491,16 @@ export const rollbackStoreResources = (
 ): NgrxJsonApiStoreData => {
   let newState: NgrxJsonApiStoreData = { ...storeData };
 
-  if(_.isUndefined(ids)){
+  if (_.isUndefined(ids)) {
     Object.keys(newState).forEach(type => {
       newState[type] = { ...newState[type] };
       Object.keys(newState[type]).forEach(id => {
         rollbackResource(newState, type, id);
       });
     });
-  }else{
+  } else {
     let modifiedResources = getPendingChanges(newState, ids, include, true);
-    for(let modifiedResource of modifiedResources){
+    for (let modifiedResource of modifiedResources) {
       rollbackResource(newState, modifiedResource.type, modifiedResource.id);
     }
   }
@@ -1270,36 +1274,66 @@ const visitPending = (
   context.sorted[--context.cursor] = pendingResource;
 };
 
-function collectPendingChange(state: NgrxJsonApiStoreData, pending: Array<StoreResource>, id: ResourceIdentifier, include: Array<Array<string>>, includeNew: boolean){
+function collectPendingChange(
+  state: NgrxJsonApiStoreData,
+  pending: Array<StoreResource>,
+  id: ResourceIdentifier,
+  include: Array<Array<string>>,
+  includeNew: boolean
+) {
   let storeResource = state[id.type][id.id];
-  if (storeResource.state !== 'IN_SYNC' && (storeResource.state !== 'NEW' || includeNew)) {
+  if (
+    storeResource.state !== 'IN_SYNC' &&
+    (storeResource.state !== 'NEW' || includeNew)
+  ) {
     pending.push(storeResource);
   }
 
-  for(let includeElement of include){
-    if(includeElement.length > 0) {
+  for (let includeElement of include) {
+    if (includeElement.length > 0) {
       let relationshipName = includeElement[0];
-      if(storeResource.relationships && storeResource.relationships[relationshipName]){
+      if (
+        storeResource.relationships &&
+        storeResource.relationships[relationshipName]
+      ) {
         let data = storeResource.relationships[relationshipName].data;
-        if(data) {
+        if (data) {
           let relationInclude: Array<Array<string>> = [];
           include
-            .filter(relIncludeElem => relIncludeElem.length >= 2 && relIncludeElem[0] == relationshipName)
-            .forEach(relIncludeElem => relationInclude.push(relIncludeElem.slice(1)));
+            .filter(
+              relIncludeElem =>
+                relIncludeElem.length >= 2 &&
+                relIncludeElem[0] == relationshipName
+            )
+            .forEach(relIncludeElem =>
+              relationInclude.push(relIncludeElem.slice(1))
+            );
 
           if (_.isArray(data)) {
             let relationIds = data as Array<ResourceIdentifier>;
-            relationIds.forEach(relationId => collectPendingChange(state, pending, relationId, relationInclude, includeNew));
-          }
-          else {
+            relationIds.forEach(relationId =>
+              collectPendingChange(
+                state,
+                pending,
+                relationId,
+                relationInclude,
+                includeNew
+              )
+            );
+          } else {
             let relationId = data as ResourceIdentifier;
-            collectPendingChange(state, pending, relationId, relationInclude, includeNew)
+            collectPendingChange(
+              state,
+              pending,
+              relationId,
+              relationInclude,
+              includeNew
+            );
           }
         }
       }
     }
   }
-
 }
 
 export function getPendingChanges(
@@ -1310,27 +1344,36 @@ export function getPendingChanges(
 ): Array<StoreResource> {
   let pending: Array<StoreResource> = [];
 
-  if(_.isUndefined(ids)){
+  if (_.isUndefined(ids)) {
     // check all
     Object.keys(state).forEach(type => {
       Object.keys(state[type]).forEach(id => {
         let storeResource = state[type][id];
-        if (storeResource.state !== 'IN_SYNC' && (storeResource.state !== 'NEW' || includeNew)) {
+        if (
+          storeResource.state !== 'IN_SYNC' &&
+          (storeResource.state !== 'NEW' || includeNew)
+        ) {
           pending.push(storeResource);
         }
       });
     });
-  }else{
+  } else {
     let relationshipInclusions = [];
-    if(include) {
+    if (include) {
       for (let includeElement of include) {
         relationshipInclusions.push(includeElement.split('.'));
       }
     }
-    for(let id of ids) {
-      collectPendingChange(state, pending, id, relationshipInclusions, includeNew);
+    for (let id of ids) {
+      collectPendingChange(
+        state,
+        pending,
+        id,
+        relationshipInclusions,
+        includeNew
+      );
     }
-    pending = _.uniqBy(pending, function (e) {
+    pending = _.uniqBy(pending, function(e) {
       return e.type + '####' + e.id;
     });
   }

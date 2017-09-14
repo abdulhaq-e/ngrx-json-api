@@ -31,11 +31,19 @@ import {
   updateStoreResource,
 } from '../src/utils';
 //
-import {initialNgrxJsonApiState} from '../src/reducers';
+import { initialNgrxJsonApiState } from '../src/reducers';
 //
-import {NgrxJsonApiStoreData, Resource, StoreResource,} from '../src/interfaces';
+import {
+  NgrxJsonApiStoreData,
+  Resource,
+  StoreResource,
+} from '../src/interfaces';
 
-import {documentPayload, resourceDefinitions, testPayload,} from './test_utils';
+import {
+  documentPayload,
+  resourceDefinitions,
+  testPayload,
+} from './test_utils';
 
 let deepFreeze = require('deep-freeze');
 
@@ -1433,16 +1441,13 @@ describe('filterResources (TODO: test remaining types)', () => {
   // });
 });
 
-
-
 describe('getPendingChanges', () => {
-
   let state: NgrxJsonApiStoreData;
 
   beforeEach(() => {
     state = {
-      'Country': {
-        'ch': {
+      Country: {
+        ch: {
           type: 'Country',
           id: 'ch',
           state: 'IN_SYNC',
@@ -1453,9 +1458,9 @@ describe('getPendingChanges', () => {
             country: {
               data: { type: 'Country', id: 'ch' },
             },
-          }
+          },
         },
-        'de': {
+        de: {
           type: 'Person',
           id: 'de',
           state: 'IN_SYNC',
@@ -1466,10 +1471,10 @@ describe('getPendingChanges', () => {
             country: {
               data: { type: 'Country', id: 'de' },
             },
-          }
-        }
+          },
+        },
       },
-      'Person': {
+      Person: {
         '3': {
           type: 'Person',
           id: '3',
@@ -1481,7 +1486,7 @@ describe('getPendingChanges', () => {
             country: {
               data: { type: 'Country', id: 'ch' },
             },
-          }
+          },
         },
         '4': {
           type: 'Person',
@@ -1494,10 +1499,10 @@ describe('getPendingChanges', () => {
             country: {
               data: { type: 'Country', id: 'de' },
             },
-          }
-        }
+          },
+        },
       },
-      'Article': {
+      Article: {
         '1': {
           type: 'Article',
           id: '1',
@@ -1509,7 +1514,7 @@ describe('getPendingChanges', () => {
             author: {
               data: { type: 'Person', id: '3' },
             },
-          }
+          },
         },
         '2': {
           type: 'Article',
@@ -1522,11 +1527,11 @@ describe('getPendingChanges', () => {
             author: {
               data: { type: 'Person', id: '4' },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     };
-  })
+  });
 
   it('should return empty array if store in sync', () => {
     let changes = getPendingChanges(state, undefined, undefined, undefined);
@@ -1571,11 +1576,21 @@ describe('getPendingChanges', () => {
     state['Article']['1'].state = 'CREATED';
     state['Article']['2'].state = 'UPDATED';
     state['Country']['de'].state = 'DELETED';
-    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], undefined, true);
+    let changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '1' }],
+      undefined,
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('1');
 
-    changes = getPendingChanges(state, [{type: 'Article', id: '2'}], undefined, true);
+    changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '2' }],
+      undefined,
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('2');
   });
@@ -1584,34 +1599,63 @@ describe('getPendingChanges', () => {
     state['Person']['3'].state = 'UPDATED';
     state['Country']['de'].state = 'DELETED';
     state['Country']['ch'].state = 'DELETED';
-    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author'], true);
+    let changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '1' }],
+      ['author'],
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('3');
 
-    let changes = getPendingChanges(state, [{type: 'Article', id: '2'}], ['author'], true);
+    let changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '2' }],
+      ['author'],
+      true
+    );
     expect(changes.length).toEqual(0);
   });
 
   it('should return nested relationships', () => {
     state['Country']['de'].state = 'DELETED';
     state['Country']['ch'].state = 'DELETED';
-    let changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.country'], true);
+    let changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '1' }],
+      ['author.country'],
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('ch');
 
-    changes = getPendingChanges(state, [{type: 'Article', id: '2'}], ['author.country'], true);
+    changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '2' }],
+      ['author.country'],
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('de');
 
-    changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.country.someOther'], true);
+    changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '1' }],
+      ['author.country.someOther'],
+      true
+    );
     expect(changes.length).toEqual(1);
     expect(changes[0].id).toEqual('ch');
 
-    changes = getPendingChanges(state, [{type: 'Article', id: '1'}], ['author.notCountry'], true);
+    changes = getPendingChanges(
+      state,
+      [{ type: 'Article', id: '1' }],
+      ['author.notCountry'],
+      true
+    );
     expect(changes.length).toEqual(0);
   });
 });
-
 
 describe('generateIncludedQueryParams', () => {
   it('should generate an included query param given an array of resources to be included', () => {
