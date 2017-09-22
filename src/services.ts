@@ -261,7 +261,9 @@ export class NgrxJsonApiService {
   public selectStoreResource(
     identifier: ResourceIdentifier
   ): Observable<StoreResource> {
-    return this.store.let(this.selectors.getStoreResource$(identifier));
+    return this.store
+      .let(this.selectors.getNgrxJsonApiStore$())
+      .let(this.selectors.getStoreResource$(identifier));
   }
 
   public denormaliseResource(
