@@ -38,6 +38,10 @@ import {
   denormaliseStoreResources,
 } from './utils';
 
+export function getNgrxJsonApiStore(state$: Store<any>): Observable<NgrxJsonApiStore>{
+  return state$.select('NgrxJsonApi').filter(it => !_.isUndefined(it)).map(it => it.api);
+}
+
 export class NgrxJsonApiSelectors {
   constructor(public config: NgrxJsonApiConfig) {}
 
@@ -46,9 +50,7 @@ export class NgrxJsonApiSelectors {
   ) => Observable<NgrxJsonApiStore> {
     return (state$: Store<any>): Observable<NgrxJsonApiStore> => {
       // note that upon setup the store may not yet be initialized
-      return state$
-        .select('NgrxJsonApi')
-        .map(it => (it ? it['api'] : undefined));
+      return state$.select('NgrxJsonApi').filter(it => !_.isUndefined(it)).map(it => it.api);
     };
   }
 
@@ -111,7 +113,7 @@ export class NgrxJsonApiSelectors {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
         .let(this.getStoreQueries$())
-        .map(it => (it ? it[queryId] : undefined));
+        .map(it => (it ? it[queryId] : undefined))
     };
   }
 

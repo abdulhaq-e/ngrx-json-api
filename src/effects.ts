@@ -45,7 +45,7 @@ import {
   NgrxJsonApiActionTypes,
 } from './actions';
 import { NgrxJsonApi } from './api';
-import { NgrxJsonApiSelectors } from './selectors';
+import {getNgrxJsonApiStore, NgrxJsonApiSelectors} from './selectors';
 import {
   NgrxJsonApiStore,
   OperationType,
@@ -244,7 +244,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
     .filter(() => this.jsonApi.config.applyEnabled !== false)
     .withLatestFrom(
-      this.store.select(this.selectors.getNgrxJsonApiStore$()),
+      this.store.let(getNgrxJsonApiStore),
       (action, ngrxstore: NgrxJsonApiStore) => {
         let payload = (action as ApiApplyInitAction).payload;
         const pending: Array<StoreResource> = getPendingChanges(
