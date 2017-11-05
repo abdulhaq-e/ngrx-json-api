@@ -1,13 +1,10 @@
-import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
+import {inject, TestBed} from '@angular/core/testing';
 
-import { HttpTestingController } from '@angular/common/http/testing';
-import { HttpRequest } from '@angular/common/http';
+import {HttpTestingController} from '@angular/common/http/testing';
 
-import { Observable } from 'rxjs/Observable';
+import {NgrxJsonApi} from '../src/api';
 
-import { NgrxJsonApi } from '../src/api';
-
-import { TestingModule, AlternativeTestingModule } from './testing.module';
+import {AlternativeTestingModule, TestingModule} from './testing.module';
 
 describe('ngrx json api', () => {
   let jsonapi: NgrxJsonApi;

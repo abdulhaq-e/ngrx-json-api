@@ -1,6 +1,8 @@
 import { Observable } from 'rxjs/Observable';
 import { AnonymousSubscription } from 'rxjs/Subscription';
 
+export const NGRX_JSON_API_DEFAULT_ZONE = 'default';
+
 export enum Direction {
   ASC,
   DESC,
@@ -63,6 +65,17 @@ export interface NgrxJsonApiConfig {
   applyEnabled?: boolean;
 }
 
+export interface NgrxJsonApiState {
+  zones: NgrxJsonApiZones
+}
+
+export interface NgrxJsonApiZones {
+  [id: string]: NgrxJsonApiZone;
+}
+
+/**
+ * deprecated, mae use of NgrxJsonApiZone instead
+ */
 export interface NgrxJsonApiStore {
   data: NgrxJsonApiStoreData;
   queries: NgrxJsonApiStoreQueries;
@@ -71,6 +84,10 @@ export interface NgrxJsonApiStore {
   isUpdating: number;
   isDeleting: number;
   isApplying: number;
+}
+
+export interface NgrxJsonApiZone extends NgrxJsonApiStore{
+
 }
 
 export interface NgrxJsonApiStoreData {

@@ -1,39 +1,15 @@
-import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
+import {inject, TestBed} from '@angular/core/testing';
 
 import * as _ from 'lodash';
 
-import { Http, HttpModule } from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import {NgrxJsonApiService} from '../src/services';
 
-import { Observable } from 'rxjs/Observable';
-import { Store, StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import {denormaliseStoreResource,} from '../src/utils';
 
-import { NgrxJsonApi } from '../src/api';
-import { NgrxJsonApiService } from '../src/services';
-import { NgrxJsonApiSelectors } from '../src/selectors';
-import { NgrxJsonApiEffects } from '../src/effects';
-import { NgrxJsonApiModule } from '../src/module';
-
-import {
-  initialNgrxJsonApiState,
-  NgrxJsonApiStoreReducer,
-} from '../src/reducers';
-
-import {
-  NGRX_JSON_API_CONFIG,
-  apiFactory,
-  selectorsFactory,
-  serviceFactory,
-} from '../src/module';
-
-import {
-  denormaliseStoreResource,
-  updateStoreDataFromPayload,
-} from '../src/utils';
-
-import { StoreResource } from '../src/interfaces';
-import { TestingModule } from './testing.module';
-import { testPayload, resourceDefinitions } from './test_utils';
+import {StoreResource} from '../src/interfaces';
+import {TestingModule} from './testing.module';
+import {resourceDefinitions} from './test_utils';
 
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
@@ -132,7 +108,7 @@ describe('NgrxJsonApiService', () => {
       });
     });
 
-    it('remove the query from the state after unsubscribing', () => {
+   it('remove the query from the state after unsubscribing', () => {
       let query = {
         type: 'Article',
         queryId: '22',
