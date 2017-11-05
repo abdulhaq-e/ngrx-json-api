@@ -7,6 +7,7 @@ export {
 export {
   FindOptions,
   NgrxJsonApiService,
+  NgrxJsonApiZoneService,
   PutQueryOptions,
   PostResourceOptions,
   PatchResourceOptions,

@@ -26,6 +26,19 @@ import {
   ErrorModificationType,
 } from './interfaces';
 
+
+export function setIn(state: any, path:string, value: any){
+  let currentValue = _.get(state, path);
+  if(value === currentValue){
+    return state;
+  }
+  return _.setWith(_.clone(state), path, value, (nsValue: any, key: string, nsObject: any) => {
+    const newObject = _.clone(nsObject);
+    newObject[key] = nsValue;
+    return newObject;
+  });
+}
+
 export const denormaliseObject = (
   resource: Resource,
   storeData: NgrxJsonApiStoreData,
@@ -682,9 +695,11 @@ export const updateQueryResults = (
       loading: false,
     };
 
-    let newState: NgrxJsonApiStoreQueries = { ...storeQueries };
-    newState[queryId] = <StoreQuery>newQueryStore;
-    return newState;
+    if(!_.isEqual(newQueryStore, storeQuery)){
+      let newState: NgrxJsonApiStoreQueries = { ...storeQueries };
+      newState[queryId] = <StoreQuery>newQueryStore;
+      return newState;
+    }
   }
   return storeQueries;
 };

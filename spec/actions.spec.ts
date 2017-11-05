@@ -214,138 +214,138 @@ describe('Json Api Actions', () => {
   });
 
   it('should generate an api create init action using apiCreateInit', () => {
-    let action = new ApiPostInitAction({});
+    let action = new ApiPostInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_POST_INIT);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api create sueccess action using apiCreateSuccess', () => {
-    let action = new ApiPostSuccessAction({});
+    let action = new ApiPostSuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_POST_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api create fail action using apiCreateFail', () => {
-    let action = new ApiPostFailAction({});
+    let action = new ApiPostFailAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_POST_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api read init action using apiReadInit', () => {
-    let action = new ApiGetInitAction({});
+    let action = new ApiGetInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_GET_INIT);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api read success action using apiReadSuccess', () => {
-    let action = new ApiGetSuccessAction({});
+    let action = new ApiGetSuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_GET_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api read fail action using apiReadFail', () => {
-    let action = new ApiGetFailAction({});
+    let action = new ApiGetFailAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_GET_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api update init action using apiUpdateInit', () => {
-    let action = new ApiPatchInitAction({});
+    let action = new ApiPatchInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_PATCH_INIT);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an update success action using apiUpdateSuccess', () => {
-    let action = new ApiPatchSuccessAction({});
+    let action = new ApiPatchSuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_PATCH_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an update fail action using apiUpdateFail', () => {
-    let action = new ApiPatchFailAction({});
+    let action = new ApiPatchFailAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_PATCH_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api delete init action using apiDeleteInit', () => {
-    let action = new ApiDeleteInitAction({});
+    let action = new ApiDeleteInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_DELETE_INIT);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api delete success action using apiDeleteSuccess', () => {
-    let action = new ApiDeleteSuccessAction({});
+    let action = new ApiDeleteSuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_DELETE_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api delete fail action using apiDeleteFail', () => {
-    let action = new ApiDeleteFailAction({});
+    let action = new ApiDeleteFailAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_DELETE_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api commit init action using ApiApplyInit', () => {
-    let action = new ApiApplyInitAction({});
+    let action = new ApiApplyInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_INIT);
     expect(action.payload).toBeDefined();
   });
 
   it('should generate an api commit success action using ApiApplySuccess', () => {
-    let action = new ApiApplySuccessAction({});
+    let action = new ApiApplySuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api commit fail action using ApiApplyFail', () => {
-    let action = new ApiApplyFailAction({});
+    let action = new ApiApplyFailAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_FAIL);
     expect(action.payload).toEqual({});
   });
 
   it('should generate an api rollback action using ApiRollbackInit', () => {
-    let action = new ApiRollbackAction();
+    let action = new ApiRollbackAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_ROLLBACK);
   });
 
   it('should generate a query store init action using LocalQueryInitAction', () => {
-    let action = new LocalQueryInitAction({});
+    let action = new LocalQueryInitAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.LOCAL_QUERY_INIT);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a query store success action using LocalQuerySuccessAction', () => {
-    let action = new LocalQuerySuccessAction({});
+    let action = new LocalQuerySuccessAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a delete store resource action using DeleteStoreResourceAction', () => {
-    let action = new DeleteStoreResourceAction({});
+    let action = new DeleteStoreResourceAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a patch store resource action using PatchStoreResourceAction', () => {
-    let action = new PatchStoreResourceAction({});
+    let action = new PatchStoreResourceAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a new store resource action using NewStoreResourceAction', () => {
-    let action = new NewStoreResourceAction({});
+    let action = new NewStoreResourceAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.NEW_STORE_RESOURCE);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a post store resource action using PostStoreResourceAction', () => {
-    let action = new PostStoreResourceAction({});
+    let action = new PostStoreResourceAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.POST_STORE_RESOURCE);
     expect(action.payload).toEqual({});
   });
 
   it('should generate a delete store resource action using RemoveQueryAction', () => {
-    let action = new RemoveQueryAction({});
+    let action = new RemoveQueryAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.REMOVE_QUERY);
     expect(action.payload).toEqual({});
   });
@@ -355,7 +355,7 @@ describe('Json Api Actions', () => {
       resourceId: null,
       errors: [],
       modificationType: 'SET',
-    });
+    }, 'testZone');
     expect(action.type).toEqual(
       NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS
     );
@@ -363,17 +363,17 @@ describe('Json Api Actions', () => {
   });
 
   it('should generate a compact store resource action using CompactStoreAction', () => {
-    let action = new CompactStoreAction({});
+    let action = new CompactStoreAction('testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.COMPACT_STORE);
   });
 
   it('should generate a clear store resource action using ClearStoreAction', () => {
-    let action = new ClearStoreAction({});
+    let action = new ClearStoreAction('testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.CLEAR_STORE);
   });
 
   it('should generate a refresh query action using ApiQueryRefreshAction', () => {
-    let action = new ApiQueryRefreshAction({});
+    let action = new ApiQueryRefreshAction({}, 'testZone');
     expect(action.type).toEqual(NgrxJsonApiActionTypes.API_QUERY_REFRESH);
   });
 });

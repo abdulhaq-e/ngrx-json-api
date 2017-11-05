@@ -1,23 +1,17 @@
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { Observable } from 'rxjs/Observable';
+import {HttpClientModule} from '@angular/common/http';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import {StoreModule} from '@ngrx/store';
+import {EffectsModule} from '@ngrx/effects';
+import {initialNgrxJsonApiState} from '../src/reducers';
+import {NgrxJsonApiModule} from '../src/module';
+import {updateStoreDataFromPayload} from '../src/utils';
 
-import { NgrxJsonApi } from '../src/api';
-import { initialNgrxJsonApiState } from '../src/reducers';
-import { NgrxJsonApiModule } from '../src/module';
-import { updateStoreDataFromPayload } from '../src/utils';
-import { Payload, Query } from '../src/interfaces';
-import { NgrxJsonApiEffects } from '../src/effects';
-
-import { testPayload, resourceDefinitions } from './test_utils';
+import {resourceDefinitions, testPayload} from './test_utils';
 
 let queries = {
   '1': {
@@ -48,14 +42,16 @@ let queries = {
 
 let initialState = {
   NgrxJsonApi: {
-    api: {
-      ...{},
-      ...initialNgrxJsonApiState,
-      ...{
-        data: updateStoreDataFromPayload({}, testPayload),
-        queries: queries,
+    zones: {
+      default: {
+        ...{},
+        ...initialNgrxJsonApiState,
+        ...{
+          data: updateStoreDataFromPayload({}, testPayload),
+          queries: queries,
+        },
       },
-    },
+    }
   },
 };
 

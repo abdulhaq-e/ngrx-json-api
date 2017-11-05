@@ -16,7 +16,7 @@ import {
   insertStoreResource,
   isEqualResource,
   removeQuery,
-  rollbackStoreResources,
+  rollbackStoreResources, setIn,
   sortPendingChanges,
   toResourceIdentifier,
   updateQueryErrors,
@@ -31,7 +31,7 @@ import {
   updateStoreResource,
 } from '../src/utils';
 //
-import { initialNgrxJsonApiState } from '../src/reducers';
+import {initialNgrxJsonApiState, initialNgrxJsonApiZone} from '../src/reducers';
 //
 import {
   NgrxJsonApiStoreData,
@@ -91,9 +91,59 @@ deepFreeze(initialNgrxJsonApiState);
 //     });
 // });
 
+
+describe('setIn', () => {
+  it('should do nothing if value not changed', () => {
+    let a = {
+      x: 1,
+      y: 2
+    };
+    let result = setIn(a, "x", 1);
+    expect(result === a).toBeTruthy();
+  });
+
+  it('should change value', () => {
+    let a = {
+      x: 1,
+      y: 2
+    };
+    let result = setIn(a, "x", 3);
+    expect(result === a).toBeFalsy();
+    expect(result.x).toEqual(3);
+    expect(result.y).toEqual(2);
+  });
+
+  it('should change value', () => {
+    let a = {
+      x: 1,
+      y: 2
+    };
+    let result = setIn(a, "x", 3);
+    expect(result === a).toBeFalsy();
+    expect(result.x).toEqual(3);
+    expect(result.y).toEqual(2);
+  });
+
+  it('should change nested value', () => {
+    let a = {
+      x: {
+        a: '1'
+      },
+      y: {
+        b: '2'
+      }
+    };
+    let result = setIn(a, "x.a", 3);
+    expect(result === a).toBeFalsy();
+    expect(result.x === a.x).toBeFalsy();
+    expect(result.y === a.y).toBeTruthy();
+    expect(result.x.a).toEqual(3);
+  });
+}
+
 describe('denormalise and denormaliseObject', () => {
   let storeData = updateStoreDataFromPayload(
-    initialNgrxJsonApiState.data,
+    initialNgrxJsonApiZone.data,
     testPayload
   );
   deepFreeze(storeData);
@@ -238,7 +288,7 @@ describe('getDenormalisedPath', () => {
 
 describe('getDenormalisedValue', () => {
   let storeData = updateStoreDataFromPayload(
-    initialNgrxJsonApiState.data,
+    initialNgrxJsonApiZone.data,
     testPayload
   );
   let denormalisedR = denormaliseStoreResource(
@@ -912,7 +962,6 @@ describe('rollbackStoreResources', () => {
   };
   it('should delete the resource if a persistedResource does not exist', () => {
     let newState = rollbackStoreResources(storeData);
-    // console.log(newState);
     expect(newState['Article']['1']).not.toBeDefined();
     expect(newState['Comment']['1']).toBeDefined();
     expect(newState['Comment']['1'].resource.attributes.title).toEqual('C11');
@@ -1019,7 +1068,7 @@ describe('updateStoreDataFromResource', () => {
 describe('updateStoreDataFromPayload', () => {
   it('should update the store data given a JsonApiDocument', () => {
     let newState = updateStoreDataFromPayload(
-      initialNgrxJsonApiState.data,
+      initialNgrxJsonApiZone.data,
       documentPayload
     );
     expect(newState['Article']).toBeDefined();
@@ -1161,7 +1210,7 @@ describe('toResourceIdentifier', () => {
 
 describe('getResourceFieldValueFromPath', () => {
   let storeData = updateStoreDataFromPayload(
-    initialNgrxJsonApiState.data,
+    initialNgrxJsonApiZone.data,
     testPayload
   );
 
@@ -1294,7 +1343,7 @@ describe('getResourceFieldValueFromPath', () => {
 
 describe('filterResources (TODO: test remaining types)', () => {
   let storeData = updateStoreDataFromPayload(
-    initialNgrxJsonApiState.data,
+    initialNgrxJsonApiZone.data,
     testPayload
   );
 
@@ -1560,7 +1609,6 @@ describe('getPendingChanges', () => {
     state['Article']['2'].state = 'UPDATED';
     let changes = getPendingChanges(state, undefined, undefined, true);
     expect(changes.length).toEqual(1);
-    console.log(changes);
     expect(changes[0].id).toEqual('2');
   });
 

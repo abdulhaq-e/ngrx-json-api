@@ -1,41 +1,11 @@
-import { async, inject, fakeAsync, tick, TestBed } from '@angular/core/testing';
-
-import { Http, HttpModule } from '@angular/http';
-
-import { Store, StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import {inject, TestBed} from '@angular/core/testing';
 
 import * as _ from 'lodash';
+import {DenormaliseStoreResourcePipe, GetDenormalisedValuePipe, SelectStoreResourcePipe,} from '../src/pipes';
 
-import { NgrxJsonApi } from '../src/api';
-import { NgrxJsonApiService } from '../src/services';
-import { NgrxJsonApiSelectors } from '../src/selectors';
-import { NgrxJsonApiEffects } from '../src/effects';
-import {
-  DenormaliseStoreResourcePipe,
-  GetDenormalisedValuePipe,
-  SelectStoreResourcePipe,
-} from '../src/pipes';
+import {denormaliseStoreResource,} from '../src/utils';
 
-import {
-  initialNgrxJsonApiState,
-  NgrxJsonApiStoreReducer,
-} from '../src/reducers';
-
-import {
-  NGRX_JSON_API_CONFIG,
-  apiFactory,
-  selectorsFactory,
-  serviceFactory,
-} from '../src/module';
-
-import {
-  denormaliseStoreResource,
-  updateStoreDataFromPayload,
-} from '../src/utils';
-
-import { TestingModule } from './testing.module';
-import { testPayload, resourceDefinitions } from './test_utils';
+import {TestingModule} from './testing.module';
 
 describe('Pipes', () => {
   let pipe;
