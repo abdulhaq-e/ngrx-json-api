@@ -218,7 +218,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
     .ofType(NgrxJsonApiActionTypes.API_QUERY_REFRESH)
     .withLatestFrom(this.store, (action: ApiQueryRefreshAction, store) => {
       let queryId = action.payload;
-      let state = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
+      let state = getNgrxJsonApiZone(store, action.zoneId);
       let query = state.queries[queryId].query;
       return new ApiGetInitAction(query, action.zoneId);
     });
@@ -234,8 +234,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         );
       }
 
-      let state = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
-
+      let state = getNgrxJsonApiZone(store, action.zoneId);
       let actions = [];
       for (let queryId in state.queries) {
         if (state.queries.hasOwnProperty(queryId)) {
