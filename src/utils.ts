@@ -277,7 +277,7 @@ export const removeStoreResource = (
  * @param resourceId
  * @param resourceState
  * @param loading
- * @returns {NgrxJsonApiStoreData}
+ * @returns
  */
 export const updateResourceState = (
   storeData: NgrxJsonApiStoreData,
@@ -325,7 +325,7 @@ export const updateResourceState = (
  * store (state, persistedResource, etc.)
  * @param resource0
  * @param resource1
- * @returns {boolean}
+ * @returns
  */
 export const isEqualResource = (
   resource0: Resource,
