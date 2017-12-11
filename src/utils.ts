@@ -608,6 +608,7 @@ export const updateStoreDataFromResource = (
   }
 };
 
+
 export const updateStoreDataFromPayload = (
   storeData: NgrxJsonApiStoreData,
   payload: Document
@@ -618,31 +619,36 @@ export const updateStoreDataFromPayload = (
     return storeData;
   }
 
-  data = _.isArray(data) ? <Resource[]>data : <Resource[]>[data];
-
+  let resources: Array<Resource> = _.isArray(data) ? <Resource[]>data : <Resource[]>[data];
   let included = <Array<Resource>>_.get(payload, 'included');
-
   if (!_.isUndefined(included)) {
-    data = [...data, ...included];
+    resources = [...resources, ...included];
   }
 
-  return <NgrxJsonApiStoreData>_.reduce(
-    data,
-    (result: NgrxJsonApiStoreData, resource: Resource) => {
-      // let resourcePath: string = getResourcePath(
-      //   result.resourcesDefinitions, resource.type);
-      // Extremely ugly, needs refactoring!
-      // let newPartialState = { data: {} };
-      // newPartialState.data[resourcePath] = { data: {} } ;
-      // newPartialState.data = updateOrInsertResource(
-      // result.data, resource);
-      return updateStoreDataFromResource(result, resource, true, true);
-      // result.data[resourcePath].data = updateOrInsertResource(
-      // result.data[resourcePath].data, resource);
-      // return <NgrxJsonApiStore>_.merge({}, result, newPartialState);
-    },
-    storeData
-  );
+  let newStoreData: NgrxJsonApiStoreData = {...storeData};
+
+  let hasChange = false;
+  for (const resource of resources) {
+    const storeResource = {
+      ...resource,
+      persistedResource: resource,
+      state: 'IN_SYNC',
+      errors: [],
+      loading: false,
+    } as StoreResource;
+
+    if (!_.isEqual(storeResource, resource)) {
+      hasChange = true;
+      if (!newStoreData[resource.type]) {
+        newStoreData[resource.type] = {}
+      }
+      else if (newStoreData[resource.type] === storeData[resource.type]) {
+        newStoreData[resource.type] = {...storeData[resource.type]};
+      }
+      newStoreData[resource.type][resource.id] = storeResource;
+    }
+  }
+  return hasChange ? newStoreData : storeData;
 };
 
 /**
