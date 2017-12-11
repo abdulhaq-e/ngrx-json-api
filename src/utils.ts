@@ -42,58 +42,58 @@ export function setIn(state: any, path:string, value: any){
 export const denormaliseObject = (
   resource: Resource,
   storeData: NgrxJsonApiStoreData,
-  bag: NgrxJsonApiStoreData
+  bag: NgrxJsonApiStoreData,
+  denormalizePersisted: boolean = false
 ): any => {
   // this function MUST MUTATE resource
-  let denormalised = resource;
-
   if (resource.hasOwnProperty('relationships')) {
-    Object.keys(resource.relationships).forEach(relation => {
-      resource.relationships[relation]['reference'] = {} as Resource;
-      let data: ResourceIdentifier | Array<ResourceIdentifier> =
-        resource.relationships[relation].data;
-      // denormalised relation
-      let relationDenorm;
+    Object.keys(resource.relationships).forEach(relationshipName => {
 
-      if (data === null || _.isEqual(data, [])) {
-        relationDenorm = data;
-      } else if (_.isPlainObject(data)) {
-        // hasOne relation
-        let relatedRS = getSingleStoreResource(
-          <ResourceIdentifier>data,
-          storeData
-        );
-        relationDenorm = denormaliseStoreResource(relatedRS, storeData, bag);
-      } else if (_.isArray(data)) {
-        // hasMany relation
-        let relatedRSs: Array<StoreResource> = getMultipleStoreResource(
-          <ResourceIdentifier[]>data,
-          storeData
-        );
-        relationDenorm = relatedRSs.map(r =>
-          denormaliseStoreResource(r, storeData, bag)
-        );
+      const orginalRelationship = resource.relationships[relationshipName];
+
+      let data: ResourceIdentifier | Array<ResourceIdentifier> = orginalRelationship.data;
+      if(!_.isUndefined(data)){
+        let denormalizedRelation;
+        if (data === null) {
+          denormalizedRelation = data;
+        } else if (!_.isArray(data)) {
+          // one relation
+          let relatedRS = getSingleStoreResource(
+            <ResourceIdentifier>data,
+            storeData
+          );
+          denormalizedRelation = denormaliseStoreResource(relatedRS, storeData, bag, denormalizePersisted);
+        } else if(data.length == 0) {
+          denormalizedRelation = data;
+        } else {
+          // many relation
+          let relatedRSs: Array<StoreResource> = getMultipleStoreResource(
+            <ResourceIdentifier[]>data,
+            storeData
+          );
+          denormalizedRelation = relatedRSs.map(r =>
+            denormaliseStoreResource(r, storeData, bag, denormalizePersisted)
+          );
+        }
+
+        const relationship = {...orginalRelationship};
+        relationship['reference'] = denormalizedRelation;
+        resource.relationships[relationshipName] = relationship;
       }
-      let relationDenormPath = 'relationships.' + relation + '.reference';
-      denormalised = <Resource>_.set(
-        denormalised,
-        relationDenormPath,
-        relationDenorm
-      );
     });
   }
-
-  return denormalised;
+  return resource;
 };
 
 export const denormaliseStoreResources = (
   items: Array<StoreResource>,
   storeData: NgrxJsonApiStoreData,
-  bag: any = {}
+  bag: any = {},
+  denormalizePersisted: boolean = false
 ): Array<StoreResource> => {
   let results: Array<StoreResource> = [];
   for (let item of items) {
-    results.push(denormaliseStoreResource(item, storeData, bag));
+    results.push(denormaliseStoreResource(item, storeData, bag, denormalizePersisted));
   }
   return results;
 };
@@ -101,29 +101,34 @@ export const denormaliseStoreResources = (
 export const denormaliseStoreResource = (
   item: StoreResource,
   storeData: NgrxJsonApiStoreData,
-  bag: any = {}
+  bag: any = {},
+  denormalizePersisted: boolean = false
 ): any => {
   if (!item) {
     return null;
   }
-  let storeResource = _.cloneDeep(<StoreResource>item);
-
-  if (_.isUndefined(bag[storeResource.type])) {
-    bag[storeResource.type] = {};
+  if (_.isUndefined(bag[item.type])) {
+    bag[item.type] = {};
   }
-  if (_.isUndefined(bag[storeResource.type][storeResource.id])) {
+  if (_.isUndefined(bag[item.type][item.id])) {
+    let storeResource: StoreResource = {...item};
+    if(item.relationships){
+      storeResource.relationships = {...item.relationships}
+    }
+
     bag[storeResource.type][storeResource.id] = storeResource;
-    storeResource = denormaliseObject(storeResource, storeData, bag);
-    if (storeResource.persistedResource) {
+    storeResource = denormaliseObject(storeResource, storeData, bag, denormalizePersisted);
+    if (storeResource.persistedResource && denormalizePersisted) {
       storeResource.persistedResource = denormaliseObject(
         storeResource.persistedResource,
         storeData,
-        bag
+        bag,
+        denormalizePersisted
       );
     }
   }
 
-  return bag[storeResource.type][storeResource.id];
+  return bag[item.type][item.id];
 };
 
 export const getSingleStoreResource = (
