@@ -41,7 +41,14 @@ export class NgrxJsonApi {
   public requestUrl: string;
   public definitions = this.config.resourceDefinitions;
 
-  constructor(private http: HttpClient, public config: NgrxJsonApiConfig) {}
+  constructor(private http: HttpClient, public config: NgrxJsonApiConfig) {
+    if (this.config.requestHeaders) {
+      for (let name of _.keys(this.config.requestHeaders)) {
+        const value = this.config.requestHeaders[name];
+        this.headers = this.headers.set(name, value);
+      }
+    }
+  }
 
   private urlBuilder(query: Query, operation: OperationType) {
     switch (operation) {

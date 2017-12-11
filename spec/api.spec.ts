@@ -135,8 +135,12 @@ describe('ngrx json api', () => {
     getRequest();
     expect(req.request.headers.has('Content-Type')).toBeTruthy();
     expect(req.request.headers.has('Accept')).toBeTruthy();
+    expect(req.request.headers.has('Custom-Header')).toBeTruthy();
     expect(req.request.headers.get('Content-Type')).toBe(
       'application/vnd.api+json'
+    );
+    expect(req.request.headers.get('Custom-Header')).toBe(
+      '42'
     );
     expect(req.request.headers.get('Accept')).toBe('application/vnd.api+json');
   });

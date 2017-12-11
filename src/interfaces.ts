@@ -1,6 +1,3 @@
-import { Observable } from 'rxjs/Observable';
-import { AnonymousSubscription } from 'rxjs/Subscription';
-
 export const NGRX_JSON_API_DEFAULT_ZONE = 'default';
 
 export enum Direction {
@@ -57,6 +54,11 @@ export interface NgrxJsonApiConfig {
   resourceDefinitions?: Array<ResourceDefinition>;
   urlBuilder?: NgrxJsonApiUrlBuilder;
   filteringConfig?: NgrxJsonApiFilteringConfig;
+
+  /**
+   * Custom request headers.
+   */
+  requestHeaders?:  { [name: string]: any };
 
   /**
    * Allows to disable the apply action and replace it with a custom one. For example

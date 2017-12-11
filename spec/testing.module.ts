@@ -64,6 +64,9 @@ let initialState = {
     NgrxJsonApiModule.configure({
       resourceDefinitions: resourceDefinitions,
       apiUrl: 'myapi.com',
+      requestHeaders: {
+        'Custom-Header': '42'
+      }
     }),
   ],
   providers: [],
