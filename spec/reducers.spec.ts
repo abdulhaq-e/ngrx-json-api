@@ -444,6 +444,11 @@ describe('NgrxJsonApiReducer', () => {
     it('should subtract 1 from isReading', () => {
       expect(tempState.isReading - newState.isReading).toBe(1);
     });
+
+    it('should update isLoading', () => {
+      expect(tempState.queries['111'].loading).toBeTruthy();
+      expect(newState.queries['111'].loading).toBeFalsy();
+    });
   });
 
   describe('API_PATCH_FAIL action', () => {
