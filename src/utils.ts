@@ -721,6 +721,7 @@ export const updateQueryErrors = (
   let newState = { ...storeQueries };
   let newStoreQuery = { ...newState[queryId] };
   newStoreQuery.errors = [];
+  newStoreQuery.loading = false;
   if (document.errors) {
     newStoreQuery.errors.push(...document.errors);
   }
