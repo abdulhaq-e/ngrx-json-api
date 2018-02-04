@@ -1,4 +1,4 @@
-import {InjectionToken, ModuleWithProviders, NgModule} from '@angular/core';
+import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 
 import { HttpClient } from '@angular/common/http';
 
@@ -16,9 +16,11 @@ import {
 } from './pipes';
 
 import { NgrxJsonApiConfig } from './interfaces';
-import {NgrxJsonApiSelectors} from "./selectors";
+import { NgrxJsonApiSelectors } from './selectors';
 
-export const NGRX_JSON_API_CONFIG = new InjectionToken<NgrxJsonApiConfig>('NGRX_JSON_API_CONFIG');
+export const NGRX_JSON_API_CONFIG = new InjectionToken<NgrxJsonApiConfig>(
+  'NGRX_JSON_API_CONFIG'
+);
 
 export function apiFactory(http: HttpClient, config: NgrxJsonApiConfig) {
   return new NgrxJsonApi(http, config);
@@ -31,11 +33,7 @@ export function selectorsFactory() {
   return new NgrxJsonApiSelectors();
 }
 
-
-export function serviceFactory(
-  store: Store<any>,
-  config: NgrxJsonApiConfig
-) {
+export function serviceFactory(store: Store<any>, config: NgrxJsonApiConfig) {
   return new NgrxJsonApiService(store, config);
 }
 

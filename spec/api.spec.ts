@@ -1,10 +1,10 @@
-import {inject, TestBed} from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
-import {HttpTestingController} from '@angular/common/http/testing';
+import { HttpTestingController } from '@angular/common/http/testing';
 
-import {NgrxJsonApi} from '../src/api';
+import { NgrxJsonApi } from '../src/api';
 
-import {AlternativeTestingModule, TestingModule} from './testing.module';
+import { AlternativeTestingModule, TestingModule } from './testing.module';
 
 describe('ngrx json api', () => {
   let jsonapi: NgrxJsonApi;
@@ -139,9 +139,7 @@ describe('ngrx json api', () => {
     expect(req.request.headers.get('Content-Type')).toBe(
       'application/vnd.api+json'
     );
-    expect(req.request.headers.get('Custom-Header')).toBe(
-      '42'
-    );
+    expect(req.request.headers.get('Custom-Header')).toBe('42');
     expect(req.request.headers.get('Accept')).toBe('application/vnd.api+json');
   });
 

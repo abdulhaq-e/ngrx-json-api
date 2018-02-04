@@ -1,11 +1,15 @@
-import {inject, TestBed} from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
 import * as _ from 'lodash';
-import {DenormaliseStoreResourcePipe, GetDenormalisedValuePipe, SelectStoreResourcePipe,} from '../src/pipes';
+import {
+  DenormaliseStoreResourcePipe,
+  GetDenormalisedValuePipe,
+  SelectStoreResourcePipe,
+} from '../src/pipes';
 
-import {denormaliseStoreResource,} from '../src/utils';
+import { denormaliseStoreResource } from '../src/utils';
 
-import {TestingModule} from './testing.module';
+import { TestingModule } from './testing.module';
 
 describe('Pipes', () => {
   let pipe;

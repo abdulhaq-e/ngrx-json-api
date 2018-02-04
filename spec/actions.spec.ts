@@ -351,11 +351,14 @@ describe('Json Api Actions', () => {
   });
 
   it('should generate a modify errors action using ModifyStoreResourceErrorsAction', () => {
-    let action = new ModifyStoreResourceErrorsAction({
-      resourceId: null,
-      errors: [],
-      modificationType: 'SET',
-    }, 'testZone');
+    let action = new ModifyStoreResourceErrorsAction(
+      {
+        resourceId: null,
+        errors: [],
+        modificationType: 'SET',
+      },
+      'testZone'
+    );
     expect(action.type).toEqual(
       NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS
     );

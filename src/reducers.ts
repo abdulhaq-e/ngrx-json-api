@@ -6,7 +6,8 @@ import {
   NgrxJsonApiActionTypes,
 } from './actions';
 import {
-  ModifyStoreResourceErrorsPayload, NgrxJsonApiState,
+  ModifyStoreResourceErrorsPayload,
+  NgrxJsonApiState,
   NgrxJsonApiZone,
   Query,
   ResourceIdentifier,
@@ -19,7 +20,8 @@ import {
   getPendingChanges,
   removeQuery,
   removeStoreResource,
-  rollbackStoreResources, setIn,
+  rollbackStoreResources,
+  setIn,
   updateQueriesForDeletedResource,
   updateQueryErrors,
   updateQueryParams,
@@ -42,7 +44,7 @@ export const initialNgrxJsonApiZone: NgrxJsonApiZone = {
 };
 
 export const initialNgrxJsonApiState: NgrxJsonApiState = {
-  zones: {}
+  zones: {},
 };
 
 export function NgrxJsonApiStoreReducer(
@@ -58,21 +60,23 @@ export function NgrxJsonApiStoreReducer(
     zone = initialNgrxJsonApiZone;
   }
   let newZone = NgrxJsonApiZoneReducer(zone, action);
-  if(zone != newZone){
+  if (zone != newZone) {
     return {
       ...state,
       zones: {
         ...state.zones,
-        [zoneId]: newZone
-      }
-    }
-  }else{
+        [zoneId]: newZone,
+      },
+    };
+  } else {
     return state;
   }
 }
 
-
-export function NgrxJsonApiZoneReducer(zone: NgrxJsonApiZone, action: any): NgrxJsonApiZone {
+export function NgrxJsonApiZoneReducer(
+  zone: NgrxJsonApiZone,
+  action: any
+): NgrxJsonApiZone {
   let newZone;
   switch (action.type) {
     case NgrxJsonApiActionTypes.API_POST_INIT: {
@@ -123,10 +127,7 @@ export function NgrxJsonApiZoneReducer(zone: NgrxJsonApiZone, action: any): Ngrx
     case NgrxJsonApiActionTypes.API_POST_SUCCESS: {
       newZone = {
         ...zone,
-        data: updateStoreDataFromPayload(
-          zone.data,
-          action.payload.jsonApiData
-        ),
+        data: updateStoreDataFromPayload(zone.data, action.payload.jsonApiData),
         isCreating: zone.isCreating - 1,
       };
       return newZone;
@@ -134,10 +135,7 @@ export function NgrxJsonApiZoneReducer(zone: NgrxJsonApiZone, action: any): Ngrx
     case NgrxJsonApiActionTypes.API_GET_SUCCESS: {
       newZone = {
         ...zone,
-        data: updateStoreDataFromPayload(
-          zone.data,
-          action.payload.jsonApiData
-        ),
+        data: updateStoreDataFromPayload(zone.data, action.payload.jsonApiData),
         queries: updateQueryResults(
           zone.queries,
           action.payload.query.queryId,
@@ -150,10 +148,7 @@ export function NgrxJsonApiZoneReducer(zone: NgrxJsonApiZone, action: any): Ngrx
     case NgrxJsonApiActionTypes.API_PATCH_SUCCESS: {
       newZone = {
         ...zone,
-        data: updateStoreDataFromPayload(
-          zone.data,
-          action.payload.jsonApiData
-        ),
+        data: updateStoreDataFromPayload(zone.data, action.payload.jsonApiData),
         isUpdating: zone.isUpdating - 1,
       };
       return newZone;
@@ -250,11 +245,15 @@ export function NgrxJsonApiZoneReducer(zone: NgrxJsonApiZone, action: any): Ngrx
       return newZone;
     }
     case NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS: {
-      return setIn(zone, 'queries', updateQueryResults(
-        zone.queries,
-        action.payload.query.queryId,
-        action.payload.jsonApiData
-      ));
+      return setIn(
+        zone,
+        'queries',
+        updateQueryResults(
+          zone.queries,
+          action.payload.query.queryId,
+          action.payload.jsonApiData
+        )
+      );
     }
     case NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE: {
       let updatedData = updateStoreDataFromResource(

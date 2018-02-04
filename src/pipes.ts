@@ -20,8 +20,8 @@ export class DenormaliseStoreResourcePipe implements PipeTransform {
   constructor(private service: NgrxJsonApiService) {}
 
   transform(
-    obs: Observable<StoreResource> | Observable<StoreResource[]>
-  ): Observable<StoreResource> | Observable<StoreResource[]> {
+    obs: Observable<StoreResource | StoreResource[]>
+  ): Observable<StoreResource | StoreResource[]> {
     return this.service.denormaliseResource(obs);
   }
 }

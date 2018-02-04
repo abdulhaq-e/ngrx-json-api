@@ -58,7 +58,7 @@ export interface NgrxJsonApiConfig {
   /**
    * Custom request headers.
    */
-  requestHeaders?:  { [name: string]: any };
+  requestHeaders?: { [name: string]: any };
 
   /**
    * Allows to disable the apply action and replace it with a custom one. For example
@@ -68,7 +68,7 @@ export interface NgrxJsonApiConfig {
 }
 
 export interface NgrxJsonApiState {
-  zones: NgrxJsonApiZones
+  zones: NgrxJsonApiZones;
 }
 
 export interface NgrxJsonApiZones {
@@ -88,9 +88,7 @@ export interface NgrxJsonApiStore {
   isApplying: number;
 }
 
-export interface NgrxJsonApiZone extends NgrxJsonApiStore{
-
-}
+export interface NgrxJsonApiZone extends NgrxJsonApiStore {}
 
 export interface NgrxJsonApiStoreData {
   [id: string]: NgrxJsonApiStoreResources;
@@ -244,25 +242,25 @@ export interface StoreQuery {
 }
 
 /**
-* Container to hold a Resource in the store with state information.
-*/
+ * Container to hold a Resource in the store with state information.
+ */
 export interface StoreResource extends Resource {
   /**
-  * State of the resource to track local changes not yet
-  * published to the json api endpoint.
-  */
+   * State of the resource to track local changes not yet
+   * published to the json api endpoint.
+   */
   state?: ResourceState;
   /**
-  * The original resource obtained from the server.
-  */
+   * The original resource obtained from the server.
+   */
   persistedResource?: Resource;
   /**
-  * One of the operation types: reading, creating, updating or deleting.
-  */
+   * One of the operation types: reading, creating, updating or deleting.
+   */
   loading?: OperationType;
   /**
-  * Errors received from the server after attempting to store the resource.
-  */
+   * Errors received from the server after attempting to store the resource.
+   */
   errors?: Array<ResourceError>;
 
   /**

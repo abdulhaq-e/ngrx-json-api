@@ -43,11 +43,7 @@ export async function compilePackageWithNgc() {
  * a FESM (Flat Ecma Script Module)
  */
 export async function bundleFesms() {
-  await util.exec('rollup', [
-    `-i ./dist/ngrx-json-api.js`,
-    `-o ./dist/FESM/ngrx-json-api.js`,
-    `--sourcemap`,
-  ]);
+  await util.exec('rollup', ['-c ./rollup.config.es.js']);
 
   await util.mapSources(`./dist/FESM/ngrx-json-api.js`);
 }
@@ -74,7 +70,7 @@ export async function downLevelFesmsToES5() {
  * Re-runs Rollup on the downleveled ES5 to produce a UMD bundle
  */
 export async function createUmdBundles() {
-  const rollupArgs = [`-c ./rollup.config.js`, `--sourcemap`];
+  const rollupArgs = [`-c ./rollup.config.umd.js`];
 
   await util.exec('rollup', rollupArgs);
   await util.mapSources(`./dist/bundles/ngrx-json-api.umd.js`);
