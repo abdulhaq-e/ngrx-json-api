@@ -26,17 +26,21 @@ import {
   ErrorModificationType,
 } from './interfaces';
 
-
-export function setIn(state: any, path:string, value: any){
+export function setIn(state: any, path: string, value: any) {
   let currentValue = _.get(state, path);
-  if(value === currentValue){
+  if (value === currentValue) {
     return state;
   }
-  return _.setWith(_.clone(state), path, value, (nsValue: any, key: string, nsObject: any) => {
-    const newObject = _.clone(nsObject);
-    newObject[key] = nsValue;
-    return newObject;
-  });
+  return _.setWith(
+    _.clone(state),
+    path,
+    value,
+    (nsValue: any, key: string, nsObject: any) => {
+      const newObject = _.clone(nsObject);
+      newObject[key] = nsValue;
+      return newObject;
+    }
+  );
 }
 
 export const denormaliseObject = (
@@ -48,11 +52,11 @@ export const denormaliseObject = (
   // this function MUST MUTATE resource
   if (resource.hasOwnProperty('relationships')) {
     Object.keys(resource.relationships).forEach(relationshipName => {
-
       const orginalRelationship = resource.relationships[relationshipName];
 
-      let data: ResourceIdentifier | Array<ResourceIdentifier> = orginalRelationship.data;
-      if(!_.isUndefined(data)){
+      let data: ResourceIdentifier | Array<ResourceIdentifier> =
+        orginalRelationship.data;
+      if (!_.isUndefined(data)) {
         let denormalizedRelation;
         if (data === null) {
           denormalizedRelation = data;
@@ -62,8 +66,13 @@ export const denormaliseObject = (
             <ResourceIdentifier>data,
             storeData
           );
-          denormalizedRelation = denormaliseStoreResource(relatedRS, storeData, bag, denormalizePersisted);
-        } else if((data as Array<ResourceIdentifier>).length == 0) {
+          denormalizedRelation = denormaliseStoreResource(
+            relatedRS,
+            storeData,
+            bag,
+            denormalizePersisted
+          );
+        } else if ((data as Array<ResourceIdentifier>).length == 0) {
           denormalizedRelation = data;
         } else {
           // many relation
@@ -76,7 +85,7 @@ export const denormaliseObject = (
           );
         }
 
-        const relationship = {...orginalRelationship};
+        const relationship = { ...orginalRelationship };
         relationship['reference'] = denormalizedRelation;
         resource.relationships[relationshipName] = relationship;
       }
@@ -93,7 +102,9 @@ export const denormaliseStoreResources = (
 ): Array<StoreResource> => {
   let results: Array<StoreResource> = [];
   for (let item of items) {
-    results.push(denormaliseStoreResource(item, storeData, bag, denormalizePersisted));
+    results.push(
+      denormaliseStoreResource(item, storeData, bag, denormalizePersisted)
+    );
   }
   return results;
 };
@@ -111,13 +122,18 @@ export const denormaliseStoreResource = (
     bag[item.type] = {};
   }
   if (_.isUndefined(bag[item.type][item.id])) {
-    let storeResource: StoreResource = {...item};
-    if(item.relationships){
-      storeResource.relationships = {...item.relationships}
+    let storeResource: StoreResource = { ...item };
+    if (item.relationships) {
+      storeResource.relationships = { ...item.relationships };
     }
 
     bag[storeResource.type][storeResource.id] = storeResource;
-    storeResource = denormaliseObject(storeResource, storeData, bag, denormalizePersisted);
+    storeResource = denormaliseObject(
+      storeResource,
+      storeData,
+      bag,
+      denormalizePersisted
+    );
     if (storeResource.persistedResource && denormalizePersisted) {
       storeResource.persistedResource = denormaliseObject(
         storeResource.persistedResource,
@@ -339,7 +355,7 @@ export const isEqualResource = (
   if (resource0 === resource1) {
     return true;
   }
-  if (resource0 !== null !== (resource1 !== null)) {
+  if ((resource0 !== null) !== (resource1 !== null)) {
     return false;
   }
 
@@ -613,7 +629,6 @@ export const updateStoreDataFromResource = (
   }
 };
 
-
 export const updateStoreDataFromPayload = (
   storeData: NgrxJsonApiStoreData,
   payload: Document
@@ -624,13 +639,15 @@ export const updateStoreDataFromPayload = (
     return storeData;
   }
 
-  let resources: Array<Resource> = _.isArray(data) ? <Resource[]>data : <Resource[]>[data];
+  let resources: Array<Resource> = _.isArray(data)
+    ? <Resource[]>data
+    : <Resource[]>[data];
   let included = <Array<Resource>>_.get(payload, 'included');
   if (!_.isUndefined(included)) {
     resources = [...resources, ...included];
   }
 
-  let newStoreData: NgrxJsonApiStoreData = {...storeData};
+  let newStoreData: NgrxJsonApiStoreData = { ...storeData };
 
   let hasChange = false;
   for (const resource of resources) {
@@ -645,10 +662,9 @@ export const updateStoreDataFromPayload = (
     if (!_.isEqual(storeResource, resource)) {
       hasChange = true;
       if (!newStoreData[resource.type]) {
-        newStoreData[resource.type] = {}
-      }
-      else if (newStoreData[resource.type] === storeData[resource.type]) {
-        newStoreData[resource.type] = {...storeData[resource.type]};
+        newStoreData[resource.type] = {};
+      } else if (newStoreData[resource.type] === storeData[resource.type]) {
+        newStoreData[resource.type] = { ...storeData[resource.type] };
       }
       newStoreData[resource.type][resource.id] = storeResource;
     }
@@ -706,7 +722,7 @@ export const updateQueryResults = (
       loading: false,
     };
 
-    if(!_.isEqual(newQueryStore, storeQuery)){
+    if (!_.isEqual(newQueryStore, storeQuery)) {
       let newState: NgrxJsonApiStoreQueries = { ...storeQueries };
       newState[queryId] = <StoreQuery>newQueryStore;
       return newState;
@@ -822,7 +838,7 @@ export const getResourceFieldValueFromPath = (
           return null;
         } else {
           let relatedPath = [resourceRelation.type, relation.data.id];
-          currentStoreResource = <StoreResource>_.get(storeData, relatedPath);
+          currentStoreResource = _.get<any, any>(storeData, relatedPath);
         }
       }
     } else {

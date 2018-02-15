@@ -1,52 +1,52 @@
 {
-    "compilerOptions": {
-        "target": "ES5",
-        "module": "es2015",
-        "sourceMap": true,
-        "outDir": "./dist",
-        "paths": { },
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "removeComments": false,
-        "moduleResolution": "node",
-        "noEmitOnError": false,
-        "declaration": true,
-        "strictNullChecks": false,
-        "inlineSources": true,
-        "baseUrl": ".",
-        "skipLibCheck": true,
-        "types": [
-            "deep-freeze",
-            "jasmine",
-            "lodash",
-            "node",
-            "source-map",
-            "uglify-js",
-            "webpack"
-        ],
-        "lib": [
-            "dom", "es2015"
-        ],
-        "baseUrl": ".",
-        "stripInternal": true,
-        "rootDir": ".",
-        "strict": true
-    },
-    "compileOnSave": false,
-    "atom": {
-        "rewriteTsconfig": false
-    },
-    "files": [
-        "index.ts"
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "es2015",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "paths": { },
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "noEmitOnError": false,
+    "declaration": true,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "inlineSources": true,
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "types": [
+      "deep-freeze",
+      "jasmine",
+      "lodash",
+      "node",
+      "uglify-js",
+      "webpack"
     ],
-    "exclude": [
-        "node_modules"
+    "lib": [
+      "dom", "es2015"
     ],
-    "angularCompilerOptions": {
-        "strictMetadataEmit": true,
-        "skipTemplateCodegen": true,
-        "annotateForClosureCompiler": true,
-        "flatModuleOutFile": "ngrx-json-api.js",
-        "flatModuleId": "ngrx-json-api"
-    }
+    "baseUrl": ".",
+    "stripInternal": true,
+    "rootDir": ".",
+    "strict": true
+  },
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  },
+  "files": [
+    "index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "angularCompilerOptions": {
+    "strictMetadataEmit": true,
+    "skipTemplateCodegen": true,
+    "annotateForClosureCompiler": true,
+    "flatModuleOutFile": "ngrx-json-api.js",
+    "flatModuleId": "ngrx-json-api"
+  }
 }

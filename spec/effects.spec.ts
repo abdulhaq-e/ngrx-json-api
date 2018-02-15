@@ -101,7 +101,8 @@ describe('NgrxJsonApiEffects', () => {
       status: 400,
     });
     let completed = new ApiPostFailAction(
-      effects.toErrorPayload(payload.query, error), 'api'
+      effects.toErrorPayload(payload.query, error),
+      'api'
     );
     actions = hot('-a', { a: postinitAction });
     let response = cold('-#', {}, error);
@@ -134,7 +135,8 @@ describe('NgrxJsonApiEffects', () => {
       status: 400,
     });
     let completed = new ApiPatchFailAction(
-      effects.toErrorPayload(payload.query, error), 'api'
+      effects.toErrorPayload(payload.query, error),
+      'api'
     );
     actions = hot('-a', { a: patchinitAction });
     let response = cold('--#', {}, error);
@@ -146,10 +148,13 @@ describe('NgrxJsonApiEffects', () => {
   it('should respond to successfull READ_INIT action', () => {
     let query = { type: 'Person', id: '1' };
     let getinitAction = new ApiGetInitAction(query, 'api');
-    let completed = new ApiGetSuccessAction({
-      jsonApiData: { data: query },
-      query: query,
-    }, 'api');
+    let completed = new ApiGetSuccessAction(
+      {
+        jsonApiData: { data: query },
+        query: query,
+      },
+      'api'
+    );
     actions = hot('-a', { a: getinitAction });
     let response = cold('--a|', {
       a: new HttpResponse({ body: { data: query } }),
@@ -167,7 +172,10 @@ describe('NgrxJsonApiEffects', () => {
       body: query,
       status: 400,
     });
-    let completed = new ApiGetFailAction(effects.toErrorPayload(query, error), 'api');
+    let completed = new ApiGetFailAction(
+      effects.toErrorPayload(query, error),
+      'api'
+    );
     actions = hot('-a', { a: getinitAction });
     let response = cold('--#', {}, error);
     let expected = cold('---b', { b: completed });
@@ -178,10 +186,13 @@ describe('NgrxJsonApiEffects', () => {
   it('should respond to successful DELETE_INIT action', () => {
     let deleteinitAction = new ApiDeleteInitAction(resource, 'api');
     let payload = generatePayload(resource, 'DELETE');
-    let completed = new ApiDeleteSuccessAction({
-      jsonApiData: payload.query,
-      query: payload.query,
-    }, 'api');
+    let completed = new ApiDeleteSuccessAction(
+      {
+        jsonApiData: payload.query,
+        query: payload.query,
+      },
+      'api'
+    );
     actions = hot('-a', { a: deleteinitAction });
     let response = cold('--a|', {
       a: new HttpResponse({
@@ -202,7 +213,8 @@ describe('NgrxJsonApiEffects', () => {
       status: 400,
     });
     let completed = new ApiDeleteFailAction(
-      effects.toErrorPayload(payload.query, error), 'api'
+      effects.toErrorPayload(payload.query, error),
+      'api'
     );
     actions = hot('-a', { a: deletefailAction });
     let response = cold('--#', {}, error);
@@ -218,10 +230,13 @@ describe('NgrxJsonApiEffects', () => {
       queryId: 'someId',
     };
     let localqueryinitAction = new LocalQueryInitAction(query, 'api');
-    let completed = new LocalQuerySuccessAction({
-      jsonApiData: { data: query },
-      query: query,
-    }, 'api');
+    let completed = new LocalQuerySuccessAction(
+      {
+        jsonApiData: { data: query },
+        query: query,
+      },
+      'api'
+    );
     actions = hot('-a', { a: localqueryinitAction });
     let response = cold('--a', { a: query });
     let expected = cold('---b', { b: completed });
@@ -251,19 +266,28 @@ describe('NgrxJsonApiEffects', () => {
     };
     let localqueryinitAction1 = new LocalQueryInitAction(query1, 'api');
     let localqueryinitAction2 = new LocalQueryInitAction(query2, 'api');
-    let completed1 = new LocalQuerySuccessAction({
-      jsonApiData: { data: resource1 },
-      query: query1,
-    }, 'api');
+    let completed1 = new LocalQuerySuccessAction(
+      {
+        jsonApiData: { data: resource1 },
+        query: query1,
+      },
+      'api'
+    );
     // note that mock setup is not perfect, second query will get resource1 and resource2
-    let completed2 = new LocalQuerySuccessAction({
-      jsonApiData: { data: resource1 },
-      query: query2,
-    }, 'api');
-    let completed3 = new LocalQuerySuccessAction({
-      jsonApiData: { data: resource2 },
-      query: query2,
-    }, 'api');
+    let completed2 = new LocalQuerySuccessAction(
+      {
+        jsonApiData: { data: resource1 },
+        query: query2,
+      },
+      'api'
+    );
+    let completed3 = new LocalQuerySuccessAction(
+      {
+        jsonApiData: { data: resource2 },
+        query: query2,
+      },
+      'api'
+    );
     actions = hot('-a--b', {
       a: localqueryinitAction1,
       b: localqueryinitAction2,
@@ -295,10 +319,13 @@ describe('NgrxJsonApiEffects', () => {
     };
     let localqueryinitAction = new LocalQueryInitAction(query, 'api');
     let removeQueryAction = new RemoveQueryAction(query.queryId, 'api');
-    let completed = new LocalQuerySuccessAction({
-      jsonApiData: { data: resource1 },
-      query: query,
-    }, 'api');
+    let completed = new LocalQuerySuccessAction(
+      {
+        jsonApiData: { data: resource1 },
+        query: query,
+      },
+      'api'
+    );
     actions = hot('-a--b', { a: localqueryinitAction, b: removeQueryAction });
     let response = cold('--a----b', { a: resource1, b: resource2 });
     let expected = cold('---a', { a: completed });

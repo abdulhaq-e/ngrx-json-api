@@ -100,7 +100,7 @@ export class NgrxJsonApi {
     return `${this.config.apiUrl}/${resourcePath}`;
   }
 
-  public find(query: Query) {
+  public find(query: Query): Observable<any> {
     let _generateIncludedQueryParams = generateIncludedQueryParams;
     let _generateFilteringQueryParams = generateFilteringQueryParams;
     let _generateFieldsQueryParams = generateFieldsQueryParams;
@@ -176,7 +176,7 @@ export class NgrxJsonApi {
     return this.request(requestOptions);
   }
 
-  public create(query: Query, document: Document) {
+  public create(query: Query, document: Document): Observable<any> {
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }
@@ -194,7 +194,7 @@ export class NgrxJsonApi {
     return this.request(requestOptions);
   }
 
-  public update(query: Query, document: Document) {
+  public update(query: Query, document: Document): Observable<any> {
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }
@@ -211,7 +211,7 @@ export class NgrxJsonApi {
     return this.request(requestOptions);
   }
 
-  public delete(query: Query) {
+  public delete(query: Query): Observable<any> {
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
     }

@@ -57,11 +57,10 @@ export interface ApiApplyInitPayload {
 
 export interface ApiApplyRollbackPayload extends ApiApplyInitPayload {}
 
-export abstract class NgrxJsonApiAction implements Action{
+export abstract class NgrxJsonApiAction implements Action {
   abstract zoneId?: string;
   abstract type: string;
-  constructor(){
-  }
+  constructor() {}
 }
 
 export class ApiApplyInitAction extends NgrxJsonApiAction {
@@ -73,127 +72,177 @@ export class ApiApplyInitAction extends NgrxJsonApiAction {
 
 export class ApiApplySuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_APPLY_SUCCESS;
-  constructor(public payload: Array<Action>, public zoneId: string) {super();}
+  constructor(public payload: Array<Action>, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiApplyFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_APPLY_FAIL;
-  constructor(public payload: Array<Action>, public zoneId: string) {super();}
+  constructor(public payload: Array<Action>, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPostInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_INIT;
-  constructor(public payload: Resource, public zoneId: string) {super();}
+  constructor(public payload: Resource, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPostSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPostFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiDeleteInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_INIT;
-  constructor(public payload: ResourceIdentifier, public zoneId: string) {super();}
+  constructor(public payload: ResourceIdentifier, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiDeleteSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiDeleteFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiGetInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_GET_INIT;
-  constructor(public payload: Query, public zoneId: string) {super();}
+  constructor(public payload: Query, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiGetSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_GET_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiGetFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_GET_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiRollbackAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_ROLLBACK;
-  constructor(public payload: ApiApplyRollbackPayload, public zoneId: string) {super();}
+  constructor(public payload: ApiApplyRollbackPayload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPatchInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_INIT;
-  constructor(public payload: Resource, public zoneId: string) {super();}
+  constructor(public payload: Resource, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPatchSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiPatchFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class DeleteStoreResourceAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.DELETE_STORE_RESOURCE;
-  constructor(public payload: ResourceIdentifier, public zoneId: string) {super();}
+  constructor(public payload: ResourceIdentifier, public zoneId: string) {
+    super();
+  }
 }
 
 export class PatchStoreResourceAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.PATCH_STORE_RESOURCE;
-  constructor(public payload: Resource, public zoneId: string) {super();}
+  constructor(public payload: Resource, public zoneId: string) {
+    super();
+  }
 }
 
 export class NewStoreResourceAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.NEW_STORE_RESOURCE;
-  constructor(public payload: Resource, public zoneId: string) {super();}
+  constructor(public payload: Resource, public zoneId: string) {
+    super();
+  }
 }
 
 export class PostStoreResourceAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.POST_STORE_RESOURCE;
-  constructor(public payload: Resource, public zoneId: string) {super();}
+  constructor(public payload: Resource, public zoneId: string) {
+    super();
+  }
 }
 
 export class RemoveQueryAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.REMOVE_QUERY;
-  constructor(public payload: string, public zoneId: string) {super();}
+  constructor(public payload: string, public zoneId: string) {
+    super();
+  }
 }
 
 export class LocalQueryInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_INIT;
-  constructor(public payload: Query, public zoneId: string) {super();}
+  constructor(public payload: Query, public zoneId: string) {
+    super();
+  }
 }
 
 export class LocalQuerySuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class LocalQueryFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.LOCAL_QUERY_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {super();}
+  constructor(public payload: Payload, public zoneId: string) {
+    super();
+  }
 }
 
 export class CompactStoreAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.COMPACT_STORE;
-  constructor(public zoneId: string) {super();}
+  constructor(public zoneId: string) {
+    super();
+  }
 }
 
 export class ClearStoreAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.CLEAR_STORE;
-  constructor(public zoneId: string) {super();}
+  constructor(public zoneId: string) {
+    super();
+  }
 }
 
 export class ApiQueryRefreshAction extends NgrxJsonApiAction {
@@ -208,7 +257,12 @@ export class ApiQueryRefreshAction extends NgrxJsonApiAction {
 
 export class ModifyStoreResourceErrorsAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.MODIFY_STORE_RESOURCE_ERRORS;
-  constructor(public payload: ModifyStoreResourceErrorsPayload, public zoneId: string) {super();}
+  constructor(
+    public payload: ModifyStoreResourceErrorsPayload,
+    public zoneId: string
+  ) {
+    super();
+  }
 }
 
 export type NgrxJsonApiActions =

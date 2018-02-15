@@ -1,10 +1,13 @@
 
 export default {
-  entry: './dist/FESM/ngrx-json-api.es5.js',
-  dest: './dist/bundles/ngrx-json-api.umd.js',
-  format: 'umd',
+  input: 'dist/FESM/ngrx-json-api.es5.js',
+  output: {
+    format: 'umd',
+    file: 'dist/bundles/ngrx-json-api.umd.js',
+    sourcemap: true
+  },
   exports: 'named',
-  moduleName: 'ngrx.json.api',
+  name: 'ngrx.json.api',
   globals: {
     '@angular/core': 'ng.core',
     'rxjs/Observable': 'Rx',

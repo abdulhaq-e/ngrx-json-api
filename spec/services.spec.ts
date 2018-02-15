@@ -1,15 +1,15 @@
-import {inject, TestBed} from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
 import * as _ from 'lodash';
 
-import {Observable} from 'rxjs/Observable';
-import {NgrxJsonApiService} from '../src/services';
+import { Observable } from 'rxjs/Observable';
+import { NgrxJsonApiService } from '../src/services';
 
-import {denormaliseStoreResource,} from '../src/utils';
+import { denormaliseStoreResource } from '../src/utils';
 
-import {StoreResource} from '../src/interfaces';
-import {TestingModule} from './testing.module';
-import {resourceDefinitions} from './test_utils';
+import { StoreResource } from '../src/interfaces';
+import { TestingModule } from './testing.module';
+import { resourceDefinitions } from './test_utils';
 
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
@@ -84,14 +84,16 @@ describe('NgrxJsonApiService', () => {
 
   describe('selectStoreResource', () => {
     it('should return resource', () => {
-      let storeResource = service.selectStoreResource({ type: 'Article', id: '1' });
+      let storeResource = service.selectStoreResource({
+        type: 'Article',
+        id: '1',
+      });
       storeResource.subscribe(it => {
         expect(it.type).toEqual('Article');
         expect(it.id).toEqual('1');
       });
     });
   });
-
 
   describe('findMany', () => {
     it('find multiple StoreResources from the state', () => {
@@ -108,7 +110,7 @@ describe('NgrxJsonApiService', () => {
       });
     });
 
-   it('remove the query from the state after unsubscribing', () => {
+    it('remove the query from the state after unsubscribing', () => {
       let query = {
         type: 'Article',
         queryId: '22',

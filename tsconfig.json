@@ -1,44 +1,45 @@
 {
-    "compilerOptions": {
-        "target": "ES5",
-        "module": "commonjs",
-        "sourceMap": true,
-        "outDir": "dist",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "removeComments": false,
-        "moduleResolution": "node",
-        "declaration": true,
-        "strictNullChecks": false,
-        "baseUrl": "./src",
-        "types": [
-            "deep-freeze",
-            "jasmine",
-            "lodash",
-            "node",
-            "source-map",
-            "uglify-js",
-            "webpack"
-        ],
-        "lib": [
-            "dom", "es6", "ES2015"
-        ]
-    },
-    "compileOnSave": false,
-    "atom": {
-        "rewriteTsconfig": false
-    },
-    "exclude": [
-      "node_modules"
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "dist",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "declaration": true,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "baseUrl": "./src",
+    "types": [
+      "deep-freeze",
+      "jasmine",
+      "lodash",
+      "node",
+      "source-map",
+      "uglify-js",
+      "webpack"
     ],
-    "filesGlob": [
-      "./spec/**/*.ts",
-      "./src/**/*.ts"
-    ],
-    "files": [
-        "./index.ts"
-    ],
-    "angularCompilerOptions": {
-        "strictMetadataEmit": true
-    }
+    "lib": [
+      "dom", "es6", "ES2015"
+    ]
+  },
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "filesGlob": [
+    "./spec/**/*.ts",
+    "./src/**/*.ts"
+  ],
+  "files": [
+    "./index.ts"
+  ],
+  "angularCompilerOptions": {
+    "strictMetadataEmit": true
+  }
 }

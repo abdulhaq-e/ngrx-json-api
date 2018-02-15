@@ -1,14 +1,16 @@
 import * as _ from 'lodash';
 
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/finally';
 
-import {Store} from '@ngrx/store';
+import { Store } from '@ngrx/store';
 
 import {
-  selectManyQueryResult, selectNgrxJsonApiDefaultZone, selectNgrxJsonApiZone,
+  selectManyQueryResult,
+  selectNgrxJsonApiDefaultZone,
+  selectNgrxJsonApiZone,
   selectOneQueryResult,
-  selectStoreResource
+  selectStoreResource,
 } from './selectors';
 import {
   ApiApplyInitAction,
@@ -28,7 +30,9 @@ import {
   RemoveQueryAction,
 } from './actions';
 import {
-  ManyQueryResult, NGRX_JSON_API_DEFAULT_ZONE, NgrxJsonApiConfig,
+  ManyQueryResult,
+  NGRX_JSON_API_DEFAULT_ZONE,
+  NgrxJsonApiConfig,
   NgrxJsonApiStore,
   NgrxJsonApiStoreData,
   OneQueryResult,
@@ -94,9 +98,7 @@ export interface Options {
  * 'api' is the default zone that already historically has been put beneath NgrxJsonApi within the store.
  */
 export class NgrxJsonApiZoneService {
-
-  constructor(protected zoneId: string, protected store: Store<any>) {
-  }
+  constructor(protected zoneId: string, protected store: Store<any>) {}
 
   /**
    * Adds the given query to the store. Any existing query with the same queryId is replaced.
@@ -136,8 +138,13 @@ export class NgrxJsonApiZoneService {
    * @param queryId
    * @returns observable holding the data as array of resources.
    */
-  public selectManyResults(queryId: string, denormalize = false): Observable<ManyQueryResult> {
-    return this.store.let(selectNgrxJsonApiZone(this.zoneId)).let(selectManyQueryResult(queryId, denormalize));
+  public selectManyResults(
+    queryId: string,
+    denormalize = false
+  ): Observable<ManyQueryResult> {
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectManyQueryResult(queryId, denormalize));
   }
 
   /**
@@ -146,18 +153,26 @@ export class NgrxJsonApiZoneService {
    * @param queryId
    * @returns observable holding the data as array of resources.
    */
-  public selectOneResults(queryId: string, denormalize = false): Observable<OneQueryResult> {
-    return this.store.let(selectNgrxJsonApiZone(this.zoneId)).let(selectOneQueryResult(queryId, denormalize));
+  public selectOneResults(
+    queryId: string,
+    denormalize = false
+  ): Observable<OneQueryResult> {
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectOneQueryResult(queryId, denormalize));
   }
 
   /**
    * @param identifier of the resource
    * @returns observable of the resource
    */
-  public selectStoreResource(identifier: ResourceIdentifier): Observable<StoreResource> {
-    return this.store.let(selectNgrxJsonApiZone(this.zoneId)).let(selectStoreResource(identifier));
+  public selectStoreResource(
+    identifier: ResourceIdentifier
+  ): Observable<StoreResource> {
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectStoreResource(identifier));
   }
-
 
   /**
    * Updates the given resource in the store with the provided data.
@@ -217,7 +232,9 @@ export class NgrxJsonApiZoneService {
     if (toRemote) {
       this.store.dispatch(new ApiDeleteInitAction(resourceId, this.zoneId));
     } else {
-      this.store.dispatch(new DeleteStoreResourceAction(resourceId, this.zoneId));
+      this.store.dispatch(
+        new DeleteStoreResourceAction(resourceId, this.zoneId)
+      );
     }
   }
 
@@ -247,14 +264,19 @@ export class NgrxJsonApiZoneService {
    * @param id
    * @param errors
    */
-  public addResourceErrors(id: ResourceIdentifier,
-                           errors: Array<ResourceError>) {
+  public addResourceErrors(
+    id: ResourceIdentifier,
+    errors: Array<ResourceError>
+  ) {
     this.store.dispatch(
-      new ModifyStoreResourceErrorsAction({
-        resourceId: id,
-        errors: errors,
-        modificationType: 'ADD',
-      }, this.zoneId)
+      new ModifyStoreResourceErrorsAction(
+        {
+          resourceId: id,
+          errors: errors,
+          modificationType: 'ADD',
+        },
+        this.zoneId
+      )
     );
   }
 
@@ -263,14 +285,19 @@ export class NgrxJsonApiZoneService {
    * @param id
    * @param errors
    */
-  public removeResourceErrors(id: ResourceIdentifier,
-                              errors: Array<ResourceError>) {
+  public removeResourceErrors(
+    id: ResourceIdentifier,
+    errors: Array<ResourceError>
+  ) {
     this.store.dispatch(
-      new ModifyStoreResourceErrorsAction({
-        resourceId: id,
-        errors: errors,
-        modificationType: 'REMOVE',
-      }, this.zoneId)
+      new ModifyStoreResourceErrorsAction(
+        {
+          resourceId: id,
+          errors: errors,
+          modificationType: 'REMOVE',
+        },
+        this.zoneId
+      )
     );
   }
 
@@ -279,19 +306,22 @@ export class NgrxJsonApiZoneService {
    * @param id
    * @param errors
    */
-  public setResourceErrors(id: ResourceIdentifier,
-                           errors: Array<ResourceError>) {
+  public setResourceErrors(
+    id: ResourceIdentifier,
+    errors: Array<ResourceError>
+  ) {
     this.store.dispatch(
-      new ModifyStoreResourceErrorsAction({
-        resourceId: id,
-        errors: errors,
-        modificationType: 'SET',
-      }, this.zoneId)
+      new ModifyStoreResourceErrorsAction(
+        {
+          resourceId: id,
+          errors: errors,
+          modificationType: 'SET',
+        },
+        this.zoneId
+      )
     );
   }
-
 }
-
 
 export class NgrxJsonApiService extends NgrxJsonApiZoneService {
   private test = true;
@@ -305,11 +335,11 @@ export class NgrxJsonApiService extends NgrxJsonApiZoneService {
     super(NGRX_JSON_API_DEFAULT_ZONE, store);
   }
 
-  public getDefaultZone(): NgrxJsonApiZoneService{
+  public getDefaultZone(): NgrxJsonApiZoneService {
     return this;
   }
 
-  public getZone(zoneId: string): NgrxJsonApiZoneService{
+  public getZone(zoneId: string): NgrxJsonApiZoneService {
     return new NgrxJsonApiZoneService(zoneId, this.store);
   }
 
@@ -334,9 +364,10 @@ export class NgrxJsonApiService extends NgrxJsonApiZoneService {
     return this._storeSnapshot;
   }
 
-
-  private findInternal(options: FindOptions,
-                       multi: boolean): Observable<QueryResult> {
+  private findInternal(
+    options: FindOptions,
+    multi: boolean
+  ): Observable<QueryResult> {
     let query = options.query;
     let fromServer = _.isUndefined(options.fromServer)
       ? true
@@ -347,12 +378,12 @@ export class NgrxJsonApiService extends NgrxJsonApiZoneService {
 
     let newQuery: Query;
     if (!query.queryId) {
-      newQuery = {...query, queryId: this.uuid()};
+      newQuery = { ...query, queryId: this.uuid() };
     } else {
       newQuery = query;
     }
 
-    this.putQuery({query: newQuery, fromServer});
+    this.putQuery({ query: newQuery, fromServer });
     let queryResult$: Observable<QueryResult>;
     if (multi) {
       queryResult$ = this.selectManyResults(newQuery.queryId, denormalise);
@@ -402,16 +433,17 @@ export class NgrxJsonApiService extends NgrxJsonApiZoneService {
     return null;
   }
 
-
-  public denormaliseResource(storeResource$: Observable<StoreResource> | Observable<StoreResource[]>): Observable<StoreResource> | Observable<StoreResource[]> {
-    return <
-      | Observable<StoreResource>
-      | Observable<StoreResource[]>>storeResource$.combineLatest(
+  public denormaliseResource(
+    storeResource$: Observable<StoreResource | StoreResource[]>
+  ): Observable<StoreResource | StoreResource[]> {
+    return storeResource$.combineLatest(
       this.store
         .let(selectNgrxJsonApiZone(this.zoneId))
         .map(state => state.data),
-      (storeResource: StoreResource | StoreResource[],
-       storeData: NgrxJsonApiStoreData) => {
+      (
+        storeResource: StoreResource | StoreResource[],
+        storeData: NgrxJsonApiStoreData
+      ) => {
         if (_.isArray(storeResource)) {
           return denormaliseStoreResources(
             storeResource as Array<StoreResource>,
@@ -450,6 +482,4 @@ export class NgrxJsonApiService extends NgrxJsonApiZoneService {
       pathSeparator
     );
   }
-
-
 }

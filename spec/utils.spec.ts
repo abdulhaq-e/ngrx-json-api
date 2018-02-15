@@ -16,7 +16,8 @@ import {
   insertStoreResource,
   isEqualResource,
   removeQuery,
-  rollbackStoreResources, setIn,
+  rollbackStoreResources,
+  setIn,
   sortPendingChanges,
   toResourceIdentifier,
   updateQueryErrors,
@@ -31,7 +32,10 @@ import {
   updateStoreResource,
 } from '../src/utils';
 //
-import {initialNgrxJsonApiState, initialNgrxJsonApiZone} from '../src/reducers';
+import {
+  initialNgrxJsonApiState,
+  initialNgrxJsonApiZone,
+} from '../src/reducers';
 //
 import {
   NgrxJsonApiStoreData,
@@ -91,23 +95,22 @@ deepFreeze(initialNgrxJsonApiState);
 //     });
 // });
 
-
 describe('setIn', () => {
   it('should do nothing if value not changed', () => {
     let a = {
       x: 1,
-      y: 2
+      y: 2,
     };
-    let result = setIn(a, "x", 1);
+    let result = setIn(a, 'x', 1);
     expect(result === a).toBeTruthy();
   });
 
   it('should change value', () => {
     let a = {
       x: 1,
-      y: 2
+      y: 2,
     };
-    let result = setIn(a, "x", 3);
+    let result = setIn(a, 'x', 3);
     expect(result === a).toBeFalsy();
     expect(result.x).toEqual(3);
     expect(result.y).toEqual(2);
@@ -116,9 +119,9 @@ describe('setIn', () => {
   it('should change value', () => {
     let a = {
       x: 1,
-      y: 2
+      y: 2,
     };
-    let result = setIn(a, "x", 3);
+    let result = setIn(a, 'x', 3);
     expect(result === a).toBeFalsy();
     expect(result.x).toEqual(3);
     expect(result.y).toEqual(2);
@@ -127,19 +130,19 @@ describe('setIn', () => {
   it('should change nested value', () => {
     let a = {
       x: {
-        a: '1'
+        a: '1',
       },
       y: {
-        b: '2'
-      }
+        b: '2',
+      },
     };
-    let result = setIn(a, "x.a", 3);
+    let result = setIn(a, 'x.a', 3);
     expect(result === a).toBeFalsy();
     expect(result.x === a.x).toBeFalsy();
     expect(result.y === a.y).toBeTruthy();
     expect(result.x.a).toEqual(3);
   });
-}
+});
 
 describe('denormalise and denormaliseObject', () => {
   let storeData = updateStoreDataFromPayload(
