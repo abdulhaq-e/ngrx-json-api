@@ -798,7 +798,10 @@ export const getResourceFieldValueFromPath = (
     ) {
       throw new Error('Attributes or Relationships must be provided');
     }
-    if (definition.attributes.hasOwnProperty(fields[i])) {
+
+    if (fields[i] === 'id') {
+      return _.get(currentStoreResource, 'id', null);
+    } else if (definition.attributes.hasOwnProperty(fields[i])) {
       return _.get(currentStoreResource, 'attributes.' + fields[i], null);
     } else if (definition.relationships.hasOwnProperty(fields[i])) {
       if (i === fields.length - 1) {
