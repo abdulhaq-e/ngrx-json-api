@@ -199,9 +199,6 @@ export const testPayload = {
     {
       type: 'Profile',
       id: '1',
-      attributes: {
-        id: 'firstProfile',
-      },
     },
     {
       type: 'Whatever',

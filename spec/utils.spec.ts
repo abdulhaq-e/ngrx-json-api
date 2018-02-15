@@ -1337,7 +1337,7 @@ describe('getResourceFieldValueFromPath', () => {
       storeData,
       resourceDefinitions
     );
-    expect(value).toEqual('firstProfile');
+    expect(value).toEqual('1');
   });
 });
 
