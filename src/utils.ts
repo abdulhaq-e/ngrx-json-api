@@ -63,7 +63,7 @@ export const denormaliseObject = (
             storeData
           );
           denormalizedRelation = denormaliseStoreResource(relatedRS, storeData, bag, denormalizePersisted);
-        } else if(data.length == 0) {
+        } else if((data as Array<ResourceIdentifier>).length == 0) {
           denormalizedRelation = data;
         } else {
           // many relation
