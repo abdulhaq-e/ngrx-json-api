@@ -149,6 +149,8 @@ export interface QueryParams {
   fields?: Array<string>;
   offset?: number;
   limit?: number;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
 export interface Resource extends ResourceIdentifier {
