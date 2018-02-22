@@ -14,7 +14,7 @@
 - [Basic Usage](./docs/basic_usage.md)
 - [Store Structure](./docs/store_structure.md)
 - [Advanced Usage](./docs/advanced_usage.md)
-- [Upgrading from v1.0](#upgrading-from-v1.0)
+- [Upgrading from v1.0](#upgrading-from-v10)
 
 
 ## Getting Started
