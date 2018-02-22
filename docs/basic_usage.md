@@ -37,7 +37,7 @@ let queryResults = this.ngrxService.findMany({query, fromServer: false});
 
 ### Creating/Updating/Deleting resources
 
-The `toRemote` parameter which is set to `true` in all the examples below makes an immediate request to the server. The other approach is explained in [advanced usage](./docs/advanced_usage).
+The `toRemote` parameter which is set to `true` in all the examples below makes an immediate request to the server. The other approach is explained in [advanced usage](./advanced_usage.md).
 
 #### Creating resources
 
