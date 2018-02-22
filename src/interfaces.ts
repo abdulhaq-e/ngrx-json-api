@@ -149,8 +149,7 @@ export interface QueryParams {
   fields?: Array<string>;
   offset?: number;
   limit?: number;
-  pageNumber?: number;
-  pageSize?: number;
+  page?: { [key: string]: string };
 }
 
 export interface Resource extends ResourceIdentifier {

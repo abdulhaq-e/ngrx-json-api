@@ -134,8 +134,7 @@ export class NgrxJsonApi {
     let fieldsParams = '';
     let offsetParams = '';
     let limitParams = '';
-    let pageNumberParams = '';
-    let pageSizeParams = '';
+    let pageParams = '';
 
     if (typeof query === undefined) {
       return Observable.throw('Query not found');
@@ -160,11 +159,12 @@ export class NgrxJsonApi {
       if (_.hasIn(query.params, 'offset')) {
         offsetParams = 'page[offset]=' + query.params.offset;
       }
-      if (_.hasIn(query.params, 'pageNumber')) {
-        pageNumberParams = 'page[number]=' + query.params.pageNumber;
-      }
-      if (_.hasIn(query.params, 'pageSize')) {
-        pageSizeParams = 'page[size]=' + query.params.pageSize;
+      if (_.hasIn(query.params, 'page')) {
+        pageParams = _.keys(query.params.page)
+          .map(key => {
+            return `page[${key}]=${query.params.page[key]}`;
+          })
+          .join('&');
       }
     }
     queryParams = _generateQueryParams(
@@ -174,8 +174,7 @@ export class NgrxJsonApi {
       fieldsParams,
       offsetParams,
       limitParams,
-      pageNumberParams,
-      pageSizeParams
+      pageParams
     );
 
     let requestOptions = {
