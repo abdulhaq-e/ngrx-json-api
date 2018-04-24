@@ -86,9 +86,11 @@ export function NgrxJsonApiZoneReducer(
         false,
         true
       );
+      let query = { queryId: action.queryId };
       newZone = {
         ...zone,
         data: updatedData,
+        queries: updateQueryParams(zone.queries, query),
         isCreating: zone.isCreating + 1,
       };
       return newZone;
@@ -128,6 +130,11 @@ export function NgrxJsonApiZoneReducer(
       newZone = {
         ...zone,
         data: updateStoreDataFromPayload(zone.data, action.payload.jsonApiData),
+        queries: updateQueryResults(
+          zone.queries,
+          action.queryId,
+          action.payload.jsonApiData
+        ),
         isCreating: zone.isCreating - 1,
       };
       return newZone;
@@ -179,6 +186,11 @@ export function NgrxJsonApiZoneReducer(
         data: updateResourceErrorsForQuery(
           zone.data,
           action.payload.query,
+          action.payload.jsonApiData
+        ),
+        queries: updateQueryErrors(
+          zone.queries,
+          action.queryId,
           action.payload.jsonApiData
         ),
         isCreating: zone.isCreating - 1,

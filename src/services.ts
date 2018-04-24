@@ -222,15 +222,21 @@ export class NgrxJsonApiZoneService {
    *
    * @param resource
    */
-  public postResource(options: PostResourceOptions) {
+  public postResource(options: PostResourceOptions): Observable<QueryResult> {
     let resource = options.resource;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
+    const queryId = uuid();
     if (toRemote) {
-      this.store.dispatch(new ApiPostInitAction(resource, this.zoneId));
+      this.store.dispatch(
+        new ApiPostInitAction(resource, queryId, this.zoneId)
+      );
     } else {
       this.store.dispatch(new PostStoreResourceAction(resource, this.zoneId));
     }
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectOneQueryResult(queryId));
   }
 
   /**

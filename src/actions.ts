@@ -86,21 +86,33 @@ export class ApiApplyFailAction extends NgrxJsonApiAction {
 
 export class ApiPostInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_INIT;
-  constructor(public payload: Resource, public zoneId: string) {
+  constructor(
+    public payload: Resource,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiPostSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiPostFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_POST_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
