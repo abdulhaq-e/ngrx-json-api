@@ -2,7 +2,24 @@
 
 It is advisable to read this guide while having [interfaces.ts](../src/interfaces.ts) opened.
 
-`NgrxJsonApiStore` consists of a number of properties, the main two are `data` and `queries`.
+The store is structured into zones to allow running multiple isolated instances of ngrx-json-api:
+
+```
+{
+  NgrxJsonApi: {
+    zones: {
+      'default': {
+         ...
+      }
+    }
+  }
+}
+```
+
+By default services and actions make use of the `default` zone. But applications are free to introduce additional zones,
+for example, to isolated modifications while still being worked on.
+
+`NgrxJsonApiZone` then consists of a number of properties, the main two are `data` and `queries`.
 
 ```js
 let store = {
