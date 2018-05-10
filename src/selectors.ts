@@ -90,6 +90,21 @@ export function selectStoreResource(identifier: ResourceIdentifier) {
   };
 }
 
+export function selectStoreResources(identifiers: ResourceIdentifier[]) {
+  return (state$: Observable<NgrxJsonApiStore>) => {
+    return state$.pipe(
+      map(state => state.data),
+      map(data => {
+        return identifiers.map(identifier => {
+          if (!data || !data[identifier.type]) {
+            return undefined;
+          }
+          return data[identifier.type][identifier.id] as StoreResource;
+        });
+      }));
+  };
+}
+
 export function selectManyQueryResult(
   queryId: string,
   denormalize?: boolean

@@ -1,6 +1,7 @@
 export * from './interfaces';
 export {
   SelectStoreResourcePipe,
+  SelectStoreResourcesPipe,
   DenormaliseStoreResourcePipe,
   GetDenormalisedValuePipe,
 } from './pipes';

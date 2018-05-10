@@ -95,6 +95,27 @@ describe('NgrxJsonApiService', () => {
     });
   });
 
+  describe('selectStoreResources', () => {
+    it('should return resources', () => {
+      let storeResources = service.selectStoreResources([
+        {
+          type: 'Article',
+          id: '1',
+        },
+        {
+          type: 'Article',
+          id: '2',
+        }
+      ]);
+      storeResources.subscribe(it => {
+        expect(it[0].type).toEqual('Article');
+        expect(it[0].id).toEqual('1');
+        expect(it[1].type).toEqual('Article');
+        expect(it[1].id).toEqual('2');
+      });
+    });
+  });
+
   describe('findMany', () => {
     it('find multiple StoreResources from the state', () => {
       let query = {

@@ -15,6 +15,15 @@ export class SelectStoreResourcePipe implements PipeTransform {
   }
 }
 
+@Pipe({ name: 'jaSelectStoreResources' })
+export class SelectStoreResourcesPipe implements PipeTransform {
+  constructor(private service: NgrxJsonApiService) {}
+
+  transform(ids: ResourceIdentifier[]): Observable<StoreResource[]> {
+    return this.service.selectStoreResources(ids);
+  }
+}
+
 @Pipe({ name: 'denormaliseStoreResource' })
 export class DenormaliseStoreResourcePipe implements PipeTransform {
   constructor(private service: NgrxJsonApiService) {}

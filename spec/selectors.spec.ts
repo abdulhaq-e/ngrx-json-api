@@ -10,6 +10,7 @@ import {
   selectOneQueryResult,
   selectStoreQuery,
   selectStoreResource,
+  selectStoreResources,
   selectStoreResourcesOfType,
 } from '../src/selectors';
 import { NgrxJsonApiZone } from '../src/interfaces';
@@ -205,6 +206,39 @@ describe('NgrxJsonApiSelectors', () => {
             .subscribe(d => (res = d));
           tick();
           expect(res).not.toBeDefined();
+        })
+      );
+    });
+
+    describe('selectStoreResources', () => {
+      it(
+        'should get resources given types and ids',
+        fakeAsync(() => {
+          let res;
+          let sub = store
+            .let(selectStoreResources([{ type: 'Article', id: '1' }, { type: 'Article', id: '2'}]))
+            .subscribe(d => (res = d));
+          tick();
+          expect(res[0].attributes.title).toEqual('Article 1');
+          expect(res[0].type).toEqual('Article');
+          expect(res[0].id).toEqual('1');
+          expect(res[1].attributes.title).toEqual('Article 2');
+          expect(res[1].type).toEqual('Article');
+          expect(res[1].id).toEqual('2');
+        })
+      );
+
+      it(
+        'should return undefined if the resources are not found',
+        fakeAsync(() => {
+          let res;
+          let sub = store
+            .let(selectStoreResources([{ type: 'Article', id: '100' }, { type: 'Article', id: '1'}, {type: 'Unknown', id: '1'}]))
+            .subscribe(d => (res = d));
+          tick();
+          expect(res[0]).not.toBeDefined();
+          expect(res[1]).toBeDefined();
+          expect(res[2]).not.toBeDefined();
         })
       );
     });

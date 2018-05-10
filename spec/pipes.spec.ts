@@ -5,6 +5,7 @@ import {
   DenormaliseStoreResourcePipe,
   GetDenormalisedValuePipe,
   SelectStoreResourcePipe,
+  SelectStoreResourcesPipe,
 } from '../src/pipes';
 
 import { denormaliseStoreResource } from '../src/utils';
@@ -21,6 +22,7 @@ describe('Pipes', () => {
         DenormaliseStoreResourcePipe,
         GetDenormalisedValuePipe,
         SelectStoreResourcePipe,
+        SelectStoreResourcesPipe,
       ],
     });
   });
@@ -69,6 +71,22 @@ describe('Pipes', () => {
         pipe = p;
       })
     );
+  });
+
+  describe('SelectStoreResourcesPipe', () => {
+    beforeEach(
+      inject([SelectStoreResourcesPipe], p => {
+        pipe = p;
+      })
+    );
+
+    it('should return Observable of StoreResource', () => {
+      const ids = [{id: '2', type: 'Article'}, {id: '1', type: 'Article'}]
+      pipe.transform(ids).subscribe(it => {
+        expect(_.get(it[0], 'attributes.title')).toBe('Article 2');
+        expect(_.get(it[1], 'attributes.title')).toBe('Article 1');
+      });
+    });
   });
 
   describe('DenormaliseStoreResourcePipe', () => {
