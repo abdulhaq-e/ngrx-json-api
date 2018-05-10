@@ -2,7 +2,7 @@
 
 It is advisable to read this guide while having [interfaces.ts](../src/interfaces.ts) opened.
 
-The store is structured into zones to allow running multiple isolated instances of ngrx-json-api:
+ngrx-json-api structures its store into zones, each representing an isolated instance of ngrx-json-api:
 
 ```
 {
@@ -16,8 +16,8 @@ The store is structured into zones to allow running multiple isolated instances 
 }
 ```
 
-By default services and actions make use of the `default` zone. But applications are free to introduce additional zones,
-for example, to isolated modifications while still being worked on.
+By default services and actions make use of the `default` zone. But applications are free to introduce additional zones;
+for example to isolate modifications to a resource while still being worked on from an editor screen.
 
 `NgrxJsonApiZone` then consists of a number of properties, the main two are `data` and `queries`.
 
