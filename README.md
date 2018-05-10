@@ -126,7 +126,7 @@ export class MyComponent {
 }
 ```
 
-The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. More details about the response type and other methods for the service are provided in the docs.
+The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. 
 
 ## Data Structures
 
