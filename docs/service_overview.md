@@ -30,4 +30,4 @@ There is one service available: `NgrxJsonApiService`. It holds methods for:
 - `addResourceErrors`, `removeResourceErrors()` and `setResourceErrors()` to modify the `errors` of a `StoreResource`
 
 
-More information are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/services.ts.
+More information are available in [services.ts](../src/services.ts).
