@@ -101,7 +101,8 @@ export function selectStoreResources(identifiers: ResourceIdentifier[]) {
           }
           return data[identifier.type][identifier.id] as StoreResource;
         });
-      }));
+      })
+    );
   };
 }
 
