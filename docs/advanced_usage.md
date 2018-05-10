@@ -202,8 +202,41 @@ When `GET` are executed, the store gets filled up with fetched resources. The `c
 methods allow to either  entirely clear the store resp. remove all resources not referenced directly
 or indirectly (relationships) by a query.
 
-### Filtering and Sorting
+### Paging, Filtering, Sorting, Inclusion, Field Sets
 
+`QueryParams` object hold by a query allows to specify various `GET` parameters:
 
+```ts
+let zone = this.ngrxJsonApiService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
+
+const query: Query = {
+  queryId: 'myQuery',
+  type: 'projects',
+  // id: '12' => add to query single item
+  params: {
+    fields: ['name'],
+    include: ['tasks'],
+    page: {
+      offset: 20,
+      limit: 10
+    },
+    sorting: {
+      { api: 'name', direction: Direction.ASC }
+    },
+    filtering: {
+      { path: 'name', operator: 'EQ', value: 'John' }
+    }
+  }    
+};
+zone.putQuery({
+  query: query,
+  fromServer: true // you may also query locally from contents in the store, e.g. new resource
+});
+
+const queryResult = this.selectManyResults(newQuery.queryId);
+...
+```ts
 
 ### Pipes
+
+TODO
