@@ -10,11 +10,10 @@
 
 ## Documentation
 
-- [Sotre Structure](./docs/store_structure.md)
+- [Store Structure](./docs/store_structure.md)
 - [Service Overview](./docs/service_overview.md)
 - [Actions](./docs/actions.md)
 - [Basic Usage](./docs/basic_usage.md)
-- [Store Structure](./docs/store_structure.md)
 - [Advanced Usage](./docs/advanced_usage.md)
 
 ## Getting Started
