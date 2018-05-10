@@ -19,7 +19,7 @@ The following actions are used in NgrxJsonApi:
 | API_DELETE_INIT               | Issues a `DELETE` request for a resource.                                                                                              |
 | API_DELETE_SUCCESS            | Upon success completion of a `DELETE` request.                                                                                         |
 | API_DELETE_FAIL               | Upon a failure of a `DELETE` request.                                                                                                  |
-| API_APPLY_INIT                | Initiates the appropriate API_X_INIT action for all pending local modifications.                                                       |
+| API_APPLY_INIT                | Initiates the appropriate API_X_INIT action for all pending local modifications except resources in state `NEW`.                                                       |
 | API_APPLY_SUCCESS             | Upon success completion of all requested modifications.                                                                                |
 | API_APPLY_FAIL                | Upon failure a at least one requested modification.                                                                                    |
 | API_ROLLBACK:                 | Reverts all local changes to resources in the store.                                                                                   |
@@ -29,8 +29,11 @@ The following actions are used in NgrxJsonApi:
 | LOCAL_QUERY_FAIL              | Triggered when a local query failed.                                                                                                   |
 | DELETE_STORE_RESOURCE         | Marks a resource in the store for deletion. Does not trigger an update to the server.                                                  |
 | PATCH_STORE_RESOURCE          | Patches a resource in the store by merging the provided values with the ones from the store. Does not trigger an update to the server. |
-| POST_STORE_RESOURCE           | Adds a new resource to the store. Does not trigger an update to the server.                                                            |
+| POST_STORE_RESOURCE           | Adds a new resource to the store. Does not trigger an update to the server. The resource then carries the state `CREATED`.           |
+| NEW_STORE_RESOURCE            | Adds a new resource to the store that is not yet considered being ready to be posted to the server. The resource then carries the state `NEW` rather than `CREATED`. | 
 | MODIFY_STORE_RESOURCE_ERRORS  | Modifies the errors of a resource in the store. Use for client side validation.                                                        |
 | REMOVE_QUERY                  | Removes a query from the store.                                                                                                        |
 | COMPACT_STORE                 | Removes all resources from the store that are not directly or indirectly (relationships) references from a query                       |
 | CLEAR_STORE                   | Removes all the contents from the store                                              
+
+More information are available in [actions.ts](../src/actions.ts).

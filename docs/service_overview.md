@@ -1,9 +1,10 @@
 ## Services
 
-There is one service available: `NgrxJsonApiService`. It holds two main methods both returning a `NgrxJsonApiZoneService` instance:
+There is one service available: `NgrxJsonApiService`. It holds methods for:
 
-- `getZone(zoneId: string)`
-- `getDefaultZone`
+- `getZone(zoneId: string)` to obtain the zone with the specified `zoneId`.
+- `getDefaultZone` to obtain the `default` zone.
+- All methods of `NgrxJsonApiZoneService` for the `default` zone as short-cut to avoid `getDefaultZone()`.
 
 `NgrxJsonApiZoneService` holds utility methods to interact with the store: do selections and trigger actions:
 
@@ -29,5 +30,4 @@ There is one service available: `NgrxJsonApiService`. It holds two main methods 
 - `addResourceErrors`, `removeResourceErrors()` and `setResourceErrors()` to modify the `errors` of a `StoreResource`
 
 
-More information are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/services.ts. The
-actions are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/actions.ts.
+More information are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/services.ts.

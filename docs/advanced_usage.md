@@ -207,7 +207,7 @@ or indirectly (relationships) by a query.
 `QueryParams` object hold by a query allows to specify various `GET` parameters:
 
 ```ts
-let zone = this.ngrxJsonApiService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
+let zone = this.ngrxService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
 
 const query: Query = {
   queryId: 'myQuery',
