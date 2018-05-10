@@ -235,8 +235,7 @@ zone.putQuery({
 
 const queryResult = this.selectManyResults(newQuery.queryId);
 ...
-```ts
 
 ### Pipes
 
-TODO
+TODO add documentation
