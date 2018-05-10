@@ -8,11 +8,6 @@
 
 **Note: v1.0 of the library is compatible with old releases of @ngrx tools (< 2). The current version (>= 2) is compatible with the latest versions of @ngrx platform (>= 4)**
 
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Upgrading from v1.0](#upgrading-from-v10)
-
 ## Documentation
 
 - [Data Structures](./docs/data_structures.md)
