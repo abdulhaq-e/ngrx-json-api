@@ -17,7 +17,8 @@ ngrx-json-api structures its store into zones, each representing an isolated ins
 ```
 
 By default services and actions make use of the `default` zone. But applications are free to introduce additional zones;
-for example to isolate modifications to a resource while still being worked on from an editor screen.
+for example to isolate modifications to a resource while still being worked on from an editor screen. One main advantage of 
+this design is that each zone can be independently synchronized with the server or discarded.
 
 `NgrxJsonApiZone` then consists of a number of properties, the main two are `data` and `queries`.
 
