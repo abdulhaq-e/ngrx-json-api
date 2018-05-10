@@ -245,11 +245,23 @@ https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/interfaces.ts. An ex
 
 There are three main structures:
 
-- `data` holds the resources organized by type and id.
-- `queries` holds query parameters and results. Each query is idified by a `queryId`.
+- `data` holds the resources organized by type and id. Each resource is of type `StoreResource`.
+  Next to the attributes, relationships, meta information and link information, `StoreResource` further
+  carries a `state`, `error`, `loading` and `persistedResource`. The `state` specifies what kind of changes
+  have been compared its counter-part on the server. Valid states are `NEW`, `IN_SYNC`, `CREATED`, `UPDATED`,
+  `DELETED`, `NOT_LOADED`. Note that there is subtle difference between `NEW` and `CREATED`. `CREATED` is considered
+  ready to be posted to the server, while `NEW` is not (see `NgrxJsonApiZoneService.apply(...)`).
+- `queries` holds query parameters and results. Each query is of type `StoreQuery` and identified by a `queryId`. Queries 
+  do not holds the result resources on their own, but rather refer to `data` using `resultIds`. Selectors 
+  allow to denormalize the queries again (see the subsequent services section).
 - `zones` allow to setup multiple, isolated instances of ngrx-json-api. This can be useful, for example,
   to isolate modifications while still being worked on from already persisted resources. The modification
   can then also independently be saved or discarded.
+  
+There are two situation where denormalization is provided by services (see below) to help working with the data structures:
+
+- Getting result resources for a query.
+- Getting related resources for a resource.  
   
   
 ## Data Structures
