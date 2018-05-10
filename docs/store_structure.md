@@ -2,7 +2,25 @@
 
 It is advisable to read this guide while having [interfaces.ts](../src/interfaces.ts) opened.
 
-`NgrxJsonApiStore` consists of a number of properties, the main two are `data` and `queries`.
+ngrx-json-api structures its store into zones, each representing an isolated instance of ngrx-json-api:
+
+```
+{
+  NgrxJsonApi: {
+    zones: {
+      'default': {
+         ...
+      }
+    }
+  }
+}
+```
+
+By default services and actions make use of the `default` zone. But applications are free to introduce additional zones;
+for example to isolate modifications to a resource while still being worked on from an editor screen. One main advantage of 
+this design is that each zone can be independently synchronized with the server or discarded.
+
+`NgrxJsonApiZone` then consists of a number of properties, the main two are `data` and `queries`.
 
 ```js
 let store = {
@@ -87,77 +105,84 @@ An example of an `NgrxJsonApiStore` is given below:
 
 ```js
 {
-    isCreating: 0,
-    isReading: 0,
-    isUpdating: 0,
-    isDeleting: 0,
-    isApplying: 0,
-    data: {
-      movie: {
-        'b61b2f41-46d8-3899-88e1-fcd45138fb0d': {
-          id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d',
-          type: 'movie',
-          attributes: {
-            year: '2015',
-            title: 'Captain America: Civil War',
-            type: 'MOVIE'
-          },
-          relationships: {
-            actors: {
-              links: {
-                self: '...',
-                related: '...'
-              }
+  NgrxJsonApi: {
+    zones: {
+      'default': {
+          isCreating: 0,
+          isReading: 0,
+          isUpdating: 0,
+          isDeleting: 0,
+          isApplying: 0,
+          data: {
+            movie: {
+              'b61b2f41-46d8-3899-88e1-fcd45138fb0d': {
+                id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d',
+                type: 'movie',
+                attributes: {
+                  year: '2015',
+                  title: 'Captain America: Civil War',
+                  type: 'MOVIE'
+                },
+                relationships: {
+                  actors: {
+                    links: {
+                      self: '...',
+                      related: '...'
+                    }
+                  }
+                },
+                persistedResource: {
+                  id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d',
+                  type: 'movie',
+                  attributes: {
+                    year: '2015',
+                    title: 'Captain America: Civil War',
+                    type: 'MOVIE',
+                  },
+                  relationships: {
+                    actors: {
+                      links: {
+                        self: '...',
+                        related: '...'
+                      }
+                    }
+                  }          
+                },
+                state: 'IN_SYNC',
+                errors: [],
+                loading: false
+              },
             }
           },
-          persistedResource: {
-            id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d',
-            type: 'movie',
-            attributes: {
-              year: '2015',
-	            title: 'Captain America: Civil War',
-              type: 'MOVIE',
-            },
-            relationships: {
-              actors: {
-                links: {
-                  self: '...',
-                  related: '...'
+          queries: {
+            movieQuery: {
+              loading: false,
+              query: {
+                queryId: 'movieTable',
+                type: 'movie',
+                params: {
+                  offset: 0,
+                  limit: 10
                 }
+              },
+              errors: [],
+              resultIds: [
+                {
+                  type: 'movie',
+                  id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d'
+                },
+              ],
+              meta: {
+                ...
+              },
+              links: {
+                ...
               }
-            }          
-          },
-          state: 'IN_SYNC',
-          errors: [],
-          loading: false
-        },
-      }
-    },
-    queries: {
-      movieQuery: {
-        loading: false,
-        query: {
-          queryId: 'movieTable',
-          type: 'movie',
-          params: {
-            offset: 0,
-            limit: 10
+            }
           }
-        },
-        errors: [],
-        resultIds: [
-          {
-            type: 'movie',
-            id: 'b61b2f41-46d8-3899-88e1-fcd45138fb0d'
-          },
-        ],
-        meta: {
-          ...
-        },
-        links: {
-          ...
         }
       }
     }
   }
+}        
 ```

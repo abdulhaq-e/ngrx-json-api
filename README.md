@@ -8,23 +8,22 @@
 
 **Note: v1.0 of the library is compatible with old releases of @ngrx tools (< 2). The current version (>= 2) is compatible with the latest versions of @ngrx platform (>= 4)**
 
-## Table of Contents
+## Documentation
 
-- [Getting Started](#getting-started)
-- [Basic Usage](./docs/basic_usage.md)
 - [Store Structure](./docs/store_structure.md)
+- [Service Overview](./docs/service_overview.md)
+- [Actions](./docs/actions.md)
+- [Basic Usage](./docs/basic_usage.md)
 - [Advanced Usage](./docs/advanced_usage.md)
-- [Upgrading from v1.0](#upgrading-from-v10)
-
 
 ## Getting Started
 
-**1- Install the library:**
+**1. Install the library:**
 ```
 npm i ngrx-json-api --save
 ```
 
-**2- Define the resources:**
+**2. Define the resources:**
 ```ts
 import { ResourceDefinition } from 'ngrx-json-api';
 let resourceDefinitions: Array<ResourceDefinition> = [
@@ -37,7 +36,7 @@ let resourceDefinitions: Array<ResourceDefinition> = [
 
 Note that if the type of a resource matches its `collectionPath` in the URL, then no resource definition is necessary.
 
-**3- Import `NgrxJsonApiModule` providing the above definitions and the API url.**
+**3. Import `NgrxJsonApiModule` providing the above definitions and the API url.**
 
 Make sure `StoreModule` and `HttpClientModule` are imported beforehand.
 
@@ -59,7 +58,7 @@ Make sure `StoreModule` and `HttpClientModule` are imported beforehand.
 export class AppModule {}
 ```
 
-**4- Inject `NgrxJsonApiService` into the component:**
+**4. Inject `NgrxJsonApiService` into the component:**
 ```ts
 import { Component } from '@angular/core';
 
@@ -71,11 +70,15 @@ export class MyComponent {
 }
 ```
 
-**5- Use the service to interact with the JSON API server and/or state:**
+**5. Use the service to interact with the JSON API server and/or state:**
 
 For example, to read data from the server and display this data in the view:
 ```ts
 import { Component } from '@angular/core';
+import {
+	NGRX_JSON_API_DEFAULT_ZONE,
+	NgrxJsonApiService,
+} from 'ngrx-json-api';
 
 @Component({
   selector: 'my-component',
@@ -83,17 +86,59 @@ import { Component } from '@angular/core';
 })
 export class MyComponent {
   
-  constructor(private ngrxJsonApiService: NgrxJsonApiService) {  }
+  public queryResult: Observable<QueryResult>;
+  
+  constructor(ngrxJsonApiService: NgrxJsonApiService) {  }
 
-  public queryResults = this.ngrxJsonApiService
-    .findMany({
-      queryType: 'getMany',
-      type: 'Article'
-      });      
+    // a zone represents an independent json-api instance
+    let zone = this.ngrxJsonApiService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
+    
+    // add query to store to trigger request from server
+    const query: Query = {
+      queryId: 'myQuery',
+      type: 'projects',
+      // id: '12' => add to query single item
+      params: {
+        fields: ['name'],
+        include: ['tasks'],
+        page: {
+          offset: 20,
+          limit: 10
+        },
+        sorting: {
+          { api: 'name', direction: Direction.ASC }
+        },
+        filtering: {
+          { path: 'name', operator: 'EQ', value: 'John' }
+        }
+      }    
+    };
+    zone.putQuery({
+      query: query,
+    	fromServer: true // you may also query locally from contents in the store, e.g. new resource
+    });
+    
+    // select observable to query result holding the loading state and (future) results
+    const denormalise = false;
+    this.queryResult = this.selectManyResults(newQuery.queryId, denormalise);
+
 }
 ```
 
-The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. More details about the response type and other methods for the service are provided in the docs.
+The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. 
+
+
+
+
+
+
+## Example application
+
+For an example application have a look at https://github.com/crnk-project/crnk-example. It combines ngrx-json-api
+with http://www.crnk.io as JSON API server implementation to gain a JSON API end-to-end example. 
+[@crnk/angular-ngrx](https://www.npmjs.com/package/@crnk/angular-ngrx) is further used to facilitate binding
+of Angular forms and tables to JSON API. More information can be found at http://www.crnk.io/releases/stable/documentation/#_angular_development_with_ngrx.
+
 
 ## Upgrading from v1.0
 
