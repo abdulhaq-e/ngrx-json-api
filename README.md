@@ -19,12 +19,12 @@
 
 ## Getting Started
 
-**1- Install the library:**
+**1. Install the library:**
 ```
 npm i ngrx-json-api --save
 ```
 
-**2- Define the resources:**
+**2. Define the resources:**
 ```ts
 import { ResourceDefinition } from 'ngrx-json-api';
 let resourceDefinitions: Array<ResourceDefinition> = [
@@ -37,7 +37,7 @@ let resourceDefinitions: Array<ResourceDefinition> = [
 
 Note that if the type of a resource matches its `collectionPath` in the URL, then no resource definition is necessary.
 
-**3- Import `NgrxJsonApiModule` providing the above definitions and the API url.**
+**3. Import `NgrxJsonApiModule` providing the above definitions and the API url.**
 
 Make sure `StoreModule` and `HttpClientModule` are imported beforehand.
 
@@ -59,7 +59,7 @@ Make sure `StoreModule` and `HttpClientModule` are imported beforehand.
 export class AppModule {}
 ```
 
-**4- Inject `NgrxJsonApiService` into the component:**
+**4. Inject `NgrxJsonApiService` into the component:**
 ```ts
 import { Component } from '@angular/core';
 
@@ -71,11 +71,15 @@ export class MyComponent {
 }
 ```
 
-**5- Use the service to interact with the JSON API server and/or state:**
+**5. Use the service to interact with the JSON API server and/or state:**
 
 For example, to read data from the server and display this data in the view:
 ```ts
 import { Component } from '@angular/core';
+import {
+	NGRX_JSON_API_DEFAULT_ZONE,
+	NgrxJsonApiService,
+} from 'ngrx-json-api';
 
 @Component({
   selector: 'my-component',
@@ -83,17 +87,218 @@ import { Component } from '@angular/core';
 })
 export class MyComponent {
   
-  constructor(private ngrxJsonApiService: NgrxJsonApiService) {  }
+  public queryResult: Observable<QueryResult>;
+  
+  constructor(ngrxJsonApiService: NgrxJsonApiService) {  }
 
-  public queryResults = this.ngrxJsonApiService
-    .findMany({
-      queryType: 'getMany',
-      type: 'Article'
-      });      
+    // a zone represents an independent json-api instance
+    let zone = this.ngrxJsonApiService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
+    
+    // add query to store to trigger request from server
+    const query: Query = {
+      queryId: 'myQuery',
+      type: 'projects',
+      // id: '12' => add to query single item
+      params: {
+        fields: ['name'],
+        include: ['tasks'],
+        page: {
+          offset: 20,
+          limit: 10
+        },
+        sorting: {
+          { api: 'name', direction: Direction.ASC }
+        },
+        filtering: {
+          { path: 'name', operator: 'EQ', value: 'John' }
+        }
+      }    
+    };
+    zone.putQuery({
+      query: query,
+    	fromServer: true // you may also query locally from contents in the store, e.g. new resource
+    });
+    
+    // select observable to query result holding the loading state and (future) results
+    const denormalise = false;
+    this.queryResult = this.selectManyResults(newQuery.queryId, denormalise);
+
 }
 ```
 
 The service is the main API for using `ngrx-json-api`. The fetching methods return an `Observable` with the obtained resources stored in a `data` property. More details about the response type and other methods for the service are provided in the docs.
+
+## Data Structures
+
+To get familiar with the store structure of ngrx-json-api, it is best to study the store-related interfaces in
+https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/interfaces.ts. An example looks like:
+
+```
+{
+  NgrxJsonApi: {
+    zones: {
+      'default': {
+        isCreating: 0,
+        isReading: 0,
+        isUpdating: 0,
+        isDeleting: 0,
+        isApplying: 0,
+        data: {
+          person: {
+            '53ad06b7-43c3-31a6-82a0-9da4d07be5f0': {
+              id: '53ad06b7-43c3-31a6-82a0-9da4d07be5f0',
+              type: 'person',
+              attributes: {
+                year: 0,
+                name: 'Robert Downey Jr.',
+                version: 0
+              },
+              relationships: {
+                roles: {
+                  links: {
+                    self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/relationships/roles',
+                    related: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/roles'
+                  }
+                },
+                history: {
+                  links: {
+                    self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/relationships/history',
+                    related: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/history'
+                  }
+                }
+              },
+              links: {
+                self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0'
+              },
+              persistedResource: {
+                id: '53ad06b7-43c3-31a6-82a0-9da4d07be5f0',
+                type: 'person',
+                attributes: {
+                  year: 0,
+                  name: 'Robert Downey Jr.',
+                  version: 0
+                },
+                relationships: {
+                  roles: {
+                    links: {
+                      self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/relationships/roles',
+                      related: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/roles'
+                    }
+                  },
+                  history: {
+                    links: {
+                      self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/relationships/history',
+                      related: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0/history'
+                    }
+                  }
+                },
+                links: {
+                  self: 'http://localhost:8080/api/person/53ad06b7-43c3-31a6-82a0-9da4d07be5f0'
+                }
+              },
+              state: 'IN_SYNC',
+              errors: [],
+              loading: false
+            },
+            ....
+          }
+        },
+        queries: {
+          person_list: {
+            loading: false,
+            query: {
+              queryId: 'person_list',
+              type: 'person',
+              params: {
+                include: []
+              }
+            },
+            errors: [],
+            resultIds: [
+              {
+                type: 'person',
+                id: '53ad06b7-43c3-31a6-82a0-9da4d07be5f0'
+              },
+              ...
+            ],
+            meta: {
+              totalResourceCount: 9
+            },
+            links: {
+              first: 'http://localhost:8080/api/person?page[limit]=10',
+              last: 'http://localhost:8080/api/person?page[limit]=10'
+            }
+          }
+        }
+      }
+    }
+  },
+  app: {
+    notifications: {},
+    current: {
+      resourceType: 'person',
+      created: false
+    }
+  }
+}
+```
+
+There are three main structures:
+
+- `data` holds the resources organized by type and id.
+- `queries` holds query parameters and results. Each query is idified by a `queryId`.
+- `zones` allow to setup multiple, isolated instances of ngrx-json-api. This can be useful, for example,
+  to isolate modifications while still being worked on from already persisted resources. The modification
+  can then also independently be saved or discarded.
+  
+  
+## Data Structures
+
+To get familiar with the available actions, have a look at https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/actions.ts.
+
+
+## Services
+
+There is one service available: `NgrxJsonApiService`. It holds two main methods both returning a `NgrxJsonApiZoneService` instance:
+
+- `getZone(zoneId: string)`
+- `getDefaultZone`
+
+`NgrxJsonApiZoneService` holds utility methods to interact with the store: do selections and trigger actions:
+
+- `putQuery(...)` puts a new query into the store (see example above). A query usually is fetched from the server. But
+  it can also be executed locally with the contents of the store. The later is typically used together with `newResource(...)`. 
+- `refreshQuery(queryId)` triggers a refresh of the query from the server.
+- `removeQuery(queryId)` removed the query from the store. `compact` can subsequently garbage collect unused/unreferenced resources.
+- `selectManyResults(queryId, denormalize)` gives an Observable for the specified query where an array of results is expected. 
+  Denormalization allows to follow relationships by making use of `ManyResourceRelationship.reference` instead of
+  `ManyResourceRelationship.data`.
+- `selectOneResults(queryId, denormalize)` gives an Observable for the specified query where only a single result is expected. 
+  Denormalization allows to follow the relationship by making use of `OneResourceRelationship.reference` instead of
+   `OneResourceRelationship.data`.
+- `selectStoreResource(id)` gives an Observable for the specified resource, identified by type and id.
+- `selectStoreResources(ids)` gives an Observable for the specified resources, identified by type and id.
+- `patchResource(...)` updates a resource in the store (or directly on the server if specified). Fields not specifies in the patch are taken from the existing resource.
+- `newResource(...)` creates a new resource in the store. Each resource is not yet considered being created, meaning it is ignored by `apply()`.
+- `postResource(...)`  marks a resource for creation (or directly creates it on the server if specified)
+- `deleteResource(...)` marks a resource for deletion (or directly deletes it on the server if specified)
+- `apply()` transmits and insertions, updates and deletions to the server.
+- `clear()` deletes all queries and resources from the zone.
+- `compact()` performs garbage collection by removing all resources from the zone that are not directly or indirectly references by a query.
+- `addResourceErrors`, `removeResourceErrors()` and `setResourceErrors()` to modify the `errors` of a `StoreResource`
+
+
+More information are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/services.ts. The
+actions are available in https://github.com/abdulhaq-e/ngrx-json-api/blob/master/src/actions.ts.
+
+
+## Example application
+
+For an example application have a look at https://github.com/crnk-project/crnk-example. It combines ngrx-json-api
+with http://www.crnk.io as JSON API server implementation to gain a JSON API end-to-end example. 
+[@crnk/angular-ngrx](https://www.npmjs.com/package/@crnk/angular-ngrx) is further used to facilitate binding
+of Angular forms and tables to JSON API. More information can be found at http://www.crnk.io/releases/stable/documentation/#_angular_development_with_ngrx.
+
 
 ## Upgrading from v1.0
 
