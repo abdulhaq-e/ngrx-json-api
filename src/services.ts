@@ -11,6 +11,7 @@ import {
   selectNgrxJsonApiZone,
   selectOneQueryResult,
   selectStoreResource,
+  selectStoreResources,
 } from './selectors';
 import {
   ApiApplyInitAction,
@@ -172,6 +173,18 @@ export class NgrxJsonApiZoneService {
     return this.store
       .let(selectNgrxJsonApiZone(this.zoneId))
       .let(selectStoreResource(identifier));
+  }
+
+  /**
+   * @param identifiers of the resources
+   * @returns observable of the resources
+   */
+  public selectStoreResources(
+    identifiers: ResourceIdentifier[]
+  ): Observable<StoreResource[]> {
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectStoreResources(identifiers));
   }
 
   /**
