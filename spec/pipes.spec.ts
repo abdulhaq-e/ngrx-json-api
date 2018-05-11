@@ -81,7 +81,7 @@ describe('Pipes', () => {
     );
 
     it('should return Observable of StoreResource', () => {
-      const ids = [{id: '2', type: 'Article'}, {id: '1', type: 'Article'}]
+      const ids = [{ id: '2', type: 'Article' }, { id: '1', type: 'Article' }];
       pipe.transform(ids).subscribe(it => {
         expect(_.get(it[0], 'attributes.title')).toBe('Article 2');
         expect(_.get(it[1], 'attributes.title')).toBe('Article 1');

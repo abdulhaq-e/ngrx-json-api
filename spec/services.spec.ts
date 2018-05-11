@@ -105,7 +105,7 @@ describe('NgrxJsonApiService', () => {
         {
           type: 'Article',
           id: '2',
-        }
+        },
       ]);
       storeResources.subscribe(it => {
         expect(it[0].type).toEqual('Article');

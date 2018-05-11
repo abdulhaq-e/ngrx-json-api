@@ -216,7 +216,12 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectStoreResources([{ type: 'Article', id: '1' }, { type: 'Article', id: '2'}]))
+            .let(
+              selectStoreResources([
+                { type: 'Article', id: '1' },
+                { type: 'Article', id: '2' },
+              ])
+            )
             .subscribe(d => (res = d));
           tick();
           expect(res[0].attributes.title).toEqual('Article 1');
@@ -233,7 +238,13 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectStoreResources([{ type: 'Article', id: '100' }, { type: 'Article', id: '1'}, {type: 'Unknown', id: '1'}]))
+            .let(
+              selectStoreResources([
+                { type: 'Article', id: '100' },
+                { type: 'Article', id: '1' },
+                { type: 'Unknown', id: '1' },
+              ])
+            )
             .subscribe(d => (res = d));
           tick();
           expect(res[0]).not.toBeDefined();
