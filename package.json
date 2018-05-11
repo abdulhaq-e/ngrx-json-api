@@ -40,11 +40,11 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^5.0.0",
-    "@angular/core": "^5.0.0",
+    "@angular/common": ">=5.0.0",
+    "@angular/core": ">=5.0.0",
     "@ngrx/effects": ">=5.1.0",
     "@ngrx/store": ">=5.1.0",
-    "rxjs": "^5.5.0"
+    "rxjs": ">=5.5.0"
   },
   "devDependencies": {
     "@angular/animations": "^5.2.2",
