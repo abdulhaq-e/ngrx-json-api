@@ -1,6 +1,6 @@
 {
   "name": "ngrx-json-api",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "A JSON API client for ngrx",
   "module": "FESM/ngrx-json-api.es5.js",
   "es2015": "FESM/ngrx-json-api.js",
