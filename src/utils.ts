@@ -446,7 +446,8 @@ export const updateResourceErrorsForQuery = (
   query: Query,
   document: Document
 ): NgrxJsonApiStoreData => {
-  if (!query.type || !query.id || document.data instanceof Array) {
+  // id can be nullify when queryType is POST
+  if (!query.type || query.id === undefined || document.data instanceof Array) {
     throw new Error('invalid parameters');
   }
   return updateResourceErrors(
