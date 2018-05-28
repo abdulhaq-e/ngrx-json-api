@@ -236,7 +236,10 @@ export class NgrxJsonApiZoneService {
     }
     return this.store
       .let(selectNgrxJsonApiZone(this.zoneId))
-      .let(selectOneQueryResult(queryId));
+      .let(selectOneQueryResult(queryId))
+      .finally(() => {
+        this.removeQuery(queryId);
+      });
   }
 
   /**
