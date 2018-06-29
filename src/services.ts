@@ -193,15 +193,24 @@ export class NgrxJsonApiZoneService {
    *
    * @param resource
    */
-  public patchResource(options: PatchResourceOptions) {
+  public patchResource(options: PatchResourceOptions): Observable<QueryResult> {
     let resource = options.resource;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
+    const queryId = uuid();
     if (toRemote) {
-      this.store.dispatch(new ApiPatchInitAction(resource, this.zoneId));
+      this.store.dispatch(
+        new ApiPatchInitAction(resource, queryId, this.zoneId)
+      );
     } else {
       this.store.dispatch(new PatchStoreResourceAction(resource, this.zoneId));
     }
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectOneQueryResult(queryId))
+      .finally(() => {
+        this.removeQuery(queryId);
+      });
   }
 
   /**
@@ -247,17 +256,28 @@ export class NgrxJsonApiZoneService {
    *
    * @param resourceId
    */
-  public deleteResource(options: DeleteResourceOptions) {
+  public deleteResource(
+    options: DeleteResourceOptions
+  ): Observable<QueryResult> {
     let resourceId = options.resourceId;
     let toRemote = _.isUndefined(options.toRemote) ? false : options.toRemote;
 
+    const queryId = uuid();
     if (toRemote) {
-      this.store.dispatch(new ApiDeleteInitAction(resourceId, this.zoneId));
+      this.store.dispatch(
+        new ApiDeleteInitAction(resourceId, queryId, this.zoneId)
+      );
     } else {
       this.store.dispatch(
         new DeleteStoreResourceAction(resourceId, this.zoneId)
       );
     }
+    return this.store
+      .let(selectNgrxJsonApiZone(this.zoneId))
+      .let(selectOneQueryResult(queryId))
+      .finally(() => {
+        this.removeQuery(queryId);
+      });
   }
 
   /**

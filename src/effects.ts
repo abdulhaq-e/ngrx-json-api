@@ -124,6 +124,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 jsonApiData: response.body,
                 query: payload.query,
               },
+              action.queryId,
               action.zoneId
             )
         ),
@@ -131,6 +132,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
           of(
             new ApiPatchFailAction(
               this.toErrorPayload(payload.query, error),
+              action.queryId,
               action.zoneId
             )
           )
@@ -264,6 +266,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
                 jsonApiData: data,
                 query: payload.query,
               },
+              action.queryId,
               action.zoneId
             )
         ),
@@ -271,6 +274,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
           of(
             new ApiDeleteFailAction(
               this.toErrorPayload(payload.query, error),
+              action.queryId,
               action.zoneId
             )
           )
@@ -368,6 +372,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
               jsonApiData: response.body,
               query: payload.query,
             },
+            null,
             zoneId
           )
       ),
@@ -375,6 +380,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         of(
           new ApiPatchFailAction(
             this.toErrorPayload(payload.query, error),
+            null,
             zoneId
           )
         )
@@ -392,6 +398,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
               jsonApiData: response.body,
               query: payload.query,
             },
+            null,
             zoneId
           )
       ),
@@ -399,6 +406,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
         of(
           new ApiDeleteFailAction(
             this.toErrorPayload(payload.query, error),
+            null,
             zoneId
           )
         )

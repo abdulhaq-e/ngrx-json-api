@@ -111,17 +111,21 @@ export function NgrxJsonApiZoneReducer(
         false,
         false
       );
+      let query = { queryId: action.queryId };
       newZone = {
         ...zone,
         data: updatedData,
+        queries: updateQueryParams(zone.queries, query),
         isUpdating: zone.isUpdating + 1,
       };
       return newZone;
     }
     case NgrxJsonApiActionTypes.API_DELETE_INIT: {
+      let query = { queryId: action.queryId };
       newZone = {
         ...zone,
         data: updateResourceState(zone.data, action.payload, 'DELETED'),
+        queries: updateQueryParams(zone.queries, query),
         isDeleting: zone.isDeleting + 1,
       };
       return newZone;
@@ -156,6 +160,11 @@ export function NgrxJsonApiZoneReducer(
       newZone = {
         ...zone,
         data: updateStoreDataFromPayload(zone.data, action.payload.jsonApiData),
+        queries: updateQueryResults(
+          zone.queries,
+          action.queryId,
+          action.payload.jsonApiData
+        ),
         isUpdating: zone.isUpdating - 1,
       };
       return newZone;
@@ -164,7 +173,7 @@ export function NgrxJsonApiZoneReducer(
       newZone = {
         ...zone,
         data: deleteStoreResources(zone.data, action.payload.query),
-        queries: updateQueriesForDeletedResource(zone.queries, {
+        queries: updateQueriesForDeletedResource(zone.queries, action.queryId, {
           id: action.payload.query.id,
           type: action.payload.query.type,
         }),
@@ -217,6 +226,11 @@ export function NgrxJsonApiZoneReducer(
           action.payload.query,
           action.payload.jsonApiData
         ),
+        queries: updateQueryErrors(
+          zone.queries,
+          action.queryId,
+          action.payload.jsonApiData
+        ),
         isUpdating: zone.isUpdating - 1,
       };
       return newZone;
@@ -227,6 +241,11 @@ export function NgrxJsonApiZoneReducer(
         data: updateResourceErrorsForQuery(
           zone.data,
           action.payload.query,
+          action.payload.jsonApiData
+        ),
+        queries: updateQueryErrors(
+          zone.queries,
+          action.queryId,
           action.payload.jsonApiData
         ),
         isDeleting: zone.isDeleting - 1,

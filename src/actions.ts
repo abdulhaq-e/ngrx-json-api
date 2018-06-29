@@ -119,21 +119,33 @@ export class ApiPostFailAction extends NgrxJsonApiAction {
 
 export class ApiDeleteInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_INIT;
-  constructor(public payload: ResourceIdentifier, public zoneId: string) {
+  constructor(
+    public payload: ResourceIdentifier,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiDeleteSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiDeleteFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_DELETE_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
@@ -168,21 +180,33 @@ export class ApiRollbackAction extends NgrxJsonApiAction {
 
 export class ApiPatchInitAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_INIT;
-  constructor(public payload: Resource, public zoneId: string) {
+  constructor(
+    public payload: Resource,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiPatchSuccessAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_SUCCESS;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }
 
 export class ApiPatchFailAction extends NgrxJsonApiAction {
   readonly type = NgrxJsonApiActionTypes.API_PATCH_FAIL;
-  constructor(public payload: Payload, public zoneId: string) {
+  constructor(
+    public payload: Payload,
+    public queryId: string,
+    public zoneId: string
+  ) {
     super();
   }
 }

@@ -421,9 +421,15 @@ export const updateStoreResource = (
 
 export const updateQueriesForDeletedResource = (
   state: NgrxJsonApiStoreQueries,
+  queryId: string,
   deletedId: ResourceIdentifier
 ): NgrxJsonApiStoreQueries => {
-  let newState: NgrxJsonApiStoreQueries = state;
+  const document = { data: deletedId };
+  let newState: NgrxJsonApiStoreQueries = this.updateQueryResults(
+    state,
+    queryId,
+    document
+  );
   for (let queryId in state) {
     if (state.hasOwnProperty(queryId)) {
       let queryState = state[queryId];
