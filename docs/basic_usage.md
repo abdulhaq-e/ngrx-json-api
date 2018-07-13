@@ -2,6 +2,7 @@
 ### Fetching resources
 
 #### 1- Fetching a single resource:
+
 ```ts
 /* let's find a single resource of type `Article` and id `1` */
 let query = {
@@ -13,6 +14,7 @@ let queryResults = this.ngrxService.findOne({query: query});
 ```
 
 #### 2- Fetching a single resource offline:
+
 No requests will be sent to the server, the resource will be fetched from the state (if found!). Default is server side fetching.
 
 ```ts
@@ -24,6 +26,7 @@ let queryResults = this.ngrxService.findOne({query: query, fromServer: false});
 ```
 
 #### 3- Fetching multiple resources
+
 ```ts
 /* let's find all resources of type `Article` */
 let query = {
@@ -54,6 +57,7 @@ this.ngrxService.postResource({resource: resource, toRemote: true})
 ```
 
 ### Patching resources
+
 ```ts
 let resource = {
   type: 'Article',
@@ -67,6 +71,7 @@ toRemote: true})
 ```
 
 ### Deleting resources
+
 ```ts
 this.ngrxService.deleteResource({resourceId: {type: 'Article', id: '10'}, toRemote: true})
 ```

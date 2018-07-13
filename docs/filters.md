@@ -4,6 +4,4 @@ There are two types of filters in NgrxJsonApi. Filters passed in the request to 
 
 ## API Filters
 
-
-
 ## Internal Filters (used along with selectors)
