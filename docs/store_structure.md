@@ -32,6 +32,7 @@ let store = {
 
 `data` stores the resources indexed by `type` 
 and `id` and `queries` stores the queries used to obtain the resources (local and remote queries) indexed by `queryId`.
+
 ```js
 data: {
   movies: {
@@ -44,6 +45,7 @@ data: {
   }
 }
 ```
+
 ```js
 queries: {
   12: {}, // StoreQuery
@@ -53,6 +55,7 @@ queries: {
 ```
 
 As can be seen from above, what is indexed by `type` and `id` is actually a `StoreResource` which can be thought of as a normal JSON API Resource on steroids. In addition to the typical properties of a JSON API Resource (id, type, attributes, relationships), it has 5 other properties:
+
 ```js
 movies: {
   1: {
@@ -64,7 +67,7 @@ movies: {
     persistedResource: {},
     loading: 'GET',
     errors: [],
-    hasTemporaryId: false    
+    hasTemporaryId: false
   }
 }
 ```
@@ -76,6 +79,7 @@ movies: {
   - `hasTemporaryId`
   
 A `StoreQuery` (which is indexed by `queryId` under `queries`) looks like this:
+
 ```js
 queries: {
   437: {
@@ -87,7 +91,7 @@ queries: {
     resultIds: [{type: 'Movie', id: 10}, {type: 'Movie', id: 20}, {type: 'Movie', id: 53}],
     meta: {},
     links: {},
-    errors: []    
+    errors: []
   }
 }
 ```
@@ -98,9 +102,8 @@ queries: {
   - `meta` and `links` returned in the response.
   - `errors`: JSON API errors or HTTP errors that occurred while performing the query.
 
-
 Finally, the store has 5 other properties that are operation counters, i.e: `isCreating: 3` means 3 creation operations are taking place.
- 
+
 An example of an `NgrxJsonApiStore` is given below:
 
 ```js
@@ -146,7 +149,7 @@ An example of an `NgrxJsonApiStore` is given below:
                         related: '...'
                       }
                     }
-                  }          
+                  }
                 },
                 state: 'IN_SYNC',
                 errors: [],
@@ -184,5 +187,5 @@ An example of an `NgrxJsonApiStore` is given below:
       }
     }
   }
-}        
+}
 ```

@@ -102,7 +102,6 @@ let resource = results.data
 
 Another property is `loading` which is a boolean indicating whether the query is still running or not. `errors` are errors returned from the server.
 
-
 ### Modifying data
 
 NgrxJsonApi provides two approaches to modifying resources. One is to "queue" all the required requests (create, delete or update) then "apply" them when the users wants to do so. The other approach is to immediately send the request. 
@@ -159,10 +158,9 @@ this.ngrxService.patchResource({resource: resource})
 
 The optional `toRemote`  parameter lets you directly `PATCH` that resource to the server.
 
-
 #### Deleting resources
 
-`deleteResource` allows to mark a new resource for deletion in the store. 
+`deleteResource` allows to mark a new resource for deletion in the store.
 
 ```ts
 this.ngrxService.deleteResource({resourceId: {type: 'Article', id: '10'}})
@@ -173,7 +171,7 @@ The optional `toRemote` parameter lets  you directly `DELETE` that resource on t
 Once the `DELETE` request succeeds, it will be removed from the store.
 
 #### Bulk updates
- 
+
 `apply` performs an update on the server for all local, unsaved modifications (where the state is
 not 'IN_SYNC'). Currently multiple requests are created. There is not yet any bulk request for JSON
 API. In the future `apply` will further allow more fine-grained control of what can be updated.
@@ -185,7 +183,7 @@ resource. This is useful when client-side validation must be applied.
 
 ### Lifecycle of a Query
 
-`findOne` and `findMany` perform three tasks at once: 
+`findOne` and `findMany` perform three tasks at once:
 
 1. setup a new query.
 2. select the state of that query.
@@ -207,7 +205,7 @@ or indirectly (relationships) by a query.
 `QueryParams` object hold by a query allows to specify various `GET` parameters:
 
 ```ts
-let zone = this.ngrxService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
+const zone = this.ngrxService.getZone(NGRX_JSON_API_DEFAULT_ZONE);
 
 const query: Query = {
   queryId: 'myQuery',
@@ -226,14 +224,15 @@ const query: Query = {
     filtering: {
       { path: 'name', operator: 'EQ', value: 'John' }
     }
-  }    
+  }
 };
+
 zone.putQuery({
   query: query,
   fromServer: true // you may also query locally from contents in the store, e.g. new resource
 });
 
-const queryResult = this.selectManyResults(newQuery.queryId);
+const queryResult = this.selectManyResults(query.queryId);
 ...
 
 ### Pipes
