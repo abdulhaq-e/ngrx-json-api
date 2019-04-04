@@ -87,7 +87,7 @@
     "istanbul-instrumenter-loader": "^3.0.0",
     "jasmine": "^2.5.3",
     "jasmine-core": "^2.5.2",
-    "jasmine-marbles": "^0.1.0",
+    "jasmine-marbles": "^0.4.0",
     "jasmine-spec-reporter": "^4.2.1",
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
