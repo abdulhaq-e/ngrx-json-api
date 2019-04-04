@@ -45,6 +45,7 @@
   "angularCompilerOptions": {
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,
+    "fullTemplateTypeCheck": true,
     "annotateForClosureCompiler": true,
     "flatModuleOutFile": "ngrx-json-api.js",
     "flatModuleId": "ngrx-json-api"
