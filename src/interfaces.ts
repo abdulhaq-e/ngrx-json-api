@@ -65,6 +65,13 @@ export interface NgrxJsonApiConfig {
    * have a look at www.crnk.io that makes use of JSON PATCH to perform bulk updates.
    */
   applyEnabled?: boolean;
+  /**
+   * Allows to send/receive cookies, authorization headers with cross-site request.
+   * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials
+   *
+   * default is false
+   */
+  requestWithCredentials?: boolean;
 }
 
 export interface NgrxJsonApiState {
