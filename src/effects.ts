@@ -450,6 +450,147 @@ export class NgrxJsonApiEffects implements OnDestroy {
     flatMap(actions => actions)
   );
 
+  @Effect()
+  operationsApplyResources$: Observable<Action> = this.actions$.pipe(
+    ofType(NgrxJsonApiActionTypes.API_APPLY_INIT),
+    filter(
+      () =>
+        this.jsonApi.config.applyEnabled === false &&
+        this.jsonApi.config.operationsApplyEnabled === true
+    ),
+    withLatestFrom(
+      this.store,
+      (action: ApiApplyInitAction, storeState: any) => {
+        const ngrxstore = getNgrxJsonApiZone(storeState, action.zoneId);
+        const payload = (action as ApiApplyInitAction).payload;
+        const pending: Array<StoreResource> = getPendingChanges(
+          ngrxstore.data,
+          payload.ids,
+          payload.include
+        );
+
+        if (pending.length === 0) {
+          return of(new ApiApplySuccessAction([], action.zoneId));
+        }
+        const sortedPending = sortPendingChanges(pending);
+
+        const operations = sortedPending.map(pendingChange => {
+          let operation: OperationType;
+          let jsonAPIOperation: string;
+          let ref: any;
+          switch (pendingChange.state) {
+            case 'CREATED': {
+              operation = 'POST';
+              jsonAPIOperation = 'add';
+              ref = {
+                type: pendingChange.type,
+              };
+              break;
+            }
+            case 'UPDATED': {
+              operation = 'PATCH';
+              jsonAPIOperation = 'update';
+              ref = {
+                type: pendingChange.type,
+                id: pendingChange.id,
+              };
+              break;
+            }
+            case 'DELETED': {
+              operation = 'DELETE';
+              jsonAPIOperation = 'remove';
+              ref = {
+                type: pendingChange.type,
+                id: pendingChange.id,
+              };
+              break;
+            }
+          }
+          const payload: Payload = this.generatePayload(
+            pendingChange,
+            operation
+          );
+          return {
+            op: jsonAPIOperation,
+            data: payload.jsonApiData.data,
+            ref: ref,
+          };
+        });
+
+        return this.jsonApi.operations({ operations: operations }).pipe(
+          map((result: { body: { operations: any[] } }): Action[] =>
+            _.zip(operations, result.body.operations).map(
+              ([operation, result]): Action => {
+                const responsePayload: Payload = {
+                  jsonApiData: { data: result.data },
+                  query: {
+                    type: operation.ref.type,
+                  },
+                };
+                if (operation.ref.id) {
+                  responsePayload.query.id = operation.ref.id;
+                }
+                switch (operation.op) {
+                  case 'add':
+                    return new ApiPostSuccessAction(
+                      responsePayload,
+                      action.zoneId
+                    );
+                  case 'update':
+                    return new ApiPatchSuccessAction(
+                      responsePayload,
+                      action.zoneId
+                    );
+                  case 'delete':
+                    return new ApiDeleteSuccessAction(
+                      responsePayload,
+                      action.zoneId
+                    );
+                }
+              }
+            )
+          ),
+          map(actions => new ApiApplySuccessAction(actions, action.zoneId)),
+          catchError(error => {
+            return of(
+              new ApiApplyFailAction(
+                operations.map(operation => {
+                  const responsePayload: Payload = {
+                    query: {
+                      type: operation.ref.type,
+                    },
+                  };
+                  if (operation.ref.id) {
+                    responsePayload.query.id = operation.ref.id;
+                  }
+                  switch (operation.op) {
+                    case 'add':
+                      return new ApiPostFailAction(
+                        responsePayload,
+                        action.zoneId
+                      );
+                    case 'update':
+                      return new ApiPatchFailAction(
+                        responsePayload,
+                        action.zoneId
+                      );
+                    case 'delete':
+                      return new ApiDeleteFailAction(
+                        responsePayload,
+                        action.zoneId
+                      );
+                  }
+                }),
+                action.zoneId
+              )
+            );
+          })
+        );
+      }
+    ),
+    flatMap(actions => actions)
+  );
+
   private config: NgrxJsonApiConfig;
 
   constructor(

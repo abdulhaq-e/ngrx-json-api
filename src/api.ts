@@ -233,6 +233,18 @@ export class NgrxJsonApi {
     return this.request(requestOptions);
   }
 
+  public operations(document: Document): Observable<any> {
+    if (typeof document === undefined) {
+      return Observable.throw('Data not found');
+    }
+    let requestOptions = {
+      method: 'PATCH',
+      url: this.config.operationsUrl || `${this.config.apiUrl}/operations`,
+      body: JSON.stringify({ operations: document.operations }),
+    };
+    return this.request(requestOptions);
+  }
+
   private request(requestOptions: any) {
     let request: HttpRequest<any>;
     let newRequestOptions = {
