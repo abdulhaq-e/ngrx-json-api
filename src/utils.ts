@@ -1282,7 +1282,7 @@ export const sortPendingChanges = (
     }
   }
 
-  return context.sorted;
+  return context.sorted.reverse();
 };
 
 const visitPending = (

@@ -805,12 +805,12 @@ describe('sortPendingChanges', () => {
     };
 
     let order = sortPendingChanges([resource1, resource2]);
-    expect(order[0].id).toEqual('1');
-    expect(order[1].id).toEqual('2');
+    expect(order[0].id).toEqual('2');
+    expect(order[1].id).toEqual('1');
 
     order = sortPendingChanges([resource2, resource1]);
-    expect(order[0].id).toEqual('1');
-    expect(order[1].id).toEqual('2');
+    expect(order[0].id).toEqual('2');
+    expect(order[1].id).toEqual('1');
   });
 });
 
