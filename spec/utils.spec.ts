@@ -1856,6 +1856,10 @@ describe('generatePayload', () => {
           ],
         },
       },
+      meta: {
+        updatedMeta: 'data',
+        keptMeta: 'same',
+      },
       persistedResource: {
         id: '10',
         type: 'Article',
@@ -1872,6 +1876,10 @@ describe('generatePayload', () => {
           existingEmptyToBeFilled: {
             data: [],
           },
+        },
+        meta: {
+          existingMeta: 'test',
+          keptMeta: 'same',
         },
       },
     };
@@ -1900,5 +1908,9 @@ describe('generatePayload', () => {
       payload.jsonApiData.data.relationships.existingEmptyToBeFilled.data[0]
         .type
     ).toEqual('foo-type');
+    expect(payload.jsonApiData.meta).toBeDefined();
+    expect(payload.jsonApiData.meta.existingMeta).toBeUndefined();
+    expect(payload.jsonApiData.meta.updatedMeta).toBeDefined();
+    expect(payload.jsonApiData.meta.keptMeta).toBeDefined();
   });
 });
