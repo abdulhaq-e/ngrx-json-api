@@ -1043,6 +1043,11 @@ export const generatePayload = (
         attributes: resource.attributes,
         relationships: resource.relationships,
       },
+      ...(resource.meta
+        ? {
+            meta: resource.meta,
+          }
+        : null),
     };
   }
 
