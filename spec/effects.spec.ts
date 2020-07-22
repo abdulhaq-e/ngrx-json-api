@@ -5,7 +5,7 @@ import {
   HttpResponse,
 } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { cold, hot } from 'jasmine-marbles';
 
@@ -43,7 +43,7 @@ describe('NgrxJsonApiEffects', () => {
   let actions: Observable<any>;
   let api: NgrxJsonApi;
   let store: Store<any>;
-  let mockStoreLet: any;
+  let mockStorePipe: any;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -65,11 +65,11 @@ describe('NgrxJsonApiEffects', () => {
     api = TestBed.get(NgrxJsonApi);
     effects = TestBed.get(NgrxJsonApiEffects);
     store = TestBed.get(Store);
-    mockStoreLet = {
-      let: function() {},
+    mockStorePipe = {
+      pipe: function() {},
     };
-    spyOn(store, 'let');
-    spyOn(mockStoreLet, 'let');
+    spyOn(store, 'pipe');
+    spyOn(mockStorePipe, 'pipe');
   });
 
   let resource = {
@@ -240,8 +240,8 @@ describe('NgrxJsonApiEffects', () => {
     actions = hot('-a', { a: localqueryinitAction });
     let response = cold('--a', { a: query });
     let expected = cold('---b', { b: completed });
-    store.let.and.returnValue(mockStoreLet);
-    mockStoreLet.let.and.returnValue(response);
+    store.pipe.and.returnValue(mockStorePipe);
+    mockStorePipe.pipe.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
   });
 
@@ -298,8 +298,8 @@ describe('NgrxJsonApiEffects', () => {
       b: completed2,
       c: completed3,
     });
-    store.let.and.returnValue(mockStoreLet);
-    mockStoreLet.let.and.returnValue(response);
+    store.pipe.and.returnValue(mockStorePipe);
+    mockStorePipe.pipe.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
   });
 
@@ -329,8 +329,8 @@ describe('NgrxJsonApiEffects', () => {
     actions = hot('-a--b', { a: localqueryinitAction, b: removeQueryAction });
     let response = cold('--a----b', { a: resource1, b: resource2 });
     let expected = cold('---a', { a: completed });
-    store.let.and.returnValue(mockStoreLet);
-    mockStoreLet.let.and.returnValue(response);
+    store.pipe.and.returnValue(mockStorePipe);
+    mockStorePipe.pipe.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
   });
 
@@ -347,8 +347,8 @@ describe('NgrxJsonApiEffects', () => {
     actions = hot('-a', { a: localqueryfailAction });
     let response = cold('--#', {}, error);
     let expected = cold('---b', { b: completed });
-    store.let.and.returnValue(mockStoreLet);
-    mockStoreLet.let.and.returnValue(response);
+    store.pipe.and.returnValue(mockStorePipe);
+    mockStorePipe.pipe.and.returnValue(response);
     expect(effects.queryStore$).toBeObservable(expected);
   });
 

@@ -7,28 +7,19 @@ import * as _ from 'lodash';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
+import { Observable } from 'rxjs';
+import { concat, of } from 'rxjs';
 
-import 'rxjs/add/operator/concatAll';
 import {
   catchError,
-  concatAll,
   combineLatest,
-  debounceTime,
+  distinctUntilChanged,
   filter,
   flatMap,
   map,
-  mapTo,
   mergeMap,
-  skip,
-  switchMap,
-  switchMapTo,
-  tap,
-  take,
   toArray,
   withLatestFrom,
-  takeWhile,
   takeUntil,
 } from 'rxjs/operators';
 import {
@@ -78,6 +69,7 @@ import {
   sortPendingChanges,
   filterResources,
 } from './utils';
+import { from } from 'rxjs/internal/observable/from';
 
 @Injectable()
 export class NgrxJsonApiEffects implements OnDestroy {
@@ -188,9 +180,9 @@ export class NgrxJsonApiEffects implements OnDestroy {
     mergeMap((action: LocalQueryInitAction) => {
       const query = action.payload;
       return this.store
-        .let(selectNgrxJsonApiZone(action.zoneId))
-        .let(this.executeLocalQuery(query))
         .pipe(
+          selectNgrxJsonApiZone(action.zoneId),
+          this.executeLocalQuery(query),
           map(
             results =>
               new LocalQuerySuccessAction(
@@ -219,17 +211,17 @@ export class NgrxJsonApiEffects implements OnDestroy {
     return (state$: Observable<NgrxJsonApiStore>) => {
       let selected$: Observable<any>;
       if (!query.type) {
-        return state$.map(() => Observable.throw('Unknown query'));
+        return state$.pipe(map(() => Observable.throw('Unknown query')));
       } else if (query.type && query.id) {
-        selected$ = state$.let(
+        selected$ = state$.pipe(
           selectStoreResource({ type: query.type, id: query.id })
         );
       } else {
         selected$ = state$
-          .let(selectStoreResourcesOfType(query.type))
           .pipe(
+            selectStoreResourcesOfType(query.type),
             combineLatest(
-              state$.map(it => it.data),
+              state$.pipe(map(it => it.data)),
               (
                 resources: NgrxJsonApiStoreResources,
                 storeData: NgrxJsonApiStoreData
@@ -244,7 +236,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             )
           );
       }
-      return selected$.distinctUntilChanged();
+      return selected$.pipe(distinctUntilChanged());
     };
   }
 
@@ -439,8 +431,7 @@ export class NgrxJsonApiEffects implements OnDestroy {
             throw new Error('unknown state ' + pendingChange.state);
           }
         }
-        return of(...actions)
-          .concatAll()
+        return concat(...actions)
           .pipe(
             toArray(),
             map(actions => this.toApplyAction(actions, action.zoneId))

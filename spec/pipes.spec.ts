@@ -11,6 +11,7 @@ import {
 import { denormaliseStoreResource } from '../src/utils';
 
 import { TestingModule } from './testing.module';
+import { map } from 'rxjs/operators';
 
 describe('Pipes', () => {
   let pipe;
@@ -104,7 +105,7 @@ describe('Pipes', () => {
       };
       let storeResource = pipe.service
         .findOne({ query, fromServer: false })
-        .map(it => it.data);
+        .pipe(map(it => it.data));
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it, 'relationships.author.reference')).toBeDefined();
@@ -117,7 +118,7 @@ describe('Pipes', () => {
       };
       let storeResource = pipe.service
         .findMany({ query, fromServer: false })
-        .map(it => it.data);
+        .pipe(map(it => it.data));
       let denormalised = pipe.transform(storeResource);
       denormalised.subscribe(it => {
         expect(_.get(it[0], 'relationships.author.reference')).toBeDefined();
