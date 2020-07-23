@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "module": "es2015",
+    "target": "es2015",
+    "module": "esnext",
     "sourceMap": true,
     "outDir": "./dist",
     "paths": { },
@@ -13,6 +13,7 @@
     "declaration": true,
     "strictNullChecks": false,
     "strictFunctionTypes": false,
+    "importHelpers": true,
     "inlineSources": true,
     "baseUrl": ".",
     "skipLibCheck": true,
@@ -25,9 +26,8 @@
       "webpack"
     ],
     "lib": [
-      "dom", "es2015"
+      "dom", "es2018"
     ],
-    "baseUrl": ".",
     "stripInternal": true,
     "rootDir": ".",
     "strict": true
@@ -48,6 +48,7 @@
     "fullTemplateTypeCheck": true,
     "annotateForClosureCompiler": true,
     "flatModuleOutFile": "ngrx-json-api.js",
-    "flatModuleId": "ngrx-json-api"
+    "flatModuleId": "ngrx-json-api",
+    "enableIvy": false
   }
 }
