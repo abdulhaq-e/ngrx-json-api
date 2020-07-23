@@ -524,6 +524,10 @@ export class NgrxJsonApiEffects implements OnDestroy {
     resource: Resource,
     operation: OperationType
   ): Payload {
-    return generatePayload(resource, operation);
+    return generatePayload(
+      resource,
+      operation,
+      this.jsonApi.config && this.jsonApi.config.diffUpdates === true
+    );
   }
 }
