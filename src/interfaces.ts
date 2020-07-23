@@ -185,7 +185,7 @@ export interface QueryParams {
 }
 
 export interface QueryPageParams {
-  [id: string]: string | number;
+  [id: string]: string | number | undefined;
   offset?: number;
   limit?: number;
   number?: number;
