@@ -423,9 +423,15 @@ export const updateStoreResource = (
 
 export const updateQueriesForDeletedResource = (
   state: NgrxJsonApiStoreQueries,
+  queryId: string,
   deletedId: ResourceIdentifier
 ): NgrxJsonApiStoreQueries => {
-  let newState: NgrxJsonApiStoreQueries = state;
+  const document = { data: deletedId };
+  let newState: NgrxJsonApiStoreQueries = updateQueryResults(
+    state,
+    queryId,
+    document
+  );
   for (let queryId in state) {
     if (state.hasOwnProperty(queryId)) {
       let queryState = state[queryId];
@@ -448,7 +454,8 @@ export const updateResourceErrorsForQuery = (
   query: Query,
   document: Document
 ): NgrxJsonApiStoreData => {
-  if (!query.type || !query.id || document.data instanceof Array) {
+  // id can be nullify when queryType is POST
+  if (!query.type || query.id === undefined || document.data instanceof Array) {
     throw new Error('invalid parameters');
   }
   return updateResourceErrors(
