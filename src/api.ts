@@ -12,10 +12,7 @@ import {
   HttpUserEvent,
 } from '@angular/common/http';
 
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/observable/throw';
+import { Observable } from 'rxjs';
 
 import {
   Document,

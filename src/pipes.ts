@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/let';
+import { Observable } from 'rxjs';
 
 import { NgrxJsonApiService } from './services';
 import {

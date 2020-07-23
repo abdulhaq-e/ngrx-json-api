@@ -1,6 +1,6 @@
 import { fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { TestingModule } from './testing.module';
 import { Store } from '@ngrx/store';
@@ -31,7 +31,7 @@ describe('NgrxJsonApiSelectors', () => {
   );
 
   beforeEach(() => {
-    store = store.let(selectNgrxJsonApiDefaultZone());
+    store = store.pipe(selectNgrxJsonApiDefaultZone());
   });
 
   describe('selectStoreResourcesOfType', () => {
@@ -40,7 +40,7 @@ describe('NgrxJsonApiSelectors', () => {
       fakeAsync(() => {
         let res;
         let sub = store
-          .let(selectStoreResourcesOfType('Article'))
+          .pipe(selectStoreResourcesOfType('Article'))
           .subscribe(d => (res = d));
         tick();
         expect(res['1']).toBeDefined();
@@ -58,7 +58,7 @@ describe('NgrxJsonApiSelectors', () => {
         'should get the a single query given a queryId',
         fakeAsync(() => {
           let res;
-          let sub = store.let(selectStoreQuery('1')).subscribe(d => (res = d));
+          let sub = store.pipe(selectStoreQuery('1')).subscribe(d => (res = d));
           tick();
           expect(res.query).toBeDefined();
           expect(res.resultIds).toBeDefined();
@@ -70,7 +70,7 @@ describe('NgrxJsonApiSelectors', () => {
         'should return undefined for unavailable queries',
         fakeAsync(() => {
           let res;
-          let sub = store.let(selectStoreQuery('10')).subscribe(d => (res = d));
+          let sub = store.pipe(selectStoreQuery('10')).subscribe(d => (res = d));
           tick();
           expect(res).not.toBeDefined();
         })
@@ -83,7 +83,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectManyQueryResult('1'))
+            .pipe(selectManyQueryResult('1'))
             .subscribe(d => (res = d));
           tick();
           expect(res.data[0].id).toEqual('1');
@@ -96,7 +96,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectManyQueryResult('doesNotExist'))
+            .pipe(selectManyQueryResult('doesNotExist'))
             .subscribe(d => (res = d));
           tick();
           expect(res).toBeUndefined();
@@ -108,7 +108,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectManyQueryResult('55'))
+            .pipe(selectManyQueryResult('55'))
             .subscribe(d => (res = d));
           tick();
           expect(res.data).toEqual([]);
@@ -120,7 +120,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectManyQueryResult('56'))
+            .pipe(selectManyQueryResult('56'))
             .subscribe(d => (res = d));
           tick();
           expect(res.data[0]).toBeUndefined();
@@ -135,7 +135,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectOneQueryResult('2'))
+            .pipe(selectOneQueryResult('2'))
             .subscribe(d => (res = d));
           tick();
           expect(res.data.id).toEqual('1');
@@ -147,7 +147,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectOneQueryResult('doesNotExist'))
+            .pipe(selectOneQueryResult('doesNotExist'))
             .subscribe(d => (res = d));
           tick();
           expect(res).toBeUndefined();
@@ -160,7 +160,7 @@ describe('NgrxJsonApiSelectors', () => {
           let res;
           let err;
           let sub = store
-            .let(selectOneQueryResult('1'))
+            .pipe(selectOneQueryResult('1'))
             .subscribe(d => (res = d), e => (err = e));
           tick();
           expect(res).toBeUndefined();
@@ -174,7 +174,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectOneQueryResult('55'))
+            .pipe(selectOneQueryResult('55'))
             .subscribe(d => (res = d));
           tick();
           expect(res.data).toBeNull();
@@ -188,7 +188,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectStoreResource({ type: 'Article', id: '1' }))
+            .pipe(selectStoreResource({ type: 'Article', id: '1' }))
             .subscribe(d => (res = d));
           tick();
           expect(res.attributes.title).toEqual('Article 1');
@@ -202,7 +202,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(selectStoreResource({ type: 'Article', id: '100' }))
+            .pipe(selectStoreResource({ type: 'Article', id: '100' }))
             .subscribe(d => (res = d));
           tick();
           expect(res).not.toBeDefined();
@@ -216,7 +216,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(
+            .pipe(
               selectStoreResources([
                 { type: 'Article', id: '1' },
                 { type: 'Article', id: '2' },
@@ -238,7 +238,7 @@ describe('NgrxJsonApiSelectors', () => {
         fakeAsync(() => {
           let res;
           let sub = store
-            .let(
+            .pipe(
               selectStoreResources([
                 { type: 'Article', id: '100' },
                 { type: 'Article', id: '1' },

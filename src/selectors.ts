@@ -1,19 +1,6 @@
 import * as _ from 'lodash';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/concat';
-import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/combineLatest';
-import 'rxjs/add/operator/concat';
-import 'rxjs/add/operator/concatMap';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/let';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/observable/zip';
-
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { Store, select } from '@ngrx/store';
@@ -35,6 +22,7 @@ import {
 } from './interfaces';
 import { denormaliseStoreResource, denormaliseStoreResources } from './utils';
 
+
 export function selectNgrxJson() {
   return (state$: Observable<any>) =>
     (<Store<any>>state$).pipe(
@@ -50,9 +38,10 @@ export function selectNgrxJsonApiDefaultZone() {
 
 export function selectNgrxJsonApiZone(zoneId: string) {
   return (state$: Observable<any>) =>
-    (<Store<any>>state$)
-      .let(selectNgrxJson())
-      .map((it: any) => it.zones[zoneId] as NgrxJsonApiZone);
+    (<Store<any>>state$).pipe(
+      selectNgrxJson(),
+      map((it: any) => it.zones[zoneId] as NgrxJsonApiZone)
+    );
 }
 
 export function getNgrxJsonApiZone(state: any, zoneId: string) {
@@ -63,7 +52,7 @@ export function selectStoreQuery(
   queryId: string
 ): (state: Observable<NgrxJsonApiStore>) => Observable<StoreQuery> {
   return (state$: Observable<NgrxJsonApiStore>) => {
-    return state$.map(state => state.queries[queryId]);
+    return state$.pipe(map(state => state.queries[queryId]));
   };
 }
 
@@ -73,20 +62,22 @@ export function selectStoreResourcesOfType(
   state: Observable<NgrxJsonApiStore>
 ) => Observable<NgrxJsonApiStoreResources> {
   return (state$: Observable<NgrxJsonApiStore>) => {
-    return state$
-      .map(state => state.data)
-      .map(data => (data ? data[type] : undefined));
+    return state$.pipe(
+      map(state => state.data),
+      map(data => (data ? data[type] : undefined))
+    );
   };
 }
 
 export function selectStoreResource(identifier: ResourceIdentifier) {
   return (state$: Observable<NgrxJsonApiStore>) => {
-    return state$
-      .let(selectStoreResourcesOfType(identifier.type))
-      .map(
+    return state$.pipe(
+      selectStoreResourcesOfType(identifier.type),
+      map(
         resources =>
           (resources ? resources[identifier.id] : undefined) as StoreResource
-      );
+      )
+    );
   };
 }
 
@@ -111,7 +102,7 @@ export function selectManyQueryResult(
   denormalize?: boolean
 ): (state: Observable<NgrxJsonApiStore>) => Observable<ManyQueryResult> {
   return (state$: Observable<NgrxJsonApiStore>) => {
-    return state$.map(state => {
+    return state$.pipe(map(state => {
       let storeQuery = state.queries[queryId];
       if (!storeQuery) {
         return undefined;
@@ -135,7 +126,7 @@ export function selectManyQueryResult(
           data: results as Array<StoreResource>,
         };
       }
-    });
+    }));
   };
 }
 
@@ -144,7 +135,7 @@ export function selectOneQueryResult(
   denormalize?: boolean
 ): (state: Observable<NgrxJsonApiStore>) => Observable<OneQueryResult> {
   return (state$: Observable<NgrxJsonApiStore>) => {
-    return state$.map(state => {
+    return state$.pipe(map(state => {
       let storeQuery = state.queries[queryId];
       if (!storeQuery) {
         return undefined;
@@ -176,7 +167,7 @@ export function selectOneQueryResult(
         };
         return queryResult;
       }
-    });
+    }));
   };
 }
 
@@ -184,7 +175,7 @@ export function selectOneQueryResult(
  * deprecated, to not use any longer
  */
 export function getNgrxJsonApiStore(state$: Observable<any>): Observable<any> {
-  return state$.let(selectNgrxJsonApiDefaultZone());
+  return state$.pipe(selectNgrxJsonApiDefaultZone());
 }
 
 /**
@@ -195,7 +186,7 @@ export class NgrxJsonApiSelectors {
 
   public getNgrxJsonApiStore$(): (state$: Observable<any>) => Observable<any> {
     return (state$: Observable<any>): Observable<NgrxJsonApiStore> => {
-      return state$.let(selectNgrxJsonApiDefaultZone());
+      return state$.pipe(selectNgrxJsonApiDefaultZone());
     };
   }
 
@@ -212,8 +203,10 @@ export class NgrxJsonApiSelectors {
   public getStoreResourceOfType$(type: string) {
     return (state$: Observable<NgrxJsonApiStore>) => {
       return state$
-        .let(this.getStoreData$())
-        .map(resources => (resources ? resources[type] : undefined));
+        .pipe(
+          this.getStoreData$(),
+          map(resources => (resources ? resources[type] : undefined))
+        );
     };
   }
 
@@ -241,9 +234,10 @@ export class NgrxJsonApiSelectors {
 
   public getPersistedResource$(identifier: ResourceIdentifier) {
     return (state$: Observable<NgrxJsonApiStore>) => {
-      return state$
-        .let(this.getStoreResource$(identifier))
-        .map(it => (it ? it.persistedResource : undefined));
+      return state$.pipe(
+        this.getStoreResource$(identifier),
+        map(it => (it ? it.persistedResource : undefined))
+      );
     };
   }
 }

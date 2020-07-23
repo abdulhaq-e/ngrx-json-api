@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 
 import * as _ from 'lodash';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { NgrxJsonApiService } from '../src/services';
 
 import { denormaliseStoreResource } from '../src/utils';
@@ -10,6 +10,7 @@ import { denormaliseStoreResource } from '../src/utils';
 import { StoreResource } from '../src/interfaces';
 import { TestingModule } from './testing.module';
 import { resourceDefinitions } from './test_utils';
+import { map } from 'rxjs/operators';
 
 describe('NgrxJsonApiService', () => {
   let service: NgrxJsonApiService;
@@ -74,7 +75,7 @@ describe('NgrxJsonApiService', () => {
       let res;
       let storeResource = service
         .findOne({ query, fromServer: false, denormalise: true })
-        .map(it => it.data);
+        .pipe(map(it => it.data));
       storeResource.subscribe(it => (res = it));
       service.denormaliseResource(storeResource).subscribe(it => {
         expect(it).toEqual(res);
@@ -155,7 +156,7 @@ describe('NgrxJsonApiService', () => {
       let res: Array<StoreResource>;
       let storeResources: Observable<Array<StoreResource>> = service
         .findMany({ query, fromServer: false, denormalise: true })
-        .map(it => it.data);
+        .pipe(map(it => it.data));
       storeResources.subscribe(it => (res = it));
       service.denormaliseResource(storeResources).subscribe(it => {
         expect(it).toEqual(res);
