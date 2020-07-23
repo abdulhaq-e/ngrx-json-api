@@ -45,6 +45,7 @@
     "@angular/core": ">=6.0.0",
     "@ngrx/effects": ">=6.1.0",
     "@ngrx/store": ">=6.1.0",
+    "deep-object-diff": "^1.1.0",
     "rxjs": "~6.2.0",
     "rxjs-compat": "~6.2.0"
   },
@@ -80,6 +81,7 @@
     "coveralls": "^3.0.0",
     "cpy-cli": "^1.0.1",
     "deep-freeze": "^0.0.1",
+    "deep-object-diff": "^1.1.0",
     "expand-range": "^2.0.1",
     "filename-regex": "^2.0.1",
     "fs-extra": "^5.0.0",
