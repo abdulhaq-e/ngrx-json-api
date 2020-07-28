@@ -15,10 +15,11 @@
     "build": "ts-node ./build/index.ts",
     "deploy:builds": "ts-node ./build/deploy-build.ts",
     "test:unit": "node ./tests.js",
-    "test": "nyc yarn run test:unit",
+    "test": "nyc node ./tests.js",
     "clean": "git clean -xdf && yarn",
     "coverage:html": "nyc report --reporter=html",
-    "ci": "yarn run build && yarn run test && nyc report --reporter=text-lcov | coveralls",
+    "ci": "yarn run build && yarn run test && yarn run coveralls",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "prettier": "prettier --parser typescript --single-quote --trailing-comma --write \"./**/*.ts\"",
     "watch:tests": "chokidar './(src|spec)/**/*.ts' --initial -c 'nyc --reporter=text --reporter=html yarn run test:unit'"
   },
